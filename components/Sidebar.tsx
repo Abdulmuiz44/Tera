@@ -1,9 +1,11 @@
+import Link from 'next/link'
+
 const navigation = [
-  { label: 'Chat', icon: '💬' },
-  { label: 'Tools', icon: '🧰' },
-  { label: 'History', icon: '⏱️' },
-  { label: 'Notes', icon: '📝' },
-  { label: 'Settings', icon: '⚙️' }
+  { label: 'Chat', icon: '💬', href: '/' },
+  { label: 'Tools', icon: '🧰', href: '/tools/lesson-plan-generator' },
+  { label: 'History', icon: '⏱️', href: '/history' },
+  { label: 'Notes', icon: '📝', href: '/history' },
+  { label: 'Settings', icon: '⚙️', href: '/history' }
 ]
 
 export default function Sidebar() {
@@ -14,13 +16,16 @@ export default function Sidebar() {
       </div>
       <div className="flex flex-col gap-3">
         {navigation.map((item) => (
-          <button
-            key={item.label}
-            className="flex items-center justify-center w-12 h-12 rounded-full transition-all duration-200 bg-tera-panel hover:bg-tera-muted focus-visible:ring-2 focus-visible:ring-tera-neon/70"
-            aria-label={item.label}
-          >
-            <span className="text-lg">{item.icon}</span>
-          </button>
+          <Link key={item.label} href={item.href} className="group relative flex items-center justify-center">
+            <span
+              className="flex h-12 w-12 items-center justify-center rounded-full border border-white/10 bg-tera-panel transition-all duration-200 group-hover:border-white/30 group-hover:bg-tera-muted"
+            >
+              <span className="text-lg">{item.icon}</span>
+            </span>
+            <span className="absolute -right-24 whitespace-nowrap rounded-full border border-white/10 bg-tera-panel/60 px-3 py-1 text-xs uppercase tracking-[0.2em] text-white/60 opacity-0 transition-all duration-200 group-hover:opacity-100">
+              {item.label}
+            </span>
+          </Link>
         ))}
       </div>
       <div className="flex items-center justify-center w-full mt-auto text-xs tracking-widest uppercase text-white/70">

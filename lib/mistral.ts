@@ -6,9 +6,37 @@ if (!process.env.MISTRAL_API_KEY) {
 
 const client = new Mistral({ apiKey: process.env.MISTRAL_API_KEY })
 
-const model = 'mistral-7b'
+const model = 'mistral-medium-latest'
 
 export async function generateTeacherResponse({ prompt, tool }: { prompt: string; tool: string }) {
-  // Placeholder response until API is confirmed
-  return `TERA Response for ${tool}: ${prompt}. This is a demo. Integrate with Mistral API when ready.`
+  const systemMessage = `You are TERA, a helpful AI assistant for teachers. Answer questions clearly and include teaching-oriented rationale.`
+  const userMessage = `Tool: ${tool}. Prompt: ${prompt}`
+
+  const response = await client.chat.complete({
+    model,
+    messages: [
+      { role: 'system', content: systemMessage },
+      { role: 'user', content: userMessage }
+    ],
+    temperature: 0.2,
+    topP: 0.9,
+    maxTokens: 350
+  })
+
+  const rawContent = response.choices?.[0]?.message?.content
+  let text = ''
+  if (typeof rawContent === 'string') {
+    text = rawContent
+  } else if (Array.isArray(rawContent)) {
+    text = rawContent
+      .map((chunk) => {
+        if (chunk && 'type' in chunk && chunk.type === 'text' && 'text' in chunk) {
+          return chunk.text ?? ''
+        }
+        return ''
+      })
+      .join('')
+  }
+
+  return text.trim() || `TERA couldn't build a response for ${tool}.`
 }
