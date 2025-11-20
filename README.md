@@ -1,6 +1,6 @@
 # TERA - AI Assistant for Teachers
 
-A Grok-inspired AI assistant tailored for educators, powered by Mistral.
+An AI assistant tailored for educators, powered by Mistral.
 
 ## Features
 - **Lesson Plan Generator**: Create aligned lessons with pacing and hooks.
