@@ -202,6 +202,8 @@ export default function PromptShell({
           prev.map((entry) => (entry.id === entryId ? { ...entry, assistantMessage } : entry))
         )
       } catch (error) {
+        const message = error instanceof Error ? error.message : 'Unable to generate a reply'
+        console.error('generateAnswer failed', error)
         setConversations((prev) =>
           prev.map((entry) =>
             entry.id === entryId
@@ -210,12 +212,13 @@ export default function PromptShell({
                   assistantMessage: {
                     id: createId(),
                     role: 'tera',
-                    content: 'Error generating response from TERA.'
+                    content: message
                   }
                 }
               : entry
           )
         )
+        setAttachmentMessage(message)
       } finally {
         setStatus('idle')
       }

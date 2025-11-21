@@ -2,6 +2,7 @@
 
 import { revalidatePath } from 'next/cache'
 import { supabase } from '@/lib/supabase'
+import { supabaseServer } from '@/lib/supabase-server'
 import { generateTeacherResponse } from '@/lib/mistral'
 import type { AttachmentReference } from '@/lib/attachment'
 
@@ -16,7 +17,7 @@ export async function generateAnswer({ prompt, tool, authorId, attachments = [] 
 
   const answer = await generateTeacherResponse({ prompt, tool })
 
-  await supabase.from('chat_sessions').insert({
+  await supabaseServer.from('chat_sessions').insert({
     user_id: authorId,
     tool,
     prompt,
