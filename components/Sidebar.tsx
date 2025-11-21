@@ -3,12 +3,12 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 
-const navigation = [
-  { label: 'Chat', icon: '💬', href: '/' },
+export const navigation = [
+  { label: 'Chat', icon: '💬', href: '/chat' },
   { label: 'Tools', icon: '🧰', href: '/tools/lesson-plan-generator' },
   { label: 'History', icon: '⏱️', href: '/history' },
-  { label: 'Notes', icon: '📝', href: '/history' },
-  { label: 'Settings', icon: '⚙️', href: '/history' }
+  { label: 'Notes', icon: '📝', href: '/notes' },
+  { label: 'Settings', icon: '⚙️', href: '/settings' }
 ]
 
 export default function Sidebar() {
