@@ -8,7 +8,9 @@ export const navigation = [
   { label: 'Tools', icon: '🧰', href: '/tools/lesson-plan-generator' },
   { label: 'History', icon: '⏱️', href: '/history' },
   { label: 'Notes', icon: '📝', href: '/notes' },
-  { label: 'Settings', icon: '⚙️', href: '/settings' }
+  { label: 'Settings', icon: '⚙️', href: '/settings' },
+  { label: 'Profile', icon: '👤', href: '/profile' },
+  { label: 'Pricing', icon: '💳', href: '/pricing' }
 ]
 
 export default function Sidebar() {

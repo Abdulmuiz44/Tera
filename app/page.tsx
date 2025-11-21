@@ -1,5 +1,5 @@
-import MainShell from '@/components/MainShell'
+import { redirect } from 'next/navigation'
 
 export default function Page() {
-  return <MainShell />
+  redirect('/chat')
 }

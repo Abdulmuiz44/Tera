@@ -69,6 +69,7 @@ export default function PromptShell({
   const imageInputRef = useRef<HTMLInputElement | null>(null)
   const [isPending, startTransition] = useTransition()
   const conversationRef = useRef<HTMLDivElement | null>(null)
+  const showInitialPrompt = conversations.every((entry) => !entry.userMessage)
 
   const uploadAttachment = async (file: File, type: AttachmentType) => {
     const formData = new FormData()
@@ -189,7 +190,7 @@ export default function PromptShell({
         const answer = await generateAnswer({
           prompt: promptForServer,
           tool: tool.name,
-          authorId: 'demo-user',
+          authorId: user?.id ?? 'demo-user',
           attachments: pendingAttachments
         })
         const assistantMessage: Message = {
@@ -236,7 +237,11 @@ export default function PromptShell({
 
   return (
     <section className="relative flex flex-1 w-full max-w-full flex-col text-left font-sans text-white md:max-w-5xl">
-      <div className="flex flex-1 flex-col gap-6 px-2 md:px-4">
+      <div
+        className={`flex flex-1 flex-col gap-6 px-2 md:px-4 ${
+          showInitialPrompt ? 'justify-center items-center text-center' : ''
+        }`}
+      >
         {conversations.every((entry) => !entry.userMessage) && (
           <div className="text-center text-3xl font-semibold tracking-wide text-white/90">What can Tera help you with?</div>
         )}

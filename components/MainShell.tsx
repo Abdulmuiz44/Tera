@@ -26,11 +26,15 @@ export default function MainShell() {
       setAuthMessage('Enter your email to continue')
       return
     }
+    const redirectTarget = typeof window !== 'undefined' ? `${window.location.origin}/chat` : 'http://localhost:3000/chat'
     setAuthLoading(true)
     try {
-      const { error } = await supabase.auth.signInWithOtp({ email })
+      const { error } = await supabase.auth.signInWithOtp({
+        email,
+        options: { emailRedirectTo: redirectTarget }
+      })
       if (error) throw error
-      setAuthMessage(`Magic link sent to ${email}`)
+      setAuthMessage(`A confirmation link has been sent to ${email}, pls check`)
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Unable to send sign-in link'
       setAuthMessage(message)
@@ -44,13 +48,15 @@ export default function MainShell() {
       setAuthMessage('Enter your email to continue')
       return
     }
+    const redirectTarget = typeof window !== 'undefined' ? `${window.location.origin}/chat` : 'http://localhost:3000/chat'
     setAuthLoading(true)
     const fallbackPassword = `${Date.now()}-${Math.random()}`
     const securePassword = typeof crypto !== 'undefined' && 'randomUUID' in crypto ? crypto.randomUUID() : fallbackPassword
     try {
       const { data, error } = await supabase.auth.signUp({
         email,
-        password: securePassword
+        password: securePassword,
+        options: { emailRedirectTo: redirectTarget }
       })
       if (error) throw error
       if (data.user?.id && data.user.email) {
@@ -63,7 +69,7 @@ export default function MainShell() {
           return
         }
       }
-      setAuthMessage('Account created. Check your email to confirm.')
+      setAuthMessage('Account created. Check your email for confirmation link.')
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Unable to create account'
       setAuthMessage(message)
@@ -102,29 +108,47 @@ export default function MainShell() {
         />
         <div className="absolute right-4 top-4 flex flex-col items-end gap-2 md:flex-row md:items-center">
           {user ? (
-            <button
-              type="button"
-              className="rounded-full bg-white px-3 py-1 text-[0.5rem] font-semibold uppercase tracking-[0.4em] text-[#050505] transition hover:bg-white/90 md:px-4 md:py-2 md:text-xs"
-              onClick={signOut}
-            >
-              Sign out
-            </button>
+            <>
+              <button
+                type="button"
+                className="rounded-full bg-white px-3 py-1 text-[0.5rem] font-semibold uppercase tracking-[0.4em] text-[#050505] transition hover:bg-white/90 md:hidden"
+                onClick={signOut}
+              >
+                Sign out
+              </button>
+              <button
+                type="button"
+                className="hidden rounded-full bg-white px-3 py-1 text-[0.5rem] font-semibold uppercase tracking-[0.4em] text-[#050505] transition hover:bg-white/90 md:block md:px-4 md:py-2 md:text-xs"
+                onClick={signOut}
+              >
+                Sign out
+              </button>
+            </>
           ) : (
             <>
               <button
                 type="button"
-                className="rounded-full border border-white/30 px-3 py-1 text-[0.5rem] font-semibold uppercase tracking-[0.4em] text-white/70 transition hover:border-white hover:text-white md:px-4 md:py-2 md:text-xs"
+                className="rounded-full border border-white/30 px-3 py-1 text-[0.5rem] font-semibold uppercase tracking-[0.4em] text-white/70 transition hover:border-white hover:text-white md:hidden"
                 onClick={() => setAuthDialog('signIn')}
               >
                 Sign in
               </button>
-              <button
-                type="button"
-                className="rounded-full bg-white px-3 py-1 text-[0.5rem] font-semibold uppercase tracking-[0.4em] text-[#050505] transition hover:bg-white/90 md:px-4 md:py-2 md:text-xs"
-                onClick={() => setAuthDialog('signUp')}
-              >
-                Sign up
-              </button>
+              <div className="hidden md:flex md:items-center md:gap-2">
+                <button
+                  type="button"
+                  className="rounded-full border border-white/30 px-3 py-1 text-[0.5rem] font-semibold uppercase tracking-[0.4em] text-white/70 transition hover:border-white hover:text-white md:px-4 md:py-2 md:text-xs"
+                  onClick={() => setAuthDialog('signIn')}
+                >
+                  Sign in
+                </button>
+                <button
+                  type="button"
+                  className="rounded-full bg-white px-3 py-1 text-[0.5rem] font-semibold uppercase tracking-[0.4em] text-[#050505] transition hover:bg-white/90 md:px-4 md:py-2 md:text-xs"
+                  onClick={() => setAuthDialog('signUp')}
+                >
+                  Sign up
+                </button>
+              </div>
             </>
           )}
         </div>
@@ -187,7 +211,7 @@ export default function MainShell() {
                 {user
                   ? `Signed in as ${user.email}`
                   : authDialog === 'signIn'
-                  ? 'Enter your email to receive an authenticated link.'
+                  ? 'Enter your email, you will receive an authentication link in your email'
                   : 'Enter your email to get started...'}
               </p>
               {!user && (
