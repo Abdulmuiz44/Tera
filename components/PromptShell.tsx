@@ -2,6 +2,7 @@
 
 import React, { ChangeEvent, useEffect, useRef, useState, useTransition } from 'react'
 import { generateAnswer } from '@/app/actions/generate'
+import type { User } from '@supabase/supabase-js'
 import type { TeacherTool } from './ToolCard'
 import type { AttachmentReference, AttachmentType } from '@/lib/attachment'
 
@@ -43,7 +44,17 @@ const structureResponse = (content: string) => {
   })
 }
 
-export default function PromptShell({ tool, onToolChange }: { tool: TeacherTool; onToolChange?: (tool: TeacherTool) => void }) {
+export default function PromptShell({
+  tool,
+  onToolChange,
+  user,
+  onRequireSignIn
+}: {
+  tool: TeacherTool
+  onToolChange?: (tool: TeacherTool) => void
+  user?: User | null
+  onRequireSignIn?: () => void
+}) {
   const [prompt, setPrompt] = useState('')
   const [status, setStatus] = useState<'idle' | 'loading'>('idle')
   const [conversations, setConversations] = useState<ConversationEntry[]>([])
@@ -137,6 +148,11 @@ export default function PromptShell({ tool, onToolChange }: { tool: TeacherTool;
     event.preventDefault()
     const messageToSend = prompt.trim()
     if (!messageToSend) return
+    if (!user) {
+      setAttachmentMessage('Sign in to start a conversation.')
+      onRequireSignIn?.()
+      return
+    }
     setStatus('loading')
     const entryId = editingMessageId ?? createId()
     const userMessage = buildUserMessage(entryId, messageToSend)
@@ -235,6 +251,21 @@ export default function PromptShell({ tool, onToolChange }: { tool: TeacherTool;
                         </button>
                       </div>
                       <p className="leading-relaxed">{entry.userMessage?.content}</p>
+                      {entry.userMessage.attachments && (
+                        <div className="mt-3 flex flex-wrap gap-2">
+                          {entry.userMessage.attachments.map((attachment) => (
+                            <a
+                              key={attachment.url}
+                              href={attachment.url}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="rounded-full border border-white/20 bg-white/5 px-3 py-1 text-[0.6rem] uppercase tracking-[0.3em] text-white/70 transition hover:border-white"
+                            >
+                              {attachment.type === 'image' ? '🖼️' : '📄'} {attachment.name}
+                            </a>
+                          ))}
+                        </div>
+                      )}
                     </div>
                   </div>
                 )}
@@ -298,6 +329,8 @@ export default function PromptShell({ tool, onToolChange }: { tool: TeacherTool;
             type="button"
             className="relative rounded-full border border-white/10 bg-transparent p-2 text-lg text-white/60 hover:text-white"
             onClick={() => setAttachmentOpen((prev) => !prev)}
+            disabled={!user}
+            aria-disabled={!user}
           >
             📎
             {attachmentOpen && (
@@ -364,10 +397,12 @@ export default function PromptShell({ tool, onToolChange }: { tool: TeacherTool;
             placeholder="Send a message..."
             value={prompt}
             onChange={(event) => setPrompt(event.target.value)}
+            disabled={!user}
           />
           <button
             type="submit"
             className="grid h-12 w-12 place-items-center rounded-full border border-white/10 bg-white/90 text-xs font-semibold uppercase tracking-[0.4em] text-[#040404]"
+            disabled={!user}
           >
             {status === 'loading' ? '•••' : '↑'}
           </button>

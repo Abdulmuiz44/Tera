@@ -6,26 +6,117 @@ import Sidebar, { navigation } from './Sidebar'
 import PromptShell from './PromptShell'
 import type { TeacherTool } from './ToolCard'
 import { teacherTools } from '@/lib/teacher-tools'
+import { supabase } from '@/lib/supabase'
+import { useAuth } from './AuthProvider'
 import { usePathname } from 'next/navigation'
 
 export default function MainShell() {
   const [selectedTool, setSelectedTool] = useState<TeacherTool>(teacherTools[0])
   const [menuOpen, setMenuOpen] = useState(false)
+  const [authDialog, setAuthDialog] = useState<'signIn' | 'signUp' | null>(null)
+  const [email, setEmail] = useState('')
+  const [authMessage, setAuthMessage] = useState<string | null>(null)
+  const [authLoading, setAuthLoading] = useState(false)
   const pathname = usePathname()
   const isToolsRoute = pathname?.startsWith('/tools')
+  const { user, loading, signOut } = useAuth()
+
+  const handleSignIn = async () => {
+    if (!email.trim()) {
+      setAuthMessage('Enter your email to continue')
+      return
+    }
+    setAuthLoading(true)
+    try {
+      const { error } = await supabase.auth.signInWithOtp({ email })
+      if (error) throw error
+      setAuthMessage(`Magic link sent to ${email}`)
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Unable to send sign-in link'
+      setAuthMessage(message)
+    } finally {
+      setAuthLoading(false)
+    }
+  }
+
+  const handleSignUp = async () => {
+    if (!email.trim()) {
+      setAuthMessage('Enter your email to continue')
+      return
+    }
+    setAuthLoading(true)
+    const fallbackPassword = `${Date.now()}-${Math.random()}`
+    const securePassword = typeof crypto !== 'undefined' && 'randomUUID' in crypto ? crypto.randomUUID() : fallbackPassword
+    try {
+      const { error } = await supabase.auth.signUp({
+        email,
+        password: securePassword
+      })
+      if (error) throw error
+      setAuthMessage('Account created. Check your email to confirm.')
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Unable to create account'
+      setAuthMessage(message)
+    } finally {
+      setAuthLoading(false)
+    }
+  }
+
+  const handleGoogleSignIn = async () => {
+    setAuthLoading(true)
+    try {
+      const redirectTo = typeof window !== 'undefined' ? window.location.origin : undefined
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: redirectTo ? { redirectTo } : undefined
+      })
+      if (error) throw error
+      setAuthMessage('Redirecting to Google…')
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Unable to redirect to Google'
+      setAuthMessage(message)
+    } finally {
+      setAuthLoading(false)
+    }
+  }
 
   return (
     <div className="flex min-h-screen w-full bg-[#050505] text-white">
       <Sidebar />
       <main className="relative flex flex-1 items-center justify-center px-6 py-10">
-        <PromptShell tool={selectedTool} onToolChange={setSelectedTool} />
-        <div className="absolute right-4 top-4 hidden items-center gap-3 md:flex">
-          <button className="rounded-full border border-white/30 px-4 py-2 text-xs font-semibold uppercase tracking-[0.35em] text-white/70 transition hover:border-white hover:text-white">
-            Sign in
-          </button>
-          <button className="rounded-full bg-white px-4 py-2 text-xs font-semibold uppercase tracking-[0.35em] text-[#050505] transition hover:bg-white/90">
-            Sign up
-          </button>
+        <PromptShell
+          tool={selectedTool}
+          onToolChange={setSelectedTool}
+          user={user}
+          onRequireSignIn={() => setAuthDialog('signIn')}
+        />
+        <div className="absolute right-4 top-4 flex flex-col items-end gap-2 md:flex-row md:items-center">
+          {user ? (
+            <button
+              type="button"
+              className="rounded-full bg-white px-3 py-1 text-[0.5rem] font-semibold uppercase tracking-[0.4em] text-[#050505] transition hover:bg-white/90 md:px-4 md:py-2 md:text-xs"
+              onClick={signOut}
+            >
+              Sign out
+            </button>
+          ) : (
+            <>
+              <button
+                type="button"
+                className="rounded-full border border-white/30 px-3 py-1 text-[0.5rem] font-semibold uppercase tracking-[0.4em] text-white/70 transition hover:border-white hover:text-white md:px-4 md:py-2 md:text-xs"
+                onClick={() => setAuthDialog('signIn')}
+              >
+                Sign in
+              </button>
+              <button
+                type="button"
+                className="rounded-full bg-white px-3 py-1 text-[0.5rem] font-semibold uppercase tracking-[0.4em] text-[#050505] transition hover:bg-white/90 md:px-4 md:py-2 md:text-xs"
+                onClick={() => setAuthDialog('signUp')}
+              >
+                Sign up
+              </button>
+            </>
+          )}
         </div>
         <button
           type="button"
@@ -69,6 +160,66 @@ export default function MainShell() {
                   )
                 })}
               </nav>
+            </div>
+          </div>
+        )}
+        {authDialog && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
+            <div className="absolute inset-0 bg-black/70" onClick={() => setAuthDialog(null)} />
+            <div className="relative z-10 w-full max-w-md rounded-3xl border border-white/20 bg-[#060606]/95 p-6 shadow-2xl backdrop-blur">
+              <div className="flex items-center justify-between text-xs uppercase tracking-[0.4em] text-white/50">
+                <span>{authDialog === 'signIn' ? 'Sign In' : 'Sign Up'}</span>
+                <button className="text-white/50 hover:text-white" onClick={() => setAuthDialog(null)}>
+                  ✕
+                </button>
+              </div>
+              <p className="mt-4 text-sm text-white/70">
+                {user
+                  ? `Signed in as ${user.email}`
+                  : authDialog === 'signIn'
+                  ? 'Enter your email to receive an authenticated link.'
+                  : 'Enter your email to get started...'}
+              </p>
+              {!user && (
+                <input
+                  className="mt-4 w-full rounded-2xl border border-white/10 bg-transparent px-4 py-3 text-sm text-white outline-none placeholder:text-white/40"
+                  placeholder="Email"
+                  value={email}
+                  onChange={(event) => setEmail(event.target.value)}
+                  type="email"
+                />
+              )}
+              <div className="mt-6 flex flex-col gap-3">
+                <button
+                  type="button"
+                  className="w-full rounded-full border border-white/20 px-4 py-2 text-[0.6rem] font-semibold uppercase tracking-[0.3em] text-white/70 transition hover:border-white hover:text-white"
+                  onClick={() => setAuthDialog(null)}
+                >
+                  Cancel
+                </button>
+                {!user && (
+                  <button
+                    type="button"
+                    className="w-full rounded-full bg-white px-4 py-2 text-[0.6rem] font-semibold uppercase tracking-[0.3em] text-[#050505] transition hover:bg-white/90"
+                    onClick={authDialog === 'signIn' ? handleSignIn : handleSignUp}
+                    disabled={authLoading}
+                  >
+                    {authDialog === 'signIn' ? 'Send link' : 'Create account'}
+                  </button>
+                )}
+                <button
+                  type="button"
+                  className="w-full rounded-full border border-white/20 bg-white/5 px-4 py-2 text-[0.6rem] font-semibold uppercase tracking-[0.3em] text-white/70 transition hover:border-white hover:text-white"
+                  onClick={handleGoogleSignIn}
+                  disabled={authLoading}
+                >
+                  Continue with Google
+                </button>
+              </div>
+              {authMessage && <p className="mt-3 text-[0.7rem] uppercase tracking-[0.3em] text-tera-neon">{authMessage}</p>}
+              {user && (
+                <p className="mt-4 text-xs text-white/60">You are already signed in. Thank you!</p>
+              )}
             </div>
           </div>
         )}
