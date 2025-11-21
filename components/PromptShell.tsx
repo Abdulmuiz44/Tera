@@ -112,13 +112,21 @@ export default function PromptShell({
     try {
       const attachment = await uploadAttachment(file, 'image')
       setPendingAttachments((prev) => [...prev, attachment])
-      setAttachmentMessage(`Image queued: ${attachment.name}`)
+      setAttachmentMessage(`Image added to the prompt`) 
     } catch (error) {
       setAttachmentMessage('Upload failed. Try again.')
     } finally {
       setAttachmentOpen(false)
       event.target.value = ''
     }
+  }
+
+  const handleSearchWeb = () => {
+    const query = window.prompt('What should Tera search for on the web?')?.trim()
+    if (!query) return
+    setAttachmentMessage(`Searching the web for “${query}”`)
+    window.open(`https://www.google.com/search?q=${encodeURIComponent(query)}`, '_blank')
+    setAttachmentOpen(false)
   }
 
   const handleCopyMessage = async (content: string) => {
@@ -173,8 +181,13 @@ export default function PromptShell({
     setPrompt('')
     startTransition(async () => {
       try {
+        const imageContextLines = pendingAttachments
+          .filter((attachment) => attachment.type === 'image')
+          .map((attachment) => `Image attached: ${attachment.name} — ${attachment.url}`)
+          .join('\n')
+        const promptForServer = [imageContextLines, messageToSend].filter(Boolean).join('\n\n')
         const answer = await generateAnswer({
-          prompt: messageToSend,
+          prompt: promptForServer,
           tool: tool.name,
           authorId: 'demo-user',
           attachments: pendingAttachments
@@ -222,8 +235,8 @@ export default function PromptShell({
   }, [conversations, conversationActive])
 
   return (
-    <section className="relative flex h-[60vh] w-full max-w-full flex-col text-left font-sans text-white md:max-w-5xl">
-      <div className="flex flex-1 flex-col gap-6 px-4">
+    <section className="relative flex flex-1 w-full max-w-full flex-col text-left font-sans text-white md:max-w-5xl">
+      <div className="flex flex-1 flex-col gap-6 px-2 md:px-4">
         {conversations.every((entry) => !entry.userMessage) && (
           <div className="text-center text-3xl font-semibold tracking-wide text-white/90">What can Tera help you with?</div>
         )}
@@ -318,7 +331,7 @@ export default function PromptShell({
       </div>
 
       <div
-        className="sticky bottom-0 z-10 mx-4 rounded-3xl border border-white/5 bg-[#111111]/80 p-4 shadow-2xl backdrop-blur"
+        className="sticky bottom-0 z-10 w-full rounded-3xl border border-white/5 bg-[#111111]/80 p-4 shadow-2xl backdrop-blur"
         style={{
           transform: hasBumpedInput ? 'translateY(6px)' : 'translateY(0)',
           transition: 'transform 0.35s ease'
@@ -327,53 +340,58 @@ export default function PromptShell({
         <form className="flex items-center gap-3" onSubmit={handleSubmit}>
           <button
             type="button"
-            className="relative rounded-full border border-white/10 bg-transparent p-2 text-lg text-white/60 hover:text-white"
+            className="relative rounded-full bg-transparent p-2 text-lg text-white/60 hover:text-white"
             onClick={() => setAttachmentOpen((prev) => !prev)}
-            disabled={!user}
-            aria-disabled={!user}
           >
-            📎
+            ⊕
             {attachmentOpen && (
-              <div className="absolute left-1/2 top-full z-10 mt-3 -translate-x-1/2 w-60 rounded-2xl border border-white/10 bg-[#111111] p-4 text-sm text-white shadow-2xl">
+              <div className="absolute left-1/2 bottom-full z-10 mb-3 -translate-x-1/2 w-60 rounded-2xl border border-white/10 bg-[#111111] p-4 text-sm text-white shadow-2xl">
                 <p className="text-xs uppercase tracking-[0.35em] text-white/40">Add attachment</p>
                 <div className="mt-3 space-y-2">
                   <div
-                    className="flex w-full cursor-pointer items-center justify-between rounded-xl border border-white/10 px-3 py-2 text-left text-sm text-white/70 hover:border-white/30"
                     role="button"
-                    onClick={() => fileInputRef.current?.click()}
-                  >
-                    <span>Upload file</span>
-                    <span className="text-white/50">↥</span>
-                  </div>
-                  <div
-                    className="flex w-full cursor-pointer items-center justify-between rounded-xl border border-white/10 px-3 py-2 text-left text-sm text-white/70 hover:border-white/30"
-                    role="button"
+                    tabIndex={0}
                     onClick={() => imageInputRef.current?.click()}
+                    onKeyDown={(event) => {
+                      if (event.key === 'Enter' || event.key === ' ') {
+                        event.preventDefault()
+                        imageInputRef.current?.click()
+                      }
+                    }}
+                    className="flex cursor-pointer w-full items-center justify-between rounded-xl border border-white/10 px-3 py-2 text-left text-sm text-white/70 transition hover:border-white/30"
                   >
                     <span>Upload image</span>
                     <span className="text-white/50">↥</span>
                   </div>
-                  <div className="rounded-xl border border-white/10 px-3 py-2">
-                    <label className="text-[0.6rem] uppercase tracking-[0.3em] text-white/40">Add text</label>
-                    <textarea
-                      className="mt-2 w-full rounded-lg border border-white/10 bg-transparent px-2 py-1 text-xs text-white outline-none"
-                      placeholder="Type snippet..."
-                      value={snippet}
-                      onChange={(event) => setSnippet(event.target.value)}
-                    />
-                    <button
-                      type="button"
-                      className="mt-2 w-full rounded-full bg-white/5 px-3 py-1 text-xs font-semibold uppercase tracking-[0.3em] text-white/70 hover:bg-white/10"
-                      onClick={() => {
-                        if (!snippet.trim()) return
-                        setPrompt((prev) => `${prev}${prev ? '\n' : ''}${snippet.trim()}`)
-                        setSnippet('')
-                        setAttachmentMessage('Text snippet added')
-                        setAttachmentOpen(false)
-                      }}
-                    >
-                      Add
-                    </button>
+                  <div
+                    role="button"
+                    tabIndex={0}
+                    onClick={() => fileInputRef.current?.click()}
+                    onKeyDown={(event) => {
+                      if (event.key === 'Enter' || event.key === ' ') {
+                        event.preventDefault()
+                        fileInputRef.current?.click()
+                      }
+                    }}
+                    className="flex cursor-pointer w-full items-center justify-between rounded-xl border border-white/10 px-3 py-2 text-left text-sm text-white/70 transition hover:border-white/30"
+                  >
+                    <span>Upload files</span>
+                    <span className="text-white/50">↥</span>
+                  </div>
+                  <div
+                    role="button"
+                    tabIndex={0}
+                    onClick={handleSearchWeb}
+                    onKeyDown={(event) => {
+                      if (event.key === 'Enter' || event.key === ' ') {
+                        event.preventDefault()
+                        handleSearchWeb()
+                      }
+                    }}
+                    className="flex cursor-pointer w-full items-center justify-between rounded-xl border border-white/10 px-3 py-2 text-left text-sm text-white/70 transition hover:border-white/30"
+                  >
+                    <span>Search the web</span>
+                    <span className="text-white/50">🔍</span>
                   </div>
                 </div>
               </div>
@@ -397,12 +415,10 @@ export default function PromptShell({
             placeholder="Send a message..."
             value={prompt}
             onChange={(event) => setPrompt(event.target.value)}
-            disabled={!user}
           />
           <button
             type="submit"
             className="grid h-12 w-12 place-items-center rounded-full border border-white/10 bg-white/90 text-xs font-semibold uppercase tracking-[0.4em] text-[#040404]"
-            disabled={!user}
           >
             {status === 'loading' ? '•••' : '↑'}
           </button>
@@ -411,12 +427,30 @@ export default function PromptShell({
           <p className="mt-2 text-xs uppercase tracking-[0.4em] text-white/50">{attachmentMessage}</p>
         )}
         {pendingAttachments.length > 0 && (
-          <div className="mt-2 flex flex-wrap gap-2">
-            {pendingAttachments.map((attachment) => (
-              <span key={attachment.url} className="rounded-full border border-white/10 px-3 py-1 text-xs text-white/70">
-                {attachment.name}
-              </span>
-            ))}
+          <div className="mt-3 flex flex-col gap-3">
+            <p className="text-[0.6rem] uppercase tracking-[0.4em] text-white/50">Tera will reference the following content</p>
+            <div className="flex flex-col gap-2">
+              {pendingAttachments.map((attachment) => (
+                <div
+                  key={attachment.url}
+                  className="overflow-hidden rounded-2xl border border-white/10"
+                >
+                  {attachment.type === 'image' ? (
+                    <img
+                      src={attachment.url}
+                      alt={attachment.name}
+                      className="w-full object-cover"
+                      draggable={false}
+                    />
+                  ) : (
+                    <div className="flex items-center justify-between bg-[#050505] px-3 py-2 text-xs uppercase tracking-[0.4em] text-white/70">
+                      <span>{attachment.name}</span>
+                      <span className="text-white/40">{attachment.type}</span>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
           </div>
         )}
       </div>

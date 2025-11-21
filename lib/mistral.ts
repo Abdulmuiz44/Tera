@@ -9,7 +9,7 @@ const client = new Mistral({ apiKey: process.env.MISTRAL_API_KEY })
 const model = 'mistral-medium-latest'
 
 export async function generateTeacherResponse({ prompt, tool }: { prompt: string; tool: string }) {
-  const systemMessage = `You are TERA, a helpful AI assistant for teachers. Answer questions clearly and include teaching-oriented rationale.`
+  const systemMessage = `You are Tera, a helpful AI assistant for teachers. Answer questions clearly, stay friendly, and adapt your response to the user's specific prompt. Do not include any asterisks (*) unless the user asks for them, avoid assuming they want a customized lesson plan, and only add emoji if the user explicitly requests or the tone warrants it.`
   const userMessage = `Tool: ${tool}. Prompt: ${prompt}`
 
   try {
@@ -43,10 +43,10 @@ export async function generateTeacherResponse({ prompt, tool }: { prompt: string
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error)
     if (/429/.test(message)) {
-      return 'TERA is currently rate limited by Mistral. Please wait a moment and try again.'
+      return 'Tera is currently rate limited by Mistral. Please wait a moment and try again.'
     }
     if (/Connect Timeout|fetch failed|connect timed out|UND_ERR_CONNECT_TIMEOUT/i.test(message)) {
-      return 'TERA cannot reach Mistral right now due to a network timeout. Please check your connection or try again shortly.'
+      return 'Tera cannot reach Mistral right now due to a network timeout. Please check your connection or try again shortly.'
     }
     throw error
   }

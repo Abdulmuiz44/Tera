@@ -48,11 +48,21 @@ export default function MainShell() {
     const fallbackPassword = `${Date.now()}-${Math.random()}`
     const securePassword = typeof crypto !== 'undefined' && 'randomUUID' in crypto ? crypto.randomUUID() : fallbackPassword
     try {
-      const { error } = await supabase.auth.signUp({
+      const { data, error } = await supabase.auth.signUp({
         email,
         password: securePassword
       })
       if (error) throw error
+      if (data.user?.id && data.user.email) {
+        const { error: syncError } = await supabase.from('users').upsert({
+          id: data.user.id,
+          email: data.user.email
+        })
+        if (syncError) {
+          setAuthMessage(syncError.message)
+          return
+        }
+      }
       setAuthMessage('Account created. Check your email to confirm.')
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Unable to create account'
@@ -83,7 +93,7 @@ export default function MainShell() {
   return (
     <div className="flex min-h-screen w-full bg-[#050505] text-white">
       <Sidebar />
-      <main className="relative flex flex-1 items-center justify-center px-6 py-10">
+      <main className="relative flex flex-1 flex-col items-center justify-start px-3 pt-10 md:px-6 md:pt-10">
         <PromptShell
           tool={selectedTool}
           onToolChange={setSelectedTool}
