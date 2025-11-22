@@ -19,7 +19,7 @@ export default function MainShell() {
   const [authLoading, setAuthLoading] = useState(false)
   const pathname = usePathname()
   const isToolsRoute = pathname?.startsWith('/tools')
-  const { user, loading, signOut } = useAuth()
+  const { user, loading, signOut, userReady } = useAuth()
 
   const handleSignIn = async () => {
     if (!email.trim()) {
@@ -99,11 +99,12 @@ export default function MainShell() {
   return (
     <div className="flex min-h-screen w-full bg-[#050505] text-white">
       <Sidebar />
-      <main className="relative flex flex-1 flex-col items-center justify-start px-3 pt-10 md:px-6 md:pt-10">
+      <main className="relative flex flex-1 flex-col items-center justify-start px-3 pt-10 md:px-6 md:pt-10 md:ml-[88px]">
         <PromptShell
           tool={selectedTool}
           onToolChange={setSelectedTool}
           user={user}
+          userReady={userReady}
           onRequireSignIn={() => setAuthDialog('signIn')}
         />
         <div className="absolute right-4 top-4 flex flex-col items-end gap-2 md:flex-row md:items-center">
@@ -177,15 +178,14 @@ export default function MainShell() {
                     item.href === '/'
                       ? pathname === '/'
                       : item.href === '/tools/lesson-plan-generator'
-                      ? isToolsRoute
-                      : pathname === item.href
+                        ? isToolsRoute
+                        : pathname === item.href
                   return (
                     <Link
                       key={item.label}
                       href={item.href}
-                      className={`flex items-center gap-3 rounded-2xl border border-white/10 px-4 py-3 text-xs font-normal uppercase tracking-[0.4em] transition ${
-                        isActive ? 'border-tera-neon bg-tera-neon/40 text-white' : 'border-white/10 bg-transparent text-white/70'
-                      }`}
+                      className={`flex items-center gap-3 rounded-2xl border border-white/10 px-4 py-3 text-xs font-normal uppercase tracking-[0.4em] transition ${isActive ? 'border-tera-neon bg-tera-neon/40 text-white' : 'border-white/10 bg-transparent text-white/70'
+                        }`}
                       onClick={() => setMenuOpen(false)}
                     >
                       <span className="text-lg">{item.icon}</span>
@@ -211,8 +211,8 @@ export default function MainShell() {
                 {user
                   ? `Signed in as ${user.email}`
                   : authDialog === 'signIn'
-                  ? 'Enter your email, you will receive an authentication link in your email'
-                  : 'Enter your email to get started...'}
+                    ? 'Enter your email, you will receive an authentication link in your email'
+                    : 'Enter your email to get started...'}
               </p>
               {!user && (
                 <input

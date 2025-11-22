@@ -49,6 +49,7 @@ CREATE TABLE chat_sessions (
   tool TEXT,
   prompt TEXT,
   response TEXT,
+  attachments JSONB DEFAULT '[]'::JSONB,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 

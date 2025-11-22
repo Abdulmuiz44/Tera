@@ -1,10 +1,11 @@
 "use client"
 
-import React, { ChangeEvent, useEffect, useRef, useState, useTransition } from 'react'
+import React, { ChangeEvent, useCallback, useEffect, useRef, useState, useTransition } from 'react'
 import { generateAnswer } from '@/app/actions/generate'
 import type { User } from '@supabase/supabase-js'
 import type { TeacherTool } from './ToolCard'
 import type { AttachmentReference, AttachmentType } from '@/lib/attachment'
+import { supabase } from '@/lib/supabase'
 
 type Message = {
   id: string
@@ -17,30 +18,36 @@ type ConversationEntry = {
   id: string
   userMessage?: Message
   assistantMessage?: Message
+  sessionId?: string | null
+}
+
+type QueuedMessage = {
+  prompt: string
+  attachments: AttachmentReference[]
 }
 
 const createId = () => (crypto.randomUUID ? crypto.randomUUID() : String(Date.now()))
 
 const structureResponse = (content: string) => {
-  const segments = content
-    .split(/\n+/)
-    .map((paragraph) => paragraph.trim())
+  // Split by double newlines for paragraphs, or single newlines for sentences
+  const paragraphs = content
+    .split(/\n\n+/)
+    .map((para) => para.trim())
     .filter(Boolean)
 
-  if (!segments.length) {
-    return [{ text: 'Awaiting TERA response...', emoji: '🛸' }]
+  if (!paragraphs.length) {
+    return [{ text: 'Awaiting TERA response...', isHeader: false }]
   }
 
-  return segments.flatMap((segment, index) => {
-    const sentenceParts = segment
-      .split(/(?<=[.!?])\s+/)
-      .map((sentence) => sentence.trim())
-      .filter(Boolean)
+  return paragraphs.map((paragraph) => {
+    // Check if it's a header (starts with # or is all caps and short)
+    const isMarkdownHeader = paragraph.startsWith('#')
+    const isAllCapsHeader = paragraph === paragraph.toUpperCase() && paragraph.length < 50 && !paragraph.includes('.')
 
-    return sentenceParts.map((sentence, sentenceIndex) => ({
-      text: sentence,
-      emoji: sentenceIndex === 0 && index === 0 ? '🚀' : '✨'
-    }))
+    return {
+      text: paragraph.replace(/^#+\s*/, ''), // Remove markdown header symbols
+      isHeader: isMarkdownHeader || isAllCapsHeader
+    }
   })
 }
 
@@ -48,11 +55,13 @@ export default function PromptShell({
   tool,
   onToolChange,
   user,
+  userReady,
   onRequireSignIn
 }: {
   tool: TeacherTool
   onToolChange?: (tool: TeacherTool) => void
   user?: User | null
+  userReady?: boolean
   onRequireSignIn?: () => void
 }) {
   const [prompt, setPrompt] = useState('')
@@ -65,10 +74,12 @@ export default function PromptShell({
   const [editingMessageId, setEditingMessageId] = useState<string | null>(null)
   const [conversationActive, setConversationActive] = useState(false)
   const [hasBumpedInput, setHasBumpedInput] = useState(false)
+  const [historyLoading, setHistoryLoading] = useState(false)
   const fileInputRef = useRef<HTMLInputElement | null>(null)
   const imageInputRef = useRef<HTMLInputElement | null>(null)
   const [isPending, startTransition] = useTransition()
   const conversationRef = useRef<HTMLDivElement | null>(null)
+  const [queuedMessage, setQueuedMessage] = useState<QueuedMessage | null>(null)
   const showInitialPrompt = conversations.every((entry) => !entry.userMessage)
 
   const uploadAttachment = async (file: File, type: AttachmentType) => {
@@ -113,7 +124,7 @@ export default function PromptShell({
     try {
       const attachment = await uploadAttachment(file, 'image')
       setPendingAttachments((prev) => [...prev, attachment])
-      setAttachmentMessage(`Image added to the prompt`) 
+      setAttachmentMessage(`Image added to the prompt`)
     } catch (error) {
       setAttachmentMessage('Upload failed. Try again.')
     } finally {
@@ -139,11 +150,11 @@ export default function PromptShell({
     }
   }
 
-  const buildUserMessage = (entryId: string, content: string) => ({
+  const buildUserMessage = (entryId: string, content: string, attachments?: AttachmentReference[]) => ({
     id: entryId,
     role: 'user' as const,
     content,
-    attachments: pendingAttachments.length ? [...pendingAttachments] : undefined
+    attachments: attachments && attachments.length ? [...attachments] : undefined
   })
 
   const handleEditMessage = (entryId: string, message: Message) => {
@@ -153,18 +164,10 @@ export default function PromptShell({
     }
   }
 
-  const handleSubmit = (event: React.FormEvent) => {
-    event.preventDefault()
-    const messageToSend = prompt.trim()
-    if (!messageToSend) return
-    if (!user) {
-      setAttachmentMessage('Sign in to start a conversation.')
-      onRequireSignIn?.()
-      return
-    }
+  const processMessage = useCallback((messageToSend: string, attachmentsToSend: AttachmentReference[]) => {
     setStatus('loading')
     const entryId = editingMessageId ?? createId()
-    const userMessage = buildUserMessage(entryId, messageToSend)
+    const userMessage = buildUserMessage(entryId, messageToSend, attachmentsToSend)
     setConversations((prev) => {
       if (editingMessageId) {
         return prev.map((entry) =>
@@ -179,19 +182,14 @@ export default function PromptShell({
     if (!hasBumpedInput) {
       setHasBumpedInput(true)
     }
-    setPrompt('')
     startTransition(async () => {
       try {
-        const imageContextLines = pendingAttachments
-          .filter((attachment) => attachment.type === 'image')
-          .map((attachment) => `Image attached: ${attachment.name} — ${attachment.url}`)
-          .join('\n')
-        const promptForServer = [imageContextLines, messageToSend].filter(Boolean).join('\n\n')
-        const answer = await generateAnswer({
-          prompt: promptForServer,
+        const { answer, sessionId } = await generateAnswer({
+          prompt: messageToSend,
           tool: tool.name,
-          authorId: user?.id ?? 'demo-user',
-          attachments: pendingAttachments
+          authorId: user?.id ?? '',
+          authorEmail: user?.email ?? undefined,
+          attachments: attachmentsToSend
         })
         const assistantMessage: Message = {
           id: createId(),
@@ -199,7 +197,9 @@ export default function PromptShell({
           content: answer
         }
         setConversations((prev) =>
-          prev.map((entry) => (entry.id === entryId ? { ...entry, assistantMessage } : entry))
+          prev.map((entry) =>
+            entry.id === entryId ? { ...entry, assistantMessage, sessionId } : entry
+          )
         )
       } catch (error) {
         const message = error instanceof Error ? error.message : 'Unable to generate a reply'
@@ -208,13 +208,13 @@ export default function PromptShell({
           prev.map((entry) =>
             entry.id === entryId
               ? {
-                  ...entry,
-                  assistantMessage: {
-                    id: createId(),
-                    role: 'tera',
-                    content: message
-                  }
+                ...entry,
+                assistantMessage: {
+                  id: createId(),
+                  role: 'tera',
+                  content: message
                 }
+              }
               : entry
           )
         )
@@ -222,10 +222,98 @@ export default function PromptShell({
       } finally {
         setStatus('idle')
       }
+      setPendingAttachments([])
+      setEditingMessageId(null)
+      setPrompt('')
+      setQueuedMessage(null)
     })
-    setPendingAttachments([])
-    setEditingMessageId(null)
+  }, [editingMessageId, hasBumpedInput, tool.name, user?.id])
+
+  const handleSubmit = (event: React.FormEvent) => {
+    event.preventDefault()
+    const messageToSend = prompt.trim()
+    if (!messageToSend) return
+    if (!user) {
+      setQueuedMessage({
+        prompt: messageToSend,
+        attachments: [...pendingAttachments]
+      })
+      setAttachmentMessage('Sign in to send your message. It will be posted automatically once you authenticate.')
+      onRequireSignIn?.()
+      return
+    }
+    if (!userReady) {
+      setQueuedMessage({
+        prompt: messageToSend,
+        attachments: [...pendingAttachments]
+      })
+      setAttachmentMessage('Hang tight—finalizing your account before sending.')
+      return
+    }
+    processMessage(messageToSend, pendingAttachments)
   }
+
+  useEffect(() => {
+    if (userReady && queuedMessage) {
+      processMessage(queuedMessage.prompt, queuedMessage.attachments)
+    }
+  }, [userReady, queuedMessage, processMessage])
+
+  // Load previous chat sessions from Supabase
+  useEffect(() => {
+    if (!user) {
+      setConversations([])
+      return
+    }
+
+    let isMounted = true
+    const userId = user.id // Capture user ID to avoid null check issues
+
+    async function loadChatHistory() {
+      setHistoryLoading(true)
+      try {
+        const { data, error } = await supabase
+          .from('chat_sessions')
+          .select('id, prompt, response, attachments, created_at')
+          .eq('user_id', userId)
+          .order('created_at', { ascending: true })
+          .limit(50)
+
+        if (isMounted && !error && data) {
+          // Transform Supabase data into conversation format
+          const loadedConversations: ConversationEntry[] = data.map((session) => ({
+            id: session.id,
+            sessionId: session.id,
+            userMessage: {
+              id: `${session.id}-user`,
+              role: 'user' as const,
+              content: session.prompt,
+              attachments: session.attachments as AttachmentReference[] | undefined
+            },
+            assistantMessage: {
+              id: `${session.id}-assistant`,
+              role: 'tera' as const,
+              content: session.response
+            }
+          }))
+          setConversations(loadedConversations)
+          setConversationActive(loadedConversations.length > 0)
+        }
+      } catch (error) {
+        console.error('Failed to load chat history', error)
+      } finally {
+        if (isMounted) {
+          setHistoryLoading(false)
+        }
+      }
+    }
+
+    loadChatHistory()
+
+    return () => {
+      isMounted = false
+    }
+  }, [user])
 
   useEffect(() => {
     if (conversationActive) {
@@ -241,12 +329,17 @@ export default function PromptShell({
   return (
     <section className="relative flex flex-1 w-full max-w-full flex-col text-left font-sans text-white md:max-w-5xl">
       <div
-        className={`flex flex-1 flex-col gap-6 px-2 md:px-4 ${
-          showInitialPrompt ? 'justify-center items-center text-center' : ''
-        }`}
+        className={`flex flex-1 flex-col gap-6 px-2 md:px-4 ${showInitialPrompt ? 'justify-center items-center text-center' : ''
+          }`}
       >
         {conversations.every((entry) => !entry.userMessage) && (
           <div className="text-center text-3xl font-semibold tracking-wide text-white/90">What can Tera help you with?</div>
+        )}
+        {user && !userReady && (
+          <div className="mx-auto flex max-w-xs items-center justify-center gap-2 rounded-2xl border border-white/20 bg-white/5 px-4 py-2 text-[0.65rem] uppercase tracking-[0.4em] text-white/80">
+            <span className="h-2 w-2 animate-ping rounded-full bg-tera-neon" />
+            Finalizing your account… your pending message will send shortly.
+          </div>
         )}
         <div className="flex flex-1 flex-col gap-4 overflow-hidden">
           <div ref={conversationRef} className="flex flex-1 min-h-0 flex-col gap-3 overflow-y-auto pr-2 pb-16">
@@ -304,10 +397,15 @@ export default function PromptShell({
                       </div>
                       <div className="flex flex-col gap-2">
                         {structureResponse(entry.assistantMessage.content).map((segment, index) => (
-                          <p key={`${entry.assistantMessage!.id}-${index}`} className="text-white leading-relaxed">
-                            <span className="mr-2 text-white/60">{segment.emoji}</span>
-                            {segment.text}
-                          </p>
+                          segment.isHeader ? (
+                            <h3 key={`${entry.assistantMessage!.id}-${index}`} className="text-white font-bold text-lg mt-2 leading-relaxed">
+                              {segment.text}
+                            </h3>
+                          ) : (
+                            <p key={`${entry.assistantMessage!.id}-${index}`} className="text-white leading-relaxed">
+                              {segment.text}
+                            </p>
+                          )
                         ))}
                       </div>
                     </div>

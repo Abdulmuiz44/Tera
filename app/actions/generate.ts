@@ -10,14 +10,25 @@ type GenerateProps = {
   prompt: string
   tool: string
   authorId: string
+  authorEmail?: string
   attachments?: AttachmentReference[]
 }
 
-export async function generateAnswer({ prompt, tool, authorId, attachments = [] }: GenerateProps) {
+export async function generateAnswer({ prompt, tool, authorId, authorEmail, attachments = [] }: GenerateProps) {
 
-  const answer = await generateTeacherResponse({ prompt, tool })
+  const answer = await generateTeacherResponse({ prompt, tool, attachments })
 
-  await supabaseServer.from('chat_sessions').insert({
+  // Ensure user exists in users table before inserting chat session
+  if (authorId && authorEmail) {
+    await supabaseServer.from('users').upsert({
+      id: authorId,
+      email: authorEmail
+    }, {
+      onConflict: 'id'
+    })
+  }
+
+  const { data, error } = await supabaseServer.from('chat_sessions').insert({
     user_id: authorId,
     tool,
     prompt,
@@ -25,8 +36,15 @@ export async function generateAnswer({ prompt, tool, authorId, attachments = [] 
     attachments,
     created_at: new Date().toISOString()
   })
+    .select('id')
+    .single()
+
+  if (error) {
+    throw error
+  }
 
   revalidatePath('/')
+  revalidatePath('/history')
 
-  return answer
+  return { answer, sessionId: data?.id ?? null }
 }

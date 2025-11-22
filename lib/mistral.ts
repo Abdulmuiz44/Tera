@@ -1,4 +1,5 @@
 import { Mistral } from '@mistralai/mistralai'
+import type { AttachmentReference } from './attachment'
 
 if (!process.env.MISTRAL_API_KEY) {
   throw new Error('Mistral API key missing in environment variables')
@@ -6,18 +7,57 @@ if (!process.env.MISTRAL_API_KEY) {
 
 const client = new Mistral({ apiKey: process.env.MISTRAL_API_KEY })
 
-const model = 'mistral-medium-latest'
+const model = 'pixtral-large-latest'
 
-export async function generateTeacherResponse({ prompt, tool }: { prompt: string; tool: string }) {
-  const systemMessage = `You are Tera, a helpful AI assistant for teachers. Answer questions clearly, stay friendly, and adapt your response to the user's specific prompt. Do not include any asterisks (*) unless the user asks for them, avoid assuming they want a customized lesson plan, and only add emoji if the user explicitly requests or the tone warrants it.`
-  const userMessage = `Tool: ${tool}. Prompt: ${prompt}`
+// System prompt with formatting guidelines
+const systemMessage = `You are Tera, a helpful AI assistant for teachers and educators. Your primary goal is to understand the user’s teaching context, ask clarifying questions about their needs, and then recommend how you can help (lesson planning, classroom management, resource creation, tutoring strategies, technology integration, etc.). Answer questions clearly and professionally.
+
+IMPORTANT FORMATTING RULES:
+- Do NOT use emojis in your responses unless specifically requested.
+- Do NOT use asterisks (*) for emphasis or formatting.
+- Use proper markdown formatting: **bold** for emphasis, headings with #, etc.
+- Keep responses concise and well-structured.
+- Use bullet points or numbered lists when appropriate.
+- Write in a structured way: each sentence on its own line, with a blank line between paragraphs.
+- Capitalize the first letter of each sentence and use appropriate punctuation.
+- Use line breaks to separate logical steps or ideas.
+- Use headings for sections when needed.
+`
+
+export async function generateTeacherResponse({
+  prompt,
+  tool,
+  attachments = [] as AttachmentReference[]
+}: {
+  prompt: string
+  tool: string
+  attachments?: AttachmentReference[]
+}) {
+  // Build user message content, handling image attachments for vision support
+  const imageAttachments = attachments.filter(att => att.type === 'image')
+
+  let userContent: string | Array<{ type: string; text?: string; image_url?: string }>
+
+  if (imageAttachments.length > 0) {
+    // Vision API expects an array of content blocks
+    userContent = [
+      { type: 'text', text: `Tool: ${tool}. Prompt: ${prompt}` },
+      ...imageAttachments.map(img => ({
+        type: 'image_url',
+        image_url: img.url
+      }))
+    ]
+  } else {
+    // Simple text when no images
+    userContent = `Tool: ${tool}. Prompt: ${prompt}`
+  }
 
   try {
     const response = await client.chat.complete({
       model,
       messages: [
         { role: 'system', content: systemMessage },
-        { role: 'user', content: userMessage }
+        { role: 'user', content: userContent as any }
       ],
       temperature: 0.2,
       topP: 0.9,
@@ -30,16 +70,25 @@ export async function generateTeacherResponse({ prompt, tool }: { prompt: string
       text = rawContent
     } else if (Array.isArray(rawContent)) {
       text = rawContent
-        .map((chunk) => {
-          if (chunk && 'type' in chunk && chunk.type === 'text' && 'text' in chunk) {
-            return chunk.text ?? ''
+        .map(chunk => {
+          if (chunk && typeof chunk === 'object' && 'type' in chunk && chunk.type === 'text' && 'text' in chunk) {
+            return (chunk as any).text ?? ''
           }
           return ''
         })
         .join('')
     }
 
-    return text.trim() || `TERA couldn't build a response for ${tool}.`
+    // Clean up any stray asterisks (should be none per guidelines)
+    text = text.replace(/\*\*([^*]+)\*\*/g, '$1') // remove **bold** markers
+    text = text.replace(/\*([^*]+)\*/g, '$1') // remove *italic* markers
+
+    // Ensure the response ends with proper punctuation
+    const trimmed = text.trim()
+    const endsWithPunct = /[.!?]$/.test(trimmed)
+    const finalText = endsWithPunct ? trimmed : `${trimmed}.`
+
+    return finalText || `TERA couldn't build a response for ${tool}.`
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error)
     if (/429/.test(message)) {

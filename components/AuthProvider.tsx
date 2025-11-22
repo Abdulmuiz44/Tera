@@ -9,6 +9,7 @@ type AuthContextType = {
   session: Session | null
   loading: boolean
   signOut: () => Promise<void>
+  userReady: boolean
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
@@ -17,11 +18,23 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null)
   const [session, setSession] = useState<Session | null>(null)
   const [loading, setLoading] = useState(true)
+  const [userReady, setUserReady] = useState(false)
 
   useEffect(() => {
+    const ensureUserRow = async (user?: User | null) => {
+      if (!user) {
+        setUserReady(false)
+        return
+      }
+      setUserReady(false)
+      await supabase.from('users').upsert({ id: user.id, email: user.email ?? '' })
+      setUserReady(true)
+    }
+
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session)
       setUser(session?.user ?? null)
+      void ensureUserRow(session?.user ?? null)
       setLoading(false)
     })
 
@@ -29,6 +42,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       (event: AuthChangeEvent, session: Session | null) => {
         setSession(session)
         setUser(session?.user ?? null)
+        void ensureUserRow(session?.user ?? null)
         setLoading(false)
       }
     )
@@ -41,7 +55,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }
 
   return (
-    <AuthContext.Provider value={{ user, session, loading, signOut }}>
+    <AuthContext.Provider value={{ user, session, loading, signOut, userReady }}>
       {children}
     </AuthContext.Provider>
   )
