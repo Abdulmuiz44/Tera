@@ -36,7 +36,7 @@ export async function generateTeacherResponse({
   // Build user message content, handling image attachments for vision support
   const imageAttachments = attachments.filter(att => att.type === 'image')
 
-  let userContent: string | Array<{ type: string; text?: string; image_url?: string }>
+  let userContent: any
 
   if (imageAttachments.length > 0) {
     // Vision API expects an array of content blocks
@@ -44,7 +44,9 @@ export async function generateTeacherResponse({
       { type: 'text', text: `Tool: ${tool}. Prompt: ${prompt}` },
       ...imageAttachments.map(img => ({
         type: 'image_url',
-        image_url: img.url
+        image_url: {
+          url: img.url
+        }
       }))
     ]
   } else {
@@ -53,26 +55,40 @@ export async function generateTeacherResponse({
   }
 
   try {
-    const response = await client.chat.complete({
-      model,
-      messages: [
-        { role: 'system', content: systemMessage },
-        { role: 'user', content: userContent as any }
-      ],
-      temperature: 0.2,
-      topP: 0.9,
-      maxTokens: 350
+    const response = await fetch('https://api.mistral.ai/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${process.env.MISTRAL_API_KEY}`
+      },
+      body: JSON.stringify({
+        model,
+        messages: [
+          { role: 'system', content: systemMessage },
+          { role: 'user', content: userContent }
+        ],
+        temperature: 0.2,
+        top_p: 0.9,
+        max_tokens: 1000
+      })
     })
 
-    const rawContent = response.choices?.[0]?.message?.content
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}))
+      throw new Error(errorData.message || `Mistral API error: ${response.statusText}`)
+    }
+
+    const data = await response.json()
+    const rawContent = data.choices?.[0]?.message?.content
+
     let text = ''
     if (typeof rawContent === 'string') {
       text = rawContent
     } else if (Array.isArray(rawContent)) {
       text = rawContent
-        .map(chunk => {
-          if (chunk && typeof chunk === 'object' && 'type' in chunk && chunk.type === 'text' && 'text' in chunk) {
-            return (chunk as any).text ?? ''
+        .map((chunk: any) => {
+          if (chunk && typeof chunk === 'object' && chunk.type === 'text') {
+            return chunk.text || ''
           }
           return ''
         })
