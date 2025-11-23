@@ -86,6 +86,7 @@ export async function generateTeacherResponse({
     // Ensure the response ends with proper punctuation
     const trimmed = text.trim()
     const endsWithPunct = /[.!?]$/.test(trimmed)
+    const endsWithQuestion = /\?$/.test(trimmed)
     const finalText = endsWithPunct ? trimmed : `${trimmed}.`
 
     return finalText || `TERA couldn't build a response for ${tool}.`

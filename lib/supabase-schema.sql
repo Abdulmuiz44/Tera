@@ -86,3 +86,5 @@ CREATE INDEX idx_users_email ON users(email);
 CREATE INDEX idx_chat_sessions_user_id ON chat_sessions(user_id);
 CREATE INDEX idx_saved_lessons_user_id ON saved_lessons(user_id);
 CREATE INDEX idx_usage_logs_user_id ON usage_logs(user_id);
+
+

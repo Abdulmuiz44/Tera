@@ -6,6 +6,7 @@ import type { User } from '@supabase/supabase-js'
 import type { TeacherTool } from './ToolCard'
 import type { AttachmentReference, AttachmentType } from '@/lib/attachment'
 import { supabase } from '@/lib/supabase'
+import { compressImage } from '@/lib/image-compression'
 
 type Message = {
   id: string
@@ -81,6 +82,8 @@ export default function PromptShell({
   const conversationRef = useRef<HTMLDivElement | null>(null)
   const [queuedMessage, setQueuedMessage] = useState<QueuedMessage | null>(null)
   const showInitialPrompt = conversations.every((entry) => !entry.userMessage)
+  const [isListening, setIsListening] = useState(false)
+  const recognitionRef = useRef<any>(null)
 
   const uploadAttachment = async (file: File, type: AttachmentType) => {
     const formData = new FormData()
@@ -99,70 +102,71 @@ export default function PromptShell({
     return (await response.json()) as AttachmentReference
   }
 
-  const handleFileSelect = async (event: ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0]
-    if (!file) return
-
-    setAttachmentMessage(`Uploading ${file.name}...`)
-    try {
-      const attachment = await uploadAttachment(file, 'file')
-      setPendingAttachments((prev) => [...prev, attachment])
-      setAttachmentMessage(`File queued: ${attachment.name}`)
-    } catch (error) {
-      setAttachmentMessage('Upload failed. Try again.')
-    } finally {
-      setAttachmentOpen(false)
-      event.target.value = ''
+  const handleFileSelect = (type: 'image' | 'file') => {
+    if (type === 'image') {
+      imageInputRef.current?.click()
+    } else {
+      fileInputRef.current?.click()
     }
+    setAttachmentOpen(false)
   }
 
-  const handleImageSelect = async (event: ChangeEvent<HTMLInputElement>) => {
+  const handleAttachmentUpload = async (event: ChangeEvent<HTMLInputElement>, type: AttachmentType) => {
     const file = event.target.files?.[0]
     if (!file) return
 
-    setAttachmentMessage(`Uploading ${file.name}...`)
     try {
-      const attachment = await uploadAttachment(file, 'image')
+      setAttachmentMessage('Compressing & Uploading...')
+
+      let fileToUpload = file
+      if (type === 'image') {
+        try {
+          fileToUpload = await compressImage(file)
+        } catch (err) {
+          console.warn('Image compression failed, uploading original', err)
+        }
+      }
+
+      const attachment = await uploadAttachment(fileToUpload, type)
       setPendingAttachments((prev) => [...prev, attachment])
-      setAttachmentMessage(`Image added to the prompt`)
+      setAttachmentMessage(null)
     } catch (error) {
-      setAttachmentMessage('Upload failed. Try again.')
+      console.error('Upload failed', error)
+      setAttachmentMessage('Upload failed. Please try again.')
     } finally {
-      setAttachmentOpen(false)
+      // Reset input
       event.target.value = ''
     }
   }
 
   const handleSearchWeb = () => {
-    const query = window.prompt('What should Tera search for on the web?')?.trim()
-    if (!query) return
-    setAttachmentMessage(`Searching the web for “${query}”`)
-    window.open(`https://www.google.com/search?q=${encodeURIComponent(query)}`, '_blank')
+    // Placeholder for search functionality
+    setAttachmentMessage('Web search coming soon!')
     setAttachmentOpen(false)
+    setTimeout(() => setAttachmentMessage(null), 3000)
   }
 
-  const handleCopyMessage = async (content: string) => {
-    try {
-      await navigator.clipboard.writeText(content)
-      setAttachmentMessage('Message copied to clipboard')
-    } catch (error) {
-      setAttachmentMessage('Copy failed')
-    }
+  const handleCopyMessage = (content: string) => {
+    navigator.clipboard.writeText(content)
+    setAttachmentMessage('Copied to clipboard!')
+    setTimeout(() => setAttachmentMessage(null), 2000)
   }
 
-  const buildUserMessage = (entryId: string, content: string, attachments?: AttachmentReference[]) => ({
-    id: entryId,
-    role: 'user' as const,
+  const handleEditMessage = (id: string, message: Message) => {
+    setPrompt(message.content)
+    setPendingAttachments(message.attachments || [])
+    setEditingMessageId(id)
+    // Focus input
+    const textarea = document.querySelector('textarea')
+    if (textarea) textarea.focus()
+  }
+
+  const buildUserMessage = (id: string, content: string, attachments: AttachmentReference[]): Message => ({
+    id: `${id}-user`,
+    role: 'user',
     content,
-    attachments: attachments && attachments.length ? [...attachments] : undefined
+    attachments: attachments.length > 0 ? attachments : undefined
   })
-
-  const handleEditMessage = (entryId: string, message: Message) => {
-    if (message.role === 'user') {
-      setPrompt(message.content)
-      setEditingMessageId(entryId)
-    }
-  }
 
   const processMessage = useCallback((messageToSend: string, attachmentsToSend: AttachmentReference[]) => {
     setStatus('loading')
@@ -326,240 +330,255 @@ export default function PromptShell({
     }
   }, [conversations, conversationActive])
 
+  useEffect(() => {
+    if (typeof window !== 'undefined' && 'webkitSpeechRecognition' in window) {
+      const SpeechRecognition = (window as any).webkitSpeechRecognition
+      recognitionRef.current = new SpeechRecognition()
+      recognitionRef.current.continuous = true
+      recognitionRef.current.interimResults = true
+
+      recognitionRef.current.onresult = (event: any) => {
+        let interimTranscript = ''
+        let finalTranscript = ''
+
+        for (let i = event.resultIndex; i < event.results.length; ++i) {
+          if (event.results[i].isFinal) {
+            finalTranscript += event.results[i][0].transcript
+          } else {
+            interimTranscript += event.results[i][0].transcript
+          }
+        }
+
+        if (finalTranscript) {
+          setPrompt((prev) => prev + (prev ? ' ' : '') + finalTranscript)
+        }
+      }
+
+      recognitionRef.current.onerror = (event: any) => {
+        console.error('Speech recognition error', event.error)
+        setIsListening(false)
+      }
+
+      recognitionRef.current.onend = () => {
+        setIsListening(false)
+      }
+    }
+  }, [])
+
+  const toggleListening = () => {
+    if (isListening) {
+      recognitionRef.current?.stop()
+      setIsListening(false)
+    } else {
+      recognitionRef.current?.start()
+      setIsListening(true)
+    }
+  }
+
   return (
-    <section className="relative flex flex-1 w-full max-w-full flex-col text-left font-sans text-white md:max-w-5xl">
-      <div
-        className={`flex flex-1 flex-col gap-6 px-2 md:px-4 ${showInitialPrompt ? 'justify-center items-center text-center' : ''
-          }`}
-      >
-        {conversations.every((entry) => !entry.userMessage) && (
-          <div className="text-center text-3xl font-semibold tracking-wide text-white/90">What can Tera help you with?</div>
-        )}
-        {user && !userReady && (
-          <div className="mx-auto flex max-w-xs items-center justify-center gap-2 rounded-2xl border border-white/20 bg-white/5 px-4 py-2 text-[0.65rem] uppercase tracking-[0.4em] text-white/80">
-            <span className="h-2 w-2 animate-ping rounded-full bg-tera-neon" />
-            Finalizing your account… your pending message will send shortly.
-          </div>
-        )}
-        <div className="flex flex-1 flex-col gap-4 overflow-hidden">
-          <div ref={conversationRef} className="flex flex-1 min-h-0 flex-col gap-3 overflow-y-auto pr-2 pb-16">
-            {conversations.map((entry) => (
-              <div key={entry.id} className="flex flex-col gap-3">
+    <div className="flex h-full w-full flex-col relative">
+      <div className="flex-1 overflow-y-auto px-4 py-6 md:px-8" ref={conversationRef}>
+        <div className="mx-auto max-w-3xl space-y-8">
+          {showInitialPrompt ? (
+            <div className="flex h-full flex-col items-center justify-center text-center">
+              <div className="mb-6 rounded-full bg-gradient-to-br from-tera-neon/20 to-transparent p-4">
+                <span className="text-4xl">✨</span>
+              </div>
+              <h2 className="mb-2 text-2xl font-semibold text-white">How can I help you teach today?</h2>
+              <p className="max-w-md text-white/60">
+                I can help you create lesson plans, generate quizzes, or brainstorm activities.
+              </p>
+            </div>
+          ) : (
+            conversations.map((entry) => (
+              <div key={entry.id} className="space-y-6">
+                {/* User Message */}
                 {entry.userMessage && (
-                  <div className="group relative flex w-full justify-end">
-                    <div className="relative max-w-[72%] rounded-2xl border border-white/10 bg-white/10 px-5 py-4 text-right shadow-lg transition text-white">
-                      <div className="absolute top-3 right-3 flex items-center gap-2 opacity-0 transition-opacity group-hover:opacity-100">
-                        <button
-                          type="button"
-                          onClick={() => entry.userMessage && handleEditMessage(entry.id, entry.userMessage)}
-                          className="rounded-full border border-white/20 bg-white/5 px-2 py-1 text-[0.6rem] uppercase tracking-[0.35em] text-white/80"
-                        >
-                          Edit
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => entry.userMessage && handleCopyMessage(entry.userMessage.content)}
-                          className="rounded-full border border-white/20 bg-white/5 px-2 py-1 text-[0.6rem] uppercase tracking-[0.35em] text-white/80"
-                        >
-                          Copy
-                        </button>
-                      </div>
-                      <p className="leading-relaxed">{entry.userMessage?.content}</p>
-                      {entry.userMessage.attachments && (
+                  <div className="flex justify-end">
+                    <div className="max-w-[80%] rounded-2xl bg-white/10 px-6 py-4 text-white backdrop-blur-sm">
+                      <p className="whitespace-pre-wrap leading-relaxed">{entry.userMessage.content}</p>
+                      {entry.userMessage.attachments && entry.userMessage.attachments.length > 0 && (
                         <div className="mt-3 flex flex-wrap gap-2">
-                          {entry.userMessage.attachments.map((attachment) => (
-                            <a
-                              key={attachment.url}
-                              href={attachment.url}
-                              target="_blank"
-                              rel="noreferrer"
-                              className="rounded-full border border-white/20 bg-white/5 px-3 py-1 text-[0.6rem] uppercase tracking-[0.3em] text-white/70 transition hover:border-white"
-                            >
-                              {attachment.type === 'image' ? '🖼️' : '📄'} {attachment.name}
-                            </a>
+                          {entry.userMessage.attachments.map((att, idx) => (
+                            <div key={idx} className="flex items-center gap-2 rounded-lg bg-black/20 px-3 py-2 text-xs">
+                              <span>{att.type === 'image' ? '🖼️' : '📄'}</span>
+                              <span className="truncate max-w-[150px]">{att.name}</span>
+                            </div>
                           ))}
                         </div>
                       )}
                     </div>
                   </div>
                 )}
+
+                {/* Assistant Message */}
                 {entry.assistantMessage && (
-                  <div className="group relative flex w-full justify-start">
-                    <div className="relative max-w-[72%] rounded-2xl border border-white/10 bg-[#111111] px-5 py-4 text-left shadow-lg transition text-white">
-                      <div className="absolute top-3 right-3 flex items-center gap-2 opacity-0 transition-opacity group-hover:opacity-100">
-                        <button
-                          type="button"
-                          onClick={() => handleCopyMessage(entry.assistantMessage!.content)}
-                          className="rounded-full border border-white/20 bg-white/5 px-2 py-1 text-[0.6rem] uppercase tracking-[0.35em] text-white/80"
-                        >
-                          Copy
-                        </button>
+                  <div className="flex justify-start">
+                    <div className="flex max-w-[85%] gap-4">
+                      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-tera-neon/20 text-tera-neon">
+                        T
                       </div>
-                      <div className="flex flex-col gap-2">
-                        {structureResponse(entry.assistantMessage.content).map((segment, index) => (
-                          segment.isHeader ? (
-                            <h3 key={`${entry.assistantMessage!.id}-${index}`} className="text-white font-bold text-lg mt-2 leading-relaxed">
-                              {segment.text}
-                            </h3>
-                          ) : (
-                            <p key={`${entry.assistantMessage!.id}-${index}`} className="text-white leading-relaxed">
-                              {segment.text}
-                            </p>
-                          )
-                        ))}
+                      <div className="rounded-2xl bg-tera-panel border border-white/5 px-6 py-4 text-white/90 shadow-lg">
+                        <div className="space-y-4">
+                          {structureResponse(entry.assistantMessage.content).map((block, idx) =>
+                            block.isHeader ? (
+                              <h3 key={idx} className="font-bold text-lg mt-2 text-white">
+                                {block.text}
+                              </h3>
+                            ) : (
+                              <p key={idx} className="leading-relaxed whitespace-pre-wrap">
+                                {block.text}
+                              </p>
+                            )
+                          )}
+                        </div>
                       </div>
                     </div>
                   </div>
                 )}
               </div>
-            ))}
-            {isPending && (
-              <div className="flex w-full justify-start">
-                <div className="flex items-center gap-2 rounded-2xl border border-white/10 bg-white/10 px-4 py-2 text-xs uppercase tracking-[0.35em] text-white/70">
-                  <span className="h-2 w-2 animate-ping rounded-full bg-tera-neon" />
-                  <span className="flex items-center gap-1 text-[0.6rem] font-semibold tracking-[0.4em] text-white/70">
-                    Tera is Thinking...
-                    <span className="flex items-center gap-[0.4rem] text-white/70">
-                      {[0, 1, 2].map((index) => (
-                        <span
-                          key={index}
-                          className="h-1.5 w-1.5 rounded-full bg-white/60 animate-pulse"
-                          style={{ animationDelay: `${index * 0.15}s` }}
-                        />
-                      ))}
-                    </span>
-                  </span>
+            ))
+          )}
+          {status === 'loading' && (
+            <div className="flex justify-start">
+              <div className="flex max-w-[85%] gap-4">
+                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-tera-neon/20 text-tera-neon animate-pulse">
+                  T
+                </div>
+                <div className="flex items-center gap-2 rounded-2xl bg-tera-panel px-6 py-4 text-white/60">
+                  <span className="animate-bounce">●</span>
+                  <span className="animate-bounce delay-100">●</span>
+                  <span className="animate-bounce delay-200">●</span>
                 </div>
               </div>
-            )}
-          </div>
+            </div>
+          )}
         </div>
       </div>
 
-      <div
-        className="sticky bottom-0 z-10 w-full rounded-3xl border border-white/5 bg-[#111111]/80 p-4 shadow-2xl backdrop-blur"
-        style={{
-          transform: hasBumpedInput ? 'translateY(6px)' : 'translateY(0)',
-          transition: 'transform 0.35s ease'
-        }}
-      >
-        <form className="flex items-center gap-3" onSubmit={handleSubmit}>
-          <button
-            type="button"
-            className="relative rounded-full bg-transparent p-2 text-lg text-white/60 hover:text-white"
-            onClick={() => setAttachmentOpen((prev) => !prev)}
-          >
-            ⊕
-            {attachmentOpen && (
-              <div className="absolute left-1/2 bottom-full z-10 mb-3 -translate-x-1/2 w-60 rounded-2xl border border-white/10 bg-[#111111] p-4 text-sm text-white shadow-2xl">
-                <p className="text-xs uppercase tracking-[0.35em] text-white/40">Add attachment</p>
-                <div className="mt-3 space-y-2">
-                  <div
-                    role="button"
-                    tabIndex={0}
-                    onClick={() => imageInputRef.current?.click()}
-                    onKeyDown={(event) => {
-                      if (event.key === 'Enter' || event.key === ' ') {
-                        event.preventDefault()
-                        imageInputRef.current?.click()
-                      }
-                    }}
-                    className="flex cursor-pointer w-full items-center justify-between rounded-xl border border-white/10 px-3 py-2 text-left text-sm text-white/70 transition hover:border-white/30"
+      {/* Input Area */}
+      <div className="sticky bottom-0 z-50 border-t border-white/10 bg-[#0a0a0a]/95 px-4 py-4 backdrop-blur-xl md:px-8">
+        <div className="mx-auto max-w-3xl relative">
+          {/* Attachments Preview */}
+          {pendingAttachments.length > 0 && (
+            <div className="mb-3 flex flex-wrap gap-2">
+              {pendingAttachments.map((att, idx) => (
+                <div key={idx} className="group relative flex items-center gap-2 rounded-lg bg-white/10 px-3 py-2 text-xs text-white">
+                  <span>{att.type === 'image' ? '🖼️' : '📄'}</span>
+                  <span className="truncate max-w-[200px]">{att.name}</span>
+                  <button
+                    onClick={() => setPendingAttachments(prev => prev.filter((_, i) => i !== idx))}
+                    className="ml-2 rounded-full bg-white/10 p-1 hover:bg-white/20"
                   >
-                    <span>Upload image</span>
-                    <span className="text-white/50">↥</span>
-                  </div>
-                  <div
-                    role="button"
-                    tabIndex={0}
-                    onClick={() => fileInputRef.current?.click()}
-                    onKeyDown={(event) => {
-                      if (event.key === 'Enter' || event.key === ' ') {
-                        event.preventDefault()
-                        fileInputRef.current?.click()
-                      }
-                    }}
-                    className="flex cursor-pointer w-full items-center justify-between rounded-xl border border-white/10 px-3 py-2 text-left text-sm text-white/70 transition hover:border-white/30"
-                  >
-                    <span>Upload files</span>
-                    <span className="text-white/50">↥</span>
-                  </div>
-                  <div
-                    role="button"
-                    tabIndex={0}
-                    onClick={handleSearchWeb}
-                    onKeyDown={(event) => {
-                      if (event.key === 'Enter' || event.key === ' ') {
-                        event.preventDefault()
-                        handleSearchWeb()
-                      }
-                    }}
-                    className="flex cursor-pointer w-full items-center justify-between rounded-xl border border-white/10 px-3 py-2 text-left text-sm text-white/70 transition hover:border-white/30"
-                  >
-                    <span>Search the web</span>
-                    <span className="text-white/50">🔍</span>
-                  </div>
-                </div>
-              </div>
-            )}
-          </button>
-          <input
-            type="file"
-            className="hidden"
-            ref={fileInputRef}
-            onChange={handleFileSelect}
-          />
-          <input
-            type="file"
-            className="hidden"
-            accept="image/*"
-            ref={imageInputRef}
-            onChange={handleImageSelect}
-          />
-          <input
-            className="flex-1 bg-transparent text-lg font-sans text-white placeholder:text-white/40 outline-none"
-            placeholder="Send a message..."
-            value={prompt}
-            onChange={(event) => setPrompt(event.target.value)}
-          />
-          <button
-            type="submit"
-            className="grid h-12 w-12 place-items-center rounded-full border border-white/10 bg-white/90 text-xs font-semibold uppercase tracking-[0.4em] text-[#040404]"
-          >
-            {status === 'loading' ? '•••' : '↑'}
-          </button>
-        </form>
-        {attachmentMessage && (
-          <p className="mt-2 text-xs uppercase tracking-[0.4em] text-white/50">{attachmentMessage}</p>
-        )}
-        {pendingAttachments.length > 0 && (
-          <div className="mt-3 flex flex-col gap-3">
-            <p className="text-[0.6rem] uppercase tracking-[0.4em] text-white/50">Tera will reference the following content</p>
-            <div className="flex flex-col gap-2">
-              {pendingAttachments.map((attachment) => (
-                <div
-                  key={attachment.url}
-                  className="overflow-hidden rounded-2xl border border-white/10"
-                >
-                  {attachment.type === 'image' ? (
-                    <img
-                      src={attachment.url}
-                      alt={attachment.name}
-                      className="w-full object-cover"
-                      draggable={false}
-                    />
-                  ) : (
-                    <div className="flex items-center justify-between bg-[#050505] px-3 py-2 text-xs uppercase tracking-[0.4em] text-white/70">
-                      <span>{attachment.name}</span>
-                      <span className="text-white/40">{attachment.type}</span>
-                    </div>
-                  )}
+                    ✕
+                  </button>
                 </div>
               ))}
             </div>
+          )}
+
+          <div className={`relative flex items-end gap-2 rounded-[24px] border border-white/10 bg-[#1a1a1a] p-2 shadow-2xl ring-1 ring-white/5 transition-all ${conversationActive ? 'focus-within:ring-tera-neon/50 focus-within:border-tera-neon/50' : 'focus-within:ring-white/20'}`}>
+
+            {/* Left Actions */}
+            <div className="flex items-center gap-1 pb-1.5 pl-2">
+              <div className="relative">
+                <button
+                  onClick={() => setAttachmentOpen(!attachmentOpen)}
+                  className="rounded-full p-2 text-white/60 transition hover:bg-white/10 hover:text-white"
+                  title="Add attachment"
+                >
+                  <span className="text-xl">⊕</span>
+                </button>
+
+                {attachmentOpen && (
+                  <div className="absolute bottom-full left-0 mb-2 w-48 overflow-hidden rounded-xl border border-white/10 bg-tera-panel shadow-xl backdrop-blur-xl">
+                    <button
+                      onClick={() => handleFileSelect('image')}
+                      className="flex w-full items-center gap-3 px-4 py-3 text-left text-sm text-white hover:bg-white/5"
+                    >
+                      <span>🖼️</span> Upload image
+                    </button>
+                    <button
+                      onClick={() => handleFileSelect('file')}
+                      className="flex w-full items-center gap-3 px-4 py-3 text-left text-sm text-white hover:bg-white/5"
+                    >
+                      <span>📄</span> Upload file
+                    </button>
+                  </div>
+                )}
+              </div>
+
+              <button
+                onClick={toggleListening}
+                className={`rounded-full p-2 transition ${isListening ? 'bg-red-500/20 text-red-400 animate-pulse' : 'text-white/60 hover:bg-white/10 hover:text-white'}`}
+                title="Voice input"
+              >
+                <span className="text-xl">🎤</span>
+              </button>
+            </div>
+
+            {/* Textarea */}
+            <textarea
+              value={prompt}
+              onChange={(e) => setPrompt(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                  e.preventDefault()
+                  handleSubmit(e)
+                }
+              }}
+              placeholder={isListening ? "Listening..." : "Ask Tera anything..."}
+              className="max-h-[200px] min-h-[52px] w-full resize-none bg-transparent py-3.5 px-2 text-white placeholder-white/40 focus:outline-none"
+              rows={1}
+              style={{ height: 'auto' }}
+              onInput={(e) => {
+                const target = e.target as HTMLTextAreaElement
+                target.style.height = 'auto'
+                target.style.height = `${Math.min(target.scrollHeight, 200)}px`
+              }}
+            />
+
+            {/* Send Button */}
+            <button
+              onClick={handleSubmit}
+              disabled={(!prompt.trim() && pendingAttachments.length === 0) || status === 'loading'}
+              className="mb-1.5 mr-1.5 flex h-9 w-9 items-center justify-center rounded-full bg-tera-neon text-white transition hover:bg-tera-neon/90 disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-white/10 disabled:text-white/20"
+            >
+              {status === 'loading' ? (
+                <span className="h-4 w-4 animate-spin rounded-full border-2 border-black/30 border-t-black" />
+              ) : (
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                  fill="currentColor"
+                  className="h-6 w-6"
+                >
+                  <path d="M3.478 2.405a.75.75 0 00-.926.94l2.432 7.905H13.5a.75.75 0 010 1.5H4.984l-2.432 7.905a.75.75 0 00.926.94 60.519 60.519 0 0018.445-8.986.75.75 0 000-1.218A60.517 60.517 0 003.478 2.405z" />
+                </svg>
+              )}
+            </button>
           </div>
-        )}
+
+          <p className="mt-3 text-center text-[10px] uppercase tracking-widest text-white/20">
+            Tera can make mistakes. Verify important information.
+          </p>
+        </div>
       </div>
-    </section>
+
+      {/* Hidden Inputs */}
+      <input
+        type="file"
+        ref={fileInputRef}
+        className="hidden"
+        onChange={(e) => handleAttachmentUpload(e, 'file')}
+      />
+      <input
+        type="file"
+        ref={imageInputRef}
+        className="hidden"
+        accept="image/*"
+        onChange={(e) => handleAttachmentUpload(e, 'image')}
+      />
+    </div>
   )
 }
