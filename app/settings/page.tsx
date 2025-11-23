@@ -22,6 +22,7 @@ export default function SettingsPage() {
   const [gradeLevels, setGradeLevels] = useState<string[]>([])
   const [style, setStyle] = useState('')
   const [message, setMessage] = useState('')
+  const [sidebarExpanded, setSidebarExpanded] = useState(false)
 
   useEffect(() => {
     if (user) {
@@ -94,13 +95,13 @@ export default function SettingsPage() {
   const availableGrades = ['K', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', 'Higher Ed']
 
   return (
-    <div className="flex flex-col md:flex-row h-screen w-full md:ml-[88px]">
-      <Sidebar />
+    <div className="flex flex-col md:flex-row h-screen w-full bg-[#050505]">
+      <Sidebar expanded={sidebarExpanded} onToggle={() => setSidebarExpanded(!sidebarExpanded)} />
       <main className="relative flex-1 overflow-hidden px-6 py-10">
         <div className="flex flex-col h-full gap-8">
           <header className="flex items-center justify-between">
             <div>
-              <p className="text-xs uppercase tracking-[0.5em] text-white/40">TERA</p>
+              <p className="text-xs uppercase tracking-[0.5em] text-white/40">Tera</p>
               <h1 className="text-3xl font-semibold leading-tight text-white">Settings</h1>
             </div>
             <div className="flex items-center gap-4">
@@ -148,8 +149,8 @@ export default function SettingsPage() {
                         key={grade}
                         onClick={() => toggleGradeLevel(grade)}
                         className={`rounded-full border px-3 py-1 text-xs transition ${gradeLevels.includes(grade)
-                            ? 'bg-tera-neon/20 border-tera-neon text-white'
-                            : 'bg-transparent border-white/10 text-white/60 hover:border-white/30'
+                          ? 'bg-tera-neon/20 border-tera-neon text-white'
+                          : 'bg-transparent border-white/10 text-white/60 hover:border-white/30'
                           }`}
                       >
                         {grade}

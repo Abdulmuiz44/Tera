@@ -22,6 +22,7 @@ export default function HistoryPage() {
   const [searchQuery, setSearchQuery] = useState('')
   const [page, setPage] = useState(1)
   const [hasMore, setHasMore] = useState(false)
+  const [sidebarExpanded, setSidebarExpanded] = useState(false)
   const pageSize = 25
 
   const fetchHistory = useCallback(async () => {
@@ -95,9 +96,9 @@ export default function HistoryPage() {
   )
 
   return (
-    <div className="flex flex-col md:flex-row h-screen w-full md:ml-[88px]">
-      <Sidebar />
-      <main className="relative flex-1 overflow-hidden px-6 py-10">
+    <div className="flex flex-col md:flex-row h-screen w-full bg-[#050505]">
+      <Sidebar expanded={sidebarExpanded} onToggle={() => setSidebarExpanded(!sidebarExpanded)} />
+      <main className="relative flex-1 overflow-hidden px-6 py-10 transition-all duration-300">
         <div className="flex flex-col h-full gap-8">
           <header className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
             <div>

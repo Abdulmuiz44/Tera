@@ -19,6 +19,7 @@ export default function NotesPage() {
   const [newNote, setNewNote] = useState('')
   const [editingNote, setEditingNote] = useState<Note | null>(null)
   const [isAdding, setIsAdding] = useState(false)
+  const [sidebarExpanded, setSidebarExpanded] = useState(false)
 
   useEffect(() => {
     if (user) {
@@ -86,8 +87,8 @@ export default function NotesPage() {
   }
 
   return (
-    <div className="flex flex-col md:flex-row h-screen w-full md:ml-[88px]">
-      <Sidebar />
+    <div className="flex flex-col md:flex-row h-screen w-full bg-[#050505]">
+      <Sidebar expanded={sidebarExpanded} onToggle={() => setSidebarExpanded(!sidebarExpanded)} />
       <main className="relative flex-1 overflow-hidden px-6 py-10">
         <div className="flex flex-col h-full gap-8">
           <header className="flex items-center justify-between">

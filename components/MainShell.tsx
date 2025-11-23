@@ -13,6 +13,7 @@ import { usePathname } from 'next/navigation'
 export default function MainShell() {
   const [selectedTool, setSelectedTool] = useState<TeacherTool>(teacherTools[0])
   const [menuOpen, setMenuOpen] = useState(false)
+  const [sidebarExpanded, setSidebarExpanded] = useState(false)
   const [authDialog, setAuthDialog] = useState<'signIn' | 'signUp' | null>(null)
   const [email, setEmail] = useState('')
   const [authMessage, setAuthMessage] = useState<string | null>(null)
@@ -98,8 +99,9 @@ export default function MainShell() {
 
   return (
     <div className="flex min-h-screen w-full bg-[#050505] text-white">
-      <Sidebar />
-      <main className="relative flex flex-1 flex-col items-center justify-start px-3 pt-10 md:px-6 md:pt-10 md:ml-[88px]">
+      <Sidebar expanded={sidebarExpanded} onToggle={() => setSidebarExpanded(!sidebarExpanded)} />
+
+      <main className={`relative flex flex-1 flex-col items-center justify-start px-3 pt-10 md:px-6 md:pt-10 transition-all duration-300 ease-in-out`}>
         <PromptShell
           tool={selectedTool}
           onToolChange={setSelectedTool}
