@@ -522,10 +522,10 @@ export default function PromptShell({
               <div className="mb-1.5 mr-1.5">
                 {showStopButton && (
                   <button
-                    className="flex h-9 w-9 items-center justify-center rounded-full bg-white text-black transition hover:bg-white/90"
+                    className="flex h-9 w-9 items-center justify-center rounded-full bg-tera-neon text-white transition hover:bg-tera-neon/90"
                     title="Stop generating"
                   >
-                    <div className="h-3 w-3 bg-black rounded-[2px]" />
+                    <div className="h-3 w-3 bg-white rounded-[2px]" />
                   </button>
                 )}
 
