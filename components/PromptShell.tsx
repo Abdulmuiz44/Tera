@@ -372,14 +372,16 @@ export default function PromptShell({
       <div className="flex-1 overflow-y-auto px-4 py-6 md:px-8" ref={conversationRef}>
         <div className="mx-auto max-w-3xl space-y-8">
           {showInitialPrompt ? (
-            <div className="flex h-full flex-col items-center justify-center text-center">
-              <div className="mb-6 rounded-full bg-gradient-to-br from-tera-neon/20 to-transparent p-4">
-                <span className="text-4xl">✨</span>
+            <div className="fixed inset-0 flex items-center justify-center text-center pointer-events-none">
+              <div className="pointer-events-auto">
+                <div className="mb-6 rounded-full bg-gradient-to-br from-tera-neon/20 to-transparent p-4 mx-auto w-fit">
+                  <span className="text-4xl">✨</span>
+                </div>
+                <h2 className="mb-2 text-2xl font-semibold text-white">How can Tera help you teach today?</h2>
+                <p className="max-w-md text-white/60">
+                  I can help you create lesson plans, generate quizzes, or brainstorm activities.
+                </p>
               </div>
-              <h2 className="mb-2 text-2xl font-semibold text-white">How can I help you teach today?</h2>
-              <p className="max-w-md text-white/60">
-                I can help you create lesson plans, generate quizzes, or brainstorm activities.
-              </p>
             </div>
           ) : (
             conversations.map((entry) => (
