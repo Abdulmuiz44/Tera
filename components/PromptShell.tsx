@@ -457,7 +457,7 @@ export default function PromptShell({
       </div>
 
       {/* Input Area */}
-      <div className="sticky bottom-0 z-50 border-t border-white/10 bg-[#0a0a0a]/95 px-4 py-4 backdrop-blur-xl md:px-8">
+      <div className="sticky bottom-0 z-50 border-t border-white/10 bg-[#0a0a0a]/95 px-2 py-4 backdrop-blur-xl md:px-8">
         <div className="mx-auto max-w-3xl relative">
           <div className={`relative flex flex-col gap-2 rounded-[24px] border border-white/10 bg-[#1a1a1a] p-2 shadow-2xl ring-1 ring-white/5 transition-all ${conversationActive ? 'focus-within:ring-tera-neon/50 focus-within:border-tera-neon/50' : 'focus-within:ring-white/20'}`}>
 
