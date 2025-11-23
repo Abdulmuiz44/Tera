@@ -208,9 +208,8 @@ export default function PromptShell({
       } finally {
         setStatus('idle')
       }
-      setPendingAttachments([])
+      // Removed setPrompt('') and setPendingAttachments([]) from here to clear immediately
       setEditingMessageId(null)
-      setPrompt('')
       setQueuedMessage(null)
     })
   }, [editingMessageId, hasBumpedInput, tool.name, user?.id])
@@ -239,7 +238,13 @@ export default function PromptShell({
       setAttachmentMessage('Hang tight—finalizing your account before sending.')
       return
     }
-    processMessage(messageToSend, pendingAttachments)
+
+    // Clear UI immediately
+    const attachmentsToSend = [...pendingAttachments]
+    setPrompt('')
+    setPendingAttachments([])
+
+    processMessage(messageToSend, attachmentsToSend)
   }
 
   useEffect(() => {
@@ -381,19 +386,33 @@ export default function PromptShell({
               <div key={entry.id} className="space-y-6">
                 {/* User Message */}
                 {entry.userMessage && (
-                  <div className="flex justify-end">
-                    <div className="max-w-[80%] rounded-2xl bg-white/10 px-6 py-4 text-white backdrop-blur-sm">
-                      <p className="whitespace-pre-wrap leading-relaxed">{entry.userMessage.content}</p>
-                      {entry.userMessage.attachments && entry.userMessage.attachments.length > 0 && (
-                        <div className="mt-3 flex flex-wrap gap-2">
-                          {entry.userMessage.attachments.map((att, idx) => (
-                            <div key={idx} className="flex items-center gap-2 rounded-lg bg-black/20 px-3 py-2 text-xs">
-                              <span>{att.type === 'image' ? '🖼️' : '📄'}</span>
-                              <span className="truncate max-w-[150px]">{att.name}</span>
-                            </div>
-                          ))}
-                        </div>
-                      )}
+                  <div className="flex justify-end group">
+                    <div className="flex items-end gap-2 max-w-[80%]">
+                      {/* Edit Button - visible on hover */}
+                      <button
+                        onClick={() => handleEditMessage(entry.id, entry.userMessage!)}
+                        className="opacity-0 group-hover:opacity-100 p-2 text-white/50 hover:text-white transition"
+                        title="Edit message"
+                      >
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4">
+                          <path d="M5.433 13.917l1.262-3.155A4 4 0 017.58 9.42l6.92-6.918a2.121 2.121 0 013 3l-6.92 6.918c-.383.383-.84.685-1.343.886l-3.154 1.262a.5.5 0 01-.65-.65z" />
+                          <path d="M3.5 5.75c0-.69.56-1.25 1.25-1.25H10A.75.75 0 0010 3H4.75A2.75 2.75 0 002 5.75v9.5A2.75 2.75 0 004.75 18h9.5A2.75 2.75 0 0017 15.25V10a.75.75 0 00-1.5 0v5.25c0 .69-.56 1.25-1.25 1.25h-9.5c-.69 0-1.25-.56-1.25-1.25v-9.5z" />
+                        </svg>
+                      </button>
+
+                      <div className="rounded-2xl bg-white/10 px-6 py-4 text-white backdrop-blur-sm w-full">
+                        <p className="whitespace-pre-wrap leading-relaxed">{entry.userMessage.content}</p>
+                        {entry.userMessage.attachments && entry.userMessage.attachments.length > 0 && (
+                          <div className="mt-3 flex flex-wrap gap-2">
+                            {entry.userMessage.attachments.map((att, idx) => (
+                              <div key={idx} className="flex items-center gap-2 rounded-lg bg-black/20 px-3 py-2 text-xs">
+                                <span>{att.type === 'image' ? '🖼️' : '📄'}</span>
+                                <span className="truncate max-w-[150px]">{att.name}</span>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
                     </div>
                   </div>
                 )}
