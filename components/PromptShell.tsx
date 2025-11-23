@@ -30,7 +30,6 @@ type QueuedMessage = {
 const createId = () => (crypto.randomUUID ? crypto.randomUUID() : String(Date.now()))
 
 const structureResponse = (content: string) => {
-  // Split by double newlines for paragraphs, or single newlines for sentences
   const paragraphs = content
     .split(/\n\n+/)
     .map((para) => para.trim())
@@ -41,12 +40,11 @@ const structureResponse = (content: string) => {
   }
 
   return paragraphs.map((paragraph) => {
-    // Check if it's a header (starts with # or is all caps and short)
     const isMarkdownHeader = paragraph.startsWith('#')
     const isAllCapsHeader = paragraph === paragraph.toUpperCase() && paragraph.length < 50 && !paragraph.includes('.')
 
     return {
-      text: paragraph.replace(/^#+\s*/, ''), // Remove markdown header symbols
+      text: paragraph.replace(/^#+\s*/, ''),
       isHeader: isMarkdownHeader || isAllCapsHeader
     }
   })
@@ -70,7 +68,6 @@ export default function PromptShell({
   const [conversations, setConversations] = useState<ConversationEntry[]>([])
   const [attachmentOpen, setAttachmentOpen] = useState(false)
   const [attachmentMessage, setAttachmentMessage] = useState<string | null>(null)
-  const [snippet, setSnippet] = useState('')
   const [pendingAttachments, setPendingAttachments] = useState<AttachmentReference[]>([])
   const [editingMessageId, setEditingMessageId] = useState<string | null>(null)
   const [conversationActive, setConversationActive] = useState(false)
@@ -134,29 +131,14 @@ export default function PromptShell({
       console.error('Upload failed', error)
       setAttachmentMessage('Upload failed. Please try again.')
     } finally {
-      // Reset input
       event.target.value = ''
     }
-  }
-
-  const handleSearchWeb = () => {
-    // Placeholder for search functionality
-    setAttachmentMessage('Web search coming soon!')
-    setAttachmentOpen(false)
-    setTimeout(() => setAttachmentMessage(null), 3000)
-  }
-
-  const handleCopyMessage = (content: string) => {
-    navigator.clipboard.writeText(content)
-    setAttachmentMessage('Copied to clipboard!')
-    setTimeout(() => setAttachmentMessage(null), 2000)
   }
 
   const handleEditMessage = (id: string, message: Message) => {
     setPrompt(message.content)
     setPendingAttachments(message.attachments || [])
     setEditingMessageId(id)
-    // Focus input
     const textarea = document.querySelector('textarea')
     if (textarea) textarea.focus()
   }
@@ -235,8 +217,11 @@ export default function PromptShell({
 
   const handleSubmit = (event: React.FormEvent) => {
     event.preventDefault()
+    if (status === 'loading') return // Prevent submit while loading
+
     const messageToSend = prompt.trim()
-    if (!messageToSend) return
+    if (!messageToSend && pendingAttachments.length === 0) return
+
     if (!user) {
       setQueuedMessage({
         prompt: messageToSend,
@@ -263,7 +248,6 @@ export default function PromptShell({
     }
   }, [userReady, queuedMessage, processMessage])
 
-  // Load previous chat sessions from Supabase
   useEffect(() => {
     if (!user) {
       setConversations([])
@@ -271,7 +255,7 @@ export default function PromptShell({
     }
 
     let isMounted = true
-    const userId = user.id // Capture user ID to avoid null check issues
+    const userId = user.id
 
     async function loadChatHistory() {
       setHistoryLoading(true)
@@ -284,7 +268,6 @@ export default function PromptShell({
           .limit(50)
 
         if (isMounted && !error && data) {
-          // Transform Supabase data into conversation format
           const loadedConversations: ConversationEntry[] = data.map((session) => ({
             id: session.id,
             sessionId: session.id,
@@ -375,6 +358,10 @@ export default function PromptShell({
     }
   }
 
+  const showSendButton = (prompt.trim().length > 0 || pendingAttachments.length > 0) && status !== 'loading'
+  const showStopButton = status === 'loading'
+  const showMicButton = !showSendButton && !showStopButton
+
   return (
     <div className="flex h-full w-full flex-col relative">
       <div className="flex-1 overflow-y-auto px-4 py-6 md:px-8" ref={conversationRef}>
@@ -459,109 +446,118 @@ export default function PromptShell({
       {/* Input Area */}
       <div className="sticky bottom-0 z-50 border-t border-white/10 bg-[#0a0a0a]/95 px-4 py-4 backdrop-blur-xl md:px-8">
         <div className="mx-auto max-w-3xl relative">
-          {/* Attachments Preview */}
-          {pendingAttachments.length > 0 && (
-            <div className="mb-3 flex flex-wrap gap-2">
-              {pendingAttachments.map((att, idx) => (
-                <div key={idx} className="group relative flex items-center gap-2 rounded-lg bg-white/10 px-3 py-2 text-xs text-white">
-                  <span>{att.type === 'image' ? '🖼️' : '📄'}</span>
-                  <span className="truncate max-w-[200px]">{att.name}</span>
-                  <button
-                    onClick={() => setPendingAttachments(prev => prev.filter((_, i) => i !== idx))}
-                    className="ml-2 rounded-full bg-white/10 p-1 hover:bg-white/20"
-                  >
-                    ✕
-                  </button>
-                </div>
-              ))}
-            </div>
-          )}
+          <div className={`relative flex flex-col gap-2 rounded-[24px] border border-white/10 bg-[#1a1a1a] p-2 shadow-2xl ring-1 ring-white/5 transition-all ${conversationActive ? 'focus-within:ring-tera-neon/50 focus-within:border-tera-neon/50' : 'focus-within:ring-white/20'}`}>
 
-          <div className={`relative flex items-end gap-2 rounded-[24px] border border-white/10 bg-[#1a1a1a] p-2 shadow-2xl ring-1 ring-white/5 transition-all ${conversationActive ? 'focus-within:ring-tera-neon/50 focus-within:border-tera-neon/50' : 'focus-within:ring-white/20'}`}>
-
-            {/* Left Actions */}
-            <div className="flex items-center gap-1 pb-1.5 pl-2">
-              <div className="relative">
-                <button
-                  onClick={() => setAttachmentOpen(!attachmentOpen)}
-                  className="rounded-full p-2 text-white/60 transition hover:bg-white/10 hover:text-white"
-                  title="Add attachment"
-                >
-                  <span className="text-xl">⊕</span>
-                </button>
-
-                {attachmentOpen && (
-                  <div className="absolute bottom-full left-0 mb-2 w-48 overflow-hidden rounded-xl border border-white/10 bg-tera-panel shadow-xl backdrop-blur-xl">
+            {/* Inline Attachments Preview */}
+            {pendingAttachments.length > 0 && (
+              <div className="flex flex-wrap gap-2 px-2 pt-2">
+                {pendingAttachments.map((att, idx) => (
+                  <div key={idx} className="group relative flex items-center gap-2 rounded-lg bg-white/10 px-3 py-2 text-xs text-white">
+                    <span>{att.type === 'image' ? '🖼️' : '📄'}</span>
+                    <span className="truncate max-w-[200px]">{att.name}</span>
                     <button
-                      onClick={() => handleFileSelect('image')}
-                      className="flex w-full items-center gap-3 px-4 py-3 text-left text-sm text-white hover:bg-white/5"
+                      onClick={() => setPendingAttachments(prev => prev.filter((_, i) => i !== idx))}
+                      className="ml-2 rounded-full bg-white/10 p-1 hover:bg-white/20"
                     >
-                      <span>🖼️</span> Upload image
-                    </button>
-                    <button
-                      onClick={() => handleFileSelect('file')}
-                      className="flex w-full items-center gap-3 px-4 py-3 text-left text-sm text-white hover:bg-white/5"
-                    >
-                      <span>📄</span> Upload file
+                      ✕
                     </button>
                   </div>
-                )}
+                ))}
+              </div>
+            )}
+
+            <div className="flex items-end gap-2">
+              {/* Left Actions */}
+              <div className="flex items-center gap-1 pb-1.5 pl-2">
+                <div className="relative">
+                  <button
+                    onClick={() => setAttachmentOpen(!attachmentOpen)}
+                    className="rounded-full p-2 text-white/60 transition hover:bg-white/10 hover:text-white"
+                    title="Add attachment"
+                  >
+                    <span className="text-xl">⊕</span>
+                  </button>
+
+                  {attachmentOpen && (
+                    <div className="absolute bottom-full left-0 mb-2 w-48 overflow-hidden rounded-xl border border-white/10 bg-tera-panel shadow-xl backdrop-blur-xl">
+                      <button
+                        onClick={() => handleFileSelect('image')}
+                        className="flex w-full items-center gap-3 px-4 py-3 text-left text-sm text-white hover:bg-white/5"
+                      >
+                        <span>🖼️</span> Upload image
+                      </button>
+                      <button
+                        onClick={() => handleFileSelect('file')}
+                        className="flex w-full items-center gap-3 px-4 py-3 text-left text-sm text-white hover:bg-white/5"
+                      >
+                        <span>📄</span> Upload file
+                      </button>
+                    </div>
+                  )}
+                </div>
               </div>
 
-              <button
-                onClick={toggleListening}
-                className={`rounded-full p-2 transition ${isListening ? 'bg-red-500/20 text-red-400 animate-pulse' : 'text-white/60 hover:bg-white/10 hover:text-white'}`}
-                title="Voice input"
-              >
-                <span className="text-xl">🎤</span>
-              </button>
+              {/* Textarea */}
+              <textarea
+                value={prompt}
+                onChange={(e) => setPrompt(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault()
+                    handleSubmit(e)
+                  }
+                }}
+                placeholder={isListening ? "Listening..." : "Ask Tera anything..."}
+                className="max-h-[200px] min-h-[52px] w-full resize-none bg-transparent py-3.5 px-2 text-white placeholder-white/40 focus:outline-none"
+                rows={1}
+                style={{ height: 'auto' }}
+                onInput={(e) => {
+                  const target = e.target as HTMLTextAreaElement
+                  target.style.height = 'auto'
+                  target.style.height = `${Math.min(target.scrollHeight, 200)}px`
+                }}
+              />
+
+              {/* Dynamic Action Button */}
+              <div className="mb-1.5 mr-1.5">
+                {showStopButton && (
+                  <button
+                    className="flex h-9 w-9 items-center justify-center rounded-full bg-white text-black transition hover:bg-white/90"
+                    title="Stop generating"
+                  >
+                    <div className="h-3 w-3 bg-black rounded-[2px]" />
+                  </button>
+                )}
+
+                {showSendButton && (
+                  <button
+                    onClick={handleSubmit}
+                    className="flex h-9 w-9 items-center justify-center rounded-full bg-tera-neon text-white transition hover:bg-tera-neon/90"
+                    title="Send message"
+                  >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      viewBox="0 0 24 24"
+                      fill="currentColor"
+                      className="h-5 w-5"
+                    >
+                      <path d="M3.478 2.405a.75.75 0 00-.926.94l2.432 7.905H13.5a.75.75 0 010 1.5H4.984l-2.432 7.905a.75.75 0 00.926.94 60.519 60.519 0 0018.445-8.986.75.75 0 000-1.218A60.517 60.517 0 003.478 2.405z" />
+                    </svg>
+                  </button>
+                )}
+
+                {showMicButton && (
+                  <button
+                    onClick={toggleListening}
+                    className={`flex h-9 w-9 items-center justify-center rounded-full transition ${isListening ? 'bg-red-500/20 text-red-400 animate-pulse' : 'bg-white/10 text-white hover:bg-white/20'}`}
+                    title="Voice input"
+                  >
+                    <span className="text-xl">🎤</span>
+                  </button>
+                )}
+              </div>
             </div>
-
-            {/* Textarea */}
-            <textarea
-              value={prompt}
-              onChange={(e) => setPrompt(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter' && !e.shiftKey) {
-                  e.preventDefault()
-                  handleSubmit(e)
-                }
-              }}
-              placeholder={isListening ? "Listening..." : "Ask Tera anything..."}
-              className="max-h-[200px] min-h-[52px] w-full resize-none bg-transparent py-3.5 px-2 text-white placeholder-white/40 focus:outline-none"
-              rows={1}
-              style={{ height: 'auto' }}
-              onInput={(e) => {
-                const target = e.target as HTMLTextAreaElement
-                target.style.height = 'auto'
-                target.style.height = `${Math.min(target.scrollHeight, 200)}px`
-              }}
-            />
-
-            {/* Send Button */}
-            <button
-              onClick={handleSubmit}
-              disabled={(!prompt.trim() && pendingAttachments.length === 0) || status === 'loading'}
-              className="mb-1.5 mr-1.5 flex h-9 w-9 items-center justify-center rounded-full bg-tera-neon text-white transition hover:bg-tera-neon/90 disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-white/10 disabled:text-white/20"
-            >
-              {status === 'loading' ? (
-                <span className="h-4 w-4 animate-spin rounded-full border-2 border-black/30 border-t-black" />
-              ) : (
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 24 24"
-                  fill="currentColor"
-                  className="h-6 w-6"
-                >
-                  <path d="M3.478 2.405a.75.75 0 00-.926.94l2.432 7.905H13.5a.75.75 0 010 1.5H4.984l-2.432 7.905a.75.75 0 00.926.94 60.519 60.519 0 0018.445-8.986.75.75 0 000-1.218A60.517 60.517 0 003.478 2.405z" />
-                </svg>
-              )}
-            </button>
           </div>
-
-          <p className="mt-3 text-center text-[10px] uppercase tracking-widest text-white/20">
-            Tera can make mistakes. Verify important information.
-          </p>
         </div>
       </div>
 
