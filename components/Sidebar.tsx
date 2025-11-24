@@ -11,6 +11,7 @@ export const navigation = [
   { label: 'Settings', icon: '⚙️', href: '/settings' },
   { label: 'Profile', icon: '👤', href: '/profile' },
   { label: 'Pricing', icon: '💳', href: '/pricing' },
+  { label: 'About', icon: 'ℹ️', href: '/about' },
 ]
 
 interface SidebarProps {

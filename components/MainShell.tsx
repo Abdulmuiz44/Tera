@@ -243,6 +243,17 @@ function MainShellContent() {
                   Continue with Google
                 </button>
               </div>
+              <p className="mt-4 text-center text-[0.6rem] text-white/40">
+                By continuing, you agree to our{' '}
+                <Link href="/terms" className="underline hover:text-white" onClick={() => setAuthDialog(null)}>
+                  Terms
+                </Link>{' '}
+                and{' '}
+                <Link href="/privacy" className="underline hover:text-white" onClick={() => setAuthDialog(null)}>
+                  Privacy Policy
+                </Link>
+                .
+              </p>
               {authMessage && <p className="mt-3 text-[0.7rem] uppercase tracking-[0.3em] text-tera-neon">{authMessage}</p>}
               {user && (
                 <p className="mt-4 text-xs text-white/60">You are already signed in. Thank you!</p>
