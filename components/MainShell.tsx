@@ -134,7 +134,7 @@ function MainShellContent() {
         onSignOut={signOut}
       />
 
-      <main className={`relative flex flex-1 flex-col items-center justify-start px-3 pt-10 md:px-6 md:pt-10 transition-all duration-300 ease-in-out`}>
+      <main className={`relative flex flex-1 flex-col items-center justify-start px-3 pt-10 md:px-6 md:pt-10 transition-all duration-300 ease-in-out ${sidebarExpanded ? 'md:ml-[280px]' : 'md:ml-[72px]'}`}>
         {/* Mobile Menu Button */}
         <button
           className="absolute left-4 top-4 z-40 rounded-full border border-white/10 bg-tera-panel p-2 text-white md:hidden"
