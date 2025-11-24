@@ -54,7 +54,7 @@ export default function Sidebar({ expanded, onToggle, onNewChat, user, onSignOut
       </div>
 
       {/* Navigation Items */}
-      <div className="flex flex-col gap-3 w-full px-3 flex-1 overflow-y-auto">
+      <div className="flex flex-col gap-3 w-full px-3 overflow-y-auto max-h-[calc(100vh-280px)]">
         {navigation.map((item) => {
           const isActive =
             item.href === '/new'
@@ -98,8 +98,8 @@ export default function Sidebar({ expanded, onToggle, onNewChat, user, onSignOut
         })}
       </div>
 
-      {/* User Menu at Bottom */}
-      <div className="w-full px-3 py-4 border-t border-white/5">
+      {/* User Menu - directly below navigation with minimal spacing */}
+      <div className="w-full px-3 py-3">
         <UserMenu user={user || null} expanded={expanded} onSignOut={onSignOut || (() => { })} />
       </div>
     </aside>
