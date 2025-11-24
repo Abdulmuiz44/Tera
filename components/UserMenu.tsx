@@ -117,7 +117,9 @@ export default function UserMenu({ user, expanded, onSignOut }: UserMenuProps) {
                     <>
                         <div className="flex-1 min-w-0 text-left">
                             <div className="text-sm font-medium text-white truncate max-w-[120px]">{name}</div>
-                            <div className="text-xs text-white/60">Free</div>
+                            <div className="text-xs text-white/60">
+                                {user.user_metadata?.plan || user.user_metadata?.subscription_plan || 'Free'}
+                            </div>
                         </div>
 
                         {/* Upgrade Button */}
