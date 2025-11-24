@@ -242,9 +242,12 @@ export default function PromptShell({
       })
       // Save to localStorage for persistence across redirects (e.g. Google Sign In)
       if (typeof window !== 'undefined') {
-        localStorage.setItem('tera_queued_message', JSON.stringify({
+        const messageData = {
+          prompt: messageToSend,
           attachments: [...pendingAttachments]
-        }))
+        }
+        console.log('🔴 SAVING to localStorage:', messageData)
+        localStorage.setItem('tera_queued_message', JSON.stringify(messageData))
       }
       setAttachmentMessage('Sign in to send your message. It will be posted automatically once you authenticate.')
       onRequireSignIn?.()
@@ -268,10 +271,39 @@ export default function PromptShell({
   }
 
   useEffect(() => {
+    // Always check for persisted message on mount
+    console.log('🟢 MOUNT EFFECT: Checking localStorage...')
+    if (typeof window !== 'undefined' && !queuedMessage) {
+      const savedMessage = localStorage.getItem('tera_queued_message')
+      console.log('🟢 localStorage value:', savedMessage)
+      if (savedMessage) {
+        try {
+          console.log('🟢 Found queued message, parsing...')
+          const parsed = JSON.parse(savedMessage)
+          console.log('🟢 Parsed message:', parsed)
+          setQueuedMessage(parsed)
+          console.log('🟢 Set queuedMessage state')
+        } catch (e) {
+          console.error('🔴 Failed to parse queued message', e)
+          localStorage.removeItem('tera_queued_message')
+        }
+      } else {
+        console.log('🟢 No saved message found in localStorage')
+      }
+    } else {
+      console.log('🟢 Skipping restore (window undefined or queuedMessage already set)')
+    }
+  }, []) // Run once on mount
+
+  useEffect(() => {
+    console.log('🔵 PROCESS EFFECT: userReady=', userReady, 'queuedMessage=', queuedMessage)
     if (userReady && queuedMessage) {
-      console.log('Processing queued message:', queuedMessage)
+      console.log('🔵 Processing queued message:', queuedMessage)
       processMessage(queuedMessage.prompt, queuedMessage.attachments)
-      // Clear queued message so we don't send it again if userReady toggles
+
+      // Clean up
+      console.log('🔵 Cleaning up localStorage and queuedMessage state')
+      localStorage.removeItem('tera_queued_message')
       setQueuedMessage(null)
     }
   }, [userReady, queuedMessage, processMessage])
