@@ -44,8 +44,8 @@ export default function Sidebar({ expanded, onToggle, onNewChat, user, onSignOut
           <Image
             src="/images/TERA_LOGO_ONLY.png"
             alt="Tera Logo"
-            width={120}
-            height={40}
+            width={60}
+            height={20}
             className="object-contain"
             priority
           />
