@@ -1,5 +1,6 @@
 import { Mistral } from '@mistralai/mistralai'
 import type { AttachmentReference } from './attachment'
+import { extractTextFromFile } from './extract-text'
 
 if (!process.env.MISTRAL_API_KEY) {
   throw new Error('Mistral API key missing in environment variables')
@@ -10,7 +11,7 @@ const client = new Mistral({ apiKey: process.env.MISTRAL_API_KEY })
 const model = 'pixtral-large-latest'
 
 // System prompt with formatting guidelines
-const systemMessage = `You are Tera, a helpful AI assistant for teachers and educators. Your primary goal is to understand the user’s teaching context, ask clarifying questions about their needs, and then recommend how you can help (lesson planning, classroom management, resource creation, tutoring strategies, technology integration, etc.). Answer questions clearly and professionally.
+const systemMessage = `You are Tera, a helpful AI assistant for teachers and educators. Your primary goal is to understand the user's teaching context, ask clarifying questions about their needs, and then recommend how you can help (lesson planning, classroom management, resource creation, tutoring strategies, technology integration, etc.). Answer questions clearly and professionally.
 
 IMPORTANT FORMATTING RULES:
 - Do NOT use emojis in your responses unless specifically requested.
@@ -35,13 +36,42 @@ export async function generateTeacherResponse({
 }) {
   // Build user message content, handling image attachments for vision support
   const imageAttachments = attachments.filter(att => att.type === 'image')
+  const fileAttachments = attachments.filter(att => att.type === 'file')
+
+  // Extract text from file attachments
+  let extractedTexts: string[] = []
+  if (fileAttachments.length > 0) {
+    console.log('🔵 Extracting text from file attachments...')
+    const textPromises = fileAttachments.map(file =>
+      extractTextFromFile(file.url, file.name)
+    )
+    extractedTexts = await Promise.all(textPromises)
+  }
+
+  // Build the prompt with extracted file contents
+  let enhancedPrompt = prompt
+  if (extractedTexts.some(text => text.length > 0)) {
+    const fileContents = fileAttachments
+      .map((file, idx) => {
+        const text = extractedTexts[idx]
+        if (text.length > 0) {
+          return `File: ${file.name}\nContent:\n${text.slice(0, 10000)}\n` // Limit to 10k chars per file
+        }
+        return ''
+      })
+      .filter(Boolean)
+      .join('\n---\n\n')
+
+    enhancedPrompt = `${fileContents}\n\nUser Question: ${prompt}`
+    console.log('🔵 Enhanced prompt with extracted text')
+  }
 
   let userContent: any
 
   if (imageAttachments.length > 0) {
     // Vision API expects an array of content blocks
     userContent = [
-      { type: 'text', text: `Tool: ${tool}. Prompt: ${prompt}` },
+      { type: 'text', text: `Tool: ${tool}. Prompt: ${enhancedPrompt}` },
       ...imageAttachments.map(img => ({
         type: 'image_url',
         image_url: {
@@ -51,7 +81,7 @@ export async function generateTeacherResponse({
     ]
   } else {
     // Simple text when no images
-    userContent = `Tool: ${tool}. Prompt: ${prompt}`
+    userContent = `Tool: ${tool}. Prompt: ${enhancedPrompt}`
   }
 
   try {
