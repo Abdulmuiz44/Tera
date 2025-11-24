@@ -30,7 +30,7 @@ export default function Sidebar({ expanded, onToggle, onNewChat, user, onSignOut
 
   return (
     <aside
-      className={`fixed inset-y-0 left-0 z-50 flex flex-col shrink-0 h-screen bg-tera-bg border-r border-white/5 shadow-glow-sm transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] overflow-hidden md:relative
+      className={`fixed inset-y-0 left-0 z-50 flex flex-col shrink-0 h-screen bg-tera-bg border-r border-white/5 shadow-glow-sm transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] overflow-hidden
         ${expanded ? 'w-[280px] translate-x-0' : 'w-[280px] -translate-x-full md:w-[72px] md:translate-x-0'}
       `}
     >
