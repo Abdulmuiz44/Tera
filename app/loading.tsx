@@ -7,7 +7,7 @@ export default function Loading() {
                 {/* Logo */}
                 <div className="animate-pulse">
                     <Image
-                        src="/images/tera-logo.png"
+                        src="/images/TERA_LOGO_ONLY.png"
                         alt="Tera"
                         width={200}
                         height={67}
