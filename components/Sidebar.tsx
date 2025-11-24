@@ -1,6 +1,7 @@
 // "use client"
 
 import Link from 'next/link'
+import Image from 'next/image'
 import { usePathname } from 'next/navigation'
 import UserMenu from './UserMenu'
 import type { User } from '@supabase/supabase-js'
@@ -38,9 +39,16 @@ export default function Sidebar({ expanded, onToggle, onNewChat, user, onSignOut
       <div className={`flex items-center ${expanded ? 'justify-between px-6' : 'justify-center'} h-20 mb-2 transition-all duration-300`}>
         {/* Logo - Only visible when expanded */}
         <div
-          className={`flex items-center justify-center w-10 h-10 rounded-full bg-gradient-to-br from-tera-neon/40 to-white/10 animate-pulse-glow transition-all duration-300 ${expanded ? 'opacity-100 scale-100' : 'opacity-0 scale-0 w-0 overflow-hidden'}`}
+          className={`flex items-center justify-center transition-all duration-300 ${expanded ? 'opacity-100 scale-100' : 'opacity-0 scale-0 w-0 overflow-hidden'}`}
         >
-          <span className="text-lg font-semibold tracking-[0.2em] text-white">T</span>
+          <Image
+            src="/images/tera-logo.png"
+            alt="Tera Logo"
+            width={120}
+            height={40}
+            className="object-contain"
+            priority
+          />
         </div>
 
         {/* Menu toggle button */}
