@@ -27,8 +27,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         return
       }
       setUserReady(false)
-      await supabase.from('users').upsert({ id: user.id, email: user.email ?? '' })
-      setUserReady(true)
+      try {
+        await supabase.from('users').upsert({ id: user.id, email: user.email ?? '' })
+      } catch (error) {
+        console.error('Error syncing user:', error)
+        // Even if sync fails, we let the user proceed so we don't block the UI
+      } finally {
+        setUserReady(true)
+      }
     }
 
     supabase.auth.getSession().then(({ data: { session } }) => {

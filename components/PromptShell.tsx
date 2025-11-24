@@ -243,7 +243,6 @@ export default function PromptShell({
       // Save to localStorage for persistence across redirects (e.g. Google Sign In)
       if (typeof window !== 'undefined') {
         localStorage.setItem('tera_queued_message', JSON.stringify({
-          prompt: messageToSend,
           attachments: [...pendingAttachments]
         }))
       }
@@ -270,7 +269,10 @@ export default function PromptShell({
 
   useEffect(() => {
     if (userReady && queuedMessage) {
+      console.log('Processing queued message:', queuedMessage)
       processMessage(queuedMessage.prompt, queuedMessage.attachments)
+      // Clear queued message so we don't send it again if userReady toggles
+      setQueuedMessage(null)
     }
   }, [userReady, queuedMessage, processMessage])
 
