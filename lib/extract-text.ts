@@ -15,10 +15,17 @@ export async function extractTextFromFile(url: string, filename: string): Promis
             const arrayBuffer = await response.arrayBuffer()
             const buffer = Buffer.from(arrayBuffer)
 
-            // Use require for CommonJS module
             const pdfParse = require('pdf-parse')
             const data = await pdfParse(buffer)
             return data.text || ''
+        } else if (ext === 'docx') {
+            // Extract text from Word document
+            const arrayBuffer = await response.arrayBuffer()
+            const buffer = Buffer.from(arrayBuffer)
+
+            const mammoth = require('mammoth')
+            const result = await mammoth.extractRawText({ buffer })
+            return result.value || ''
         } else if (ext === 'txt' || ext === 'md') {
             // Extract text from plain text files
             return await response.text()

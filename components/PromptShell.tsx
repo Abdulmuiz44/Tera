@@ -431,11 +431,6 @@ export default function PromptShell({
 
   return (
     <div className="flex h-full w-full flex-col relative">
-      {/* DEBUG BANNER - REMOVE BEFORE PRODUCTION */}
-      <div className="bg-red-500 text-white text-xs p-1 text-center">
-        DEBUG: User={user ? 'Yes' : 'No'} | Ready={userReady ? 'Yes' : 'No'} | Queued={queuedMessage ? 'Yes' : 'No'}
-      </div>
-
       <div className="flex-1 overflow-y-auto px-4 py-6 md:px-8" ref={conversationRef}>
         <div className="mx-auto max-w-3xl space-y-8">
           {showInitialPrompt ? (
