@@ -5,8 +5,8 @@ export type PlanType = 'free' | 'pro' | 'school'
 
 export interface PlanLimits {
     lessonPlansPerMonth: number | 'unlimited'
-    chatsPerMonth: number | 'unlimited'
-    fileUploadsPerChat: number
+    chatsPerDay: number | 'unlimited'
+    fileUploadsPerChat: number | 'unlimited'
     maxFileSize: number // in MB
     features: string[]
 }
@@ -31,15 +31,16 @@ export const PLAN_CONFIGS: Record<PlanType, PlanConfig> = {
         description: 'Perfect for trying out Tera in your classroom.',
         limits: {
             lessonPlansPerMonth: 5,
-            chatsPerMonth: 20, // "Limited chat" = 20 chats/month
-            fileUploadsPerChat: 0,
-            maxFileSize: 0,
-            features: ['basic-chat', 'lesson-plans', 'basic-tools']
+            chatsPerDay: 20, // "Limited chat" = 20 chats/day
+            fileUploadsPerChat: 50,
+            maxFileSize: 25,
+            features: ['basic-chat', 'lesson-plans', 'basic-tools', 'file-uploads']
         },
         features: [
-            'Limited basic chat (20/month)',
+            'Limited chat (20/day)',
             '5 AI-generated lesson plans per month',
             'Basic resource generation',
+            'File uploads (50 per chat, 25MB max)',
             'Community support'
         ]
     },
@@ -51,18 +52,18 @@ export const PLAN_CONFIGS: Record<PlanType, PlanConfig> = {
         description: 'For teachers who want to supercharge their workflow.',
         limits: {
             lessonPlansPerMonth: 'unlimited',
-            chatsPerMonth: 'unlimited',
-            fileUploadsPerChat: 5,
-            maxFileSize: 10,
+            chatsPerDay: 'unlimited',
+            fileUploadsPerChat: 'unlimited',
+            maxFileSize: 100,
             features: ['advanced-chat', 'lesson-plans', 'all-tools', 'file-uploads', 'export']
         },
         features: [
             'Everything in Free',
             'Unlimited lesson plans',
             'Unlimited chat',
+            'Unlimited file uploads (100MB max per file)',
             'Priority support',
             'Custom teaching style calibration',
-            'File uploads in chat',
             'Export to PDF & Word'
         ]
     },
@@ -74,19 +75,19 @@ export const PLAN_CONFIGS: Record<PlanType, PlanConfig> = {
         description: 'For schools and districts looking to empower their staff.',
         limits: {
             lessonPlansPerMonth: 'unlimited',
-            chatsPerMonth: 'unlimited',
-            fileUploadsPerChat: 10,
-            maxFileSize: 50,
+            chatsPerDay: 'unlimited',
+            fileUploadsPerChat: 'unlimited',
+            maxFileSize: 500,
             features: ['advanced-chat', 'lesson-plans', 'all-tools', 'file-uploads', 'export', 'admin', 'analytics', 'sso']
         },
         features: [
             'Everything in Pro',
+            'Unlimited file uploads (500MB max per file)',
             'Admin dashboard',
             'Shared resource library',
             'District-wide analytics',
             'Dedicated success manager',
-            'SSO & Advanced Security',
-            'Unlimited file uploads'
+            'SSO & Advanced Security'
         ]
     }
 }
@@ -106,7 +107,7 @@ export function canGenerateLessonPlan(plan: PlanType, currentCount: number): boo
 }
 
 export function canStartChat(plan: PlanType, currentCount: number): boolean {
-    const limit = PLAN_CONFIGS[plan].limits.chatsPerMonth
+    const limit = PLAN_CONFIGS[plan].limits.chatsPerDay
     return limit === 'unlimited' || currentCount < limit
 }
 
@@ -117,7 +118,7 @@ export function getRemainingLessonPlans(plan: PlanType, currentCount: number): n
 }
 
 export function getRemainingChats(plan: PlanType, currentCount: number): number | 'unlimited' {
-    const limit = PLAN_CONFIGS[plan].limits.chatsPerMonth
+    const limit = PLAN_CONFIGS[plan].limits.chatsPerDay
     if (limit === 'unlimited') return 'unlimited'
     return Math.max(0, limit - currentCount)
 }

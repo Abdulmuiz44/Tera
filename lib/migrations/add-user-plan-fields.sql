@@ -5,8 +5,9 @@
 ALTER TABLE users
 ADD COLUMN IF NOT EXISTS subscription_plan TEXT DEFAULT 'free',
 ADD COLUMN IF NOT EXISTS monthly_lesson_plans INTEGER DEFAULT 0,
-ADD COLUMN IF NOT EXISTS monthly_chats INTEGER DEFAULT 0,
+ADD COLUMN IF NOT EXISTS daily_chats INTEGER DEFAULT 0,
 ADD COLUMN IF NOT EXISTS plan_reset_date TIMESTAMP WITH TIME ZONE DEFAULT (NOW() + INTERVAL '1 month'),
+ADD COLUMN IF NOT EXISTS chat_reset_date TIMESTAMP WITH TIME ZONE DEFAULT (NOW() + INTERVAL '1 day'),
 ADD COLUMN IF NOT EXISTS profile_image_url TEXT,
 ADD COLUMN IF NOT EXISTS full_name TEXT,
 ADD COLUMN IF NOT EXISTS school TEXT,
@@ -20,6 +21,7 @@ CHECK (subscription_plan IN ('free', 'pro', 'school'));
 -- Create index for plan queries
 CREATE INDEX IF NOT EXISTS idx_users_subscription_plan ON users(subscription_plan);
 CREATE INDEX IF NOT EXISTS idx_users_plan_reset_date ON users(plan_reset_date);
+CREATE INDEX IF NOT EXISTS idx_users_chat_reset_date ON users(chat_reset_date);
 
 -- Update RLS policies to allow users to update their own profile
 -- (Users can view own data policy already exists)
@@ -27,8 +29,9 @@ CREATE INDEX IF NOT EXISTS idx_users_plan_reset_date ON users(plan_reset_date);
 
 COMMENT ON COLUMN users.subscription_plan IS 'User subscription plan: free, pro, or school';
 COMMENT ON COLUMN users.monthly_lesson_plans IS 'Number of lesson plans generated this month';
-COMMENT ON COLUMN users.monthly_chats IS 'Number of chats initiated this month';
-COMMENT ON COLUMN users.plan_reset_date IS 'Date when usage counters will reset';
+COMMENT ON COLUMN users.daily_chats IS 'Number of chats initiated today';
+COMMENT ON COLUMN users.plan_reset_date IS 'Date when lesson plan counter will reset';
+COMMENT ON COLUMN users.chat_reset_date IS 'Date when chat counter will reset (daily)';
 COMMENT ON COLUMN users.profile_image_url IS 'URL to user profile image';
 COMMENT ON COLUMN users.full_name IS 'User full name';
 COMMENT ON COLUMN users.school IS 'School or institution name';
