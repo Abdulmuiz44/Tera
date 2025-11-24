@@ -48,7 +48,9 @@ function MainShellContent() {
       setAuthMessage('Enter your email to continue')
       return
     }
-    const redirectTarget = typeof window !== 'undefined' ? `${window.location.origin}/new` : 'http://localhost:3000/new'
+    const origin = typeof window !== 'undefined' && window.location.origin ? window.location.origin : ''
+    const isLocal = origin.includes('localhost')
+    const redirectTarget = isLocal ? `${origin}/new` : 'https://teraai.chat/new'
     setAuthLoading(true)
     try {
       const { error } = await supabase.auth.signInWithOtp({
@@ -70,7 +72,9 @@ function MainShellContent() {
       setAuthMessage('Enter your email to continue')
       return
     }
-    const redirectTarget = typeof window !== 'undefined' ? `${window.location.origin}/new` : 'http://localhost:3000/new'
+    const origin = typeof window !== 'undefined' && window.location.origin ? window.location.origin : ''
+    const isLocal = origin.includes('localhost')
+    const redirectTarget = isLocal ? `${origin}/new` : 'https://teraai.chat/new'
     setAuthLoading(true)
     const fallbackPassword = `${Date.now()}-${Math.random()}`
     const securePassword = typeof crypto !== 'undefined' && 'randomUUID' in crypto ? crypto.randomUUID() : fallbackPassword
@@ -103,7 +107,9 @@ function MainShellContent() {
   const handleGoogleSignIn = async () => {
     setAuthLoading(true)
     try {
-      const redirectTo = typeof window !== 'undefined' ? `${window.location.origin}/new` : undefined
+      const origin = typeof window !== 'undefined' && window.location.origin ? window.location.origin : ''
+      const isLocal = origin.includes('localhost')
+      const redirectTo = isLocal ? `${origin}/new` : 'https://teraai.chat/new'
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: redirectTo ? { redirectTo } : undefined
