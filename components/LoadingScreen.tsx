@@ -23,7 +23,7 @@ export default function LoadingScreen() {
         {/* Logo with fade-in animation */}
         <div className="animate-fade-in">
           <Image
-            src="/images/tera-logo.png"
+            src="/images/TERA_LOGO_ONLY.png"
             alt="Tera Logo"
             width={200}
             height={67}
@@ -31,7 +31,7 @@ export default function LoadingScreen() {
             priority
           />
         </div>
-        
+
         {/* Loading indicator */}
         <div className="flex gap-2">
           <div className="w-2 h-2 rounded-full bg-tera-neon animate-bounce" style={{ animationDelay: '0ms' }} />
