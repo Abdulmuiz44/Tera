@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
 import type { User } from '@supabase/supabase-js'
 
 interface UserMenuProps {
@@ -44,7 +45,11 @@ export default function UserMenu({ user, expanded, onSignOut }: UserMenuProps) {
         .slice(0, 2)
 
     const menuItems = [
-        { label: 'Upgrade plan', icon: '✨', href: '/pricing' },
+        {
+            label: 'Upgrade plan',
+            icon: <div className="w-4 h-4 relative flex items-center justify-center"><Image src="/images/TERA_LOGO_ONLY.png" alt="Tera" width={16} height={16} className="object-contain" /></div>,
+            href: '/pricing'
+        },
         { label: 'Personalization', icon: '🎨', href: '/settings' },
         { label: 'Settings', icon: '⚙️', href: '/settings' },
         { label: 'Help', icon: '❓', href: '/help', hasChevron: true },

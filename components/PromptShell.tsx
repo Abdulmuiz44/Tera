@@ -1,6 +1,7 @@
 "use client"
 
 import React, { ChangeEvent, useCallback, useEffect, useRef, useState, useTransition } from 'react'
+import Image from 'next/image'
 import { generateAnswer } from '@/app/actions/generate'
 import type { User } from '@supabase/supabase-js'
 import type { TeacherTool } from './ToolCard'
@@ -437,7 +438,9 @@ export default function PromptShell({
             <div className="fixed inset-0 flex items-center justify-center text-center pointer-events-none">
               <div className="pointer-events-auto">
                 <div className="mb-6 rounded-full bg-gradient-to-br from-tera-neon/20 to-transparent p-4 mx-auto w-fit">
-                  <span className="text-4xl">✨</span>
+                  <span className="flex items-center justify-center w-10 h-10">
+                    <Image src="/images/TERA_LOGO_ONLY.png" alt="Tera" width={32} height={32} className="object-contain" />
+                  </span>
                 </div>
                 <h2 className="mb-2 text-2xl font-semibold text-white">How can Tera help you teach today?</h2>
                 <p className="max-w-md text-white/60">

@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { useAuth } from '@/components/AuthProvider'
 import Sidebar from '@/components/Sidebar'
 import { getUserProfile, updateUserProfile, type UserProfile } from '@/lib/usage-tracking'
+import Image from 'next/image'
 import { getPlanConfig, getRemainingLessonPlans, getRemainingChats, getUsagePercentage, type PlanType } from '@/lib/plan-config'
 import Link from 'next/link'
 
@@ -290,7 +291,10 @@ export default function ProfilePage() {
                   )}
 
                   {lessonPlanLimit === 'unlimited' && (
-                    <p className="text-sm text-tera-neon">Unlimited usage ✨</p>
+                    <div className="flex items-center gap-2 text-sm text-tera-neon">
+                      Unlimited usage
+                      <Image src="/images/TERA_LOGO_ONLY.png" alt="Tera" width={16} height={16} className="object-contain inline-block" />
+                    </div>
                   )}
                 </div>
 
@@ -341,7 +345,10 @@ export default function ProfilePage() {
                   )}
 
                   {chatLimit === 'unlimited' && (
-                    <p className="text-sm text-blue-400">Unlimited usage ✨</p>
+                    <div className="flex items-center gap-2 text-sm text-blue-400">
+                      Unlimited usage
+                      <Image src="/images/TERA_LOGO_ONLY.png" alt="Tera" width={16} height={16} className="object-contain inline-block" />
+                    </div>
                   )}
                 </div>
 

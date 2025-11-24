@@ -177,7 +177,7 @@ function MainShellContent() {
                 className="rounded-full bg-white px-4 py-2 text-xs font-bold uppercase tracking-[0.2em] text-[#050505] transition hover:bg-white/90 md:hidden"
                 onClick={() => setAuthDialog('signIn')}
               >
-                Sign in
+                Log In
               </button>
               <div className="hidden md:flex md:items-center md:gap-2">
                 <button
@@ -185,7 +185,7 @@ function MainShellContent() {
                   className="rounded-full bg-white px-4 py-2 text-xs font-bold uppercase tracking-[0.2em] text-[#050505] transition hover:bg-white/90"
                   onClick={() => setAuthDialog('signIn')}
                 >
-                  Sign in
+                  Log In
                 </button>
                 <button
                   type="button"
@@ -203,7 +203,7 @@ function MainShellContent() {
             <div className="absolute inset-0 bg-black/70" onClick={() => setAuthDialog(null)} />
             <div className="relative z-10 w-full max-w-md rounded-3xl border border-white/20 bg-[#060606]/95 p-6 shadow-2xl backdrop-blur">
               <div className="flex items-center justify-between text-xs uppercase tracking-[0.4em] text-white/50">
-                <span>{authDialog === 'signIn' ? 'Sign In' : 'Sign Up'}</span>
+                <span>{authDialog === 'signIn' ? 'Log In' : 'Sign Up'}</span>
                 <button className="text-white/50 hover:text-white" onClick={() => setAuthDialog(null)}>
                   ✕
                 </button>
