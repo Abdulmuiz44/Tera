@@ -6,8 +6,9 @@ import type { PlanType } from './plan-config'
 
 export interface UsageStats {
     monthlyLessonPlans: number
-    monthlyChats: number
+    dailyChats: number
     planResetDate: Date
+    chatResetDate: Date
 }
 
 export interface UserProfile {
@@ -15,8 +16,9 @@ export interface UserProfile {
     email: string
     subscriptionPlan: PlanType
     monthlyLessonPlans: number
-    monthlyChats: number
+    dailyChats: number
     planResetDate: Date | null
+    chatResetDate: Date | null
     profileImageUrl: string | null
     fullName: string | null
     school: string | null
@@ -44,8 +46,9 @@ export async function getUserProfile(userId: string): Promise<UserProfile | null
         email: data.email,
         subscriptionPlan: (data.subscription_plan || 'free') as PlanType,
         monthlyLessonPlans: data.monthly_lesson_plans || 0,
-        monthlyChats: data.monthly_chats || 0,
+        dailyChats: data.daily_chats || 0,
         planResetDate: data.plan_reset_date ? new Date(data.plan_reset_date) : null,
+        chatResetDate: data.chat_reset_date ? new Date(data.chat_reset_date) : null,
         profileImageUrl: data.profile_image_url,
         fullName: data.full_name,
         school: data.school,
@@ -60,7 +63,7 @@ export async function getUserProfile(userId: string): Promise<UserProfile | null
 export async function getUsageStats(userId: string): Promise<UsageStats | null> {
     const { data, error } = await supabase
         .from('users')
-        .select('monthly_lesson_plans, monthly_chats, plan_reset_date')
+        .select('monthly_lesson_plans, daily_chats, plan_reset_date, chat_reset_date')
         .eq('id', userId)
         .single()
 
@@ -71,45 +74,56 @@ export async function getUsageStats(userId: string): Promise<UsageStats | null> 
 
     return {
         monthlyLessonPlans: data.monthly_lesson_plans || 0,
-        monthlyChats: data.monthly_chats || 0,
-        planResetDate: data.plan_reset_date ? new Date(data.plan_reset_date) : new Date()
+        dailyChats: data.daily_chats || 0,
+        planResetDate: data.plan_reset_date ? new Date(data.plan_reset_date) : new Date(),
+        chatResetDate: data.chat_reset_date ? new Date(data.chat_reset_date) : new Date()
     }
 }
 
 /**
- * Check if counters need to be reset (monthly)
+ * Check if counters need to be reset
  */
 export async function checkAndResetUsage(userId: string): Promise<boolean> {
     const { data, error } = await supabase
         .from('users')
-        .select('plan_reset_date')
+        .select('plan_reset_date, chat_reset_date')
         .eq('id', userId)
         .single()
 
     if (error || !data) return false
 
-    const resetDate = new Date(data.plan_reset_date)
     const now = new Date()
+    const updates: Record<string, any> = {}
+    let needsUpdate = false
 
-    if (now >= resetDate) {
-        // Reset counters
+    // Check monthly lesson plan reset
+    if (data.plan_reset_date && now >= new Date(data.plan_reset_date)) {
         const nextResetDate = new Date(now)
         nextResetDate.setMonth(nextResetDate.getMonth() + 1)
+        updates.monthly_lesson_plans = 0
+        updates.plan_reset_date = nextResetDate.toISOString()
+        needsUpdate = true
+    }
 
+    // Check daily chat reset
+    if (data.chat_reset_date && now >= new Date(data.chat_reset_date)) {
+        const nextChatResetDate = new Date(now)
+        nextChatResetDate.setDate(nextChatResetDate.getDate() + 1)
+        updates.daily_chats = 0
+        updates.chat_reset_date = nextChatResetDate.toISOString()
+        needsUpdate = true
+    }
+
+    if (needsUpdate) {
         const { error: updateError } = await supabase
             .from('users')
-            .update({
-                monthly_lesson_plans: 0,
-                monthly_chats: 0,
-                plan_reset_date: nextResetDate.toISOString()
-            })
+            .update(updates)
             .eq('id', userId)
 
         if (updateError) {
             console.error('Error resetting usage:', updateError)
             return false
         }
-
         return true
     }
 
@@ -153,27 +167,21 @@ export async function incrementChats(userId: string): Promise<boolean> {
     // First check and reset if needed
     await checkAndResetUsage(userId)
 
-    const { error } = await supabase.rpc('increment_chats', { user_id: userId })
+    // Manual increment since we changed the column name and RPC might be outdated
+    const { data, error: fetchError } = await supabase
+        .from('users')
+        .select('daily_chats')
+        .eq('id', userId)
+        .single()
 
-    if (error) {
-        // Fallback if function doesn't exist - manual increment
-        const { data, error: fetchError } = await supabase
-            .from('users')
-            .select('monthly_chats')
-            .eq('id', userId)
-            .single()
+    if (fetchError || !data) return false
 
-        if (fetchError || !data) return false
+    const { error: updateError } = await supabase
+        .from('users')
+        .update({ daily_chats: (data.daily_chats || 0) + 1 })
+        .eq('id', userId)
 
-        const { error: updateError } = await supabase
-            .from('users')
-            .update({ monthly_chats: (data.monthly_chats || 0) + 1 })
-            .eq('id', userId)
-
-        return !updateError
-    }
-
-    return true
+    return !updateError
 }
 
 /**

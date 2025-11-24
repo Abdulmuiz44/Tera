@@ -36,10 +36,10 @@ export async function generateAnswer({ prompt, tool, authorId, authorEmail, atta
     throw new Error(`You've reached your monthly limit of ${planConfig.limits.lessonPlansPerMonth} lesson plans. Upgrade to Pro for unlimited access.`)
   }
 
-  if (isChatTool && !canStartChat(userProfile.subscriptionPlan, userProfile.monthlyChats)) {
+  if (isChatTool && !canStartChat(userProfile.subscriptionPlan, userProfile.dailyChats)) {
     const planConfig = getPlanConfig(userProfile.subscriptionPlan)
-    const limit = planConfig.limits.chatsPerMonth
-    throw new Error(`You've reached your monthly limit of ${limit} chats. Upgrade to Pro for unlimited access.`)
+    const limit = planConfig.limits.chatsPerDay
+    throw new Error(`You've reached your daily limit of ${limit} chats. Upgrade to Pro for unlimited access.`)
   }
 
   // Generate the AI response
