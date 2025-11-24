@@ -240,6 +240,13 @@ export default function PromptShell({
         prompt: messageToSend,
         attachments: [...pendingAttachments]
       })
+      // Save to localStorage for persistence across redirects (e.g. Google Sign In)
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('tera_queued_message', JSON.stringify({
+          prompt: messageToSend,
+          attachments: [...pendingAttachments]
+        }))
+      }
       setAttachmentMessage('Sign in to send your message. It will be posted automatically once you authenticate.')
       onRequireSignIn?.()
       return
