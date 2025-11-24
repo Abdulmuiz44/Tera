@@ -2,57 +2,29 @@
 
 import { useState } from 'react'
 import Sidebar from '@/components/Sidebar'
+import { PLAN_CONFIGS } from '@/lib/plan-config'
 
 export default function PricingPage() {
   const [sidebarExpanded, setSidebarExpanded] = useState(false)
 
   const plans = [
     {
-      name: 'Free',
-      price: '$0',
-      period: '/month',
-      description: 'Perfect for trying out Tera in your classroom.',
-      features: [
-        'Limited basic chat',
-        '5 AI-generated lesson plans per month',
-        'Basic resource generation',
-        'Community support'
-      ],
+      ...PLAN_CONFIGS.free,
       cta: 'Current Plan',
-      current: true
+      current: true,
+      popular: false
     },
     {
-      name: 'Pro',
-      price: '$5',
-      period: '/month',
-      description: 'For teachers who want to supercharge their workflow.',
-      features: [
-        'Everything in Free',
-        'Unlimited lesson plans',
-        'Priority support',
-        'Custom teaching style calibration',
-        'Export to PDF & Word'
-      ],
+      ...PLAN_CONFIGS.pro,
       cta: 'Upgrade to Pro',
       current: false,
       popular: true
     },
     {
-      name: 'School',
-      price: '$20',
-      period: '',
-      description: 'For schools and districts looking to empower their staff.',
-      features: [
-        'Everything in Pro',
-        'Unlimited chat',
-        'Admin dashboard',
-        'Shared resource library',
-        'District-wide analytics',
-        'Dedicated success manager',
-        'SSO & Advanced Security'
-      ],
-      cta: 'Upgrade to School',
-      current: false
+      ...PLAN_CONFIGS.school,
+      cta: 'Contact Sales',
+      current: false,
+      popular: false
     }
   ]
 
@@ -87,9 +59,9 @@ export default function PricingPage() {
                   )}
 
                   <div className="mb-4">
-                    <h3 className="text-lg font-medium text-white">{plan.name}</h3>
+                    <h3 className="text-lg font-medium text-white">{plan.displayName}</h3>
                     <div className="mt-2 flex items-baseline gap-1">
-                      <span className="text-3xl font-bold text-white">{plan.price}</span>
+                      <span className="text-3xl font-bold text-white">${plan.price}</span>
                       <span className="text-sm text-white/60">{plan.period}</span>
                     </div>
                     <p className="mt-2 text-sm text-white/60">{plan.description}</p>

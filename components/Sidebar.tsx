@@ -42,7 +42,7 @@ export default function Sidebar({ expanded, onToggle, onNewChat, user, onSignOut
           className={`flex items-center justify-center transition-all duration-300 ${expanded ? 'opacity-100 scale-100' : 'opacity-0 scale-0 w-0 overflow-hidden'}`}
         >
           <Image
-            src="/images/tera-logo.png"
+            src="/images/TERA_LOGO_ONLY.png"
             alt="Tera Logo"
             width={120}
             height={40}
