@@ -2,6 +2,8 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+import UserMenu from './UserMenu'
+import type { User } from '@supabase/supabase-js'
 
 export const navigation = [
   { label: 'Chat', icon: '💬', href: '/new' },
@@ -18,9 +20,11 @@ interface SidebarProps {
   expanded: boolean
   onToggle: () => void
   onNewChat?: () => void
+  user?: User | null
+  onSignOut?: () => void
 }
 
-export default function Sidebar({ expanded, onToggle, onNewChat }: SidebarProps) {
+export default function Sidebar({ expanded, onToggle, onNewChat, user, onSignOut }: SidebarProps) {
   const pathname = usePathname()
   const isToolsRoute = pathname?.startsWith('/tools')
 
@@ -50,7 +54,7 @@ export default function Sidebar({ expanded, onToggle, onNewChat }: SidebarProps)
       </div>
 
       {/* Navigation Items */}
-      <div className="flex flex-col gap-3 w-full px-3">
+      <div className="flex flex-col gap-3 w-full px-3 flex-1 overflow-y-auto">
         {navigation.map((item) => {
           const isActive =
             item.href === '/new'
@@ -94,9 +98,9 @@ export default function Sidebar({ expanded, onToggle, onNewChat }: SidebarProps)
         })}
       </div>
 
-      {/* Footer */}
-      <div className={`flex items-center ${expanded ? 'justify-start px-6' : 'justify-center'} w-full mt-auto py-6 text-xs tracking-widest uppercase text-white/70 transition-all duration-300 whitespace-nowrap overflow-hidden`}>
-        {expanded ? 'Private' : 'P'}
+      {/* User Menu at Bottom */}
+      <div className="w-full px-3 py-4 border-t border-white/5">
+        <UserMenu user={user || null} expanded={expanded} onSignOut={onSignOut || (() => { })} />
       </div>
     </aside>
   )

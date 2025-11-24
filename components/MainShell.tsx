@@ -130,6 +130,8 @@ function MainShellContent() {
         expanded={sidebarExpanded}
         onToggle={() => setSidebarExpanded(!sidebarExpanded)}
         onNewChat={handleNewChat}
+        user={user}
+        onSignOut={signOut}
       />
 
       <main className={`relative flex flex-1 flex-col items-center justify-start px-3 pt-10 md:px-6 md:pt-10 transition-all duration-300 ease-in-out`}>
