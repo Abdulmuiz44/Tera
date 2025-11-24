@@ -127,6 +127,14 @@ function MainShellContent() {
       />
 
       <main className={`relative flex flex-1 flex-col items-center justify-start px-3 pt-10 md:px-6 md:pt-10 transition-all duration-300 ease-in-out`}>
+        {/* Mobile Menu Button */}
+        <button
+          className="absolute left-4 top-4 z-40 rounded-full border border-white/10 bg-tera-panel p-2 text-white md:hidden"
+          onClick={() => setSidebarExpanded(true)}
+        >
+          ☰
+        </button>
+
         <PromptShell
           key={sessionId}
           sessionId={sessionId}
@@ -158,7 +166,7 @@ function MainShellContent() {
             <>
               <button
                 type="button"
-                className="rounded-full border border-white/30 px-3 py-1 text-[0.5rem] font-semibold uppercase tracking-[0.4em] text-white/70 transition hover:border-white hover:text-white md:hidden"
+                className="rounded-full bg-white px-4 py-2 text-xs font-bold uppercase tracking-[0.2em] text-[#050505] transition hover:bg-white/90 md:hidden"
                 onClick={() => setAuthDialog('signIn')}
               >
                 Sign in
@@ -166,7 +174,7 @@ function MainShellContent() {
               <div className="hidden md:flex md:items-center md:gap-2">
                 <button
                   type="button"
-                  className="rounded-full border border-white/30 px-3 py-1 text-[0.5rem] font-semibold uppercase tracking-[0.4em] text-white/70 transition hover:border-white hover:text-white md:px-4 md:py-2 md:text-xs"
+                  className="rounded-full bg-white px-4 py-2 text-xs font-bold uppercase tracking-[0.2em] text-[#050505] transition hover:bg-white/90"
                   onClick={() => setAuthDialog('signIn')}
                 >
                   Sign in

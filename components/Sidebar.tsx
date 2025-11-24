@@ -25,7 +25,9 @@ export default function Sidebar({ expanded, onToggle, onNewChat }: SidebarProps)
 
   return (
     <aside
-      className={`flex flex-col shrink-0 ${expanded ? 'w-[280px]' : 'w-[72px]'} h-screen bg-tera-bg border-r border-white/5 shadow-glow-sm transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] overflow-hidden z-50`}
+      className={`fixed inset-y-0 left-0 z-50 flex flex-col shrink-0 h-screen bg-tera-bg border-r border-white/5 shadow-glow-sm transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] overflow-hidden md:relative
+        ${expanded ? 'w-[280px] translate-x-0' : 'w-[280px] -translate-x-full md:w-[72px] md:translate-x-0'}
+      `}
     >
       {/* Header Section */}
       <div className={`flex items-center ${expanded ? 'justify-between px-6' : 'justify-center'} h-20 mb-2 transition-all duration-300`}>
