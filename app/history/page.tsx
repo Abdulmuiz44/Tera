@@ -7,12 +7,11 @@ import { useAuth } from '@/components/AuthProvider'
 import { supabase } from '@/lib/supabase'
 
 type ChatSession = {
-  id: string
-  prompt: string
-  response: string
+  session_id: string
+  title: string | null
+  last_message: string
   created_at: string
   tool: string
-  attachments?: { name: string; url: string; type: string }[]
 }
 
 export default function HistoryPage() {
@@ -33,28 +32,61 @@ export default function HistoryPage() {
     }
 
     setLoading(true)
-    let query = supabase
-      .from('chat_sessions')
-      .select('id,prompt,response,created_at,tool,attachments', { count: 'exact' })
-      .eq('user_id', user.id)
-      .order('created_at', { ascending: false })
 
-    if (searchQuery) {
-      query = query.or(`prompt.ilike.%${searchQuery}%,response.ilike.%${searchQuery}%`)
-    }
+    try {
+      // Try to query the view first
+      let query = supabase
+        .from('distinct_chat_sessions')
+        .select('session_id,title,last_message,created_at,tool', { count: 'exact' })
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false })
 
-    const from = (page - 1) * pageSize
-    const to = from + pageSize - 1
+      if (searchQuery) {
+        query = query.or(`title.ilike.%${searchQuery}%,last_message.ilike.%${searchQuery}%`)
+      }
 
-    const { data, error, count } = await query.range(from, to)
+      const from = (page - 1) * pageSize
+      const to = from + pageSize - 1
 
-    if (error) {
-      console.error('Failed to load chat history', error)
+      const { data, error, count } = await query.range(from, to)
+
+      if (error) {
+        // If view doesn't exist, fall back to regular table
+        console.warn('View not found, falling back to chat_sessions table:', error)
+
+        const fallbackQuery = supabase
+          .from('chat_sessions')
+          .select('id,session_id,title,prompt,created_at,tool', { count: 'exact' })
+          .eq('user_id', user.id)
+          .order('created_at', { ascending: false })
+          .range(from, to)
+
+        const fallbackResult = await fallbackQuery
+
+        if (fallbackResult.error) {
+          console.error('Failed to load chat history', fallbackResult.error)
+          setConversations([])
+        } else if (fallbackResult.data) {
+          // Transform to match ChatSession type
+          const transformed = fallbackResult.data.map(item => ({
+            session_id: item.session_id || item.id,
+            title: item.title || null,
+            last_message: item.prompt,
+            created_at: item.created_at,
+            tool: item.tool
+          }))
+          setConversations(transformed as ChatSession[])
+          setHasMore(fallbackResult.count ? from + fallbackResult.data.length < fallbackResult.count : false)
+        }
+      } else if (data) {
+        setConversations(data as ChatSession[])
+        setHasMore(count ? from + data.length < count : false)
+      }
+    } catch (err) {
+      console.error('Unexpected error loading history:', err)
       setConversations([])
-    } else if (data) {
-      setConversations(data as ChatSession[])
-      setHasMore(count ? from + data.length < count : false)
     }
+
     setLoading(false)
   }, [user, searchQuery, page])
 
@@ -70,7 +102,7 @@ export default function HistoryPage() {
     if (!user) return
 
     const { data, error } = await supabase
-      .from('chat_sessions')
+      .from('distinct_chat_sessions')
       .select('*')
       .eq('user_id', user.id)
       .order('created_at', { ascending: false })
@@ -131,8 +163,8 @@ export default function HistoryPage() {
               {!loading && conversations.length === 0 && placeholder}
               {conversations.map((conversation) => (
                 <Link
-                  key={conversation.id}
-                  href="/chat"
+                  key={conversation.session_id}
+                  href={`/new?sessionId=${conversation.session_id}`}
                   className="block rounded-2xl border border-white/10 bg-tera-muted p-4 transition hover:border-tera-neon"
                 >
                   <div className="flex justify-between items-start">
@@ -141,24 +173,8 @@ export default function HistoryPage() {
                       {new Date(conversation.created_at).toLocaleString()}
                     </p>
                   </div>
-                  <p className="mt-2 text-sm text-white/80 font-medium line-clamp-2">{conversation.prompt}</p>
-                  <p className="mt-2 text-sm text-white/60 line-clamp-2">{conversation.response}</p>
-                  {conversation.attachments && Array.isArray(conversation.attachments) && conversation.attachments.length > 0 && (
-                    <div className="mt-3 flex flex-wrap gap-2">
-                      {conversation.attachments.map((attachment, idx) =>
-                        attachment.type === 'image' ? (
-                          <div key={idx} className="rounded-lg overflow-hidden border border-white/10">
-                            <img src={attachment.url} alt={attachment.name} className="h-12 w-12 object-cover" />
-                          </div>
-                        ) : (
-                          <div key={idx} className="flex items-center gap-2 rounded-full border border-white/20 bg-white/5 px-3 py-1">
-                            <span className="text-xs">📄</span>
-                            <span className="text-[0.6rem] uppercase tracking-[0.3em] text-white/70 truncate max-w-[100px]">{attachment.name}</span>
-                          </div>
-                        )
-                      )}
-                    </div>
-                  )}
+                  <p className="mt-2 text-sm text-white/80 font-medium line-clamp-2">{conversation.title || 'Untitled Chat'}</p>
+                  <p className="mt-2 text-sm text-white/60 line-clamp-2">{conversation.last_message}</p>
                 </Link>
               ))}
             </div>

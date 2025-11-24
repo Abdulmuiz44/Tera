@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from 'react'
+import { useState, useEffect, Suspense } from 'react'
 import Link from 'next/link'
 import Sidebar, { navigation } from './Sidebar'
 import PromptShell from './PromptShell'
@@ -8,9 +8,9 @@ import type { TeacherTool } from './ToolCard'
 import { teacherTools } from '@/lib/teacher-tools'
 import { supabase } from '@/lib/supabase'
 import { useAuth } from './AuthProvider'
-import { usePathname } from 'next/navigation'
+import { useSearchParams, usePathname } from 'next/navigation'
 
-export default function MainShell() {
+function MainShellContent() {
   const [selectedTool, setSelectedTool] = useState<TeacherTool>(teacherTools[0])
   const [menuOpen, setMenuOpen] = useState(false)
   const [sidebarExpanded, setSidebarExpanded] = useState(false)
@@ -19,15 +19,36 @@ export default function MainShell() {
   const [authMessage, setAuthMessage] = useState<string | null>(null)
   const [authLoading, setAuthLoading] = useState(false)
   const pathname = usePathname()
+  const searchParams = useSearchParams()
+  const urlSessionId = searchParams?.get('sessionId')
   const isToolsRoute = pathname?.startsWith('/tools')
   const { user, loading, signOut, userReady } = useAuth()
+
+  const [sessionId, setSessionId] = useState<string | null>(urlSessionId || null)
+
+  // Sync with URL
+  useEffect(() => {
+    if (urlSessionId) {
+      setSessionId(urlSessionId)
+    }
+  }, [urlSessionId])
+
+  const handleNewChat = () => {
+    setSessionId(crypto.randomUUID())
+    // Optional: Clear URL param
+    if (typeof window !== 'undefined') {
+      const url = new URL(window.location.href)
+      url.searchParams.delete('sessionId')
+      window.history.pushState({}, '', url)
+    }
+  }
 
   const handleSignIn = async () => {
     if (!email.trim()) {
       setAuthMessage('Enter your email to continue')
       return
     }
-    const redirectTarget = typeof window !== 'undefined' ? `${window.location.origin}/chat` : 'http://localhost:3000/chat'
+    const redirectTarget = typeof window !== 'undefined' ? `${window.location.origin}/new` : 'http://localhost:3000/new'
     setAuthLoading(true)
     try {
       const { error } = await supabase.auth.signInWithOtp({
@@ -49,7 +70,7 @@ export default function MainShell() {
       setAuthMessage('Enter your email to continue')
       return
     }
-    const redirectTarget = typeof window !== 'undefined' ? `${window.location.origin}/chat` : 'http://localhost:3000/chat'
+    const redirectTarget = typeof window !== 'undefined' ? `${window.location.origin}/new` : 'http://localhost:3000/new'
     setAuthLoading(true)
     const fallbackPassword = `${Date.now()}-${Math.random()}`
     const securePassword = typeof crypto !== 'undefined' && 'randomUUID' in crypto ? crypto.randomUUID() : fallbackPassword
@@ -82,7 +103,7 @@ export default function MainShell() {
   const handleGoogleSignIn = async () => {
     setAuthLoading(true)
     try {
-      const redirectTo = typeof window !== 'undefined' ? window.location.origin : undefined
+      const redirectTo = typeof window !== 'undefined' ? `${window.location.origin}/new` : undefined
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: redirectTo ? { redirectTo } : undefined
@@ -99,10 +120,16 @@ export default function MainShell() {
 
   return (
     <div className="flex min-h-screen w-full bg-[#050505] text-white">
-      <Sidebar expanded={sidebarExpanded} onToggle={() => setSidebarExpanded(!sidebarExpanded)} />
+      <Sidebar
+        expanded={sidebarExpanded}
+        onToggle={() => setSidebarExpanded(!sidebarExpanded)}
+        onNewChat={handleNewChat}
+      />
 
       <main className={`relative flex flex-1 flex-col items-center justify-start px-3 pt-10 md:px-6 md:pt-10 transition-all duration-300 ease-in-out`}>
         <PromptShell
+          key={sessionId}
+          sessionId={sessionId}
           tool={selectedTool}
           onToolChange={setSelectedTool}
           user={user}
@@ -155,50 +182,6 @@ export default function MainShell() {
             </>
           )}
         </div>
-        <button
-          type="button"
-          className="absolute left-4 top-4 z-40 flex h-12 w-12 items-center justify-center rounded-2xl border border-white/20 bg-white/5 text-lg text-white hover:border-white/50 md:hidden"
-          aria-label="Open menu"
-          onClick={() => setMenuOpen(true)}
-        >
-          ☰
-        </button>
-        {menuOpen && (
-          <div className="fixed inset-0 z-50 flex">
-            <div className="absolute inset-0 bg-black/70" onClick={() => setMenuOpen(false)} />
-            <div className="relative flex w-3/5 max-w-xs flex-col gap-6 rounded-3xl border border-white/10 bg-[#090909]/90 p-6 text-white shadow-2xl backdrop-blur md:hidden">
-              <button
-                type="button"
-                className="self-end text-sm font-semibold uppercase tracking-[0.3em] text-white/60"
-                onClick={() => setMenuOpen(false)}
-              >
-                Close
-              </button>
-              <nav className="flex flex-col gap-4">
-                {navigation.map((item) => {
-                  const isActive =
-                    item.href === '/'
-                      ? pathname === '/'
-                      : item.href === '/tools/lesson-plan-generator'
-                        ? isToolsRoute
-                        : pathname === item.href
-                  return (
-                    <Link
-                      key={item.label}
-                      href={item.href}
-                      className={`flex items-center gap-3 rounded-2xl border border-white/10 px-4 py-3 text-xs font-normal uppercase tracking-[0.4em] transition ${isActive ? 'border-tera-neon bg-tera-neon/40 text-white' : 'border-white/10 bg-transparent text-white/70'
-                        }`}
-                      onClick={() => setMenuOpen(false)}
-                    >
-                      <span className="text-lg">{item.icon}</span>
-                      <span className="text-sm font-normal uppercase tracking-[0.2em] text-white/80">{item.label}</span>
-                    </Link>
-                  )
-                })}
-              </nav>
-            </div>
-          </div>
-        )}
         {authDialog && (
           <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
             <div className="absolute inset-0 bg-black/70" onClick={() => setAuthDialog(null)} />
@@ -261,5 +244,13 @@ export default function MainShell() {
         )}
       </main>
     </div>
+  )
+}
+
+export default function MainShell() {
+  return (
+    <Suspense fallback={<div className="flex h-screen w-full items-center justify-center bg-[#050505] text-white">Loading...</div>}>
+      <MainShellContent />
+    </Suspense>
   )
 }

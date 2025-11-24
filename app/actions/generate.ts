@@ -12,9 +12,10 @@ type GenerateProps = {
   authorId: string
   authorEmail?: string
   attachments?: AttachmentReference[]
+  sessionId?: string | null
 }
 
-export async function generateAnswer({ prompt, tool, authorId, authorEmail, attachments = [] }: GenerateProps) {
+export async function generateAnswer({ prompt, tool, authorId, authorEmail, attachments = [], sessionId }: GenerateProps) {
 
   const answer = await generateTeacherResponse({ prompt, tool, attachments })
 
@@ -28,13 +29,19 @@ export async function generateAnswer({ prompt, tool, authorId, authorEmail, atta
     })
   }
 
+  const currentSessionId = sessionId || crypto.randomUUID()
+  // Simple title generation: first 50 chars of prompt
+  const title = sessionId ? undefined : prompt.slice(0, 50) + (prompt.length > 50 ? '...' : '')
+
   const { data, error } = await supabaseServer.from('chat_sessions').insert({
     user_id: authorId,
     tool,
     prompt,
     response: answer,
     attachments,
-    created_at: new Date().toISOString()
+    created_at: new Date().toISOString(),
+    session_id: currentSessionId,
+    title: title
   })
     .select('id')
     .single()
@@ -46,5 +53,5 @@ export async function generateAnswer({ prompt, tool, authorId, authorEmail, atta
   revalidatePath('/')
   revalidatePath('/history')
 
-  return { answer, sessionId: data?.id ?? null }
+  return { answer, sessionId: currentSessionId }
 }

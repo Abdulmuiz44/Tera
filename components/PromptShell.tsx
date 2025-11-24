@@ -55,13 +55,15 @@ export default function PromptShell({
   onToolChange,
   user,
   userReady,
-  onRequireSignIn
+  onRequireSignIn,
+  sessionId
 }: {
   tool: TeacherTool
   onToolChange?: (tool: TeacherTool) => void
   user?: User | null
   userReady?: boolean
   onRequireSignIn?: () => void
+  sessionId?: string | null
 }) {
   const [prompt, setPrompt] = useState('')
   const [status, setStatus] = useState<'idle' | 'loading'>('idle')
@@ -81,6 +83,12 @@ export default function PromptShell({
   const showInitialPrompt = conversations.every((entry) => !entry.userMessage)
   const [isListening, setIsListening] = useState(false)
   const recognitionRef = useRef<any>(null)
+  const [currentSessionId, setCurrentSessionId] = useState<string | null>(sessionId || null)
+
+  // Update currentSessionId if prop changes (e.g. new chat from parent)
+  useEffect(() => {
+    setCurrentSessionId(sessionId || null)
+  }, [sessionId])
 
   const uploadAttachment = async (file: File, type: AttachmentType) => {
     const formData = new FormData()
@@ -170,13 +178,19 @@ export default function PromptShell({
     }
     startTransition(async () => {
       try {
-        const { answer, sessionId } = await generateAnswer({
+        const { answer, sessionId: newSessionId } = await generateAnswer({
           prompt: messageToSend,
           tool: tool.name,
           authorId: user?.id ?? '',
           authorEmail: user?.email ?? undefined,
-          attachments: attachmentsToSend
+          attachments: attachmentsToSend,
+          sessionId: currentSessionId
         })
+
+        if (newSessionId && newSessionId !== currentSessionId) {
+          setCurrentSessionId(newSessionId)
+        }
+
         const assistantMessage: Message = {
           id: createId(),
           role: 'tera',
@@ -184,7 +198,7 @@ export default function PromptShell({
         }
         setConversations((prev) =>
           prev.map((entry) =>
-            entry.id === entryId ? { ...entry, assistantMessage, sessionId } : entry
+            entry.id === entryId ? { ...entry, assistantMessage, sessionId: newSessionId } : entry
           )
         )
       } catch (error) {
@@ -212,7 +226,7 @@ export default function PromptShell({
       setEditingMessageId(null)
       setQueuedMessage(null)
     })
-  }, [editingMessageId, hasBumpedInput, tool.name, user?.id])
+  }, [editingMessageId, hasBumpedInput, tool.name, user?.id, currentSessionId])
 
   const handleSubmit = (event: React.FormEvent) => {
     event.preventDefault()
@@ -263,19 +277,26 @@ export default function PromptShell({
     const userId = user.id
 
     async function loadChatHistory() {
+      // If no sessionId is provided (New Chat), don't load history
+      if (!sessionId) {
+        setConversations([])
+        return
+      }
+
       setHistoryLoading(true)
       try {
         const { data, error } = await supabase
           .from('chat_sessions')
           .select('id, prompt, response, attachments, created_at')
           .eq('user_id', userId)
+          .eq('session_id', sessionId) // Filter by session ID
           .order('created_at', { ascending: true })
           .limit(50)
 
         if (isMounted && !error && data) {
           const loadedConversations: ConversationEntry[] = data.map((session) => ({
             id: session.id,
-            sessionId: session.id,
+            sessionId: session.id, // This is actually the row ID, but we use it as entry ID. The real session ID is passed in prop.
             userMessage: {
               id: `${session.id}-user`,
               role: 'user' as const,
@@ -305,7 +326,7 @@ export default function PromptShell({
     return () => {
       isMounted = false
     }
-  }, [user])
+  }, [user, sessionId])
 
   useEffect(() => {
     if (conversationActive) {
