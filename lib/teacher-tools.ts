@@ -1,5 +1,14 @@
 import type { TeacherTool } from '@/components/ToolCard'
 
+export const slugify = (text: string) => {
+  return text
+    .toLowerCase()
+    .replace(/[^\w\s-]/g, '') // Remove special chars
+    .replace(/\s+/g, '-')     // Replace spaces with hyphens
+    .replace(/-+/g, '-')      // Remove duplicate hyphens
+    .trim()
+}
+
 export const teacherTools: TeacherTool[] = [
   {
     name: 'Lesson Plan Generator',
@@ -60,5 +69,41 @@ export const teacherTools: TeacherTool[] = [
     description: 'Summarize articles and align to your syllabus.',
     icon: '📖',
     tags: ['Summary', 'Research']
+  },
+  {
+    name: 'IEP Goal Drafter',
+    description: 'Draft SMART goals aligned with student needs and standards.',
+    icon: '🎯',
+    tags: ['IEP', 'Special Ed', 'Goals']
+  },
+  {
+    name: 'Group Project Generator',
+    description: 'Create structured group projects with roles, timelines, and rubrics.',
+    icon: '👥',
+    tags: ['Collaboration', 'Projects', 'Roles']
+  },
+  {
+    name: 'Icebreaker Generator',
+    description: 'Fun and engaging activities to build classroom community.',
+    icon: '🧊',
+    tags: ['Community', 'Fun', 'Start']
+  },
+  {
+    name: 'Substitute Teacher Plan',
+    description: 'Emergency lesson plans and instructions for substitutes.',
+    icon: '🆘',
+    tags: ['Sub Plans', 'Emergency', 'Admin']
+  },
+  {
+    name: 'Student Feedback Generator',
+    description: 'Generate constructive and personalized feedback for students.',
+    icon: '💬',
+    tags: ['Feedback', 'Growth', 'Comments']
+  },
+  {
+    name: 'Field Trip Planner',
+    description: 'Plan logistics, permissions, and educational objectives for trips.',
+    icon: '🚌',
+    tags: ['Logistics', 'Events', 'Safety']
   }
 ]

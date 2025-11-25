@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import Sidebar from '@/components/Sidebar'
-import { teacherTools } from '@/lib/teacher-tools'
+import { teacherTools, slugify } from '@/lib/teacher-tools'
 import { useAuth } from '@/components/AuthProvider'
 
 export default function ToolsPage() {
@@ -42,7 +42,7 @@ export default function ToolsPage() {
                         {teacherTools.map((tool) => (
                             <Link
                                 key={tool.name}
-                                href={`/new?tool=${tool.name.toLowerCase().replace(/\s+/g, '-')}`}
+                                href={`/new?tool=${slugify(tool.name)}`}
                                 className="group relative flex flex-col gap-4 rounded-2xl border border-white/10 bg-[#1a1a1a] p-6 transition-all hover:border-tera-neon/50 hover:bg-[#222] hover:shadow-lg hover:shadow-tera-neon/5"
                             >
                                 <div className="flex items-center justify-between">

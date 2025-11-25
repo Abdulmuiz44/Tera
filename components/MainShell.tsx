@@ -5,7 +5,7 @@ import Link from 'next/link'
 import Sidebar, { navigation } from './Sidebar'
 import PromptShell from './PromptShell'
 import type { TeacherTool } from './ToolCard'
-import { teacherTools } from '@/lib/teacher-tools'
+import { teacherTools, slugify } from '@/lib/teacher-tools'
 import { supabase } from '@/lib/supabase'
 import { useAuth } from './AuthProvider'
 import { useSearchParams, usePathname } from 'next/navigation'
@@ -39,14 +39,11 @@ function MainShellContent() {
   useEffect(() => {
     if (urlTool) {
       const toolSlug = urlTool.toLowerCase()
-      const foundTool = teacherTools.find(t => t.name.toLowerCase().replace(/\s+/g, '-') === toolSlug)
+      const foundTool = teacherTools.find(t => slugify(t.name) === toolSlug)
 
       if (foundTool) {
         setSelectedTool(foundTool)
         setInitialPrompt(`Using ${foundTool.name}: `)
-
-        // Clear the tool param from URL to avoid re-triggering on refresh if user navigates away
-        // But keeping it might be better for deep linking. Let's keep it for now.
       }
     }
   }, [urlTool])
