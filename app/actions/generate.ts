@@ -21,19 +21,38 @@ export async function generateAnswer({ prompt, tool, authorId, authorEmail, atta
 
   // Ensure user exists in users table FIRST
   if (authorId && authorEmail) {
-    await supabaseServer.from('users').upsert({
+    const { error } = await supabaseServer.from('users').upsert({
       id: authorId,
       email: authorEmail
     }, {
       onConflict: 'id'
     })
+
+    if (error) {
+      console.error('Error creating/updating user:', error)
+    }
   }
 
   // Get user profile and check limits
-  const userProfile = await getUserProfile(authorId)
+  let userProfile = await getUserProfile(authorId)
 
+  // If profile still doesn't exist, create a default one
   if (!userProfile) {
-    throw new Error('User profile not found')
+    console.warn('User profile not found, creating default profile for:', authorId)
+    userProfile = {
+      id: authorId,
+      email: authorEmail || '',
+      subscriptionPlan: 'free',
+      monthlyLessonPlans: 0,
+      dailyChats: 0,
+      planResetDate: null,
+      chatResetDate: null,
+      profileImageUrl: null,
+      fullName: null,
+      school: null,
+      gradeLevels: null,
+      createdAt: new Date()
+    }
   }
 
   // Check plan limits based on tool type
