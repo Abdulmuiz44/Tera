@@ -57,7 +57,8 @@ export default function PromptShell({
   user,
   userReady,
   onRequireSignIn,
-  sessionId
+  sessionId,
+  initialPrompt
 }: {
   tool: TeacherTool
   onToolChange?: (tool: TeacherTool) => void
@@ -65,8 +66,9 @@ export default function PromptShell({
   userReady?: boolean
   onRequireSignIn?: () => void
   sessionId?: string | null
+  initialPrompt?: string
 }) {
-  const [prompt, setPrompt] = useState('')
+  const [prompt, setPrompt] = useState(initialPrompt || '')
   const [status, setStatus] = useState<'idle' | 'loading'>('idle')
   const [conversations, setConversations] = useState<ConversationEntry[]>([])
   const [attachmentOpen, setAttachmentOpen] = useState(false)
@@ -90,6 +92,13 @@ export default function PromptShell({
   useEffect(() => {
     setCurrentSessionId(sessionId || null)
   }, [sessionId])
+
+  // Update prompt if initialPrompt changes
+  useEffect(() => {
+    if (initialPrompt) {
+      setPrompt(initialPrompt)
+    }
+  }, [initialPrompt])
 
   const uploadAttachment = async (file: File, type: AttachmentType) => {
     const formData = new FormData()

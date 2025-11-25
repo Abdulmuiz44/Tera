@@ -21,10 +21,12 @@ function MainShellContent() {
   const pathname = usePathname()
   const searchParams = useSearchParams()
   const urlSessionId = searchParams?.get('sessionId')
+  const urlTool = searchParams?.get('tool')
   const isToolsRoute = pathname?.startsWith('/tools')
   const { user, loading, signOut, userReady } = useAuth()
 
   const [sessionId, setSessionId] = useState<string | null>(urlSessionId || null)
+  const [initialPrompt, setInitialPrompt] = useState<string | undefined>(undefined)
 
   // Sync with URL
   useEffect(() => {
@@ -32,6 +34,22 @@ function MainShellContent() {
       setSessionId(urlSessionId)
     }
   }, [urlSessionId])
+
+  // Handle Tool Selection from URL
+  useEffect(() => {
+    if (urlTool) {
+      const toolSlug = urlTool.toLowerCase()
+      const foundTool = teacherTools.find(t => t.name.toLowerCase().replace(/\s+/g, '-') === toolSlug)
+
+      if (foundTool) {
+        setSelectedTool(foundTool)
+        setInitialPrompt(`Using ${foundTool.name}: `)
+
+        // Clear the tool param from URL to avoid re-triggering on refresh if user navigates away
+        // But keeping it might be better for deep linking. Let's keep it for now.
+      }
+    }
+  }, [urlTool])
 
   const handleNewChat = () => {
     setSessionId(crypto.randomUUID())
@@ -151,6 +169,7 @@ function MainShellContent() {
           user={user}
           userReady={userReady}
           onRequireSignIn={() => setAuthDialog('signIn')}
+          initialPrompt={initialPrompt}
         />
         <div className="absolute right-4 top-4 flex flex-col items-end gap-2 md:flex-row md:items-center">
           {user ? (
