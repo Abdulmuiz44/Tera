@@ -513,9 +513,7 @@ export default function PromptShell({
             <div className="flex justify-start">
               <div className="max-w-[85%]">
                 <div className="flex items-center gap-2 rounded-2xl bg-tera-panel px-6 py-4 text-white/60">
-                  <span className="animate-bounce">●</span>
-                  <span className="animate-bounce delay-100">●</span>
-                  <span className="animate-bounce delay-200">●</span>
+                  <span className="animate-pulse font-medium">Tera is Thinking...</span>
                 </div>
               </div>
             </div>
