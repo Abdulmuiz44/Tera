@@ -161,9 +161,9 @@ export default function HistoryPage() {
             <div className="flex-1 overflow-y-auto space-y-4 pr-2">
               {loading && <p className="text-white/60">Loading history...</p>}
               {!loading && conversations.length === 0 && placeholder}
-              {conversations.map((conversation) => (
+              {conversations.map((conversation, index) => (
                 <Link
-                  key={conversation.session_id}
+                  key={`${conversation.session_id}-${conversation.created_at}-${index}`}
                   href={`/new?sessionId=${conversation.session_id}`}
                   className="block rounded-2xl border border-white/10 bg-tera-muted p-4 transition hover:border-tera-neon"
                 >
