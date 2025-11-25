@@ -8,7 +8,7 @@ import type { User } from '@supabase/supabase-js'
 
 export const navigation = [
   { label: 'Chat', icon: '💬', href: '/new' },
-  { label: 'Tools', icon: '🧰', href: '/tools/lesson-plan-generator' },
+  { label: 'Tools', icon: '🧰', href: '/tools' },
   { label: 'History', icon: '⏱️', href: '/history' },
   { label: 'Notes', icon: '📝', href: '/notes' },
   { label: 'Settings', icon: '⚙️', href: '/settings' },
