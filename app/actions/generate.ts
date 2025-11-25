@@ -19,6 +19,16 @@ type GenerateProps = {
 
 export async function generateAnswer({ prompt, tool, authorId, authorEmail, attachments = [], sessionId }: GenerateProps) {
 
+  // Ensure user exists in users table FIRST
+  if (authorId && authorEmail) {
+    await supabaseServer.from('users').upsert({
+      id: authorId,
+      email: authorEmail
+    }, {
+      onConflict: 'id'
+    })
+  }
+
   // Get user profile and check limits
   const userProfile = await getUserProfile(authorId)
 
@@ -44,16 +54,6 @@ export async function generateAnswer({ prompt, tool, authorId, authorEmail, atta
 
   // Generate the AI response
   const answer = await generateTeacherResponse({ prompt, tool, attachments })
-
-  // Ensure user exists in users table before inserting chat session
-  if (authorId && authorEmail) {
-    await supabaseServer.from('users').upsert({
-      id: authorId,
-      email: authorEmail
-    }, {
-      onConflict: 'id'
-    })
-  }
 
   const currentSessionId = sessionId || crypto.randomUUID()
   // Simple title generation: first 50 chars of prompt
