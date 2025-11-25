@@ -18,14 +18,14 @@ export default function UpgradePrompt({ type, onClose, inline = false }: Upgrade
         },
         'chats': {
             title: 'Chat Limit Reached',
-            description: "You've reached your monthly chat limit on the Free plan.",
+            description: "You've reached your daily limit of 10 chats on the Free plan.",
             benefit: 'Upgrade to Pro for unlimited chats and priority support.',
             icon: '💬'
         },
         'file-uploads': {
-            title: 'File Uploads Not Available',
-            description: 'File uploads are not available on the Free plan.',
-            benefit: 'Upgrade to Pro to upload files in your chats.',
+            title: 'File Upload Limit Reached',
+            description: "You've reached your daily limit of 5 file uploads on the Free plan.",
+            benefit: 'Upgrade to Pro for unlimited file uploads.',
             icon: '📎'
         }
     }

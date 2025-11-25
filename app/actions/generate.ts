@@ -5,8 +5,8 @@ import { supabase } from '@/lib/supabase'
 import { supabaseServer } from '@/lib/supabase-server'
 import { generateTeacherResponse } from '@/lib/mistral'
 import type { AttachmentReference } from '@/lib/attachment'
-import { getUserProfile, incrementLessonPlans, incrementChats } from '@/lib/usage-tracking'
-import { canGenerateLessonPlan, canStartChat, getPlanConfig } from '@/lib/plan-config'
+import { getUserProfile, incrementLessonPlans, incrementChats, incrementFileUploads } from '@/lib/usage-tracking'
+import { canGenerateLessonPlan, canStartChat, canUploadFile, getPlanConfig } from '@/lib/plan-config'
 
 type GenerateProps = {
   prompt: string
@@ -45,6 +45,7 @@ export async function generateAnswer({ prompt, tool, authorId, authorEmail, atta
       subscriptionPlan: 'free',
       monthlyLessonPlans: 0,
       dailyChats: 0,
+      dailyFileUploads: 0,
       planResetDate: null,
       chatResetDate: null,
       profileImageUrl: null,
@@ -53,6 +54,13 @@ export async function generateAnswer({ prompt, tool, authorId, authorEmail, atta
       gradeLevels: null,
       createdAt: new Date()
     }
+  }
+
+  // Check file upload limits if attachments are present
+  if (attachments.length > 0 && !canUploadFile(userProfile.subscriptionPlan, userProfile.dailyFileUploads)) {
+    const planConfig = getPlanConfig(userProfile.subscriptionPlan)
+    const limit = planConfig.limits.fileUploadsPerDay
+    throw new Error(`You've reached your daily limit of ${limit} file uploads. Upgrade to Pro for unlimited access.`)
   }
 
   // Check plan limits based on tool type
@@ -100,6 +108,11 @@ export async function generateAnswer({ prompt, tool, authorId, authorEmail, atta
     await incrementLessonPlans(authorId)
   } else {
     await incrementChats(authorId)
+  }
+
+  // Increment file upload counter if attachments were used
+  if (attachments.length > 0) {
+    await incrementFileUploads(authorId, attachments.length)
   }
 
   revalidatePath('/')

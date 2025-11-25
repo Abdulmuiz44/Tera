@@ -7,6 +7,7 @@ import type { PlanType } from './plan-config'
 export interface UsageStats {
     monthlyLessonPlans: number
     dailyChats: number
+    dailyFileUploads: number
     planResetDate: Date
     chatResetDate: Date
 }
@@ -17,6 +18,7 @@ export interface UserProfile {
     subscriptionPlan: PlanType
     monthlyLessonPlans: number
     dailyChats: number
+    dailyFileUploads: number
     planResetDate: Date | null
     chatResetDate: Date | null
     profileImageUrl: string | null
@@ -47,6 +49,7 @@ export async function getUserProfile(userId: string): Promise<UserProfile | null
         subscriptionPlan: (data.subscription_plan || 'free') as PlanType,
         monthlyLessonPlans: data.monthly_lesson_plans || 0,
         dailyChats: data.daily_chats || 0,
+        dailyFileUploads: data.daily_file_uploads || 0,
         planResetDate: data.plan_reset_date ? new Date(data.plan_reset_date) : null,
         chatResetDate: data.chat_reset_date ? new Date(data.chat_reset_date) : null,
         profileImageUrl: data.profile_image_url,
@@ -63,7 +66,7 @@ export async function getUserProfile(userId: string): Promise<UserProfile | null
 export async function getUsageStats(userId: string): Promise<UsageStats | null> {
     const { data, error } = await supabase
         .from('users')
-        .select('monthly_lesson_plans, daily_chats, plan_reset_date, chat_reset_date')
+        .select('monthly_lesson_plans, daily_chats, daily_file_uploads, plan_reset_date, chat_reset_date')
         .eq('id', userId)
         .single()
 
@@ -75,6 +78,7 @@ export async function getUsageStats(userId: string): Promise<UsageStats | null> 
     return {
         monthlyLessonPlans: data.monthly_lesson_plans || 0,
         dailyChats: data.daily_chats || 0,
+        dailyFileUploads: data.daily_file_uploads || 0,
         planResetDate: data.plan_reset_date ? new Date(data.plan_reset_date) : new Date(),
         chatResetDate: data.chat_reset_date ? new Date(data.chat_reset_date) : new Date()
     }
@@ -110,6 +114,7 @@ export async function checkAndResetUsage(userId: string): Promise<boolean> {
         const nextChatResetDate = new Date(now)
         nextChatResetDate.setDate(nextChatResetDate.getDate() + 1)
         updates.daily_chats = 0
+        updates.daily_file_uploads = 0
         updates.chat_reset_date = nextChatResetDate.toISOString()
         needsUpdate = true
     }
@@ -179,6 +184,29 @@ export async function incrementChats(userId: string): Promise<boolean> {
     const { error: updateError } = await supabase
         .from('users')
         .update({ daily_chats: (data.daily_chats || 0) + 1 })
+        .eq('id', userId)
+
+    return !updateError
+}
+
+/**
+ * Increment file upload counter
+ */
+export async function incrementFileUploads(userId: string, count: number = 1): Promise<boolean> {
+    // First check and reset if needed
+    await checkAndResetUsage(userId)
+
+    const { data, error: fetchError } = await supabase
+        .from('users')
+        .select('daily_file_uploads')
+        .eq('id', userId)
+        .single()
+
+    if (fetchError || !data) return false
+
+    const { error: updateError } = await supabase
+        .from('users')
+        .update({ daily_file_uploads: (data.daily_file_uploads || 0) + count })
         .eq('id', userId)
 
     return !updateError
