@@ -371,7 +371,7 @@ export default function PromptShell({
   }, [user, sessionId])
 
   useEffect(() => {
-    if (conversationActive) {
+    if (conversationActive || status === 'loading') {
       requestAnimationFrame(() => {
         conversationRef.current?.scrollTo({
           top: conversationRef.current.scrollHeight,
@@ -379,7 +379,7 @@ export default function PromptShell({
         })
       })
     }
-  }, [conversations, conversationActive])
+  }, [conversations, conversationActive, status])
 
   useEffect(() => {
     if (typeof window !== 'undefined' && 'webkitSpeechRecognition' in window) {
