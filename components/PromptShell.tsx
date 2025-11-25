@@ -370,14 +370,16 @@ export default function PromptShell({
     }
   }, [user, sessionId])
 
+  const messagesEndRef = useRef<HTMLDivElement | null>(null)
+
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+  }
+
   useEffect(() => {
     if (conversationActive || status === 'loading') {
-      requestAnimationFrame(() => {
-        conversationRef.current?.scrollTo({
-          top: conversationRef.current.scrollHeight,
-          behavior: 'smooth'
-        })
-      })
+      // Small timeout to ensure DOM is updated
+      setTimeout(scrollToBottom, 100)
     }
   }, [conversations, conversationActive, status])
 
@@ -518,6 +520,7 @@ export default function PromptShell({
               </div>
             </div>
           )}
+          <div ref={messagesEndRef} />
         </div>
       </div>
 
