@@ -79,8 +79,31 @@ export async function generateAnswer({ prompt, tool, authorId, authorEmail, atta
     throw new Error(`You've reached your daily limit of ${limit} chats. Upgrade to Pro for unlimited access.`)
   }
 
+  // Fetch chat history if sessionId exists
+  let history: { role: 'user' | 'assistant'; content: string }[] = []
+
+  if (sessionId) {
+    const { data: historyData } = await supabaseServer
+      .from('chat_sessions')
+      .select('prompt, response, created_at')
+      .eq('session_id', sessionId)
+      .order('created_at', { ascending: false })
+      .limit(10)
+
+    if (historyData) {
+      // Format history and reverse to chronological order
+      history = historyData
+        .map(msg => [
+          { role: 'user' as const, content: msg.prompt },
+          { role: 'assistant' as const, content: msg.response }
+        ])
+        .flat()
+        .reverse()
+    }
+  }
+
   // Generate the AI response
-  const answer = await generateTeacherResponse({ prompt, tool, attachments })
+  const answer = await generateTeacherResponse({ prompt, tool, attachments, history })
 
   const currentSessionId = sessionId || crypto.randomUUID()
   // Simple title generation: first 50 chars of prompt

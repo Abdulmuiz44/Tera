@@ -28,11 +28,13 @@ IMPORTANT FORMATTING RULES:
 export async function generateTeacherResponse({
   prompt,
   tool,
-  attachments = [] as AttachmentReference[]
+  attachments = [] as AttachmentReference[],
+  history = [] as { role: 'user' | 'assistant'; content: string }[]
 }: {
   prompt: string
   tool: string
   attachments?: AttachmentReference[]
+  history?: { role: 'user' | 'assistant'; content: string }[]
 }) {
   // Build user message content, handling image attachments for vision support
   const imageAttachments = attachments.filter(att => att.type === 'image')
@@ -95,6 +97,7 @@ export async function generateTeacherResponse({
         model,
         messages: [
           { role: 'system', content: systemMessage },
+          ...history,
           { role: 'user', content: userContent }
         ],
         temperature: 0.2,
