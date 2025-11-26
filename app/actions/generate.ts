@@ -103,7 +103,7 @@ export async function generateAnswer({ prompt, tool, authorId, authorEmail, atta
   }
 
   // Generate the AI response
-  const answer = await generateTeacherResponse({ prompt, tool, attachments, history })
+  const answer = await generateTeacherResponse({ prompt, tool, attachments, history, userId: authorId })
 
   const currentSessionId = sessionId || crypto.randomUUID()
   // Simple title generation: first 50 chars of prompt

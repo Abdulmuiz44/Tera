@@ -61,6 +61,14 @@ CREATE TABLE usage_logs (
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
+-- User memories
+CREATE TABLE user_memories (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID REFERENCES users(id) ON DELETE CASCADE,
+  memory_text TEXT NOT NULL,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
 -- Enable RLS
 ALTER TABLE users ENABLE ROW LEVEL SECURITY;
 ALTER TABLE teacher_profiles ENABLE ROW LEVEL SECURITY;
@@ -69,6 +77,7 @@ ALTER TABLE saved_lessons ENABLE ROW LEVEL SECURITY;
 ALTER TABLE saved_quizzes ENABLE ROW LEVEL SECURITY;
 ALTER TABLE chat_sessions ENABLE ROW LEVEL SECURITY;
 ALTER TABLE usage_logs ENABLE ROW LEVEL SECURITY;
+ALTER TABLE user_memories ENABLE ROW LEVEL SECURITY;
 
 -- RLS Policies (user can only access their own data)
 CREATE POLICY "Users can view own data" ON users FOR SELECT USING (auth.uid() = id);
@@ -80,6 +89,7 @@ CREATE POLICY "Saved lessons own data" ON saved_lessons FOR ALL USING (auth.uid(
 CREATE POLICY "Saved quizzes own data" ON saved_quizzes FOR ALL USING (auth.uid() = user_id);
 CREATE POLICY "Chat sessions own data" ON chat_sessions FOR ALL USING (auth.uid() = user_id);
 CREATE POLICY "Usage logs own data" ON usage_logs FOR ALL USING (auth.uid() = user_id);
+CREATE POLICY "User memories own data" ON user_memories FOR ALL USING (auth.uid() = user_id);
 
 -- Indexes for performance
 CREATE INDEX idx_users_email ON users(email);
