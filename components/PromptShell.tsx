@@ -8,6 +8,7 @@ import type { TeacherTool } from './ToolCard'
 import type { AttachmentReference, AttachmentType } from '@/lib/attachment'
 import { supabase } from '@/lib/supabase'
 import { compressImage } from '@/lib/image-compression'
+import UpgradePrompt from './UpgradePrompt'
 
 type Message = {
   id: string
@@ -87,6 +88,7 @@ export default function PromptShell({
   const [isListening, setIsListening] = useState(false)
   const recognitionRef = useRef<any>(null)
   const [currentSessionId, setCurrentSessionId] = useState<string | null>(sessionId || null)
+  const [upgradePromptType, setUpgradePromptType] = useState<'lesson-plans' | 'chats' | 'file-uploads' | null>(null)
 
   // Update currentSessionId if prop changes (e.g. new chat from parent)
   useEffect(() => {
@@ -214,6 +216,16 @@ export default function PromptShell({
       } catch (error) {
         const message = error instanceof Error ? error.message : 'Unable to generate a reply'
         console.error('generateAnswer failed', error)
+
+        // Check for limit errors
+        if (message.includes('limit') && message.includes('chats')) {
+          setUpgradePromptType('chats')
+        } else if (message.includes('limit') && message.includes('lesson plans')) {
+          setUpgradePromptType('lesson-plans')
+        } else if (message.includes('limit') && message.includes('file uploads')) {
+          setUpgradePromptType('file-uploads')
+        }
+
         setConversations((prev) =>
           prev.map((entry) =>
             entry.id === entryId
@@ -665,6 +677,13 @@ export default function PromptShell({
         accept="image/*"
         onChange={(e) => handleAttachmentUpload(e, 'image')}
       />
+
+      {upgradePromptType && (
+        <UpgradePrompt
+          type={upgradePromptType}
+          onClose={() => setUpgradePromptType(null)}
+        />
+      )}
     </div>
   )
 }
