@@ -7,8 +7,8 @@ export const metadata = {
   title: 'Tera - AI Assistant for Teachers',
   description: 'AI assistant reimagined for teachers. Create lesson plans, generate quizzes, and get teaching support.',
   icons: {
-    icon: '/images/TERA_LOGO_ONLY.png',
-    apple: '/images/TERA_LOGO_ONLY.png',
+    icon: '/favicon.ico',
+    apple: '/favicon.ico',
   },
 }
 
@@ -16,7 +16,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="en">
       <head>
-        <link rel="icon" href="/images/TERA_LOGO_ONLY.png" />
+        {/* Favicon is handled by metadata */}
       </head>
       <body className="bg-tera-bg text-white min-h-screen font-sans">
         <AuthProvider>
