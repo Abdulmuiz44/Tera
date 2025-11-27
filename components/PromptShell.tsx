@@ -9,6 +9,7 @@ import type { AttachmentReference, AttachmentType } from '@/lib/attachment'
 import { supabase } from '@/lib/supabase'
 import { compressImage } from '@/lib/image-compression'
 import UpgradePrompt from './UpgradePrompt'
+import VoiceControls from './VoiceControls'
 
 type Message = {
   id: string
@@ -559,6 +560,7 @@ export default function PromptShell({
                             )
                           )}
                         </div>
+                        <VoiceControls text={entry.assistantMessage.content} messageId={entry.id} />
                       </div>
                     </div>
                   </div>
