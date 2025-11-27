@@ -95,28 +95,28 @@ export default function VoiceControls({ text, messageId }: VoiceControlsProps) {
     }
 
     return (
-        <div className="mt-3 flex items-center gap-2">
+        <div className="mt-3 flex flex-col sm:flex-row sm:items-center gap-2 w-full">
             {/* Compact toggle button */}
             <button
                 onClick={() => setShowControls(!showControls)}
-                className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-white/60 hover:text-white/80 text-xs transition border border-white/10"
+                className="flex items-center justify-center sm:justify-start gap-2 px-3 py-2 rounded-lg bg-white/5 hover:bg-white/10 text-white/60 hover:text-white/80 text-sm transition border border-white/10 w-full sm:w-auto"
                 title="Voice controls"
             >
-                <span className="text-sm">🔊</span>
-                {showControls ? 'Hide' : 'Voice'}
+                <span className="text-base">🔊</span>
+                <span>{showControls ? 'Hide Voice Controls' : 'Voice Controls'}</span>
             </button>
 
             {showControls && (
-                <div className="flex items-center gap-3 flex-wrap">
+                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full sm:w-auto">
                     {/* Play/Pause/Stop Controls */}
-                    <div className="flex items-center gap-1">
+                    <div className="flex items-center justify-center gap-2">
                         {!isPlaying && !isPaused && (
                             <button
                                 onClick={handlePlay}
-                                className="p-1.5 rounded-lg bg-tera-neon/20 hover:bg-tera-neon/30 text-tera-neon transition"
+                                className="p-2 rounded-lg bg-tera-neon/20 hover:bg-tera-neon/30 text-tera-neon transition"
                                 title="Play"
                             >
-                                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
                                     <path d="M6.3 2.841A1.5 1.5 0 004 4.11V15.89a1.5 1.5 0 002.3 1.269l9.344-5.89a1.5 1.5 0 000-2.538L6.3 2.84z" />
                                 </svg>
                             </button>
@@ -125,10 +125,10 @@ export default function VoiceControls({ text, messageId }: VoiceControlsProps) {
                         {isPlaying && (
                             <button
                                 onClick={handlePause}
-                                className="p-1.5 rounded-lg bg-yellow-500/20 hover:bg-yellow-500/30 text-yellow-500 transition"
+                                className="p-2 rounded-lg bg-yellow-500/20 hover:bg-yellow-500/30 text-yellow-500 transition"
                                 title="Pause"
                             >
-                                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
                                     <path d="M5.75 3a.75.75 0 00-.75.75v12.5c0 .414.336.75.75.75h1.5a.75.75 0 00.75-.75V3.75A.75.75 0 007.25 3h-1.5zM12.75 3a.75.75 0 00-.75.75v12.5c0 .414.336.75.75.75h1.5a.75.75 0 00.75-.75V3.75a.75.75 0 00-.75-.75h-1.5z" />
                                 </svg>
                             </button>
@@ -137,10 +137,10 @@ export default function VoiceControls({ text, messageId }: VoiceControlsProps) {
                         {isPaused && (
                             <button
                                 onClick={handlePlay}
-                                className="p-1.5 rounded-lg bg-tera-neon/20 hover:bg-tera-neon/30 text-tera-neon transition"
+                                className="p-2 rounded-lg bg-tera-neon/20 hover:bg-tera-neon/30 text-tera-neon transition"
                                 title="Resume"
                             >
-                                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
                                     <path d="M6.3 2.841A1.5 1.5 0 004 4.11V15.89a1.5 1.5 0 002.3 1.269l9.344-5.89a1.5 1.5 0 000-2.538L6.3 2.84z" />
                                 </svg>
                             </button>
@@ -149,10 +149,10 @@ export default function VoiceControls({ text, messageId }: VoiceControlsProps) {
                         {(isPlaying || isPaused) && (
                             <button
                                 onClick={handleStop}
-                                className="p-1.5 rounded-lg bg-red-500/20 hover:bg-red-500/30 text-red-500 transition"
+                                className="p-2 rounded-lg bg-red-500/20 hover:bg-red-500/30 text-red-500 transition"
                                 title="Stop"
                             >
-                                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
                                     <path d="M5.25 3A2.25 2.25 0 003 5.25v9.5A2.25 2.25 0 005.25 17h9.5A2.25 2.25 0 0017 14.75v-9.5A2.25 2.25 0 0014.75 3h-9.5z" />
                                 </svg>
                             </button>
@@ -163,7 +163,7 @@ export default function VoiceControls({ text, messageId }: VoiceControlsProps) {
                     <select
                         value={selectedVoice}
                         onChange={(e) => setSelectedVoice(e.target.value)}
-                        className="px-2 py-1 rounded-lg bg-white/5 border border-white/10 text-white/80 text-xs focus:border-tera-neon focus:outline-none hover:bg-white/10 transition"
+                        className="px-3 py-2 rounded-lg bg-white/5 border border-white/10 text-white/80 text-sm focus:border-tera-neon focus:outline-none hover:bg-white/10 transition w-full sm:w-auto"
                         disabled={isPlaying}
                     >
                         {voices.map((voice) => (
@@ -174,8 +174,8 @@ export default function VoiceControls({ text, messageId }: VoiceControlsProps) {
                     </select>
 
                     {/* Speed Control */}
-                    <div className="flex items-center gap-2">
-                        <label className="text-xs text-white/60">Speed:</label>
+                    <div className="flex items-center gap-2 justify-between sm:justify-start">
+                        <label className="text-sm text-white/60">Speed:</label>
                         <input
                             type="range"
                             min="0.5"
@@ -183,10 +183,10 @@ export default function VoiceControls({ text, messageId }: VoiceControlsProps) {
                             step="0.1"
                             value={speed}
                             onChange={(e) => setSpeed(parseFloat(e.target.value))}
-                            className="w-20 accent-tera-neon"
+                            className="flex-1 sm:w-24 accent-tera-neon"
                             disabled={isPlaying}
                         />
-                        <span className="text-xs text-white/60 w-8">{speed.toFixed(1)}x</span>
+                        <span className="text-sm text-white/60 min-w-[2.5rem] text-right">{speed.toFixed(1)}x</span>
                     </div>
                 </div>
             )}

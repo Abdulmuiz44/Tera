@@ -494,16 +494,13 @@ export default function PromptShell({
         <div className="mx-auto max-w-3xl space-y-8">
           {showInitialPrompt ? (
             <div className="fixed inset-0 flex items-center justify-center text-center pointer-events-none">
-              <div className="pointer-events-auto">
-                <div className="mb-6 rounded-full bg-gradient-to-br from-tera-neon/20 to-transparent p-4 mx-auto w-fit">
-                  <span className="flex items-center justify-center w-24 h-24">
-                    <Image src="/images/TERA_LOGO_ONLY.png" alt="Tera" width={80} height={80} className="object-contain" />
+              <div className="pointer-events-auto flex flex-col items-center">
+                <div className="mb-8 rounded-full bg-gradient-to-br from-tera-neon/20 to-transparent p-6 mx-auto w-fit">
+                  <span className="flex items-center justify-center w-32 h-32">
+                    <Image src="/images/TERA_LOGO_ONLY.png" alt="Tera" width={120} height={120} className="object-contain" />
                   </span>
                 </div>
-                <h2 className="mb-2 text-2xl font-semibold text-white">How can Tera help you teach today?</h2>
-                <p className="max-w-md text-white/60">
-                  I can help you create lesson plans, generate quizzes, or brainstorm activities.
-                </p>
+                <h2 className="text-3xl font-semibold text-white">How can Tera help you today?</h2>
               </div>
             </div>
           ) : (
