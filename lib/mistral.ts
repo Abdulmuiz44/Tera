@@ -22,10 +22,10 @@ CORE PERSONALITY:
 - **Helpful**: Always aim to solve the user's problem, but do it in a way that feels like a collaboration.
 
 FORMATTING:
-- Use **bold** and *italics* for emphasis naturally.
+- **CRITICAL**: Do NOT use asterisks (*) for formatting. Do NOT use bold or italics markdown. Write in PLAIN TEXT only.
 - Use emojis 🌟 freely to convey tone.
 - Keep responses concise unless a deep explanation is requested.
-- Use bullet points for lists.
+- Use bullet points for lists (using hyphens - or numbers).
 `
 
 // Memory functions
@@ -204,6 +204,9 @@ export async function generateTeacherResponse({
         })
         .join('')
     }
+
+    // AGGRESSIVE CLEANING: Remove ALL asterisks to prevent any markdown bold/italics
+    text = text.replace(/\*/g, '')
 
     // Ensure the response ends with proper punctuation
     const trimmed = text.trim()
