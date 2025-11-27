@@ -493,7 +493,7 @@ export default function PromptShell({
       <div className="flex-1 overflow-y-auto px-4 py-6 md:px-8" ref={conversationRef}>
         <div className="mx-auto max-w-3xl space-y-8">
           {showInitialPrompt ? (
-            <div className="fixed inset-0 flex items-center justify-center text-center pointer-events-none">
+            <div className="fixed inset-0 flex items-center justify-center text-center pointer-events-none -mt-20">
               <div className="pointer-events-auto flex flex-col items-center">
                 <div className="mb-8 rounded-full bg-gradient-to-br from-tera-neon/20 to-transparent p-6 mx-auto w-fit">
                   <span className="flex items-center justify-center w-32 h-32">
@@ -541,9 +541,9 @@ export default function PromptShell({
 
                 {/* Assistant Message */}
                 {entry.assistantMessage && (
-                  <div className="flex justify-start">
-                    <div className="max-w-[85%]">
-                      <div className="rounded-2xl bg-tera-panel border border-white/5 px-6 py-4 text-white/90 shadow-lg">
+                  <div className="flex justify-start w-full">
+                    <div className="w-full md:max-w-[85%]">
+                      <div className="rounded-2xl bg-tera-panel border border-white/5 px-4 md:px-6 py-4 text-white/90 shadow-lg">
                         <div className="space-y-4">
                           {structureResponse(entry.assistantMessage.content).map((block, idx) =>
                             block.isHeader ? (

@@ -7,9 +7,22 @@ export const metadata = {
   title: 'Tera - AI Assistant for Teachers',
   description: 'AI assistant reimagined for teachers. Create lesson plans, generate quizzes, and get teaching support.',
   icons: {
-    icon: '/favicon.ico',
-    apple: '/favicon.ico',
+    icon: [
+      { url: '/favicon.ico', sizes: 'any' },
+      { url: '/app/icon.png', type: 'image/png', sizes: '192x192' },
+    ],
+    apple: [
+      { url: '/app/icon.png', sizes: '180x180', type: 'image/png' },
+    ],
+    shortcut: '/favicon.ico',
   },
+  manifest: '/manifest.json',
+  viewport: {
+    width: 'device-width',
+    initialScale: 1,
+    maximumScale: 1,
+  },
+  themeColor: '#00FFA3',
 }
 
 export default function RootLayout({ children }: { children: ReactNode }) {
