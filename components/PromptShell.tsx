@@ -89,6 +89,7 @@ export default function PromptShell({
   const recognitionRef = useRef<any>(null)
   const [currentSessionId, setCurrentSessionId] = useState<string | null>(sessionId || null)
   const [upgradePromptType, setUpgradePromptType] = useState<'lesson-plans' | 'chats' | 'file-uploads' | null>(null)
+  const requestIdRef = useRef(0)
 
   // Update currentSessionId if prop changes (e.g. new chat from parent)
   useEffect(() => {
@@ -170,8 +171,17 @@ export default function PromptShell({
     attachments: attachments.length > 0 ? attachments : undefined
   })
 
+  const handleStop = () => {
+    // Increment request ID to invalidate any pending requests
+    requestIdRef.current += 1
+    setStatus('idle')
+  }
+
   const processMessage = useCallback((messageToSend: string, attachmentsToSend: AttachmentReference[]) => {
     setStatus('loading')
+    // Increment request ID for new request
+    const currentRequestId = ++requestIdRef.current
+
     const entryId = editingMessageId ?? createId()
     const userMessage = buildUserMessage(entryId, messageToSend, attachmentsToSend)
     setConversations((prev) => {
@@ -190,14 +200,21 @@ export default function PromptShell({
     }
     startTransition(async () => {
       try {
-        const { answer, sessionId: newSessionId } = await generateAnswer({
+        const { answer, sessionId: newSessionId, chatId: savedChatId } = await generateAnswer({
           prompt: messageToSend,
           tool: tool.name,
           authorId: user?.id ?? '',
           authorEmail: user?.email ?? undefined,
           attachments: attachmentsToSend,
-          sessionId: currentSessionId
+          sessionId: currentSessionId,
+          chatId: editingMessageId ?? undefined
         })
+
+        // Check if this request is still valid (hasn't been stopped or superseded)
+        if (currentRequestId !== requestIdRef.current) {
+          console.log('🛑 Request cancelled/superseded, ignoring response')
+          return
+        }
 
         if (newSessionId && newSessionId !== currentSessionId) {
           setCurrentSessionId(newSessionId)
@@ -210,10 +227,24 @@ export default function PromptShell({
         }
         setConversations((prev) =>
           prev.map((entry) =>
-            entry.id === entryId ? { ...entry, assistantMessage, sessionId: newSessionId } : entry
+            entry.id === entryId ? {
+              ...entry,
+              assistantMessage,
+              sessionId: newSessionId
+            } : entry
           )
         )
+
+        // Update editingMessageId to the saved chat ID for future edits
+        if (editingMessageId && savedChatId) {
+          setEditingMessageId(savedChatId)
+        }
       } catch (error) {
+        // Check if this request is still valid
+        if (currentRequestId !== requestIdRef.current) {
+          return
+        }
+
         const message = error instanceof Error ? error.message : 'Unable to generate a reply'
         console.error('generateAnswer failed', error)
 
@@ -242,7 +273,10 @@ export default function PromptShell({
         )
         setAttachmentMessage(message)
       } finally {
-        setStatus('idle')
+        // Only reset status if this is still the active request
+        if (currentRequestId === requestIdRef.current) {
+          setStatus('idle')
+        }
       }
       // Removed setPrompt('') and setPendingAttachments([]) from here to clear immediately
       setEditingMessageId(null)
@@ -624,6 +658,7 @@ export default function PromptShell({
               <div className="mb-1.5 mr-1.5">
                 {showStopButton && (
                   <button
+                    onClick={handleStop}
                     className="flex h-9 w-9 items-center justify-center rounded-full bg-tera-neon text-white transition hover:bg-tera-neon/90"
                     title="Stop generating"
                   >

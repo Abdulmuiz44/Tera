@@ -15,9 +15,10 @@ type GenerateProps = {
   authorEmail?: string
   attachments?: AttachmentReference[]
   sessionId?: string | null
+  chatId?: string
 }
 
-export async function generateAnswer({ prompt, tool, authorId, authorEmail, attachments = [], sessionId }: GenerateProps) {
+export async function generateAnswer({ prompt, tool, authorId, authorEmail, attachments = [], sessionId, chatId }: GenerateProps) {
 
   // Ensure user exists in users table FIRST
   if (authorId && authorEmail) {
@@ -109,21 +110,44 @@ export async function generateAnswer({ prompt, tool, authorId, authorEmail, atta
   // Simple title generation: first 50 chars of prompt
   const title = sessionId ? undefined : prompt.slice(0, 50) + (prompt.length > 50 ? '...' : '')
 
-  const { data, error } = await supabaseServer.from('chat_sessions').insert({
-    user_id: authorId,
-    tool,
-    prompt,
-    response: answer,
-    attachments,
-    created_at: new Date().toISOString(),
-    session_id: currentSessionId,
-    title: title
-  })
-    .select('id')
-    .single()
+  let savedChatId = chatId
 
-  if (error) {
-    throw error
+  if (chatId) {
+    // Update existing row
+    const { error } = await supabaseServer
+      .from('chat_sessions')
+      .update({
+        prompt,
+        response: answer,
+        attachments,
+        // We don't update created_at or session_id usually, but ensure they match just in case?
+        // Usually just updating content is enough.
+      })
+      .eq('id', chatId)
+      .eq('user_id', authorId)
+
+    if (error) {
+      throw error
+    }
+  } else {
+    // Insert new row
+    const { data, error } = await supabaseServer.from('chat_sessions').insert({
+      user_id: authorId,
+      tool,
+      prompt,
+      response: answer,
+      attachments,
+      created_at: new Date().toISOString(),
+      session_id: currentSessionId,
+      title: title
+    })
+      .select('id')
+      .single()
+
+    if (error) {
+      throw error
+    }
+    savedChatId = data.id
   }
 
   // Increment usage counters after successful generation
@@ -142,5 +166,5 @@ export async function generateAnswer({ prompt, tool, authorId, authorEmail, atta
   revalidatePath('/history')
   revalidatePath('/profile')
 
-  return { answer, sessionId: currentSessionId }
+  return { answer, sessionId: currentSessionId, chatId: savedChatId }
 }
