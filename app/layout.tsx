@@ -2,6 +2,7 @@ import '@/styles/globals.css'
 import type { ReactNode } from 'react'
 import { AuthProvider } from '@/components/AuthProvider'
 import AppLayout from '@/components/AppLayout'
+import { Analytics } from "@vercel/analytics/react"
 
 export const metadata = {
   title: 'Tera - AI Assistant for Teachers',
@@ -35,6 +36,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         <AuthProvider>
           <AppLayout>
             {children}
+            <Analytics />
           </AppLayout>
         </AuthProvider>
       </body>
