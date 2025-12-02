@@ -82,6 +82,7 @@ export default function PromptShell({
   const [historyLoading, setHistoryLoading] = useState(false)
   const fileInputRef = useRef<HTMLInputElement | null>(null)
   const imageInputRef = useRef<HTMLInputElement | null>(null)
+  const cameraInputRef = useRef<HTMLInputElement | null>(null)
   const [isPending, startTransition] = useTransition()
   const conversationRef = useRef<HTMLDivElement | null>(null)
   const [queuedMessage, setQueuedMessage] = useState<QueuedMessage | null>(null)
@@ -121,9 +122,11 @@ export default function PromptShell({
     return (await response.json()) as AttachmentReference
   }
 
-  const handleFileSelect = (type: 'image' | 'file') => {
+  const handleFileSelect = (type: 'image' | 'file' | 'camera') => {
     if (type === 'image') {
       imageInputRef.current?.click()
+    } else if (type === 'camera') {
+      cameraInputRef.current?.click()
     } else {
       fileInputRef.current?.click()
     }
@@ -616,6 +619,12 @@ export default function PromptShell({
                   {attachmentOpen && (
                     <div className="absolute bottom-full left-0 mb-2 w-48 overflow-hidden rounded-xl border border-white/10 bg-tera-panel shadow-xl backdrop-blur-xl">
                       <button
+                        onClick={() => handleFileSelect('camera')}
+                        className="flex w-full items-center gap-3 px-4 py-3 text-left text-sm text-white hover:bg-white/5"
+                      >
+                        <span>📷</span> Open Camera
+                      </button>
+                      <button
                         onClick={() => handleFileSelect('image')}
                         className="flex w-full items-center gap-3 px-4 py-3 text-left text-sm text-white hover:bg-white/5"
                       >
@@ -709,6 +718,14 @@ export default function PromptShell({
         ref={imageInputRef}
         className="hidden"
         accept="image/*"
+        onChange={(e) => handleAttachmentUpload(e, 'image')}
+      />
+      <input
+        type="file"
+        ref={cameraInputRef}
+        className="hidden"
+        accept="image/*"
+        capture="environment"
         onChange={(e) => handleAttachmentUpload(e, 'image')}
       />
 
