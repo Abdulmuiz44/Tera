@@ -220,12 +220,27 @@ export async function generateTeacherResponse({
     }
   }
 
+  // Determine if we're in "Universal" mode or a specific tool mode
+  const isUniversalMode = tool === 'Universal Companion'
+
+  let toolContext = ''
+  if (!isUniversalMode) {
+    toolContext = `\nActive Tool: ${tool}\nYour role is to strictly fulfill the purpose of this tool.`
+  } else {
+    toolContext = `\nActive Mode: Universal Companion\n
+    INSTRUCTION:
+    1. Analyze the user's prompt to understand their intent (Are they a teacher planning a lesson? A student needing help? A curious learner?).
+    2. Adapt your personality and response style to match their need.
+    3. If they ask for something specific that matches one of your known capabilities (like a lesson plan, quiz, or explanation), provide it naturally without needing to "switch tools".
+    4. Be a flexible, all-purpose AI companion.`
+  }
+
   let userContent: any
 
   if (imageAttachments.length > 0) {
     // Vision API expects an array of content blocks
     userContent = [
-      { type: 'text', text: `Tool: ${tool}. Prompt: ${enhancedPrompt}` },
+      { type: 'text', text: `Context: ${toolContext}. User Prompt: ${enhancedPrompt}` },
       ...imageAttachments.map(img => ({
         type: 'image_url',
         image_url: {
@@ -235,7 +250,7 @@ export async function generateTeacherResponse({
     ]
   } else {
     // Simple text when no images
-    userContent = `Tool: ${tool}. Prompt: ${enhancedPrompt}`
+    userContent = `Context: ${toolContext}. User Prompt: ${enhancedPrompt}`
   }
 
   try {

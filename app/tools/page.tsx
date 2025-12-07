@@ -3,12 +3,21 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import Sidebar from '@/components/Sidebar'
-import { teacherTools, slugify } from '@/lib/teacher-tools'
+import { teacherTools, studentTools, learnerTools, slugify } from '@/lib/tools-data'
 import { useAuth } from '@/components/AuthProvider'
+
+type ToolTab = 'teachers' | 'students' | 'learners'
 
 export default function ToolsPage() {
     const [sidebarExpanded, setSidebarExpanded] = useState(false)
+    const [activeTab, setActiveTab] = useState<ToolTab>('teachers')
     const { user, signOut } = useAuth()
+
+    const activeTools = activeTab === 'teachers'
+        ? teacherTools
+        : activeTab === 'students'
+            ? studentTools
+            : learnerTools
 
     return (
         <div className="flex flex-col md:flex-row h-screen w-full bg-[#050505] text-white">
@@ -29,17 +38,50 @@ export default function ToolsPage() {
                 </button>
 
                 <div className="max-w-6xl mx-auto space-y-8 pt-10 md:pt-0">
-                    <div className="space-y-2">
-                        <h1 className="text-3xl font-bold bg-gradient-to-r from-white to-white/60 bg-clip-text text-transparent">
-                            Teacher Tools
-                        </h1>
-                        <p className="text-white/60 max-w-2xl">
-                            Select a tool to get started. Each tool is designed to help you save time and improve your teaching workflow.
-                        </p>
+                    <div className="space-y-6">
+                        <div className="space-y-2">
+                            <h1 className="text-3xl font-bold bg-gradient-to-r from-white to-white/60 bg-clip-text text-transparent">
+                                Discover Tools
+                            </h1>
+                            <p className="text-white/60 max-w-2xl">
+                                Select a tool to get started. Each tool is designed to help you save time and improve your workflow.
+                            </p>
+                        </div>
+
+                        {/* Tabs */}
+                        <div className="flex gap-2">
+                            <button
+                                onClick={() => setActiveTab('teachers')}
+                                className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${activeTab === 'teachers'
+                                        ? 'bg-tera-neon text-black'
+                                        : 'bg-white/5 text-white/60 hover:bg-white/10 hover:text-white'
+                                    }`}
+                            >
+                                For Teachers
+                            </button>
+                            <button
+                                onClick={() => setActiveTab('students')}
+                                className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${activeTab === 'students'
+                                        ? 'bg-tera-neon text-black'
+                                        : 'bg-white/5 text-white/60 hover:bg-white/10 hover:text-white'
+                                    }`}
+                            >
+                                For Students
+                            </button>
+                            <button
+                                onClick={() => setActiveTab('learners')}
+                                className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${activeTab === 'learners'
+                                        ? 'bg-tera-neon text-black'
+                                        : 'bg-white/5 text-white/60 hover:bg-white/10 hover:text-white'
+                                    }`}
+                            >
+                                For Everyone
+                            </button>
+                        </div>
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                        {teacherTools.map((tool) => (
+                        {activeTools.map((tool) => (
                             <Link
                                 key={tool.name}
                                 href={`/new?tool=${slugify(tool.name)}`}

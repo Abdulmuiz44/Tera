@@ -5,13 +5,13 @@ import Link from 'next/link'
 import Sidebar, { navigation } from './Sidebar'
 import PromptShell from './PromptShell'
 import type { TeacherTool } from './ToolCard'
-import { teacherTools, slugify } from '@/lib/teacher-tools'
+import { teacherTools, studentTools, learnerTools, UniversalTool, slugify } from '@/lib/tools-data'
 import { supabase } from '@/lib/supabase'
 import { useAuth } from './AuthProvider'
 import { useSearchParams, usePathname } from 'next/navigation'
 
 function MainShellContent() {
-  const [selectedTool, setSelectedTool] = useState<TeacherTool>(teacherTools[0])
+  const [selectedTool, setSelectedTool] = useState<TeacherTool>(UniversalTool)
   const [menuOpen, setMenuOpen] = useState(false)
   const [sidebarExpanded, setSidebarExpanded] = useState(false)
   const [authDialog, setAuthDialog] = useState<'signIn' | 'signUp' | null>(null)
@@ -39,7 +39,8 @@ function MainShellContent() {
   useEffect(() => {
     if (urlTool) {
       const toolSlug = urlTool.toLowerCase()
-      const foundTool = teacherTools.find(t => slugify(t.name) === toolSlug)
+      const allTools = [...teacherTools, ...studentTools, ...learnerTools]
+      const foundTool = allTools.find(t => slugify(t.name) === toolSlug)
 
       if (foundTool) {
         setSelectedTool(foundTool)
