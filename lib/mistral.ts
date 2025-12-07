@@ -1,4 +1,4 @@
-import { Mistral } from '@mistralai/mistralai'
+// import { Mistral } from '@mistralai/mistralai' -- Removed unused import
 import type { AttachmentReference } from './attachment'
 import { extractTextFromFile } from './extract-text'
 import { supabaseServer } from './supabase-server'
@@ -7,7 +7,7 @@ if (!process.env.MISTRAL_API_KEY) {
   throw new Error('Mistral API key missing in environment variables')
 }
 
-const client = new Mistral({ apiKey: process.env.MISTRAL_API_KEY })
+// const client = new Mistral({ apiKey: process.env.MISTRAL_API_KEY }) -- Removed unused client
 
 const model = 'pixtral-large-latest'
 
@@ -63,7 +63,7 @@ async function getMemories(userId: string): Promise<string> {
 
   if (!data || data.length === 0) return ''
 
-  return data.map(m => `- ${m.memory_text}`).join('\n')
+  return data.map((m: any) => `- ${m.memory_text}`).join('\n')
 }
 
 // Get recent conversation history for context
@@ -78,7 +78,7 @@ async function getRecentConversations(userId: string): Promise<string> {
   if (!data || data.length === 0) return ''
 
   // Format conversations in a readable way
-  const conversations = data.reverse().map(chat => {
+  const conversations = data.reverse().map((chat: any) => {
     return `User: ${chat.prompt}\nTera: ${chat.response.substring(0, 150)}...` // Truncate long responses
   })
 
