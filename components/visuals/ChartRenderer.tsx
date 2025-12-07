@@ -65,8 +65,6 @@ export default function ChartRenderer({ config }: ChartRendererProps) {
         const svgData = new XMLSerializer().serializeToString(svg)
 
         // Add minimal styling to ensure it looks good on white background if transparent
-        // Recharts SVGs usually transparent. Let's force a dark background for "Tera" style or white for printing?
-        // Let's go with dark background matching the app theme for fidelity.
         const svgBlob = new Blob([svgData], { type: 'image/svg+xml;charset=utf-8' })
         const url = URL.createObjectURL(svgBlob)
 
@@ -92,9 +90,12 @@ export default function ChartRenderer({ config }: ChartRendererProps) {
         img.src = url
     }
 
+    const normalizedType = (type || '').toLowerCase()
+
     const renderChart = () => {
-        switch (type) {
+        switch (normalizedType) {
             case 'line':
+            case 'linechart':
                 return (
                     <LineChart data={data}>
                         <CartesianGrid strokeDasharray="3 3" stroke="#333" />
@@ -117,6 +118,7 @@ export default function ChartRenderer({ config }: ChartRendererProps) {
                     </LineChart>
                 )
             case 'bar':
+            case 'barchart':
                 return (
                     <BarChart data={data}>
                         <CartesianGrid strokeDasharray="3 3" stroke="#333" />
@@ -136,6 +138,7 @@ export default function ChartRenderer({ config }: ChartRendererProps) {
                     </BarChart>
                 )
             case 'area':
+            case 'areachart':
                 return (
                     <AreaChart data={data}>
                         <CartesianGrid strokeDasharray="3 3" stroke="#333" />
@@ -157,6 +160,7 @@ export default function ChartRenderer({ config }: ChartRendererProps) {
                     </AreaChart>
                 )
             case 'radar':
+            case 'radarchart':
                 return (
                     <RadarChart cx="50%" cy="50%" outerRadius="80%" data={data}>
                         <PolarGrid stroke="#333" />
@@ -177,6 +181,7 @@ export default function ChartRenderer({ config }: ChartRendererProps) {
                     </RadarChart>
                 )
             case 'scatter':
+            case 'scatterplot':
                 return (
                     <ScatterChart>
                         <CartesianGrid strokeDasharray="3 3" stroke="#333" />
@@ -196,6 +201,8 @@ export default function ChartRenderer({ config }: ChartRendererProps) {
                     </ScatterChart>
                 )
             case 'composed':
+            case 'composedchart':
+            case 'combo':
                 return (
                     <ComposedChart data={data}>
                         <CartesianGrid strokeDasharray="3 3" stroke="#333" />
@@ -212,6 +219,7 @@ export default function ChartRenderer({ config }: ChartRendererProps) {
                     </ComposedChart>
                 )
             case 'pie':
+            case 'piechart':
                 return (
                     <PieChart>
                         <Pie
@@ -257,7 +265,14 @@ export default function ChartRenderer({ config }: ChartRendererProps) {
             )}
             <div className="h-[300px] w-full text-xs">
                 <ResponsiveContainer width="100%" height="100%">
-                    {renderChart() || <div className="flex items-center justify-center h-full text-white/40">Invalid Chart Config</div>}
+                    {renderChart() || (
+                        <div className="flex flex-col items-center justify-center h-full text-white/40 space-y-2">
+                            <span>Invalid Chart Config</span>
+                            <span className="text-xs font-mono text-white/20">
+                                Type received: {String(type || 'undefined')}
+                            </span>
+                        </div>
+                    )}
                 </ResponsiveContainer>
             </div>
         </div>

@@ -59,8 +59,8 @@ const parseContent = (content: string): ContentBlock[] => {
         const [, lang, type, code] = match
         const cleanCode = code ? code.trim() : ''
 
-        // Check if code contains chart keys
-        const isChart = (c: string) => c.includes('"series"') && c.includes('"data"') && c.includes('"type"')
+        // Check if code contains chart keys (relaxed check)
+        const isChart = (c: string) => (c.includes('"data"') && c.includes('"type"')) || (c.includes('"series"'))
 
         if ((lang === 'json' && type === 'chart') || (lang === 'json' && isChart(cleanCode))) {
           try {
