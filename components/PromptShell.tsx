@@ -57,9 +57,12 @@ const parseContent = (content: string): ContentBlock[] => {
       const match = part.match(/```(\w+)?(?::(\w+))?\n([\s\S]*?)```/)
       if (match) {
         const [, lang, type, code] = match
-        const cleanCode = code.trim()
+        const cleanCode = code ? code.trim() : ''
 
-        if (lang === 'json' && type === 'chart') {
+        // Check if code contains chart keys
+        const isChart = (c: string) => c.includes('"series"') && c.includes('"data"') && c.includes('"type"')
+
+        if ((lang === 'json' && type === 'chart') || (lang === 'json' && isChart(cleanCode))) {
           try {
             const config = JSON.parse(cleanCode)
             blocks.push({ type: 'chart', config })
