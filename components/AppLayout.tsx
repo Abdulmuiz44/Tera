@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, type ReactNode } from 'react'
+import { useState, ReactNode } from 'react'
 import Sidebar from './Sidebar'
 import { useAuth } from './AuthProvider'
 
