@@ -1,6 +1,6 @@
 "use client"
 
-import React from 'react'
+import React, { useRef } from 'react'
 import {
     LineChart,
     Line,
@@ -10,24 +10,36 @@ import {
     Area,
     PieChart,
     Pie,
+    RadarChart,
+    Radar,
+    PolarGrid,
+    PolarAngleAxis,
+    PolarRadiusAxis,
+    ScatterChart,
+    Scatter,
+    ComposedChart,
     XAxis,
     YAxis,
     CartesianGrid,
     Tooltip,
     Legend,
     ResponsiveContainer,
-    Cell
+    Cell,
+    ZAxis
 } from 'recharts'
 
 interface ChartData {
-    type: 'line' | 'bar' | 'area' | 'pie'
+    type: 'line' | 'bar' | 'area' | 'pie' | 'radar' | 'scatter' | 'composed'
     title?: string
     xAxisKey?: string
+    yAxisKey?: string
+    zAxisKey?: string // For bubble charts or scatter weights
     data: any[]
     series: Array<{
         key: string
         color: string
         name?: string
+        type?: 'line' | 'bar' | 'area' | 'scatter' // For composed charts
     }>
 }
 
@@ -35,10 +47,50 @@ interface ChartRendererProps {
     config: ChartData
 }
 
-const COLORS = ['#00FFA3', '#00B8D9', '#FF5630', '#FFAB00', '#36B37E', '#6554C0']
+const COLORS = ['#00FFA3', '#00B8D9', '#FF5630', '#FFAB00', '#36B37E', '#6554C0', '#FF00E6', '#2979FF']
 
 export default function ChartRenderer({ config }: ChartRendererProps) {
-    const { type, data, series, xAxisKey = 'name', title } = config
+    const { type, data, series, xAxisKey = 'name', yAxisKey, zAxisKey, title } = config
+    const chartRef = useRef<HTMLDivElement>(null)
+
+    const handleDownload = () => {
+        if (!chartRef.current) return
+
+        const svg = chartRef.current.querySelector('svg')
+        if (!svg) return
+
+        // Create a canvas to draw the SVG
+        const canvas = document.createElement('canvas')
+        const ctx = canvas.getContext('2d')
+        const svgData = new XMLSerializer().serializeToString(svg)
+
+        // Add minimal styling to ensure it looks good on white background if transparent
+        // Recharts SVGs usually transparent. Let's force a dark background for "Tera" style or white for printing?
+        // Let's go with dark background matching the app theme for fidelity.
+        const svgBlob = new Blob([svgData], { type: 'image/svg+xml;charset=utf-8' })
+        const url = URL.createObjectURL(svgBlob)
+
+        const img = new Image()
+        img.onload = () => {
+            canvas.width = svg.clientWidth || 600
+            canvas.height = svg.clientHeight || 400
+            if (ctx) {
+                ctx.fillStyle = '#0A0A0A' // Match container bg
+                ctx.fillRect(0, 0, canvas.width, canvas.height)
+                ctx.drawImage(img, 0, 0)
+
+                const pngUrl = canvas.toDataURL('image/png')
+                const downloadLink = document.createElement('a')
+                downloadLink.href = pngUrl
+                downloadLink.download = `${title ? title.replace(/\s+/g, '_') : 'tera_chart'}.png`
+                document.body.appendChild(downloadLink)
+                downloadLink.click()
+                document.body.removeChild(downloadLink)
+                URL.revokeObjectURL(url)
+            }
+        }
+        img.src = url
+    }
 
     const renderChart = () => {
         switch (type) {
@@ -48,10 +100,7 @@ export default function ChartRenderer({ config }: ChartRendererProps) {
                         <CartesianGrid strokeDasharray="3 3" stroke="#333" />
                         <XAxis dataKey={xAxisKey} stroke="#888" />
                         <YAxis stroke="#888" />
-                        <Tooltip
-                            contentStyle={{ backgroundColor: '#111', border: '1px solid #333' }}
-                            itemStyle={{ color: '#fff' }}
-                        />
+                        <Tooltip contentStyle={{ backgroundColor: '#111', border: '1px solid #333' }} itemStyle={{ color: '#fff' }} />
                         <Legend wrapperStyle={{ paddingTop: '10px' }} />
                         {series.map((s, i) => (
                             <Line
@@ -73,10 +122,7 @@ export default function ChartRenderer({ config }: ChartRendererProps) {
                         <CartesianGrid strokeDasharray="3 3" stroke="#333" />
                         <XAxis dataKey={xAxisKey} stroke="#888" />
                         <YAxis stroke="#888" />
-                        <Tooltip
-                            contentStyle={{ backgroundColor: '#111', border: '1px solid #333' }}
-                            itemStyle={{ color: '#fff' }}
-                        />
+                        <Tooltip contentStyle={{ backgroundColor: '#111', border: '1px solid #333' }} itemStyle={{ color: '#fff' }} />
                         <Legend wrapperStyle={{ paddingTop: '10px' }} />
                         {series.map((s, i) => (
                             <Bar
@@ -95,10 +141,7 @@ export default function ChartRenderer({ config }: ChartRendererProps) {
                         <CartesianGrid strokeDasharray="3 3" stroke="#333" />
                         <XAxis dataKey={xAxisKey} stroke="#888" />
                         <YAxis stroke="#888" />
-                        <Tooltip
-                            contentStyle={{ backgroundColor: '#111', border: '1px solid #333' }}
-                            itemStyle={{ color: '#fff' }}
-                        />
+                        <Tooltip contentStyle={{ backgroundColor: '#111', border: '1px solid #333' }} itemStyle={{ color: '#fff' }} />
                         <Legend wrapperStyle={{ paddingTop: '10px' }} />
                         {series.map((s, i) => (
                             <Area
@@ -112,6 +155,61 @@ export default function ChartRenderer({ config }: ChartRendererProps) {
                             />
                         ))}
                     </AreaChart>
+                )
+            case 'radar':
+                return (
+                    <RadarChart cx="50%" cy="50%" outerRadius="80%" data={data}>
+                        <PolarGrid stroke="#333" />
+                        <PolarAngleAxis dataKey={xAxisKey} tick={{ fill: '#888', fontSize: 12 }} />
+                        <PolarRadiusAxis angle={30} domain={[0, 'auto']} tick={{ fill: '#888' }} />
+                        <Tooltip contentStyle={{ backgroundColor: '#111', border: '1px solid #333' }} itemStyle={{ color: '#fff' }} />
+                        <Legend wrapperStyle={{ paddingTop: '10px' }} />
+                        {series.map((s, i) => (
+                            <Radar
+                                key={s.key}
+                                name={s.name || s.key}
+                                dataKey={s.key}
+                                stroke={s.color || COLORS[i % COLORS.length]}
+                                fill={s.color || COLORS[i % COLORS.length]}
+                                fillOpacity={0.4}
+                            />
+                        ))}
+                    </RadarChart>
+                )
+            case 'scatter':
+                return (
+                    <ScatterChart>
+                        <CartesianGrid strokeDasharray="3 3" stroke="#333" />
+                        <XAxis type="number" dataKey={xAxisKey} name={xAxisKey} stroke="#888" />
+                        <YAxis type="number" dataKey={yAxisKey || series[0]?.key} name={series[0]?.name || 'Y'} stroke="#888" />
+                        {zAxisKey && <ZAxis type="number" dataKey={zAxisKey} range={[60, 400]} name={zAxisKey} />}
+                        <Tooltip cursor={{ strokeDasharray: '3 3' }} contentStyle={{ backgroundColor: '#111', border: '1px solid #333' }} itemStyle={{ color: '#fff' }} />
+                        <Legend wrapperStyle={{ paddingTop: '10px' }} />
+                        {series.map((s, i) => (
+                            <Scatter
+                                key={s.key}
+                                name={s.name || s.key}
+                                data={data}
+                                fill={s.color || COLORS[i % COLORS.length]}
+                            />
+                        ))}
+                    </ScatterChart>
+                )
+            case 'composed':
+                return (
+                    <ComposedChart data={data}>
+                        <CartesianGrid strokeDasharray="3 3" stroke="#333" />
+                        <XAxis dataKey={xAxisKey} stroke="#888" />
+                        <YAxis stroke="#888" />
+                        <Tooltip contentStyle={{ backgroundColor: '#111', border: '1px solid #333' }} itemStyle={{ color: '#fff' }} />
+                        <Legend wrapperStyle={{ paddingTop: '10px' }} />
+                        {series.map((s, i) => {
+                            const color = s.color || COLORS[i % COLORS.length]
+                            if (s.type === 'bar') return <Bar key={s.key} dataKey={s.key} fill={color} name={s.name || s.key} radius={[4, 4, 0, 0]} />
+                            if (s.type === 'area') return <Area key={s.key} type="monotone" dataKey={s.key} fill={color} stroke={color} fillOpacity={0.3} name={s.name || s.key} />
+                            return <Line key={s.key} type="monotone" dataKey={s.key} stroke={color} strokeWidth={2} dot={{ r: 4, fill: '#111' }} name={s.name || s.key} />
+                        })}
+                    </ComposedChart>
                 )
             case 'pie':
                 return (
@@ -130,10 +228,7 @@ export default function ChartRenderer({ config }: ChartRendererProps) {
                                 <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                             ))}
                         </Pie>
-                        <Tooltip
-                            contentStyle={{ backgroundColor: '#111', border: '1px solid #333' }}
-                            itemStyle={{ color: '#fff' }}
-                        />
+                        <Tooltip contentStyle={{ backgroundColor: '#111', border: '1px solid #333' }} itemStyle={{ color: '#fff' }} />
                         <Legend wrapperStyle={{ paddingTop: '10px' }} />
                     </PieChart>
                 )
@@ -143,11 +238,22 @@ export default function ChartRenderer({ config }: ChartRendererProps) {
     }
 
     return (
-        <div className="w-full my-4 rounded-xl border border-white/10 bg-[#0A0A0A] p-4 shadow-lg overflow-hidden">
+        <div ref={chartRef} className="w-full my-4 rounded-xl border border-white/10 bg-[#0A0A0A] p-4 shadow-lg overflow-hidden relative group">
             {title && (
-                <h3 className="mb-4 text-sm font-semibold text-white/80 uppercase tracking-wider text-center">
-                    {title}
-                </h3>
+                <div className="flex justify-between items-center mb-4 px-2">
+                    <h3 className="text-sm font-semibold text-white/80 uppercase tracking-wider text-center flex-1">
+                        {title}
+                    </h3>
+                    <button
+                        onClick={handleDownload}
+                        className="opacity-0 group-hover:opacity-100 transition-opacity p-1 text-white/40 hover:text-tera-neon"
+                        title="Download Chart"
+                    >
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5M7.5 12 12 16.5m0 0 4.5-4.5M12 16.5V3" />
+                        </svg>
+                    </button>
+                </div>
             )}
             <div className="h-[300px] w-full text-xs">
                 <ResponsiveContainer width="100%" height="100%">

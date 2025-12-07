@@ -57,12 +57,20 @@ You CAN generate visuals using special code blocks. Use them whenever a user ask
    Use a \`\`\`json:chart block.
    Schema:
    {
-     "type": "line" | "bar" | "area" | "pie",
+     "type": "line" | "bar" | "area" | "pie" | "radar" | "scatter" | "composed",
      "title": "Chart Title",
      "xAxisKey": "name",
-     "series": [{ "key": "valueKey", "color": "#00FFA3", "name": "Label" }],
+     "yAxisKey": "yVal", // for scatter
+     "series": [
+        { "key": "valueKey", "color": "#00FFA3", "name": "Label", "type": "bar" } // type needed for composed
+     ],
      "data": [{ "name": "X1", "valueKey": 100 }, ... ]
    }
+   
+   RULES:
+   - "radar": Great for comparing skills or attributes (3+ variables)
+   - "scatter": Best for correlation/distribution (x vs y). Data needs number values for both axes.
+   - "composed": Combine "bar" and "line" (e.g., Temperature (line) vs Rainfall (bar)). Provide "type" in series.
 
 2. DIAGRAMS & FLOWCHARTS:
    Use a \`\`\`mermaid block.
