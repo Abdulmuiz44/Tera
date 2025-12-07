@@ -1,23 +1,52 @@
-# TERA - AI Assistant for Teachers
+# TERA - AI Learning & Teaching Companion
 
-An AI assistant tailored for educators/teachers, powered by Mistral.
+Your brilliant, supportive AI companion for learning anything and teaching everything. Chat with Tera like you're texting a knowledgeable friend on WhatsApp - natural, warm, and genuinely excited to help.
 
-## Features
-- **Lesson Plan Generator**: Create aligned lessons with pacing and hooks.
-- **Worksheet & Quiz Generator**: Formative assessments with keys.
-- **Concept Explainer**: Grade-level explanations.
-- **Rubric Builder**: Scalable criteria.
-- **Parent Communication**: Thoughtful updates.
-- **Classroom Quick Assist**: Instant strategies.
-- **Rewrite & Differentiate**: Adapt content.
-- **Teaching Materials Builder**: Slides and handouts.
-- **Warm-up Question Generator**: Engaging prompts.
-- **Research & Reading Simplifier**: Summaries.
+## Who is Tera for?
+
+**🎓 Students & Learners**
+- Get homework help that actually makes sense
+- Master tough concepts with simple explanations and analogies
+- Prepare for exams with practice questions and study strategies
+- Explore new topics and feed your curiosity
+
+**👨‍🏫 Teachers & Educators**
+- Generate lesson plans in seconds
+- Create engaging worksheets and assessments
+- Get fresh classroom management strategies
+- Build teaching materials and resources
+
+**💡 Lifelong Learners**
+- Pick up new skills (guitar, coding, cooking, anything!)
+- Get personalized learning roadmaps
+- Understand complex topics in your field
+- Turn curiosity into knowledge
+
+## Core Features
+
+**Learning Tools**
+- **Concept Explainer**: Break down any topic into bite-sized, understandable chunks
+- **Study Buddy**: Homework help, practice problems, and exam prep
+- **Skill Builder**: Step-by-step guidance for learning new skills
+- **Knowledge Explorer**: Turn curiosity into deep understanding
+
+**Teaching Tools**
+- **Lesson Plan Generator**: Comprehensive lesson plans with pacing and engagement hooks
+- **Worksheet & Quiz Generator**: Formative assessments with answer keys
+- **Rubric Builder**: Clear, scalable grading criteria
+- **Teaching Materials Builder**: Slides, handouts, and visual aids
+- **Parent Communication**: Thoughtful, professional updates
+
+**For Everyone**
+- **Interactive Chat**: Talk to Tera like a friend, get responses that feel natural
+- **Memory**: Tera remembers your preferences and learning style
+- **Voice Input**: Speak your questions naturally
+- **File Support**: Upload images, PDFs, and documents for context
 
 ## Tech Stack
 - **Frontend**: Next.js 14, TailwindCSS, React
-- **Backend**: Supabase (Auth, DB, Storage), Mistral API
-- **UI**: Dark theme with neon accents, responsive design
+- **Backend**: Supabase (Auth, DB, Storage), Mistral AI (Pixtral Large)
+- **UI**: Dark theme with neon accents, WhatsApp-like chat interface
 
 ## Setup
 1. Clone the repo: `git clone <url>`
@@ -34,18 +63,16 @@ An AI assistant tailored for educators/teachers, powered by Mistral.
 
 ## Architecture
 - `app/`: Next.js routes
-- `components/`: Reusable UI
-- `lib/`: Supabase client, Mistral helper, seed
-- `styles/`: Global CSS
-- `actions/`: Server actions for AI calls
+- `components/`: Reusable UI components
+- `lib/`: Supabase client, Mistral AI integration, utilities
+- `styles/`: Global CSS and theming
+- `actions/`: Server actions for AI interactions
 
 ## Pricing Model
-- Free: Basic tools, limited usage
-- Pro: Unlimited, advanced features ($9/mo)
-- School: Team access ($29/mo)
+- **Free**: Core features, limited usage for everyone
+- **Pro**: Unlimited access, advanced features ($9/mo)
+- **School**: Team access for educators ($29/mo)
 
-## Launch Plan
-- Beta on teacher forums
-- Social: X announcement, LinkedIn
-- Community: Discord for feedback
-- Growth: Referral program
+## The Tera Difference
+Unlike other AI chatbots that feel robotic and cold, Tera feels like chatting with your smartest, most supportive friend. Whether you're a student stuck on homework at 11pm, a teacher planning Monday's lesson on Sunday night, or someone who just wants to learn something new - Tera's got your back. 💪
+

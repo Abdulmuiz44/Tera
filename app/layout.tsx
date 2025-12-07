@@ -5,8 +5,8 @@ import AppLayout from '@/components/AppLayout'
 import { Analytics } from "@vercel/analytics/react"
 
 export const metadata = {
-  title: 'Tera - AI Assistant for Teachers',
-  description: 'AI assistant reimagined for teachers. Create lesson plans, generate quizzes, and get teaching support.',
+  title: 'Tera - AI Learning & Teaching Companion',
+  description: 'Your brilliant AI companion for learning anything and teaching everything. Chat naturally with Tera like texting a friend - get homework help, create lesson plans, explore new skills, and more.',
   icons: {
     icon: [
       { url: '/favicon.ico', sizes: 'any' },

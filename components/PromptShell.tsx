@@ -16,6 +16,7 @@ type Message = {
   role: 'user' | 'tera'
   content: string
   attachments?: AttachmentReference[]
+  timestamp?: number
 }
 
 type ConversationEntry = {
@@ -92,6 +93,24 @@ export default function PromptShell({
   const [currentSessionId, setCurrentSessionId] = useState<string | null>(sessionId || null)
   const [upgradePromptType, setUpgradePromptType] = useState<'lesson-plans' | 'chats' | 'file-uploads' | null>(null)
   const requestIdRef = useRef(0)
+  const [placeholderIndex, setPlaceholderIndex] = useState(0)
+
+  // Rotating placeholders for WhatsApp-like feel
+  const placeholders = [
+    "What do you want to learn today? 💡",
+    "Need help with something? I'm all ears 👂",
+    "Ask me anything... seriously, anything! 🤓",
+    "Let's figure this out together 🎯",
+    "What's on your mind? 💭"
+  ]
+
+  // Rotate placeholder every 3 seconds
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setPlaceholderIndex((prev) => (prev + 1) % placeholders.length)
+    }, 3000)
+    return () => clearInterval(interval)
+  }, [])
 
   // Update currentSessionId if prop changes (e.g. new chat from parent)
   useEffect(() => {
@@ -172,8 +191,23 @@ export default function PromptShell({
     id: `${id}-user`,
     role: 'user',
     content,
-    attachments: attachments.length > 0 ? attachments : undefined
+    attachments: attachments.length > 0 ? attachments : undefined,
+    timestamp: Date.now()
   })
+
+  // Format timestamp for display
+  const formatTimestamp = (timestamp?: number) => {
+    if (!timestamp) return ''
+    const date = new Date(timestamp)
+    const now = new Date()
+    const diffMs = now.getTime() - date.getTime()
+    const diffMins = Math.floor(diffMs / 60000)
+
+    if (diffMins < 1) return 'Just now'
+    if (diffMins < 60) return `${diffMins}m ago`
+    if (diffMins < 1440) return date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true })
+    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+  }
 
   const handleStop = () => {
     // Increment request ID to invalidate any pending requests
@@ -227,7 +261,8 @@ export default function PromptShell({
         const assistantMessage: Message = {
           id: createId(),
           role: 'tera',
-          content: answer
+          content: answer,
+          timestamp: Date.now()
         }
         setConversations((prev) =>
           prev.map((entry) =>
@@ -402,12 +437,14 @@ export default function PromptShell({
               id: `${session.id}-user`,
               role: 'user' as const,
               content: session.prompt,
-              attachments: session.attachments as AttachmentReference[] | undefined
+              attachments: session.attachments as AttachmentReference[] | undefined,
+              timestamp: new Date(session.created_at).getTime()
             },
             assistantMessage: {
               id: `${session.id}-assistant`,
               role: 'tera' as const,
-              content: session.response
+              content: session.response,
+              timestamp: new Date(session.created_at).getTime() + 1000 // Slight offset
             }
           }))
           setConversations(loadedConversations)
@@ -525,18 +562,25 @@ export default function PromptShell({
                         </svg>
                       </button>
 
-                      <div className="rounded-2xl bg-white/10 px-6 py-4 text-white backdrop-blur-sm w-full">
-                        <p className="whitespace-pre-wrap leading-relaxed">{entry.userMessage.content}</p>
-                        {entry.userMessage.attachments && entry.userMessage.attachments.length > 0 && (
-                          <div className="mt-3 flex flex-wrap gap-2">
-                            {entry.userMessage.attachments.map((att, idx) => (
-                              <div key={idx} className="flex items-center gap-2 rounded-lg bg-black/20 px-3 py-2 text-xs">
-                                <span>{att.type === 'image' ? '🖼️' : '📄'}</span>
-                                <span className="truncate max-w-[150px]">{att.name}</span>
-                              </div>
-                            ))}
-                          </div>
-                        )}
+                      <div className="flex flex-col items-end gap-1 w-full">
+                        <div className="rounded-2xl bg-white/10 px-6 py-4 text-white backdrop-blur-sm w-full">
+                          <p className="whitespace-pre-wrap leading-relaxed">{entry.userMessage.content}</p>
+                          {entry.userMessage.attachments && entry.userMessage.attachments.length > 0 && (
+                            <div className="mt-3 flex flex-wrap gap-2">
+                              {entry.userMessage.attachments.map((att, idx) => (
+                                <div key={idx} className="flex items-center gap-2 rounded-lg bg-black/20 px-3 py-2 text-xs">
+                                  <span>{att.type === 'image' ? '🖼️' : '📄'}</span>
+                                  <span className="truncate max-w-[150px]">{att.name}</span>
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                        {/* Timestamp and checkmarks */}
+                        <div className="flex items-center gap-1.5 px-2 text-xs text-white/40">
+                          <span>{formatTimestamp(entry.userMessage.timestamp)}</span>
+                          <span className="text-white/50">✓✓</span>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -560,7 +604,10 @@ export default function PromptShell({
                             )
                           )}
                         </div>
-                        <VoiceControls text={entry.assistantMessage.content} messageId={entry.id} />
+                        <div className="flex items-center justify-between mt-3 pt-2 border-t border-white/5">
+                          <span className="text-xs text-white/30">{formatTimestamp(entry.assistantMessage.timestamp)}</span>
+                          <VoiceControls text={entry.assistantMessage.content} messageId={entry.id} />
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -571,8 +618,13 @@ export default function PromptShell({
           {status === 'loading' && (
             <div className="flex justify-start">
               <div className="max-w-[85%]">
-                <div className="flex items-center gap-2 rounded-2xl bg-tera-panel px-6 py-4 text-white/60">
-                  <span className="animate-pulse font-medium">Tera is Thinking...</span>
+                <div className="flex items-center gap-3 rounded-2xl bg-tera-panel px-6 py-4 text-white/60">
+                  <div className="flex gap-1">
+                    <span className="w-2 h-2 bg-tera-neon/60 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></span>
+                    <span className="w-2 h-2 bg-tera-neon/60 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></span>
+                    <span className="w-2 h-2 bg-tera-neon/60 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></span>
+                  </div>
+                  <span className="font-medium">Tera is Thinking...</span>
                 </div>
               </div>
             </div>
@@ -651,7 +703,7 @@ export default function PromptShell({
                     handleSubmit(e)
                   }
                 }}
-                placeholder={isListening ? "Listening..." : "Ask Tera anything..."}
+                placeholder={isListening ? "Listening... 🎤" : placeholders[placeholderIndex]}
                 className="max-h-[200px] min-h-[52px] w-full resize-none bg-transparent py-3.5 px-2 text-white placeholder-white/40 focus:outline-none"
                 rows={1}
                 style={{ height: 'auto' }}
