@@ -62,12 +62,18 @@ const parseContent = (content: string): ContentBlock[] => {
         // Check if code contains chart keys (relaxed check)
         const isChart = (c: string) => (c.includes('"data"') && c.includes('"type"')) || (c.includes('"series"'))
 
-        if ((lang === 'json' && type === 'chart') || (lang === 'json' && isChart(cleanCode))) {
+        if ((lang === 'json' && type === 'chart') || isChart(cleanCode)) {
           try {
-            const config = JSON.parse(cleanCode)
+            // Remove comments from JSON (// and /* */)
+            const jsonStr = cleanCode
+              .replace(/\/\/.*$/gm, '')
+              .replace(/\/\*[\s\S]*?\*\//g, '')
+
+            const config = JSON.parse(jsonStr)
             blocks.push({ type: 'chart', config })
           } catch (e) {
-            blocks.push({ type: 'code', language: 'json', code: cleanCode })
+            console.warn('Failed to parse chart JSON', e)
+            blocks.push({ type: 'code', language: lang || 'json', code: cleanCode })
           }
         } else if (lang === 'mermaid') {
           blocks.push({ type: 'mermaid', chart: cleanCode })
