@@ -134,24 +134,7 @@ export default function PromptShell({
   const [currentSessionId, setCurrentSessionId] = useState<string | null>(sessionId || null)
   const [upgradePromptType, setUpgradePromptType] = useState<'lesson-plans' | 'chats' | 'file-uploads' | null>(null)
   const requestIdRef = useRef(0)
-  const [placeholderIndex, setPlaceholderIndex] = useState(0)
 
-  // Rotating placeholders for WhatsApp-like feel
-  const placeholders = [
-    "What do you want to learn today? 💡",
-    "Need help with something? I'm all ears 👂",
-    "Ask me anything... seriously, anything! 🤓",
-    "Let's figure this out together 🎯",
-    "What's on your mind? 💭"
-  ]
-
-  // Rotate placeholder every 3 seconds
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setPlaceholderIndex((prev) => (prev + 1) % placeholders.length)
-    }, 3000)
-    return () => clearInterval(interval)
-  }, [])
 
   // Update currentSessionId if prop changes (e.g. new chat from parent)
   useEffect(() => {
@@ -757,7 +740,7 @@ export default function PromptShell({
                     handleSubmit(e)
                   }
                 }}
-                placeholder={isListening ? "Listening... 🎤" : placeholders[placeholderIndex]}
+                placeholder={isListening ? "Listening... 🎤" : "Ask Tera Anything..."}
                 className="max-h-[200px] min-h-[52px] w-full resize-none bg-transparent py-3.5 px-2 text-white placeholder-white/40 focus:outline-none"
                 rows={1}
                 style={{ height: 'auto' }}
