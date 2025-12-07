@@ -33,25 +33,63 @@ type QueuedMessage = {
 
 const createId = () => (crypto.randomUUID ? crypto.randomUUID() : String(Date.now()))
 
-const structureResponse = (content: string) => {
-  const paragraphs = content
-    .split(/\n\n+/)
-    .map((para) => para.trim())
-    .filter(Boolean)
+import dynamic from 'next/dynamic'
 
-  if (!paragraphs.length) {
-    return [{ text: 'Awaiting TERA response...', isHeader: false }]
-  }
+const ChartRenderer = dynamic(() => import('./visuals/ChartRenderer'), { ssr: false })
+const MermaidRenderer = dynamic(() => import('./visuals/MermaidRenderer'), { ssr: false })
 
-  return paragraphs.map((paragraph) => {
-    const isMarkdownHeader = paragraph.startsWith('#')
-    const isAllCapsHeader = paragraph === paragraph.toUpperCase() && paragraph.length < 50 && !paragraph.includes('.')
+type ContentBlock =
+  | { type: 'text', content: string, isHeader: boolean }
+  | { type: 'chart', config: any }
+  | { type: 'mermaid', chart: string }
+  | { type: 'code', language: string, code: string }
 
-    return {
-      text: paragraph.replace(/^#+\s*/, ''),
-      isHeader: isMarkdownHeader || isAllCapsHeader
+const parseContent = (content: string): ContentBlock[] => {
+  const blocks: ContentBlock[] = []
+
+  // Split by code blocks
+  const parts = content.split(/(```[\s\S]*?```)/g)
+
+  parts.forEach(part => {
+    if (!part.trim()) return
+
+    if (part.startsWith('```')) {
+      const match = part.match(/```(\w+)?(?::(\w+))?\n([\s\S]*?)```/)
+      if (match) {
+        const [, lang, type, code] = match
+        const cleanCode = code.trim()
+
+        if (lang === 'json' && type === 'chart') {
+          try {
+            const config = JSON.parse(cleanCode)
+            blocks.push({ type: 'chart', config })
+          } catch (e) {
+            blocks.push({ type: 'code', language: 'json', code: cleanCode })
+          }
+        } else if (lang === 'mermaid') {
+          blocks.push({ type: 'mermaid', chart: cleanCode })
+        } else {
+          blocks.push({ type: 'code', language: lang || 'text', code: cleanCode })
+        }
+        return
+      }
     }
+
+    // Process regular text paragraphs
+    const paragraphs = part.split(/\n\n+/).filter(p => p.trim())
+    paragraphs.forEach(p => {
+      const isMarkdownHeader = p.startsWith('#')
+      const isAllCapsHeader = p === p.toUpperCase() && p.length < 50 && !p.includes('.')
+
+      blocks.push({
+        type: 'text',
+        content: p.replace(/^#+\s*/, ''),
+        isHeader: isMarkdownHeader || isAllCapsHeader
+      })
+    })
   })
+
+  return blocks
 }
 
 export default function PromptShell({
@@ -592,17 +630,30 @@ export default function PromptShell({
                     <div className="w-full md:max-w-[85%]">
                       <div className="rounded-2xl bg-tera-panel border border-white/5 px-4 md:px-6 py-4 text-white/90 shadow-lg">
                         <div className="space-y-4">
-                          {structureResponse(entry.assistantMessage.content).map((block, idx) =>
-                            block.isHeader ? (
+                          {parseContent(entry.assistantMessage.content).map((block, idx) => {
+                            if (block.type === 'chart') {
+                              return <ChartRenderer key={idx} config={block.config} />
+                            }
+                            if (block.type === 'mermaid') {
+                              return <MermaidRenderer key={idx} chart={block.chart} />
+                            }
+                            if (block.type === 'code') {
+                              return (
+                                <div key={idx} className="my-4 rounded-lg bg-black/30 p-4 font-mono text-xs overflow-x-auto text-tera-neon max-w-full">
+                                  <pre>{block.code}</pre>
+                                </div>
+                              )
+                            }
+                            return block.isHeader ? (
                               <h3 key={idx} className="font-bold text-lg mt-2 text-white">
-                                {block.text}
+                                {block.content}
                               </h3>
                             ) : (
                               <p key={idx} className="leading-relaxed whitespace-pre-wrap">
-                                {block.text}
+                                {block.content}
                               </p>
                             )
-                          )}
+                          })}
                         </div>
                         <div className="flex items-center justify-between mt-3 pt-2 border-t border-white/5">
                           <span className="text-xs text-white/30">{formatTimestamp(entry.assistantMessage.timestamp)}</span>

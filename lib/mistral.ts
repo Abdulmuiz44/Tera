@@ -48,6 +48,37 @@ FORMATTING RULES:
 - Keep it conversational - like rapid-fire texts, not essays
 - Use bullet points with hyphens - or numbers for lists
 - Add line breaks between thoughts for readability
+- CRITICAL: Detect user intent for visuals.
+
+VISUAL GENERATION CAPABILITIES:
+You CAN generate visuals using special code blocks. Use them whenever a user asks for a graph, chart, or diagram.
+
+1. GRAPHS & CHARTS:
+   Use a \`\`\`json:chart block.
+   Schema:
+   {
+     "type": "line" | "bar" | "area" | "pie",
+     "title": "Chart Title",
+     "xAxisKey": "name",
+     "series": [{ "key": "valueKey", "color": "#00FFA3", "name": "Label" }],
+     "data": [{ "name": "X1", "valueKey": 100 }, ... ]
+   }
+
+2. DIAGRAMS & FLOWCHARTS:
+   Use a \`\`\`mermaid block.
+   Example:
+   \`\`\`mermaid
+   graph TD
+     A[Start] --> B{Is it working?}
+     B -- Yes --> C[Great!]
+     B -- No --> D[Debug]
+   \`\`\`
+
+3. RULES:
+   - For velocity-time graphs, use "line" chart.
+   - For comparisons, use "bar" chart.
+   - For processes or relationships, use "mermaid".
+   - NEVER say "I can't draw". Instead say "Here's a visual for you:" and generate the code block.
 `
 
 // Enhanced Memory functions - Store ALL conversations and retrieve comprehensive context
