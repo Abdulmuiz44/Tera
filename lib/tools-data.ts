@@ -181,4 +181,13 @@ export const learnerTools: TeacherTool[] = [
     }
 ]
 
-export const allTools = [...teacherTools, ...studentTools, ...learnerTools]
+export const spreadsheetTools: TeacherTool[] = [
+    {
+        name: 'Spreadsheet Creator',
+        description: 'Create and populate Google Sheets with data, charts, and visualizations.',
+        icon: '📊',
+        tags: ['Spreadsheet', 'Data', 'Charts', 'Google Sheets']
+    }
+]
+
+export const allTools = [...teacherTools, ...studentTools, ...learnerTools, ...spreadsheetTools]

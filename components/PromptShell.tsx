@@ -37,12 +37,14 @@ import dynamic from 'next/dynamic'
 
 const ChartRenderer = dynamic(() => import('./visuals/ChartRenderer'), { ssr: false })
 const MermaidRenderer = dynamic(() => import('./visuals/MermaidRenderer'), { ssr: false })
+const SpreadsheetRenderer = dynamic(() => import('./visuals/SpreadsheetRenderer'), { ssr: false })
 
 type ContentBlock =
-  | { type: 'text', content: string, isHeader: boolean }
-  | { type: 'chart', config: any }
-  | { type: 'mermaid', chart: string }
-  | { type: 'code', language: string, code: string }
+   | { type: 'text', content: string, isHeader: boolean }
+   | { type: 'chart', config: any }
+   | { type: 'mermaid', chart: string }
+   | { type: 'code', language: string, code: string }
+   | { type: 'spreadsheet', config: any }
 
 const parseContent = (content: string): ContentBlock[] => {
   const blocks: ContentBlock[] = []
@@ -61,8 +63,22 @@ const parseContent = (content: string): ContentBlock[] => {
 
         // Check if code contains chart keys (relaxed check)
         const isChart = (c: string) => (c.includes('"data"') && c.includes('"type"')) || (c.includes('"series"'))
+        const isSpreadsheet = (c: string) => c.includes('"action"') && (c.includes('"data"') || c.includes('"title"'))
 
-        if ((lang === 'json' && type === 'chart') || isChart(cleanCode)) {
+        if ((lang === 'json' && type === 'spreadsheet') || isSpreadsheet(cleanCode)) {
+          try {
+            // Remove comments from JSON (// and /* */)
+            const jsonStr = cleanCode
+              .replace(/\/\/.*$/gm, '')
+              .replace(/\/\*[\s\S]*?\*\//g, '')
+
+            const config = JSON.parse(jsonStr)
+            blocks.push({ type: 'spreadsheet', config })
+          } catch (e) {
+            console.warn('Failed to parse spreadsheet JSON', e)
+            blocks.push({ type: 'code', language: lang || 'json', code: cleanCode })
+          }
+        } else if ((lang === 'json' && type === 'chart') || isChart(cleanCode)) {
           try {
             // Remove comments from JSON (// and /* */)
             const jsonStr = cleanCode
@@ -625,6 +641,9 @@ export default function PromptShell({
                           {parseContent(entry.assistantMessage.content).map((block, idx) => {
                             if (block.type === 'chart') {
                               return <ChartRenderer key={idx} config={block.config} />
+                            }
+                            if (block.type === 'spreadsheet') {
+                              return <SpreadsheetRenderer key={idx} config={block.config} userId={user?.id} />
                             }
                             if (block.type === 'mermaid') {
                               return <MermaidRenderer key={idx} chart={block.chart} />
