@@ -156,11 +156,17 @@ export default function SpreadsheetRenderer({ config, userId }: { config: Spread
           >
             Authorize Google Sheets
           </button>
-        ) : status.state !== 'creating' ? (
+        ) : status.state === 'creating' ? (
+          <button
+            disabled
+            className="w-full rounded-full bg-tera-neon px-4 py-2 text-sm font-semibold text-black transition opacity-50 cursor-not-allowed"
+          >
+            Creating...
+          </button>
+        ) : status.state === 'idle' || status.state === 'error' ? (
           <button
             onClick={handleCreateSpreadsheet}
-            disabled={status.state === 'creating'}
-            className="w-full rounded-full bg-tera-neon px-4 py-2 text-sm font-semibold text-black transition hover:bg-tera-neon/90 disabled:opacity-50"
+            className="w-full rounded-full bg-tera-neon px-4 py-2 text-sm font-semibold text-black transition hover:bg-tera-neon/90"
           >
             Create Spreadsheet
           </button>
