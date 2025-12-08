@@ -145,7 +145,7 @@ export default function SpreadsheetRenderer({ config, userId }: { config: Spread
             href={status.spreadsheetUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="block w-full rounded-full bg-tera-neon px-4 py-2 text-center text-sm font-semibold text-black transition hover:bg-tera-neon/90"
+            className="block w-full rounded-full bg-white px-4 py-2 text-center text-xs font-bold uppercase tracking-[0.2em] text-[#050505] transition hover:bg-white/90"
           >
             Open Spreadsheet →
           </a>
@@ -159,14 +159,14 @@ export default function SpreadsheetRenderer({ config, userId }: { config: Spread
         ) : status.state === 'creating' ? (
           <button
             disabled
-            className="w-full rounded-full bg-tera-neon px-4 py-2 text-sm font-semibold text-black transition opacity-50 cursor-not-allowed"
+            className="w-full rounded-full bg-white px-4 py-2 text-xs font-bold uppercase tracking-[0.2em] text-[#050505] transition opacity-50 cursor-not-allowed"
           >
             Creating...
           </button>
         ) : status.state === 'idle' || status.state === 'error' ? (
           <button
             onClick={handleCreateSpreadsheet}
-            className="w-full rounded-full bg-tera-neon px-4 py-2 text-sm font-semibold text-black transition hover:bg-tera-neon/90"
+            className="w-full rounded-full bg-white px-4 py-2 text-xs font-bold uppercase tracking-[0.2em] text-[#050505] transition hover:bg-white/90"
           >
             Create Spreadsheet
           </button>
