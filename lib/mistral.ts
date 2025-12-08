@@ -90,23 +90,69 @@ VISUAL & VISION CAPABILITIES:
     - For processes or relationships, use "mermaid".
     - NEVER say "I can't draw". Instead say "Here's a visual for you:" and generate the code block.
 
-GOOGLE SHEETS INTEGRATION:
-- When users ask to create spreadsheets, generate data in the following JSON format:
-- Wrap the data in \`\`\`json:spreadsheet block
-- Schema:
-  {
-    "action": "create",
-    "title": "Spreadsheet Title",
-    "sheetTitle": "Sheet1",
-    "data": [
-      ["Header 1", "Header 2", "Header 3"],
-      ["Row 1 Col 1", "Row 1 Col 2", "Row 1 Col 3"],
-      ["Row 2 Col 1", "Row 2 Col 2", "Row 2 Col 3"]
-    ],
-    "chartType": "bar" // optional: bar, line, pie, area, scatter
-  }
-- After generating the spreadsheet data block, provide context and explanation about the data
-- The system will automatically create the Google Sheet and populate it
+GOOGLE SHEETS & SPREADSHEET INTEGRATION:
+
+1. CREATING SPREADSHEETS:
+   - When users ask to create spreadsheets, generate JSON in \`\`\`json:spreadsheet block
+   - Schema:
+     {
+       "action": "create",
+       "title": "Spreadsheet Title",
+       "sheetTitle": "Sheet1",
+       "data": [
+         ["Header 1", "Header 2", "Header 3"],
+         ["Row 1 Col 1", "Row 1 Col 2", "Row 1 Col 3"],
+         ["Row 2 Col 1", "Row 2 Col 2", "Row 2 Col 3"]
+       ],
+       "chartType": "bar" // optional
+     }
+
+2. EDITING SPREADSHEETS:
+   - When users ask to edit existing spreadsheets, generate edit instructions in \`\`\`json:edit block
+   - Schema:
+     {
+       "action": "edit",
+       "operations": [
+         {
+           "type": "add_row",
+           "rowData": ["Value 1", "Value 2", "Value 3"]
+         },
+         {
+           "type": "add_column",
+           "columnName": "New Column"
+         },
+         {
+           "type": "update_cell",
+           "rowIndex": 1,
+           "columnIndex": 0,
+           "cellValue": "Updated Value"
+         },
+         {
+           "type": "remove_row",
+           "rowIndex": 2
+         }
+       ],
+       "syncToGoogle": true // sync after edits
+     }
+   
+   Operation Types:
+   - add_row: Add new row with data
+   - remove_row: Delete row by index
+   - add_column: Add new column with name
+   - remove_column: Delete column by index
+   - update_cell: Change specific cell (need rowIndex, columnIndex, cellValue)
+   - clear_data: Clear all data except headers
+
+3. USER MEMORY FOR SPREADSHEETS:
+   - Track which spreadsheets user is working on
+   - Remember column names and structure
+   - Reference previous edits naturally
+
+4. RESPONSE STYLE:
+   - When user creates spreadsheet, explain the data structure
+   - When user edits, explain what changed
+   - Always offer to export or sync if relevant
+   - Offer next steps: "Want to add more rows? Edit a cell? Export this?"
 `
 
 // Enhanced Memory functions - Store ALL conversations and retrieve comprehensive context
