@@ -35,7 +35,7 @@ export default function PricingPage() {
     loadUser()
   }, [])
 
-  const handleCheckout = async (plan: 'pro' | 'school') => {
+  const handleCheckout = async (plan: 'pro' | 'plus') => {
     if (!user) {
       router.push('/auth/signin')
       return
@@ -59,16 +59,20 @@ export default function PricingPage() {
       })
 
       if (!response.ok) {
-        throw new Error('Failed to create checkout session')
+        const error = await response.json()
+        throw new Error(error.error || 'Failed to create checkout session')
       }
 
       const data = await response.json()
       if (data.checkoutUrl) {
         window.location.href = data.checkoutUrl
+      } else {
+        throw new Error('No checkout URL returned')
       }
     } catch (error) {
       console.error('Checkout error:', error)
-      alert('Failed to initiate checkout. Please try again.')
+      const message = error instanceof Error ? error.message : 'Failed to initiate checkout'
+      alert(`Error: ${message}. Please try again or contact support.`)
     } finally {
       setLoading(false)
     }
@@ -77,99 +81,208 @@ export default function PricingPage() {
   const plans = [
     {
       ...PLAN_CONFIGS.free,
-      cta: 'Current Plan',
+      cta: 'Start Free',
       current: currentPlan === 'free',
-      popular: false
+      popular: false,
+      highlighted: false
     },
     {
       ...PLAN_CONFIGS.pro,
       cta: 'Upgrade to Pro',
       current: currentPlan === 'pro',
-      popular: true
+      popular: true,
+      highlighted: true
     },
     {
-      ...PLAN_CONFIGS.school,
-      cta: 'Contact Sales',
-      current: currentPlan === 'school',
-      popular: false
+      ...PLAN_CONFIGS.plus,
+      cta: 'Go Premium',
+      current: currentPlan === 'plus',
+      popular: false,
+      highlighted: false
     }
   ]
 
   return (
-    <div className="flex flex-col md:flex-row h-screen w-full bg-[#050505]">
+    <div className="flex flex-col md:flex-row h-screen w-full bg-gradient-to-br from-[#050505] to-[#1a1a1a]">
       <Sidebar expanded={sidebarExpanded} onToggle={() => setSidebarExpanded(!sidebarExpanded)} />
       <main className="relative flex-1 overflow-hidden px-6 py-10">
         <div className="flex flex-col h-full gap-8">
           <header className="flex items-center justify-between">
             <div>
-              <p className="text-xs uppercase tracking-[0.5em] text-white/40">TERA</p>
-              <h1 className="text-3xl font-semibold leading-tight text-white">Pricing</h1>
+              <p className="text-xs uppercase tracking-[0.5em] text-tera-neon">Pricing</p>
+              <h1 className="text-4xl font-bold leading-tight text-white mt-2">Unlock Your Potential</h1>
+              <p className="text-white/60 mt-2 max-w-2xl">Choose the perfect plan to supercharge your learning and productivity with AI</p>
             </div>
           </header>
 
-          <div className="flex-1 rounded-[28px] bg-tera-panel border border-white/10 p-6 shadow-glow-md overflow-y-auto">
-            <h2 className="text-xl font-semibold text-white mb-8 text-center">Choose the plan that fits your classroom</h2>
-
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-6xl mx-auto">
-              {plans.map((plan) => (
-                <div
-                  key={plan.name}
-                  className={`relative flex flex-col rounded-2xl border p-6 transition-all duration-300 ${plan.popular
-                    ? 'bg-white/5 border-tera-neon shadow-[0_0_30px_-10px_rgba(var(--tera-neon-rgb),0.3)] scale-105 z-10'
-                    : 'bg-tera-muted border-white/10 hover:border-white/20'
-                    }`}
-                >
-                  {plan.popular && (
-                    <div className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-tera-neon px-3 py-1 text-[0.6rem] font-bold uppercase tracking-wider text-black">
-                      Most Popular
-                    </div>
-                  )}
-
-                  <div className="mb-4">
-                    <h3 className="text-lg font-medium text-white">{plan.displayName}</h3>
-                    <div className="mt-2 flex items-baseline gap-1">
-                      <span className="text-3xl font-bold text-white">${plan.price}</span>
-                      <span className="text-sm text-white/60">{plan.period}</span>
-                    </div>
-                    <p className="mt-2 text-sm text-white/60">{plan.description}</p>
-                  </div>
-
-                  <ul className="mb-8 flex-1 space-y-3">
-                    {plan.features.map((feature) => (
-                      <li key={feature} className="flex items-start gap-3 text-sm text-white/80">
-                        <span className="mt-1 text-tera-neon">✓</span>
-                        {feature}
-                      </li>
-                    ))}
-                  </ul>
-
-                  <button
-                    disabled={plan.current || loading}
-                    onClick={() => {
-                      if (plan.name === 'pro') {
-                        handleCheckout('pro')
-                      } else if (plan.name === 'school') {
-                        // Contact sales - open email or contact form
-                        window.location.href = 'mailto:sales@teralearn.ai?subject=School%20Plan%20Inquiry'
-                      }
-                    }}
-                    className={`w-full rounded-lg py-2 text-sm font-medium transition ${plan.current
-                      ? 'bg-white/10 text-white/40 cursor-default'
-                      : plan.popular
-                        ? 'bg-tera-neon text-black hover:bg-tera-neon/90 disabled:opacity-50 disabled:cursor-not-allowed'
-                        : 'bg-white text-black hover:bg-white/90 disabled:opacity-50 disabled:cursor-not-allowed'
-                      }`}
+          <div className="flex-1 rounded-[28px] bg-tera-panel/40 border border-white/5 p-8 shadow-glow-md overflow-y-auto">
+            {/* Comparison Table */}
+            <div className="max-w-7xl mx-auto">
+              {/* Pricing Cards */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+                {plans.map((plan) => (
+                  <div
+                    key={plan.name}
+                    className={`relative flex flex-col rounded-2xl border transition-all duration-300 ${plan.highlighted
+                      ? 'bg-gradient-to-br from-tera-neon/10 to-tera-neon/5 border-tera-neon shadow-[0_0_40px_-10px_rgba(0,255,170,0.4)] scale-105 z-10'
+                      : 'bg-white/5 border-white/10 hover:border-white/20 hover:bg-white/10'
+                    } p-8`}
                   >
-                    {loading && plan.name === 'pro' ? 'Processing...' : plan.cta}
-                  </button>
-                </div>
-              ))}
-            </div>
+                    {plan.highlighted && (
+                      <div className="absolute -top-4 left-1/2 -translate-x-1/2 rounded-full bg-gradient-to-r from-tera-neon to-tera-neon/80 px-4 py-1 text-xs font-bold uppercase tracking-wider text-black shadow-lg">
+                        ⭐ Most Popular
+                      </div>
+                    )}
 
-            <div className="mt-12 text-center">
-              <p className="text-sm text-white/40">
-                Questions? <a href="#" className="text-tera-neon hover:underline">Contact our support team</a>
-              </p>
+                    {/* Plan Header */}
+                    <div className="mb-6">
+                      <h3 className="text-2xl font-bold text-white">{plan.displayName}</h3>
+                      <p className="text-white/60 text-sm mt-1">{plan.description}</p>
+                      <div className="mt-4 flex items-baseline gap-1">
+                        <span className={`text-4xl font-black ${plan.highlighted ? 'text-tera-neon' : 'text-white'}`}>
+                          ${plan.price}
+                        </span>
+                        <span className="text-white/60">{plan.period}</span>
+                      </div>
+                    </div>
+
+                    {/* Features List */}
+                    <ul className="mb-8 flex-1 space-y-3 border-t border-white/10 pt-6">
+                      {plan.features.map((feature, idx) => (
+                        <li key={idx} className="flex items-start gap-3 text-sm text-white/90">
+                          <span className={`mt-1 text-lg flex-shrink-0 ${plan.highlighted ? 'text-tera-neon' : 'text-tera-neon/60'}`}>✨</span>
+                          <span>{feature}</span>
+                        </li>
+                      ))}
+                    </ul>
+
+                    {/* CTA Button */}
+                    <button
+                      disabled={plan.current || loading}
+                      onClick={() => {
+                        if (plan.name === 'free') {
+                          if (!user) {
+                            router.push('/auth/signin')
+                          } else {
+                            router.push('/new')
+                          }
+                        } else if (plan.name === 'pro') {
+                          handleCheckout('pro')
+                        } else if (plan.name === 'plus') {
+                          handleCheckout('plus')
+                        }
+                      }}
+                      className={`w-full py-3 px-4 rounded-lg font-semibold transition-all duration-200 text-base ${
+                        plan.current
+                          ? 'bg-white/10 text-white/40 cursor-default'
+                          : plan.highlighted
+                            ? 'bg-white text-black hover:bg-white/90 hover:shadow-lg hover:shadow-white/20 disabled:opacity-50 disabled:cursor-not-allowed'
+                            : 'bg-white text-black hover:bg-white/90 disabled:opacity-50 disabled:cursor-not-allowed'
+                      }`}
+                    >
+                      {plan.current ? '✓ Current Plan' : (loading && (plan.name === 'pro' || plan.name === 'plus') ? 'Processing...' : plan.cta)}
+                    </button>
+                  </div>
+                ))}
+              </div>
+
+              {/* Feature Comparison Table */}
+              <div className="border-t border-white/10 pt-12">
+                <h2 className="text-2xl font-bold text-white mb-8 text-center">Detailed Comparison</h2>
+                <div className="overflow-x-auto">
+                  <table className="w-full text-sm">
+                    <thead>
+                      <tr className="border-b border-white/10">
+                        <th className="text-left py-4 px-4 font-semibold text-white/80">Feature</th>
+                        <th className="text-center py-4 px-4 font-semibold text-white/80">Starter</th>
+                        <th className="text-center py-4 px-4 font-semibold text-white/80">Pro</th>
+                        <th className="text-center py-4 px-4 font-semibold text-white/80">Plus</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {[
+                        { feature: 'Daily AI Conversations', free: '15', pro: 'Unlimited', plus: 'Unlimited' },
+                        { feature: 'Monthly Web Searches', free: '5', pro: '100', plus: '500' },
+                        { feature: 'File Uploads (per day)', free: '5', pro: 'Unlimited', plus: 'Unlimited' },
+                        { feature: 'Max File Size', free: '25 MB', pro: '500 MB', plus: '2 GB' },
+                        { feature: 'All Tools & Features', free: '✓ Basic', pro: '✓ All', plus: '✓ All' },
+                        { feature: 'Export to PDF/Word', free: '—', pro: '✓', plus: '✓' },
+                        { feature: 'Priority Support', free: '—', pro: '✓', plus: '✓ 24/7' },
+                        { feature: 'Analytics Dashboard', free: '—', pro: '—', plus: '✓ Advanced' },
+                        { feature: 'Team Collaboration', free: '—', pro: '—', plus: '✓' },
+                        { feature: 'API Access', free: '—', pro: '—', plus: '✓' },
+                        { feature: 'Custom AI Training', free: '—', pro: '—', plus: '✓' },
+                      ].map((row, idx) => (
+                        <tr key={idx} className="border-b border-white/5 hover:bg-white/5 transition">
+                          <td className="py-4 px-4 text-white font-medium">{row.feature}</td>
+                          <td className="py-4 px-4 text-center text-white/70">{row.free}</td>
+                          <td className="py-4 px-4 text-center text-white/70">{row.pro}</td>
+                          <td className="py-4 px-4 text-center text-white/70">{row.plus}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              {/* FAQ Section */}
+              <div className="border-t border-white/10 pt-12 mt-12">
+                <h2 className="text-2xl font-bold text-white mb-8 text-center">Frequently Asked Questions</h2>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto">
+                  {[
+                    { q: 'Can I switch plans anytime?', a: 'Yes! Upgrade or downgrade your plan instantly. Changes take effect immediately.' },
+                    { q: 'Is there a contract?', a: 'No contracts. Cancel anytime. Your account remains active through your billing period.' },
+                    { q: 'Do you offer refunds?', a: 'Yes, we offer a 7-day money-back guarantee on all paid plans.' },
+                    { q: 'Can I use it for teams?', a: 'Plus plan includes team collaboration. Pro plan works great for individuals.' },
+                    { q: 'What payment methods do you accept?', a: 'We accept all major credit cards, PayPal, and more through Lemon Squeezy.' },
+                    { q: 'Is my data secure?', a: 'Yes! We use enterprise-grade encryption and comply with GDPR, CCPA, and other standards.' }
+                  ].map((faq, idx) => (
+                    <div key={idx} className="bg-white/5 border border-white/10 rounded-lg p-4">
+                      <h3 className="font-semibold text-white mb-2">{faq.q}</h3>
+                      <p className="text-white/70 text-sm">{faq.a}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* CTA Section */}
+              <div className="border-t border-white/10 pt-12 mt-12 text-center">
+                <h2 className="text-2xl font-bold text-white mb-4">Ready to Get Started?</h2>
+                <p className="text-white/60 mb-8 max-w-2xl mx-auto">
+                  Join thousands of learners and professionals using Tera to unlock their potential. Start free, upgrade anytime.
+                </p>
+                <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                  {!user ? (
+                    <>
+                      <button
+                        onClick={() => router.push('/auth/signin')}
+                        className="px-8 py-3 bg-white text-black font-semibold rounded-lg hover:bg-white/90 transition"
+                      >
+                        Sign In
+                      </button>
+                      <button
+                        onClick={() => router.push('/auth/signup')}
+                        className="px-8 py-3 bg-tera-neon text-black font-semibold rounded-lg hover:bg-tera-neon/90 transition"
+                      >
+                        Create Free Account
+                      </button>
+                    </>
+                  ) : (
+                    <button
+                      onClick={() => router.push('/new')}
+                      className="px-8 py-3 bg-tera-neon text-black font-semibold rounded-lg hover:bg-tera-neon/90 transition"
+                    >
+                      Start Using Tera
+                    </button>
+                  )}
+                </div>
+              </div>
+
+              <div className="mt-12 text-center border-t border-white/10 pt-8">
+                <p className="text-sm text-white/40">
+                  Questions? <a href="mailto:support@teralearn.ai" className="text-tera-neon hover:underline">Contact our support team</a>
+                </p>
+              </div>
             </div>
           </div>
         </div>

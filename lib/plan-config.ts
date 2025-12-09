@@ -1,7 +1,7 @@
 // Plan configuration and limits
 // Centralized definitions for all subscription plans
 
-export type PlanType = 'free' | 'pro' | 'school'
+export type PlanType = 'free' | 'pro' | 'plus'
 
 export interface PlanLimits {
     lessonPlansPerMonth: number | 'unlimited'
@@ -26,75 +26,78 @@ export interface PlanConfig {
 export const PLAN_CONFIGS: Record<PlanType, PlanConfig> = {
     free: {
         name: 'free',
-        displayName: 'Free',
+        displayName: 'Starter',
         price: 0,
         period: '/month',
-        description: 'Perfect for trying out Tera in your classroom.',
+        description: 'Start exploring AI-powered learning for free.',
         limits: {
             lessonPlansPerMonth: 5,
-            chatsPerDay: 10, // Updated to 10 chats/day
-            fileUploadsPerDay: 5, // Updated to 5 uploads/day
-            webSearchesPerMonth: 3,
+            chatsPerDay: 15,
+            fileUploadsPerDay: 5,
+            webSearchesPerMonth: 5,
             maxFileSize: 25,
-            features: ['basic-chat', 'lesson-plans', 'basic-tools', 'file-uploads', 'web-search']
+            features: ['basic-chat', 'basic-tools', 'file-uploads', 'web-search']
         },
         features: [
-            'Limited chat (10/day)',
-            '5 AI-generated lesson plans per month',
-            'Basic resource generation',
-            'File uploads (5 per day, 25MB max)',
-            '3 web searches per month',
+            'Up to 15 AI conversations per day',
+            '5 file uploads per day (25MB each)',
+            '5 web searches per month',
+            'Basic AI tools & features',
+            'Mobile & desktop access',
             'Community support'
         ]
     },
     pro: {
         name: 'pro',
         displayName: 'Pro',
-        price: 5,
+        price: 9,
         period: '/month',
-        description: 'For teachers who want to supercharge their workflow.',
+        description: 'Unlimited knowledge, unlimited possibilities.',
         limits: {
             lessonPlansPerMonth: 'unlimited',
             chatsPerDay: 'unlimited',
             fileUploadsPerDay: 'unlimited',
-            webSearchesPerMonth: 50,
-            maxFileSize: 100,
-            features: ['advanced-chat', 'lesson-plans', 'all-tools', 'file-uploads', 'export', 'web-search']
+            webSearchesPerMonth: 100,
+            maxFileSize: 500,
+            features: ['advanced-chat', 'lesson-plans', 'all-tools', 'file-uploads', 'export', 'web-search', 'priority-support']
         },
         features: [
-            'Everything in Free',
-            'Unlimited lesson plans',
-            'Unlimited chat',
-            'Unlimited file uploads (100MB max per file)',
-            '50 web searches per month',
-            'Priority support',
-            'Custom teaching style calibration',
-            'Export to PDF & Word'
+            'Unlimited AI conversations',
+            'Unlimited file uploads (500MB each)',
+            '100 web searches per month',
+            'Access to all tools & features',
+            'Export to PDF & Word',
+            'Priority email support',
+            'Advanced customization',
+            'No ads, no limits on creativity'
         ]
     },
-    school: {
-        name: 'school',
-        displayName: 'School',
-        price: 20,
-        period: '/per user/month',
-        description: 'For schools and districts looking to empower their staff.',
+    plus: {
+        name: 'plus',
+        displayName: 'Plus',
+        price: 19,
+        period: '/month',
+        description: 'For power users who need everything.',
         limits: {
             lessonPlansPerMonth: 'unlimited',
             chatsPerDay: 'unlimited',
             fileUploadsPerDay: 'unlimited',
-            webSearchesPerMonth: 80,
-            maxFileSize: 500,
-            features: ['advanced-chat', 'lesson-plans', 'all-tools', 'file-uploads', 'export', 'admin', 'analytics', 'sso', 'web-search']
+            webSearchesPerMonth: 500,
+            maxFileSize: 2000,
+            features: ['advanced-chat', 'lesson-plans', 'all-tools', 'file-uploads', 'export', 'admin', 'analytics', 'sso', 'web-search', 'priority-support', 'custom-ai']
         },
         features: [
-            'Everything in Pro',
-            'Unlimited file uploads (500MB max per file)',
-            '80 web searches per month',
-            'Admin dashboard',
-            'Shared resource library',
-            'District-wide analytics',
-            'Dedicated success manager',
-            'SSO & Advanced Security'
+            'Everything in Pro, plus:',
+            '500 web searches per month',
+            'Unlimited file uploads (2GB each)',
+            'Advanced analytics dashboard',
+            'Team collaboration features',
+            'API access',
+            'Dedicated account manager',
+            '24/7 priority support',
+            'Custom AI model training',
+            'Batch file processing',
+            'Advanced data export options'
         ]
     }
 }

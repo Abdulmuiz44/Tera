@@ -10,9 +10,9 @@ import { supabaseServer } from './supabase-server'
 import { getPlanConfig } from './plan-config'
 
 const MONTHLY_WEB_SEARCH_LIMITS = {
-  free: 3,
-  pro: 50,
-  school: 80
+  free: 5,
+  pro: 100,
+  plus: 500
 }
 
 /**
@@ -35,7 +35,7 @@ export async function getWebSearchRemaining(userId: string): Promise<{ remaining
       return { remaining: 3, total: 3, resetDate: null, plan: 'free' }
     }
 
-    const plan = (data.subscription_plan || 'free') as 'free' | 'pro' | 'school'
+    const plan = (data.subscription_plan || 'free') as 'free' | 'pro' | 'plus'
     const limit = MONTHLY_WEB_SEARCH_LIMITS[plan]
 
     // Check if reset date has passed (reset monthly)
@@ -121,4 +121,4 @@ export function getWebSearchLimitMessage(remaining: number, total: number): stri
 }
 
 export const WEB_SEARCH_LIMITS = MONTHLY_WEB_SEARCH_LIMITS
-export const getDefaultLimit = (plan: 'free' | 'pro' | 'school' = 'free') => MONTHLY_WEB_SEARCH_LIMITS[plan]
+export const getDefaultLimit = (plan: 'free' | 'pro' | 'plus' = 'free') => MONTHLY_WEB_SEARCH_LIMITS[plan]

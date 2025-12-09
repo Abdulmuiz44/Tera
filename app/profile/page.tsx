@@ -182,17 +182,17 @@ export default function ProfilePage() {
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-white/80 mb-2">School / Institution</label>
+                      <label className="block text-sm font-medium text-white/80 mb-2">Organization / Company (Optional)</label>
                       <input
                         type="text"
                         value={formData.school}
                         onChange={(e) => setFormData({ ...formData, school: e.target.value })}
                         className="w-full rounded-lg bg-tera-muted border border-white/10 px-4 py-2 text-white focus:border-tera-neon focus:outline-none"
-                        placeholder="Enter your school or institution"
+                        placeholder="Enter your organization, company, or institution"
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-white/80 mb-2">Grade Levels</label>
+                      <label className="block text-sm font-medium text-white/80 mb-2">Interests (Optional)</label>
                       <input
                         type="text"
                         value={formData.gradeLevels.join(', ')}
@@ -201,9 +201,9 @@ export default function ProfilePage() {
                           gradeLevels: e.target.value.split(',').map(s => s.trim()).filter(Boolean)
                         })}
                         className="w-full rounded-lg bg-tera-muted border border-white/10 px-4 py-2 text-white focus:border-tera-neon focus:outline-none"
-                        placeholder="e.g., K-2, 3-5, Middle School"
+                        placeholder="e.g., Machine Learning, Data Science, Web Development"
                       />
-                      <p className="mt-1 text-xs text-white/40">Separate multiple levels with commas</p>
+                      <p className="mt-1 text-xs text-white/40">Separate multiple interests with commas</p>
                     </div>
                   </div>
                 ) : (
@@ -211,7 +211,7 @@ export default function ProfilePage() {
                     <h2 className="text-2xl font-semibold text-white">{displayName}</h2>
                     <p className="text-white/60 mt-1">{email}</p>
                     {formData.school && (
-                      <p className="text-white/80 mt-2">🏫 {formData.school}</p>
+                      <p className="text-white/80 mt-2">🏢 {formData.school}</p>
                     )}
                     {formData.gradeLevels.length > 0 && (
                       <div className="flex gap-2 mt-3">
@@ -234,7 +234,7 @@ export default function ProfilePage() {
 
               {/* Current Plan Badge */}
               <div className="text-right">
-                <div className={`inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium ${profile.subscriptionPlan === 'school'
+                <div className={`inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium ${profile.subscriptionPlan === 'plus'
                   ? 'bg-purple-500/20 text-purple-300 border border-purple-500/30'
                   : profile.subscriptionPlan === 'pro'
                     ? 'bg-tera-neon/20 text-tera-neon border border-tera-neon/30'
@@ -376,7 +376,7 @@ export default function ProfilePage() {
               ))}
             </div>
 
-            {profile.subscriptionPlan !== 'school' && (
+            {profile.subscriptionPlan !== 'plus' && (
               <div className="mt-8 pt-6 border-t border-white/10">
                 <div className="flex items-center justify-between">
                   <div>

@@ -30,8 +30,8 @@ export default function UpgradePrompt({ type, onClose, inline = false }: Upgrade
         },
         'web-search': {
             title: 'Web Search Limit Reached',
-            description: "You've reached your monthly limit of 3 web searches on the Free plan.",
-            benefit: 'Upgrade to Pro for 50 web searches per month, or to School for unlimited searches.',
+            description: "You've reached your monthly limit of 5 web searches on the Starter plan.",
+            benefit: 'Upgrade to Pro (100/month) or Plus (500/month) to unlock more searches.',
             icon: '🔍'
         }
     }

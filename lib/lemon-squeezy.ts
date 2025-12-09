@@ -118,14 +118,14 @@ export function verifyWebhookSignature(body: string, signature: string): boolean
 /**
  * Map Lemon Squeezy variant ID to plan type
  */
-export function mapVariantToPlan(variantId: string): 'pro' | 'school' | null {
+export function mapVariantToPlan(variantId: string): 'pro' | 'plus' | null {
   const proVariantId = process.env.LEMON_SQUEEZY_PRO_VARIANT_ID
-  const schoolVariantId = process.env.LEMON_SQUEEZY_SCHOOL_VARIANT_ID
+  const plusVariantId = process.env.LEMON_SQUEEZY_PLUS_VARIANT_ID
 
   if (variantId === proVariantId) {
     return 'pro'
-  } else if (variantId === schoolVariantId) {
-    return 'school'
+  } else if (variantId === plusVariantId) {
+    return 'plus'
   }
 
   return null
@@ -135,14 +135,14 @@ export function mapVariantToPlan(variantId: string): 'pro' | 'school' | null {
  * Get checkout URL for a specific plan
  */
 export async function getCheckoutUrlForPlan(
-  plan: 'pro' | 'school',
+  plan: 'pro' | 'plus',
   email: string,
   userId: string,
   returnUrl?: string
 ): Promise<string> {
   const variantId = plan === 'pro'
     ? process.env.LEMON_SQUEEZY_PRO_VARIANT_ID
-    : process.env.LEMON_SQUEEZY_SCHOOL_VARIANT_ID
+    : process.env.LEMON_SQUEEZY_PLUS_VARIANT_ID
 
   if (!variantId) {
     throw new Error(`Lemon Squeezy variant ID not configured for ${plan} plan`)

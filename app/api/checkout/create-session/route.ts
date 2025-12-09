@@ -6,7 +6,7 @@ export async function POST(request: NextRequest) {
     const { plan, email, userId, returnUrl } = await request.json()
 
     // Validate inputs
-    if (!plan || !['pro', 'school'].includes(plan)) {
+    if (!plan || !['pro', 'plus'].includes(plan)) {
       return NextResponse.json(
         { error: 'Invalid plan' },
         { status: 400 }
