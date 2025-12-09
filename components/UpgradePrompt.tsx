@@ -3,7 +3,7 @@
 import Link from 'next/link'
 
 interface UpgradePromptProps {
-    type: 'lesson-plans' | 'chats' | 'file-uploads'
+    type: 'lesson-plans' | 'chats' | 'file-uploads' | 'web-search'
     onClose?: () => void
     inline?: boolean
 }
@@ -27,6 +27,12 @@ export default function UpgradePrompt({ type, onClose, inline = false }: Upgrade
             description: "You've reached your daily limit of 5 file uploads on the Free plan.",
             benefit: 'Upgrade to Pro for unlimited file uploads.',
             icon: '📎'
+        },
+        'web-search': {
+            title: 'Web Search Limit Reached',
+            description: "You've reached your monthly limit of 3 web searches on the Free plan.",
+            benefit: 'Upgrade to Pro for 50 web searches per month, or to School for unlimited searches.',
+            icon: '🔍'
         }
     }
 

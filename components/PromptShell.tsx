@@ -164,7 +164,9 @@ export default function PromptShell({
   const [isListening, setIsListening] = useState(false)
   const recognitionRef = useRef<any>(null)
   const [currentSessionId, setCurrentSessionId] = useState<string | null>(sessionId || null)
-  const [upgradePromptType, setUpgradePromptType] = useState<'lesson-plans' | 'chats' | 'file-uploads' | null>(null)
+  const [upgradePromptType, setUpgradePromptType] = useState<'lesson-plans' | 'chats' | 'file-uploads' | 'web-search' | null>(null)
+  const [webSearchEnabled, setWebSearchEnabled] = useState(false)
+  const [webSearchRemaining, setWebSearchRemaining] = useState(100)
   const requestIdRef = useRef(0)
 
 
@@ -301,7 +303,8 @@ export default function PromptShell({
           authorEmail: user?.email ?? undefined,
           attachments: attachmentsToSend,
           sessionId: currentSessionId,
-          chatId: editingMessageId ?? undefined
+          chatId: editingMessageId ?? undefined,
+          enableWebSearch: webSearchEnabled
         })
 
         // Check if this request is still valid (hasn't been stopped or superseded)
@@ -350,6 +353,8 @@ export default function PromptShell({
           setUpgradePromptType('lesson-plans')
         } else if (message.includes('limit') && message.includes('file uploads')) {
           setUpgradePromptType('file-uploads')
+        } else if (message.includes('limit') && message.includes('web-search')) {
+          setUpgradePromptType('web-search')
         }
 
         setConversations((prev) =>
@@ -535,6 +540,24 @@ export default function PromptShell({
     }
   }, [conversations, conversationActive, status])
 
+  // Load web search remaining count
+  useEffect(() => {
+    if (user?.id) {
+      fetch('/api/user/web-search-status', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId: user.id })
+      })
+        .then(r => r.json())
+        .then(data => {
+          if (data.remaining !== undefined) {
+            setWebSearchRemaining(data.remaining)
+          }
+        })
+        .catch(err => console.warn('Failed to fetch web search status:', err))
+    }
+  }, [user?.id])
+
   useEffect(() => {
     if (typeof window !== 'undefined' && 'webkitSpeechRecognition' in window) {
       const SpeechRecognition = (window as any).webkitSpeechRecognition
@@ -710,23 +733,34 @@ export default function PromptShell({
         <div className="mx-auto max-w-3xl relative">
           <div className={`relative flex flex-col gap-2 rounded-[24px] border border-white/10 bg-[#1a1a1a] p-2 shadow-2xl ring-1 ring-white/5 transition-all ${conversationActive ? 'focus-within:ring-tera-neon/50 focus-within:border-tera-neon/50' : 'focus-within:ring-white/20'}`}>
 
-            {/* Inline Attachments Preview */}
-            {pendingAttachments.length > 0 && (
-              <div className="flex flex-wrap gap-2 px-2 pt-2">
-                {pendingAttachments.map((att, idx) => (
-                  <div key={idx} className="group relative flex items-center gap-2 rounded-lg bg-white/10 px-3 py-2 text-xs text-white">
-                    <span>{att.type === 'image' ? '🖼️' : '📄'}</span>
-                    <span className="truncate max-w-[200px]">{att.name}</span>
-                    <button
-                      onClick={() => setPendingAttachments(prev => prev.filter((_, i) => i !== idx))}
-                      className="ml-2 rounded-full bg-white/10 p-1 hover:bg-white/20"
-                    >
-                      ✕
-                    </button>
-                  </div>
-                ))}
-              </div>
-            )}
+            {/* Active Tools & Attachments Preview */}
+            <div className="flex flex-wrap items-center gap-2 px-2 pt-2">
+              {/* Web Search Toggle Badge */}
+              {webSearchEnabled && (
+                <div className="flex items-center gap-2 rounded-lg bg-blue-500/30 text-blue-200 border border-blue-500/50 px-3 py-2 text-xs font-medium">
+                  <span>🔍</span>
+                  <span>Web Search ON ({webSearchRemaining})</span>
+                </div>
+              )}
+
+              {/* Attachments Preview */}
+              {pendingAttachments.length > 0 && (
+                <div className="flex flex-wrap gap-2">
+                  {pendingAttachments.map((att, idx) => (
+                    <div key={idx} className="group relative flex items-center gap-2 rounded-lg bg-white/10 px-3 py-2 text-xs text-white">
+                      <span>{att.type === 'image' ? '🖼️' : '📄'}</span>
+                      <span className="truncate max-w-[200px]">{att.name}</span>
+                      <button
+                        onClick={() => setPendingAttachments(prev => prev.filter((_, i) => i !== idx))}
+                        className="ml-2 rounded-full bg-white/10 p-1 hover:bg-white/20"
+                      >
+                        ✕
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
 
             <div className="flex items-end gap-2">
               {/* Left Actions */}
@@ -741,24 +775,55 @@ export default function PromptShell({
                   </button>
 
                   {attachmentOpen && (
-                    <div className="absolute bottom-full left-0 mb-2 w-48 overflow-hidden rounded-xl border border-white/10 bg-tera-panel shadow-xl backdrop-blur-xl">
+                    <div className="absolute bottom-full left-0 mb-2 w-56 overflow-hidden rounded-xl border border-white/10 bg-tera-panel shadow-xl backdrop-blur-xl">
+                      {/* File & Media Section */}
                       <button
                         onClick={() => handleFileSelect('camera')}
-                        className="flex w-full items-center gap-3 px-4 py-3 text-left text-sm text-white hover:bg-white/5"
+                        className="flex w-full items-center gap-3 px-4 py-3 text-left text-sm text-white hover:bg-white/5 border-b border-white/5"
                       >
                         <span>📷</span> Open Camera
                       </button>
                       <button
                         onClick={() => handleFileSelect('image')}
-                        className="flex w-full items-center gap-3 px-4 py-3 text-left text-sm text-white hover:bg-white/5"
+                        className="flex w-full items-center gap-3 px-4 py-3 text-left text-sm text-white hover:bg-white/5 border-b border-white/5"
                       >
                         <span>🖼️</span> Upload image
                       </button>
                       <button
                         onClick={() => handleFileSelect('file')}
-                        className="flex w-full items-center gap-3 px-4 py-3 text-left text-sm text-white hover:bg-white/5"
+                        className="flex w-full items-center gap-3 px-4 py-3 text-left text-sm text-white hover:bg-white/5 border-b border-white/5"
                       >
                         <span>📄</span> Upload file
+                      </button>
+                      
+                      {/* Web Search Option */}
+                      <button
+                        onClick={() => {
+                          if (webSearchRemaining > 0) {
+                            setWebSearchEnabled(!webSearchEnabled)
+                            setAttachmentOpen(false)
+                          } else {
+                            setUpgradePromptType('web-search')
+                            setAttachmentOpen(false)
+                          }
+                        }}
+                        disabled={webSearchRemaining <= 0}
+                        className={`flex w-full items-center gap-3 px-4 py-3 text-left text-sm transition ${
+                          webSearchRemaining <= 0
+                            ? 'text-red-300/50 cursor-not-allowed opacity-60 hover:bg-red-500/10'
+                            : webSearchEnabled
+                              ? 'text-blue-200 bg-blue-500/20 hover:bg-blue-500/30'
+                              : 'text-white hover:bg-white/5'
+                        }`}
+                        title={webSearchRemaining <= 0 ? 'Monthly web search limit reached - Upgrade to continue' : 'Search the web for current information'}
+                      >
+                        <span>🔍</span>
+                        <div className="flex-1">
+                          <div>Web Search {webSearchEnabled ? '(ON)' : ''}</div>
+                          <div className={`text-xs ${webSearchRemaining <= 0 ? 'text-red-300/50' : 'text-white/50'}`}>
+                            {webSearchRemaining <= 0 ? 'Limit reached' : `${webSearchRemaining} remaining`}
+                          </div>
+                        </div>
                       </button>
                     </div>
                   )}

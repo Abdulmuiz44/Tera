@@ -261,13 +261,15 @@ export async function generateTeacherResponse({
   tool,
   attachments = [] as AttachmentReference[],
   history = [] as { role: 'user' | 'assistant'; content: string }[],
-  userId
+  userId,
+  enableWebSearch = false
 }: {
   prompt: string
   tool: string
   attachments?: AttachmentReference[]
   history?: { role: 'user' | 'assistant'; content: string }[]
   userId?: string
+  enableWebSearch?: boolean
 }) {
   // Build user message content, handling image attachments for vision support
   const imageAttachments = attachments.filter(att => att.type === 'image')
@@ -300,6 +302,31 @@ export async function generateTeacherResponse({
     enhancedPrompt = `${fileContents}\n\nUser Question: ${prompt}`
     console.log('🔵 Enhanced prompt with extracted text')
   }
+
+  // Add web search results if enabled
+  let webSearchContext = ''
+  if (enableWebSearch) {
+    try {
+      const { searchWeb } = await import('./web-search')
+      const searchResults = await searchWeb(prompt, 5, userId)
+      if (searchResults.success && searchResults.results.length > 0) {
+        webSearchContext = '\n\n=== WEB SEARCH RESULTS ===\n'
+        webSearchContext += searchResults.results
+          .map((r, i) => `${i + 1}. ${r.title}\nSource: ${r.source}\n${r.snippet}`)
+          .join('\n\n')
+        webSearchContext += '\n=== END WEB SEARCH ===\n'
+        console.log('🔵 Enhanced prompt with web search results')
+      } else if (!searchResults.success && searchResults.message) {
+        console.warn('Web search limitation:', searchResults.message)
+        webSearchContext = `\n\n⚠️ Note: ${searchResults.message}\n`
+      }
+    } catch (error) {
+      console.warn('Web search failed, continuing without search results:', error)
+    }
+  }
+
+  // Combine all context
+  enhancedPrompt = enhancedPrompt + webSearchContext
 
   // ALWAYS search memory for context before responding (if userId provided)
   let systemPromptWithMemory = systemMessage

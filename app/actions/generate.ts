@@ -6,7 +6,8 @@ import { supabaseServer } from '@/lib/supabase-server'
 import { generateTeacherResponse } from '@/lib/mistral'
 import type { AttachmentReference } from '@/lib/attachment'
 import { getUserProfile, incrementLessonPlans, incrementChats, incrementFileUploads } from '@/lib/usage-tracking'
-import { canGenerateLessonPlan, canStartChat, canUploadFile, getPlanConfig } from '@/lib/plan-config'
+import { canGenerateLessonPlan, canStartChat, canUploadFile, canPerformWebSearch, getPlanConfig } from '@/lib/plan-config'
+import { getWebSearchRemaining } from '@/lib/web-search-usage'
 
 type GenerateProps = {
   prompt: string
@@ -16,9 +17,10 @@ type GenerateProps = {
   attachments?: AttachmentReference[]
   sessionId?: string | null
   chatId?: string
+  enableWebSearch?: boolean
 }
 
-export async function generateAnswer({ prompt, tool, authorId, authorEmail, attachments = [], sessionId, chatId }: GenerateProps) {
+export async function generateAnswer({ prompt, tool, authorId, authorEmail, attachments = [], sessionId, chatId, enableWebSearch = false }: GenerateProps) {
 
   // Ensure user exists in users table FIRST
   if (authorId && authorEmail) {
@@ -80,6 +82,14 @@ export async function generateAnswer({ prompt, tool, authorId, authorEmail, atta
     throw new Error(`You've reached your daily limit of ${limit} chats. Upgrade to Pro for unlimited access.`)
   }
 
+  // Check web search limits if enabled
+  if (enableWebSearch) {
+    const { remaining } = await getWebSearchRemaining(authorId)
+    if (remaining <= 0) {
+      throw new Error('limit web-search')
+    }
+  }
+
   // Fetch chat history if sessionId exists
   let history: { role: 'user' | 'assistant'; content: string }[] = []
 
@@ -104,7 +114,7 @@ export async function generateAnswer({ prompt, tool, authorId, authorEmail, atta
   }
 
   // Generate the AI response
-  const answer = await generateTeacherResponse({ prompt, tool, attachments, history, userId: authorId })
+  const answer = await generateTeacherResponse({ prompt, tool, attachments, history, userId: authorId, enableWebSearch })
 
   const currentSessionId = sessionId || crypto.randomUUID()
   // Simple title generation: first 50 chars of prompt
