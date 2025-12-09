@@ -1,29 +1,96 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 import Sidebar from '@/components/Sidebar'
 import { PLAN_CONFIGS } from '@/lib/plan-config'
+import type { User } from '@supabase/supabase-js'
+import { supabase } from '@/lib/supabase'
 
 export default function PricingPage() {
   const [sidebarExpanded, setSidebarExpanded] = useState(false)
+  const [user, setUser] = useState<User | null>(null)
+  const [loading, setLoading] = useState(false)
+  const [currentPlan, setCurrentPlan] = useState<string>('free')
+  const router = useRouter()
+
+  // Load user and subscription status
+  useEffect(() => {
+    const loadUser = async () => {
+      const { data: { user: authUser } } = await supabase.auth.getUser()
+      setUser(authUser || null)
+
+      if (authUser) {
+        const response = await fetch('/api/subscription/status', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ userId: authUser.id })
+        })
+        const data = await response.json()
+        if (data.success) {
+          setCurrentPlan(data.plan)
+        }
+      }
+    }
+    loadUser()
+  }, [])
+
+  const handleCheckout = async (plan: 'pro' | 'school') => {
+    if (!user) {
+      router.push('/auth/signin')
+      return
+    }
+
+    if (currentPlan === plan) {
+      return
+    }
+
+    setLoading(true)
+    try {
+      const response = await fetch('/api/checkout/create-session', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          plan,
+          email: user.email,
+          userId: user.id,
+          returnUrl: `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/profile`
+        })
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to create checkout session')
+      }
+
+      const data = await response.json()
+      if (data.checkoutUrl) {
+        window.location.href = data.checkoutUrl
+      }
+    } catch (error) {
+      console.error('Checkout error:', error)
+      alert('Failed to initiate checkout. Please try again.')
+    } finally {
+      setLoading(false)
+    }
+  }
 
   const plans = [
     {
       ...PLAN_CONFIGS.free,
       cta: 'Current Plan',
-      current: true,
+      current: currentPlan === 'free',
       popular: false
     },
     {
       ...PLAN_CONFIGS.pro,
       cta: 'Upgrade to Pro',
-      current: false,
+      current: currentPlan === 'pro',
       popular: true
     },
     {
       ...PLAN_CONFIGS.school,
       cta: 'Contact Sales',
-      current: false,
+      current: currentPlan === 'school',
       popular: false
     }
   ]
@@ -77,15 +144,23 @@ export default function PricingPage() {
                   </ul>
 
                   <button
-                    disabled={plan.current}
+                    disabled={plan.current || loading}
+                    onClick={() => {
+                      if (plan.name === 'pro') {
+                        handleCheckout('pro')
+                      } else if (plan.name === 'school') {
+                        // Contact sales - open email or contact form
+                        window.location.href = 'mailto:sales@teralearn.ai?subject=School%20Plan%20Inquiry'
+                      }
+                    }}
                     className={`w-full rounded-lg py-2 text-sm font-medium transition ${plan.current
                       ? 'bg-white/10 text-white/40 cursor-default'
                       : plan.popular
-                        ? 'bg-tera-neon text-black hover:bg-tera-neon/90'
-                        : 'bg-white text-black hover:bg-white/90'
+                        ? 'bg-tera-neon text-black hover:bg-tera-neon/90 disabled:opacity-50 disabled:cursor-not-allowed'
+                        : 'bg-white text-black hover:bg-white/90 disabled:opacity-50 disabled:cursor-not-allowed'
                       }`}
                   >
-                    {plan.cta}
+                    {loading && plan.name === 'pro' ? 'Processing...' : plan.cta}
                   </button>
                 </div>
               ))}
