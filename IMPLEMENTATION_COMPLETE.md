@@ -14,9 +14,9 @@ The complete Lemon Squeezy payment integration has been successfully implemented
   - Support for 5 webhook event types (order, subscription lifecycle)
 
 ### 2. Subscription Plans ✅
-- **Free Plan**: 3 web searches/month (no charge)
-- **Pro Plan**: $5/month (50 web searches/month)
-- **School Plan**: $20/month per user (80 web searches/month)
+- **Free Plan**: 5 web searches/month, 5 file uploads/day (no charge)
+- **Pro Plan**: $5/month (50 web searches/month, 20 file uploads/day)
+- **Plus Plan**: $19/month (80 web searches/month, unlimited file uploads)
 
 ### 3. Limit Enforcement ✅
 - Plan-based web search limits enforced at API level

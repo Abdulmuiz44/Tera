@@ -26,7 +26,7 @@ export interface PlanConfig {
 export const PLAN_CONFIGS: Record<PlanType, PlanConfig> = {
     free: {
         name: 'free',
-        displayName: 'Starter',
+        displayName: 'Free',
         price: 0,
         period: '/month',
         description: 'Start exploring AI-powered learning for free.',
@@ -50,21 +50,21 @@ export const PLAN_CONFIGS: Record<PlanType, PlanConfig> = {
     pro: {
         name: 'pro',
         displayName: 'Pro',
-        price: 9,
+        price: 5,
         period: '/month',
         description: 'Unlimited knowledge, unlimited possibilities.',
         limits: {
             lessonPlansPerMonth: 'unlimited',
             chatsPerDay: 'unlimited',
-            fileUploadsPerDay: 'unlimited',
-            webSearchesPerMonth: 100,
+            fileUploadsPerDay: 20,
+            webSearchesPerMonth: 50,
             maxFileSize: 500,
             features: ['advanced-chat', 'lesson-plans', 'all-tools', 'file-uploads', 'export', 'web-search', 'priority-support']
         },
         features: [
             'Unlimited AI conversations',
-            'Unlimited file uploads (500MB each)',
-            '100 web searches per month',
+            '20 file uploads per day (500MB each)',
+            '50 web searches per month',
             'Access to all tools & features',
             'Export to PDF & Word',
             'Priority email support',
@@ -82,13 +82,13 @@ export const PLAN_CONFIGS: Record<PlanType, PlanConfig> = {
             lessonPlansPerMonth: 'unlimited',
             chatsPerDay: 'unlimited',
             fileUploadsPerDay: 'unlimited',
-            webSearchesPerMonth: 500,
+            webSearchesPerMonth: 80,
             maxFileSize: 2000,
             features: ['advanced-chat', 'lesson-plans', 'all-tools', 'file-uploads', 'export', 'admin', 'analytics', 'sso', 'web-search', 'priority-support', 'custom-ai']
         },
         features: [
             'Everything in Pro, plus:',
-            '500 web searches per month',
+            '80 web searches per month',
             'Unlimited file uploads (2GB each)',
             'Advanced analytics dashboard',
             'Team collaboration features',

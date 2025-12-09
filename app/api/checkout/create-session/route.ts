@@ -1,9 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getCheckoutUrlForPlan } from '@/lib/lemon-squeezy'
+import { convertPrice } from '@/lib/currency-converter'
 
 export async function POST(request: NextRequest) {
   try {
-    const { plan, email, userId, returnUrl } = await request.json()
+    const { plan, email, userId, returnUrl, currencyCode } = await request.json()
 
     // Validate inputs
     if (!plan || !['pro', 'plus'].includes(plan)) {
@@ -27,12 +28,14 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Get checkout URL
-    const checkoutUrl = await getCheckoutUrlForPlan(plan, email, userId, returnUrl)
+    // Get checkout URL (Lemon Squeezy handles pricing in their dashboard)
+    // We pass currency info for reference but LS manages actual pricing
+    const checkoutUrl = await getCheckoutUrlForPlan(plan, email, userId, returnUrl, currencyCode)
 
     return NextResponse.json({
       success: true,
-      checkoutUrl
+      checkoutUrl,
+      currency: currencyCode
     })
   } catch (error) {
     console.error('Checkout creation error:', error)

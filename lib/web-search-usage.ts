@@ -1,9 +1,9 @@
 /**
  * Web Search Usage Tracking
  * Tracks and limits web searches based on subscription plan:
- * - Free: 3/month
+ * - Free: 5/month
  * - Pro: 50/month
- * - School: unlimited
+ * - Plus: 80/month
  */
 
 import { supabaseServer } from './supabase-server'
@@ -11,8 +11,8 @@ import { getPlanConfig } from './plan-config'
 
 const MONTHLY_WEB_SEARCH_LIMITS = {
   free: 5,
-  pro: 100,
-  plus: 500
+  pro: 50,
+  plus: 80
 }
 
 /**

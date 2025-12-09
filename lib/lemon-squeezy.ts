@@ -138,7 +138,8 @@ export async function getCheckoutUrlForPlan(
   plan: 'pro' | 'plus',
   email: string,
   userId: string,
-  returnUrl?: string
+  returnUrl?: string,
+  currencyCode?: string
 ): Promise<string> {
   const variantId = plan === 'pro'
     ? process.env.LEMON_SQUEEZY_PRO_VARIANT_ID
