@@ -3,8 +3,14 @@
 import { useState } from 'react'
 import dynamic from 'next/dynamic'
 
-const SpreadsheetEditor = dynamic(() => import('../SpreadsheetEditor'), { ssr: false })
-const SpreadsheetEditHistory = dynamic(() => import('../SpreadsheetEditHistory'), { ssr: false })
+const SpreadsheetEditor = dynamic(() => import('../SpreadsheetEditor'), { 
+  ssr: false,
+  loading: () => <div className="text-white/50 text-sm">Loading editor...</div>
+})
+const SpreadsheetEditHistory = dynamic(() => import('../SpreadsheetEditHistory'), { 
+  ssr: false,
+  loading: () => <div className="text-white/50 text-sm">Loading history...</div>
+})
 
 interface SpreadsheetConfig {
   action: string

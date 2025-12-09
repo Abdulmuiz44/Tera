@@ -5,10 +5,22 @@
 
 import { createClient } from '@supabase/supabase-js'
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL || '',
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ''
-)
+let supabase: any = null
+
+function getSupabaseClient() {
+  if (!supabase) {
+    const url = process.env.NEXT_PUBLIC_SUPABASE_URL
+    const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+    
+    if (!url || !key) {
+      console.warn('Supabase credentials not configured')
+      return null
+    }
+    
+    supabase = createClient(url, key)
+  }
+  return supabase
+}
 
 export interface SpreadsheetEdit {
   id?: string
@@ -33,7 +45,10 @@ export async function logSpreadsheetEdit(
   newData?: any
 ): Promise<{ success: boolean; error?: string; data?: any }> {
   try {
-    const { data, error } = await supabase
+    const client = getSupabaseClient()
+    if (!client) return { success: false, error: 'Supabase not configured' }
+
+    const { data, error } = await client
       .from('spreadsheet_edits')
       .insert({
         user_id: userId,
@@ -67,7 +82,10 @@ export async function getSpreadsheetEditHistory(
   offset: number = 0
 ): Promise<{ success: boolean; edits?: SpreadsheetEdit[]; error?: string }> {
   try {
-    const { data, error } = await supabase
+    const client = getSupabaseClient()
+    if (!client) return { success: false, error: 'Supabase not configured' }
+
+    const { data, error } = await client
       .from('spreadsheet_edits')
       .select('*')
       .eq('spreadsheet_id', spreadsheetId)
@@ -94,7 +112,10 @@ export async function getSpreadsheetEditCount(
   spreadsheetId: string
 ): Promise<{ success: boolean; count?: number; error?: string }> {
   try {
-    const { count, error } = await supabase
+    const client = getSupabaseClient()
+    if (!client) return { success: false, error: 'Supabase not configured' }
+
+    const { count, error } = await client
       .from('spreadsheet_edits')
       .select('*', { count: 'exact' })
       .eq('spreadsheet_id', spreadsheetId)
@@ -122,7 +143,10 @@ export async function updateSpreadsheetData(
   editCount?: number
 ): Promise<{ success: boolean; error?: string }> {
   try {
-    const { error } = await supabase
+    const client = getSupabaseClient()
+    if (!client) return { success: false, error: 'Supabase not configured' }
+
+    const { error } = await client
       .from('google_spreadsheets')
       .update({
         current_data: currentData,
@@ -153,7 +177,10 @@ export async function getSpreadsheetCurrentData(
   spreadsheetId: string
 ): Promise<{ success: boolean; data?: any[][] | null; error?: string }> {
   try {
-    const { data, error } = await supabase
+    const client = getSupabaseClient()
+    if (!client) return { success: false, error: 'Supabase not configured' }
+
+    const { data, error } = await client
       .from('google_spreadsheets')
       .select('current_data')
       .eq('user_id', userId)
