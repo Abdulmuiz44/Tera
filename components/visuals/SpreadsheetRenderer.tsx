@@ -1,6 +1,10 @@
 'use client'
 
 import { useState } from 'react'
+import dynamic from 'next/dynamic'
+
+const SpreadsheetEditor = dynamic(() => import('../SpreadsheetEditor'), { ssr: false })
+const SpreadsheetEditHistory = dynamic(() => import('../SpreadsheetEditHistory'), { ssr: false })
 
 interface SpreadsheetConfig {
   action: string
@@ -14,11 +18,14 @@ interface SpreadsheetStatus {
   state: 'idle' | 'creating' | 'success' | 'error'
   message?: string
   spreadsheetUrl?: string
+  spreadsheetId?: string
 }
 
 export default function SpreadsheetRenderer({ config, userId }: { config: SpreadsheetConfig; userId?: string }) {
   const [status, setStatus] = useState<SpreadsheetStatus>({ state: 'idle' })
   const [needsAuth, setNeedsAuth] = useState(false)
+  const [spreadsheetData, setSpreadsheetData] = useState(config.data)
+  const [showHistory, setShowHistory] = useState(false)
 
   const handleAuthorizeGoogle = async () => {
     if (!userId) {
@@ -82,12 +89,57 @@ export default function SpreadsheetRenderer({ config, userId }: { config: Spread
       setStatus({
         state: 'success',
         message: 'Spreadsheet created successfully!',
-        spreadsheetUrl: result.spreadsheet.url
+        spreadsheetUrl: result.spreadsheet.url,
+        spreadsheetId: result.spreadsheet.id
       })
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Unknown error'
       setStatus({ state: 'error', message })
     }
+  }
+
+  // Show editor if spreadsheet is created
+  if (status.state === 'success' && status.spreadsheetId) {
+    return (
+      <div className="w-full rounded-2xl bg-tera-panel border border-white/10 p-6 my-4 space-y-6">
+        {/* Editor */}
+        <SpreadsheetEditor
+          spreadsheetId={status.spreadsheetId}
+          title={config.title}
+          data={spreadsheetData}
+          userId={userId}
+          onDataChange={setSpreadsheetData}
+        />
+
+        {/* Toggle History */}
+        <button
+          onClick={() => setShowHistory(!showHistory)}
+          className="text-sm text-blue-400 hover:text-blue-300 transition"
+        >
+          {showHistory ? 'Hide' : 'Show'} Edit History
+        </button>
+
+        {/* Edit History */}
+        {showHistory && (
+          <SpreadsheetEditHistory
+            spreadsheetId={status.spreadsheetId}
+            limit={20}
+          />
+        )}
+
+        {/* Link to Google Sheets */}
+        {status.spreadsheetUrl && (
+          <a
+            href={status.spreadsheetUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="block w-full rounded-full bg-green-600 px-4 py-2 text-center text-xs font-bold uppercase tracking-[0.2em] text-white transition hover:bg-green-700"
+          >
+            Open in Google Sheets →
+          </a>
+        )}
+      </div>
+    )
   }
 
   return (
@@ -140,16 +192,7 @@ export default function SpreadsheetRenderer({ config, userId }: { config: Spread
         )}
 
         {/* Action Buttons */}
-        {status.state === 'success' && status.spreadsheetUrl ? (
-          <a
-            href={status.spreadsheetUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="block w-full rounded-full bg-white px-4 py-2 text-center text-xs font-bold uppercase tracking-[0.2em] text-[#050505] transition hover:bg-white/90"
-          >
-            Open Spreadsheet →
-          </a>
-        ) : needsAuth || (status.state === 'error' && status.message?.includes('authorize')) ? (
+        {needsAuth || (status.state === 'error' && status.message?.includes('authorize')) ? (
           <button
             onClick={handleAuthorizeGoogle}
             className="w-full rounded-full bg-blue-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-blue-700"

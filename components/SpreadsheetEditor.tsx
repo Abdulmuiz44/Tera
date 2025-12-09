@@ -3,6 +3,14 @@
 import { useState, useCallback } from 'react'
 import { exportAndDownload, EXPORT_FORMATS, estimateFileSize } from '@/lib/export-spreadsheet'
 import type { EditOperation } from '@/lib/spreadsheet-operations'
+import {
+  trackCellUpdate,
+  trackRowAdd,
+  trackRowDelete,
+  trackColumnAdd,
+  trackColumnDelete,
+  updateSpreadsheetData
+} from '@/lib/spreadsheet-edit-tracking'
 
 interface SpreadsheetEditorProps {
   spreadsheetId: string
@@ -50,6 +58,7 @@ export default function SpreadsheetEditor({
   const handleSaveCell = async () => {
     if (!selectedCell) return
 
+    const oldValue = data[selectedCell.row][selectedCell.col]
     const newData = data.map((row, rIdx) =>
       rIdx === selectedCell.row
         ? row.map((cell, cIdx) => (cIdx === selectedCell.col ? cellEditValue : cell))
@@ -60,9 +69,23 @@ export default function SpreadsheetEditor({
     setEditMode('view')
     setSelectedCell(null)
 
-    // Send to backend
+    // Track and sync
     if (userId) {
       try {
+        // Log to edit history
+        await trackCellUpdate(
+          userId,
+          spreadsheetId,
+          selectedCell.row,
+          selectedCell.col,
+          oldValue,
+          cellEditValue
+        )
+
+        // Update current data in spreadsheet
+        await updateSpreadsheetData(userId, spreadsheetId, newData)
+
+        // Send to backend for Google Sheets sync
         await fetch('/api/sheets/edit', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -99,9 +122,16 @@ export default function SpreadsheetEditor({
     setEditMode('view')
     setNewRowData([])
 
-    // Send to backend
+    // Track and sync
     if (userId) {
       try {
+        // Log to edit history
+        await trackRowAdd(userId, spreadsheetId, rowToAdd, newData.length - 1)
+
+        // Update current data in spreadsheet
+        await updateSpreadsheetData(userId, spreadsheetId, newData)
+
+        // Send to backend for Google Sheets sync
         await fetch('/api/sheets/edit', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -132,6 +162,7 @@ export default function SpreadsheetEditor({
       return
     }
 
+    const columnIndex = data[0]?.length || 0
     const newData = data.map((row, rowIdx) => [
       ...row,
       rowIdx === 0 ? newColumnName : ''
@@ -141,9 +172,16 @@ export default function SpreadsheetEditor({
     setEditMode('view')
     setNewColumnName('')
 
-    // Send to backend
+    // Track and sync
     if (userId) {
       try {
+        // Log to edit history
+        await trackColumnAdd(userId, spreadsheetId, newColumnName, columnIndex)
+
+        // Update current data in spreadsheet
+        await updateSpreadsheetData(userId, spreadsheetId, newData)
+
+        // Send to backend for Google Sheets sync
         await fetch('/api/sheets/edit', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -154,7 +192,7 @@ export default function SpreadsheetEditor({
               {
                 type: 'add_column',
                 columnName: newColumnName,
-                columnIndex: data[0]?.length || 0
+                columnIndex
               }
             ],
             syncToGoogle: false
@@ -175,11 +213,19 @@ export default function SpreadsheetEditor({
       return
     }
 
+    const deletedRow = data[rowIdx]
     const newData = data.filter((_, idx) => idx !== rowIdx)
     setData(newData)
 
     if (userId) {
       try {
+        // Log to edit history
+        await trackRowDelete(userId, spreadsheetId, rowIdx, deletedRow)
+
+        // Update current data in spreadsheet
+        await updateSpreadsheetData(userId, spreadsheetId, newData)
+
+        // Send to backend for Google Sheets sync
         await fetch('/api/sheets/edit', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },

@@ -37,7 +37,10 @@ CREATE POLICY "Users can insert their own edits" ON spreadsheet_edits
   FOR INSERT WITH CHECK (auth.uid() = user_id);
 
 -- Update existing RLS on google_spreadsheets to allow edits
-ALTER TABLE google_spreadsheets DROP POLICY IF EXISTS "Users can view their own spreadsheets" CASCADE;
+DROP POLICY IF EXISTS "Users can view their own spreadsheets" ON google_spreadsheets;
+DROP POLICY IF EXISTS "Users can update their own spreadsheets" ON google_spreadsheets;
+DROP POLICY IF EXISTS "Users can insert their own spreadsheets" ON google_spreadsheets;
+DROP POLICY IF EXISTS "Users can delete their own spreadsheets" ON google_spreadsheets;
 
 CREATE POLICY "Users can view their own spreadsheets" ON google_spreadsheets
   FOR SELECT USING (auth.uid() = user_id);
