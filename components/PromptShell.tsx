@@ -86,7 +86,17 @@ const parseContent = (content: string): ContentBlock[] => {
               .replace(/\/\*[\s\S]*?\*\//g, '')
 
             const config = JSON.parse(jsonStr)
-            blocks.push({ type: 'chart', config })
+            
+            // Validate chart config
+            if (!config.data || !Array.isArray(config.data) || config.data.length === 0) {
+              console.warn('Invalid chart: missing data array', config)
+              blocks.push({ type: 'code', language: 'json', code: cleanCode })
+            } else if (!config.series || !Array.isArray(config.series) || config.series.length === 0) {
+              console.warn('Invalid chart: missing series array', config)
+              blocks.push({ type: 'code', language: 'json', code: cleanCode })
+            } else {
+              blocks.push({ type: 'chart', config })
+            }
           } catch (e) {
             console.warn('Failed to parse chart JSON', e)
             blocks.push({ type: 'code', language: lang || 'json', code: cleanCode })

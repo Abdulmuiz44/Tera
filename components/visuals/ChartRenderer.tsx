@@ -50,6 +50,15 @@ interface ChartRendererProps {
 const COLORS = ['#00FFA3', '#00B8D9', '#FF5630', '#FFAB00', '#36B37E', '#6554C0', '#FF00E6', '#2979FF']
 
 export default function ChartRenderer({ config }: ChartRendererProps) {
+    // Validate config
+    if (!config || !Array.isArray(config.data) || !Array.isArray(config.series) || config.series.length === 0) {
+        return (
+            <div className="w-full my-4 rounded-xl border border-white/10 bg-[#0A0A0A] p-4 text-white/50 text-sm">
+                Invalid chart configuration. Missing required: data (array), series (array with items).
+            </div>
+        )
+    }
+
     const { type, data, series, xAxisKey = 'name', yAxisKey, zAxisKey, title } = config
     const chartRef = useRef<HTMLDivElement>(null)
 
