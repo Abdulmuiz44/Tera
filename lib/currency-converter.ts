@@ -13,7 +13,7 @@ export interface CurrencyInfo {
 
 // Exchange rates (base currency: USD)
 // These should be updated regularly from an API in production
-const EXCHANGE_RATES: Record<string, CurrencyInfo> = {
+export const EXCHANGE_RATES: Record<string, CurrencyInfo> = {
   USD: {
     code: 'USD',
     symbol: '$',
@@ -101,7 +101,7 @@ const EXCHANGE_RATES: Record<string, CurrencyInfo> = {
 }
 
 // Country to currency mapping
-const COUNTRY_TO_CURRENCY: Record<string, string> = {
+export const COUNTRY_TO_CURRENCY: Record<string, string> = {
   US: 'USD',
   GB: 'GBP',
   DE: 'EUR',
