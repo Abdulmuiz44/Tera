@@ -1,7 +1,7 @@
 -- Add Lemon Squeezy subscription fields to users table
 -- This migration adds fields for tracking subscription status and Lemon Squeezy integration
 
-ALTER TABLE users ADD COLUMN IF NOT EXISTS lemon_squeezy_customer_id TEXT;
+ALTER TABLE users ADD COLUMN IF NOT EXISTS lemon_squeezy_customer_id TEXT UNIQUE;
 ALTER TABLE users ADD COLUMN IF NOT EXISTS lemon_squeezy_subscription_id TEXT;
 ALTER TABLE users ADD COLUMN IF NOT EXISTS lemon_squeezy_order_id TEXT;
 ALTER TABLE users ADD COLUMN IF NOT EXISTS subscription_status TEXT DEFAULT 'active';
@@ -13,6 +13,3 @@ ALTER TABLE users ADD COLUMN IF NOT EXISTS subscription_updated_at TIMESTAMP;
 CREATE INDEX IF NOT EXISTS idx_users_lemon_squeezy_customer_id ON users(lemon_squeezy_customer_id);
 CREATE INDEX IF NOT EXISTS idx_users_lemon_squeezy_subscription_id ON users(lemon_squeezy_subscription_id);
 CREATE INDEX IF NOT EXISTS idx_users_subscription_status ON users(subscription_status);
-
--- Add a unique constraint for Lemon Squeezy customer ID
-ALTER TABLE users ADD CONSTRAINT IF NOT EXISTS unique_lemon_squeezy_customer_id UNIQUE(lemon_squeezy_customer_id) DEFERRABLE INITIALLY DEFERRED;
