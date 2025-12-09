@@ -1,0 +1,100 @@
+'use client'
+
+import React, { useEffect, useState } from 'react'
+
+interface WebSearchStatusProps {
+  isSearching: boolean
+  query?: string
+  status?: 'searching' | 'processing' | 'complete'
+  resultCount?: number
+  error?: string
+}
+
+export default function WebSearchStatus({
+  isSearching,
+  query = '',
+  status = 'searching',
+  resultCount = 0,
+  error
+}: WebSearchStatusProps) {
+  const [dots, setDots] = useState(0)
+
+  useEffect(() => {
+    if (!isSearching) return
+
+    const interval = setInterval(() => {
+      setDots(prev => (prev + 1) % 4)
+    }, 500)
+
+    return () => clearInterval(interval)
+  }, [isSearching])
+
+  const dotDisplay = '.'.repeat(dots)
+
+  if (error) {
+    return (
+      <div className="flex justify-start">
+        <div className="max-w-[85%]">
+          <div className="flex items-start gap-3 rounded-2xl bg-red-500/10 border border-red-500/30 px-6 py-4 text-red-300">
+            <span className="text-lg mt-1">⚠️</span>
+            <div className="flex-1">
+              <div className="font-medium">Web Search Failed</div>
+              <div className="text-sm text-red-300/70 mt-1">{error}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  if (!isSearching && resultCount === 0) {
+    return null
+  }
+
+  if (isSearching) {
+    return (
+      <div className="flex justify-start">
+        <div className="max-w-[85%]">
+          <div className="flex items-start gap-3 rounded-2xl bg-blue-500/10 border border-blue-500/30 px-6 py-4 text-blue-200">
+            <div className="mt-1">
+              <span className="text-xl">🔍</span>
+            </div>
+            <div className="flex-1">
+              <div className="font-medium">Searching the web{dotDisplay}</div>
+              {query && (
+                <div className="text-sm text-blue-200/70 mt-1">
+                  Looking for: <span className="text-blue-200">{query}</span>
+                </div>
+              )}
+              <div className="mt-2 flex gap-1">
+                <span className="inline-block w-2 h-2 bg-blue-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></span>
+                <span className="inline-block w-2 h-2 bg-blue-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></span>
+                <span className="inline-block w-2 h-2 bg-blue-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  if (status === 'complete' && resultCount > 0) {
+    return (
+      <div className="flex justify-start">
+        <div className="max-w-[85%]">
+          <div className="flex items-start gap-3 rounded-2xl bg-green-500/10 border border-green-500/30 px-6 py-4 text-green-200">
+            <span className="text-lg mt-1">✅</span>
+            <div className="flex-1">
+              <div className="font-medium">Web search complete</div>
+              <div className="text-sm text-green-200/70 mt-1">
+                Found {resultCount} relevant result{resultCount !== 1 ? 's' : ''}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  return null
+}

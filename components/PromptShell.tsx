@@ -10,6 +10,7 @@ import { supabase } from '@/lib/supabase'
 import { compressImage } from '@/lib/image-compression'
 import UpgradePrompt from './UpgradePrompt'
 import VoiceControls from './VoiceControls'
+import WebSearchStatus from './WebSearchStatus'
 
 type Message = {
   id: string
@@ -45,12 +46,40 @@ type ContentBlock =
    | { type: 'mermaid', chart: string }
    | { type: 'code', language: string, code: string }
    | { type: 'spreadsheet', config: any }
+   | { type: 'web-sources', sources: Array<{ title: string; url: string; snippet: string; source: string }> }
 
 const parseContent = (content: string): ContentBlock[] => {
   const blocks: ContentBlock[] = []
 
+  // Extract web sources section if present
+  const webSourcesMatch = content.match(/--- SOURCES FROM WEB ---\n([\s\S]*?)$/i)
+  let contentToProcess = content
+  let webSources: Array<{ title: string; url: string; snippet: string; source: string }> = []
+
+  if (webSourcesMatch) {
+    contentToProcess = content.substring(0, webSourcesMatch.index || 0)
+    const sourcesText = webSourcesMatch[1]
+
+    // Parse web search results format
+    const sourceRegex = /(\d+)\.\s+(.+?)\nSource:\s+(.+?)\n(.+?)(?=\n\n\d+\.|$)/gs
+    let match
+    while ((match = sourceRegex.exec(sourcesText)) !== null) {
+      webSources.push({
+        title: match[2],
+        source: match[3],
+        snippet: match[4],
+        url: `https://${match[3]}` // Construct URL from source
+      })
+    }
+
+    // Add web sources block if we found any
+    if (webSources.length > 0) {
+      blocks.push({ type: 'web-sources', sources: webSources })
+    }
+  }
+
   // Split by code blocks
-  const parts = content.split(/(```[\s\S]*?```)/g)
+  const parts = contentToProcess.split(/(```[\s\S]*?```)/g)
 
   parts.forEach(part => {
     if (!part.trim()) return
@@ -167,6 +196,10 @@ export default function PromptShell({
   const [upgradePromptType, setUpgradePromptType] = useState<'lesson-plans' | 'chats' | 'file-uploads' | 'web-search' | null>(null)
   const [webSearchEnabled, setWebSearchEnabled] = useState(false)
   const [webSearchRemaining, setWebSearchRemaining] = useState(100)
+  const [isWebSearching, setIsWebSearching] = useState(false)
+  const [currentSearchQuery, setCurrentSearchQuery] = useState('')
+  const [webSearchStatus, setWebSearchStatus] = useState<'idle' | 'searching' | 'processing' | 'complete'>('idle')
+  const [webSearchResultCount, setWebSearchResultCount] = useState(0)
   const requestIdRef = useRef(0)
 
 
@@ -296,6 +329,14 @@ export default function PromptShell({
     }
     startTransition(async () => {
       try {
+        // Set up web search tracking
+        if (webSearchEnabled) {
+          setIsWebSearching(true)
+          setCurrentSearchQuery(messageToSend)
+          setWebSearchStatus('searching')
+          setWebSearchResultCount(0)
+        }
+
         const { answer, sessionId: newSessionId, chatId: savedChatId } = await generateAnswer({
           prompt: messageToSend,
           tool: tool.name,
@@ -306,6 +347,17 @@ export default function PromptShell({
           chatId: editingMessageId ?? undefined,
           enableWebSearch: webSearchEnabled
         })
+
+        // Clear web search status
+        if (webSearchEnabled) {
+          setIsWebSearching(false)
+          setWebSearchStatus('complete')
+          // Auto-reset after 2 seconds
+          setTimeout(() => {
+            setWebSearchStatus('idle')
+            setCurrentSearchQuery('')
+          }, 2000)
+        }
 
         // Check if this request is still valid (hasn't been stopped or superseded)
         if (currentRequestId !== requestIdRef.current) {
@@ -672,32 +724,63 @@ export default function PromptShell({
                       <div className="rounded-2xl bg-tera-panel border border-white/5 px-4 md:px-6 py-4 text-white/90 shadow-lg">
                         <div className="space-y-4">
                           {parseContent(entry.assistantMessage.content).map((block, idx) => {
-                            if (block.type === 'chart') {
-                              return <ChartRenderer key={idx} config={block.config} />
-                            }
-                            if (block.type === 'spreadsheet') {
-                              return <SpreadsheetRenderer key={idx} config={block.config} userId={user?.id} />
-                            }
-                            if (block.type === 'mermaid') {
-                              return <MermaidRenderer key={idx} chart={block.chart} />
-                            }
-                            if (block.type === 'code') {
-                              return (
-                                <div key={idx} className="my-4 rounded-lg bg-black/30 p-4 font-mono text-xs overflow-x-auto text-tera-neon max-w-full">
-                                  <pre>{block.code}</pre>
-                                </div>
-                              )
-                            }
-                            return block.isHeader ? (
-                              <h3 key={idx} className="font-bold text-lg mt-2 text-white">
-                                {block.content}
-                              </h3>
-                            ) : (
-                              <p key={idx} className="leading-relaxed whitespace-pre-wrap">
-                                {block.content}
-                              </p>
-                            )
-                          })}
+                             if (block.type === 'chart') {
+                               return <ChartRenderer key={idx} config={block.config} />
+                             }
+                             if (block.type === 'spreadsheet') {
+                               return <SpreadsheetRenderer key={idx} config={block.config} userId={user?.id} />
+                             }
+                             if (block.type === 'mermaid') {
+                               return <MermaidRenderer key={idx} chart={block.chart} />
+                             }
+                             if (block.type === 'web-sources') {
+                               return (
+                                 <div key={idx} className="my-4 rounded-lg bg-blue-500/10 border border-blue-500/30 p-4">
+                                   <div className="flex items-center gap-2 mb-3 text-blue-200">
+                                     <span className="text-lg">🔍</span>
+                                     <h4 className="font-semibold">Web Sources</h4>
+                                   </div>
+                                   <div className="space-y-3">
+                                     {block.sources.map((source, sidx) => (
+                                       <div key={sidx} className="rounded border border-blue-500/20 bg-blue-500/5 p-3">
+                                         <div className="flex items-start gap-2">
+                                           <span className="text-xs font-semibold text-blue-300 flex-shrink-0 mt-1">{sidx + 1}</span>
+                                           <div className="flex-1 min-w-0">
+                                             <a
+                                               href={source.url}
+                                               target="_blank"
+                                               rel="noopener noreferrer"
+                                               className="font-medium text-blue-300 hover:text-blue-200 text-sm line-clamp-2 break-words"
+                                             >
+                                               {source.title}
+                                             </a>
+                                             <p className="text-xs text-blue-200/60 mt-1">{source.source}</p>
+                                             <p className="text-xs text-white/70 mt-2 line-clamp-2">{source.snippet}</p>
+                                           </div>
+                                         </div>
+                                       </div>
+                                     ))}
+                                   </div>
+                                 </div>
+                               )
+                             }
+                             if (block.type === 'code') {
+                               return (
+                                 <div key={idx} className="my-4 rounded-lg bg-black/30 p-4 font-mono text-xs overflow-x-auto text-tera-neon max-w-full">
+                                   <pre>{block.code}</pre>
+                                 </div>
+                               )
+                             }
+                             return block.isHeader ? (
+                               <h3 key={idx} className="font-bold text-lg mt-2 text-white">
+                                 {block.content}
+                               </h3>
+                             ) : (
+                               <p key={idx} className="leading-relaxed whitespace-pre-wrap">
+                                 {block.content}
+                               </p>
+                             )
+                           })}
                         </div>
                         <div className="flex items-center justify-between mt-3 pt-2 border-t border-white/5">
                           <span className="text-xs text-white/30">{formatTimestamp(entry.assistantMessage.timestamp)}</span>
@@ -710,21 +793,30 @@ export default function PromptShell({
               </div>
             ))
           )}
-          {status === 'loading' && (
-            <div className="flex justify-start">
-              <div className="max-w-[85%]">
-                <div className="flex items-center gap-3 rounded-2xl bg-tera-panel px-6 py-4 text-white/60">
-                  <div className="flex gap-1">
-                    <span className="w-2 h-2 bg-tera-neon/60 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></span>
-                    <span className="w-2 h-2 bg-tera-neon/60 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></span>
-                    <span className="w-2 h-2 bg-tera-neon/60 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></span>
-                  </div>
-                  <span className="font-medium">Tera is Thinking...</span>
-                </div>
-              </div>
-            </div>
-          )}
-          <div ref={messagesEndRef} />
+           {/* Web Search Status */}
+           {(isWebSearching || webSearchStatus !== 'idle') && (
+             <WebSearchStatus
+               isSearching={isWebSearching}
+               query={currentSearchQuery}
+               status={webSearchStatus}
+               resultCount={webSearchResultCount}
+             />
+           )}
+           {status === 'loading' && (
+             <div className="flex justify-start">
+               <div className="max-w-[85%]">
+                 <div className="flex items-center gap-3 rounded-2xl bg-tera-panel px-6 py-4 text-white/60">
+                   <div className="flex gap-1">
+                     <span className="w-2 h-2 bg-tera-neon/60 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></span>
+                     <span className="w-2 h-2 bg-tera-neon/60 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></span>
+                     <span className="w-2 h-2 bg-tera-neon/60 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></span>
+                   </div>
+                   <span className="font-medium">Tera is Thinking...</span>
+                 </div>
+               </div>
+             </div>
+           )}
+           <div ref={messagesEndRef} />
         </div>
       </div>
 

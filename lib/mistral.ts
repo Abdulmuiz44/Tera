@@ -304,26 +304,31 @@ export async function generateTeacherResponse({
   }
 
   // Add web search results if enabled
-  let webSearchContext = ''
-  if (enableWebSearch) {
-    try {
-      const { searchWeb } = await import('./web-search')
-      const searchResults = await searchWeb(prompt, 5, userId)
-      if (searchResults.success && searchResults.results.length > 0) {
-        webSearchContext = '\n\n=== WEB SEARCH RESULTS ===\n'
-        webSearchContext += searchResults.results
-          .map((r, i) => `${i + 1}. ${r.title}\nSource: ${r.source}\n${r.snippet}`)
-          .join('\n\n')
-        webSearchContext += '\n=== END WEB SEARCH ===\n'
-        console.log('🔵 Enhanced prompt with web search results')
-      } else if (!searchResults.success && searchResults.message) {
-        console.warn('Web search limitation:', searchResults.message)
-        webSearchContext = `\n\n⚠️ Note: ${searchResults.message}\n`
-      }
-    } catch (error) {
-      console.warn('Web search failed, continuing without search results:', error)
-    }
-  }
+   let webSearchContext = ''
+   let webSearchPerformed = false
+   if (enableWebSearch) {
+     try {
+       const { searchWeb } = await import('./web-search')
+       console.log('🔍 Starting web search for:', prompt)
+       const searchResults = await searchWeb(prompt, 5, userId)
+       
+       if (searchResults.success && searchResults.results.length > 0) {
+         webSearchPerformed = true
+         webSearchContext = '\n\n=== WEB SEARCH RESULTS ===\n'
+         webSearchContext += 'Found ' + searchResults.results.length + ' relevant results:\n\n'
+         webSearchContext += searchResults.results
+           .map((r, i) => `${i + 1}. ${r.title}\nSource: ${r.source}\n${r.snippet}`)
+           .join('\n\n')
+         webSearchContext += '\n=== END WEB SEARCH ===\n'
+         console.log('✅ Web search completed with', searchResults.results.length, 'results')
+       } else if (!searchResults.success && searchResults.message) {
+         console.warn('Web search limitation:', searchResults.message)
+         webSearchContext = `\n\n⚠️ Note: ${searchResults.message}\n`
+       }
+     } catch (error) {
+       console.warn('Web search failed, continuing without search results:', error)
+     }
+   }
 
   // Combine all context
   enhancedPrompt = enhancedPrompt + webSearchContext
@@ -434,7 +439,13 @@ export async function generateTeacherResponse({
     const trimmed = text.trim()
     const endsWithPunct = /[.!?]$/.test(trimmed)
     const endsWithQuestion = /\?$/.test(trimmed)
-    const finalText = endsWithPunct ? trimmed : `${trimmed}.`
+    let finalText = endsWithPunct ? trimmed : `${trimmed}.`
+
+    // If web search was performed, add a sources section at the end
+    if (webSearchPerformed && webSearchContext) {
+      finalText += '\n\n--- SOURCES FROM WEB ---'
+      finalText += webSearchContext
+    }
 
     // Save conversation to memory immediately (fire and forget)
     if (userId) {
