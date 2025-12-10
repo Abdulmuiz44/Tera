@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useEffect, Suspense } from 'react'
+import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import Sidebar, { navigation } from './Sidebar'
 import PromptShell from './PromptShell'
@@ -11,6 +12,7 @@ import { useAuth } from './AuthProvider'
 import { useSearchParams, usePathname } from 'next/navigation'
 
 function MainShellContent() {
+  const router = useRouter()
   const [selectedTool, setSelectedTool] = useState<TeacherTool>(UniversalTool)
   const [menuOpen, setMenuOpen] = useState(false)
   const [sidebarExpanded, setSidebarExpanded] = useState(false)

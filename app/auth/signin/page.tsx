@@ -121,7 +121,7 @@ export default function SignInPage() {
                             {/* Divider */}
                             <div className="flex items-center gap-3 mb-6">
                                 <div className="flex-1 h-px bg-gradient-to-r from-white/10 to-transparent"></div>
-                                <span className="text-white/40 text-xs uppercase tracking-wider">Or continue with</span>
+                                <span className="text-white/40 text-xs uppercase tracking-wider">OR</span>
                                 <div className="flex-1 h-px bg-gradient-to-l from-white/10 to-transparent"></div>
                             </div>
 
@@ -149,14 +149,14 @@ export default function SignInPage() {
                                         d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
                                     />
                                 </svg>
-                                Google
+                                Continue with Google
                             </button>
                         </>
                     ) : (
                         <>
                             {/* Magic Link Sent */}
                             <div className="mb-6 p-4 bg-green-500/10 border border-green-500/30 rounded-lg">
-                                <p className="text-green-400 text-sm">Check your email for a sign-in link</p>
+                                <p className="text-green-400 text-sm">Check your email for an authentication link</p>
                             </div>
 
                             {/* Google as Alternative */}
