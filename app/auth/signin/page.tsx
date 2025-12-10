@@ -11,25 +11,26 @@ export default function SignInPage() {
     const [error, setError] = useState('')
     const router = useRouter()
 
-    const handleGoogleSignIn = async () => {
+    const handleEmailSignIn = async (e: React.FormEvent) => {
+        e.preventDefault()
         setError('')
         setLoading(true)
 
         try {
             const appUrl = process.env.NEXT_PUBLIC_APP_URL
-            const { data, error: googleError } = await supabase.auth.signInWithOAuth({
+            const { error: signInError } = await supabase.auth.signInWithOAuth({
                 provider: 'google',
                 options: {
                     redirectTo: `${appUrl}/auth/callback`
                 }
             })
 
-            if (googleError) {
-                setError(googleError.message)
+            if (signInError) {
+                setError(signInError.message)
                 return
             }
         } catch (err) {
-            setError(err instanceof Error ? err.message : 'Google sign in failed')
+            setError(err instanceof Error ? err.message : 'Sign in failed')
         } finally {
             setLoading(false)
         }
@@ -67,7 +68,7 @@ export default function SignInPage() {
                                 type="email"
                                 value={email}
                                 onChange={(e) => setEmail(e.target.value)}
-                                placeholder="you@gmail.com"
+                                placeholder="you@example.com"
                                 disabled={loading}
                                 className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-lg text-white placeholder-white/40 focus:outline-none focus:border-tera-neon focus:ring-1 focus:ring-tera-neon/50 transition disabled:opacity-50"
                                 required
@@ -75,11 +76,11 @@ export default function SignInPage() {
                         </div>
                     </div>
 
-                    {/* Google Button */}
+                    {/* Submit Button */}
                     <button
-                        onClick={handleGoogleSignIn}
-                        disabled={loading}
-                        className="w-full py-2.5 px-4 bg-white/5 border border-white/10 hover:bg-white/10 hover:border-white/20 rounded-lg font-medium text-white transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                        onClick={handleEmailSignIn}
+                        disabled={loading || !email}
+                        className="w-full py-2.5 px-4 bg-white text-black font-semibold rounded-lg hover:bg-white/90 transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                     >
                         <svg className="w-5 h-5" viewBox="0 0 24 24">
                             <path
@@ -99,7 +100,7 @@ export default function SignInPage() {
                                 d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
                             />
                         </svg>
-                        Google
+                        {loading ? 'Signing in...' : 'Sign in with Google'}
                     </button>
 
                     {/* Footer */}

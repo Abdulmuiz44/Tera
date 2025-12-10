@@ -11,25 +11,26 @@ export default function SignUpPage() {
     const [error, setError] = useState('')
     const router = useRouter()
 
-    const handleGoogleSignUp = async () => {
+    const handleEmailSignUp = async (e: React.FormEvent) => {
+        e.preventDefault()
         setError('')
         setLoading(true)
 
         try {
             const appUrl = process.env.NEXT_PUBLIC_APP_URL
-            const { data, error: googleError } = await supabase.auth.signInWithOAuth({
+            const { error: signUpError } = await supabase.auth.signInWithOAuth({
                 provider: 'google',
                 options: {
                     redirectTo: `${appUrl}/auth/callback`
                 }
             })
 
-            if (googleError) {
-                setError(googleError.message)
+            if (signUpError) {
+                setError(signUpError.message)
                 return
             }
         } catch (err) {
-            setError(err instanceof Error ? err.message : 'Google sign up failed')
+            setError(err instanceof Error ? err.message : 'Sign up failed')
         } finally {
             setLoading(false)
         }
@@ -75,10 +76,10 @@ export default function SignUpPage() {
                         </div>
                     </div>
 
-                    {/* Google Button */}
+                    {/* Submit Button */}
                     <button
-                        onClick={handleGoogleSignUp}
-                        disabled={loading}
+                        onClick={handleEmailSignUp}
+                        disabled={loading || !email}
                         className="w-full py-2.5 px-4 bg-white text-black font-semibold rounded-lg hover:bg-white/90 transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                     >
                         <svg className="w-5 h-5" viewBox="0 0 24 24">
