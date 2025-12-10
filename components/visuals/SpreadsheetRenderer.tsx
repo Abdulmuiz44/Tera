@@ -162,10 +162,10 @@ export default function SpreadsheetRenderer({ config, userId }: { config: Spread
         </div>
 
         {/* Data Preview */}
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm">
-            <tbody>
-              {config.data.slice(0, 6).map((row, rowIdx) => (
+         <div className="overflow-x-auto">
+           <table className="w-full text-sm">
+             <tbody>
+               {(config.data || []).slice(0, 6).map((row, rowIdx) => (
                 <tr key={rowIdx} className={rowIdx === 0 ? 'bg-white/10' : 'border-t border-white/5'}>
                   {row.map((cell, colIdx) => (
                     <td

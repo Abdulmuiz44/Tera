@@ -108,8 +108,8 @@ export default function ProfilePage() {
   const chatPercentage = getUsagePercentage(chatLimit, profile.dailyChats)
 
   const email = user.email || ''
-  const displayName = formData.fullName || profile.fullName || email.split('@')[0] || 'User'
-  const initials = displayName
+  const displayName = formData.fullName || profile.fullName || (email ? email.split('@')[0] : '') || 'User'
+  const initials = (displayName || 'User')
     .split(' ')
     .map((n: string) => n[0])
     .join('')

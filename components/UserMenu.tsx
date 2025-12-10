@@ -35,14 +35,14 @@ export default function UserMenu({ user, expanded, onSignOut }: UserMenuProps) {
     if (!user) return null
 
     // Get user's first and last name initials from email
-    const email = user.email || ''
-    const name = user.user_metadata?.full_name || email.split('@')[0] || 'User'
-    const initials = name
-        .split(' ')
-        .map((n: string) => n[0])
-        .join('')
-        .toUpperCase()
-        .slice(0, 2)
+     const email = user.email || ''
+     const name = user.user_metadata?.full_name || (email ? email.split('@')[0] : '') || 'User'
+     const initials = (name || 'User')
+         .split(' ')
+         .map((n: string) => n[0])
+         .join('')
+         .toUpperCase()
+         .slice(0, 2)
 
     const menuItems = [
         {
