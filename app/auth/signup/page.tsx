@@ -92,10 +92,11 @@ export default function SignUpPage() {
         setLoading(true)
 
         try {
+            const appUrl = typeof window !== 'undefined' ? window.location.origin : process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
             const { data, error: googleError } = await supabase.auth.signInWithOAuth({
                 provider: 'google',
                 options: {
-                    redirectTo: `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/auth/callback`
+                    redirectTo: `${appUrl}/auth/callback`
                 }
             })
 
