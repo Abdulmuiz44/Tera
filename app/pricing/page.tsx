@@ -194,10 +194,10 @@ export default function PricingPage() {
                                                 }
                                             }}
                                             className={`w-full py-3 px-4 rounded-lg font-semibold transition-all duration-200 text-base ${plan.current
-                                                    ? 'bg-white/10 text-white/40 cursor-default'
-                                                    : plan.highlighted
-                                                        ? 'bg-white text-black hover:bg-white/90 hover:shadow-lg hover:shadow-white/20 disabled:opacity-50 disabled:cursor-not-allowed'
-                                                        : 'bg-white text-black hover:bg-white/90 disabled:opacity-50 disabled:cursor-not-allowed'
+                                                ? 'bg-white/10 text-white/40 cursor-default'
+                                                : plan.highlighted
+                                                    ? 'bg-white text-black hover:bg-white/90 hover:shadow-lg hover:shadow-white/20 disabled:opacity-50 disabled:cursor-not-allowed'
+                                                    : 'bg-white text-black hover:bg-white/90 disabled:opacity-50 disabled:cursor-not-allowed'
                                                 }`}
                                         >
                                             {plan.current ? '✓ Current Plan' : (loading && (plan.name === 'pro' || plan.name === 'plus') ? 'Processing...' : plan.cta)}
