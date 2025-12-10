@@ -5,7 +5,7 @@ import React, { useEffect, useState } from 'react'
 interface WebSearchStatusProps {
   isSearching: boolean
   query?: string
-  status?: 'searching' | 'processing' | 'complete'
+  status?: 'idle' | 'searching' | 'processing' | 'complete'
   resultCount?: number
   error?: string
 }
