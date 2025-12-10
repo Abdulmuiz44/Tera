@@ -243,7 +243,7 @@ export default function AboutPage() {
                 </p>
                 <Link
                     href="/new"
-                    className="inline-block rounded-full bg-tera-neon text-black px-8 py-4 text-lg font-semibold transition hover:bg-tera-neon/90 hover:scale-105"
+                    className="inline-block rounded-full bg-white text-black px-8 py-4 text-lg font-semibold transition hover:bg-white/90"
                 >
                     Start Learning with Tera
                 </Link>
