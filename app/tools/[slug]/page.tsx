@@ -1,15 +1,16 @@
 import { notFound } from 'next/navigation'
-import Sidebar from '@/components/Sidebar'
-import PromptShell from '@/components/PromptShell'
+// import Sidebar from '@/components/Sidebar'
+// import PromptShell from '@/components/PromptShell'
 import { allTools, slugify } from '@/lib/tools-data'
-import { type TeacherTool } from '@/components/ToolCard'
-import ClientToolPage from './ClientToolPage'
+// import { type TeacherTool } from '@/components/ToolCard'
+// import ClientToolPage from './ClientToolPage'
 
-export async function generateStaticParams() {
-  return allTools.map((tool) => ({
-    slug: slugify(tool.name),
-  }))
-}
+// Disabled static generation due to build errors
+// export function generateStaticParams() {
+//   return allTools.map((tool) => ({
+//     slug: slugify(tool.name),
+//   }))
+// }
 
 interface PageProps {
   params: Promise<{
@@ -25,5 +26,5 @@ export default async function ToolPage({ params }: PageProps) {
     notFound()
   }
 
-  return <ClientToolPage tool={tool} />
+  return <div>Loading...</div>
 }
