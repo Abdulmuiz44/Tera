@@ -179,7 +179,7 @@ export default function PricingPage() {
 
                                         {/* CTA Button */}
                                         <button
-                                            disabled={plan.current || loading}
+                                            disabled={plan.current || (loading && (plan.name === 'pro' || plan.name === 'plus'))}
                                             onClick={() => {
                                                 if (plan.name === 'free') {
                                                     if (!user) {
@@ -195,9 +195,7 @@ export default function PricingPage() {
                                             }}
                                             className={`w-full py-3 px-4 rounded-lg font-semibold transition-all duration-200 text-base ${plan.current
                                                 ? 'bg-white/10 text-white/40 cursor-default'
-                                                : plan.highlighted
-                                                    ? 'bg-white text-black hover:bg-white/90 hover:shadow-lg hover:shadow-white/20 disabled:opacity-50 disabled:cursor-not-allowed'
-                                                    : 'bg-white text-black hover:bg-white/90 disabled:opacity-50 disabled:cursor-not-allowed'
+                                                : 'bg-white text-black hover:bg-white/90 disabled:opacity-50 disabled:cursor-not-allowed'
                                                 }`}
                                         >
                                             {plan.current ? '✓ Current Plan' : (loading && (plan.name === 'pro' || plan.name === 'plus') ? 'Processing...' : plan.cta)}
@@ -246,24 +244,30 @@ export default function PricingPage() {
                             </div>
 
                             {/* FAQ Section */}
-                            <div className="border-t border-white/10 pt-12 mt-12">
-                                <h2 className="text-2xl font-bold text-white mb-8 text-center">Frequently Asked Questions</h2>
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto">
-                                    {[
-                                        { q: 'Can I switch plans anytime?', a: 'Yes! Upgrade or downgrade your plan instantly. Changes take effect immediately.' },
-                                        { q: 'Is there a contract?', a: 'No contracts. Cancel anytime. Your account remains active through your billing period.' },
-                                        { q: 'Do you offer refunds?', a: 'Yes, we offer a 7-day money-back guarantee on all paid plans.' },
-                                        { q: 'Can I use it for teams?', a: 'Plus plan includes team collaboration. Pro plan works great for individuals.' },
-                                        { q: 'What payment methods do you accept?', a: 'We accept all major credit cards, PayPal, and more through Lemon Squeezy.' },
-                                        { q: 'Is my data secure?', a: 'Yes! We use enterprise-grade encryption and comply with GDPR, CCPA, and other standards.' }
-                                    ].map((faq, idx) => (
-                                        <div key={idx} className="bg-white/5 border border-white/10 rounded-lg p-4">
-                                            <h3 className="font-semibold text-white mb-2">{faq.q}</h3>
-                                            <p className="text-white/70 text-sm">{faq.a}</p>
-                                        </div>
-                                    ))}
-                                </div>
-                            </div>
+                             <div className="border-t border-white/10 pt-12 mt-12">
+                                 <h2 className="text-2xl font-bold text-white mb-8 text-center">Frequently Asked Questions</h2>
+                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto">
+                                     {[
+                                         { q: 'Can I upgrade my plan?', a: 'Yes! You can upgrade to Pro or Plus anytime. Your new features will be available immediately.' },
+                                         { q: 'Is there a contract?', a: 'No contracts. Cancel anytime. Your account remains active through your billing period.' },
+                                         { q: 'Do you offer refunds?', a: 'Yes, we offer a 7-day money-back guarantee on all paid plans.' },
+                                         { q: 'Can I use it for teams?', a: 'Plus plan includes team collaboration. Pro plan works great for individuals.' },
+                                         { q: 'What payment methods do you accept?', a: 'We accept all major credit cards, PayPal, and more through Lemon Squeezy.' },
+                                         { q: 'Is my data secure?', a: 'Yes! We use enterprise-grade encryption and comply with GDPR, CCPA, and other standards.' }
+                                     ].map((faq, idx) => (
+                                         <div key={idx} className="bg-white/5 border border-white/10 rounded-lg p-4">
+                                             <h3 className="font-semibold text-white mb-2">{faq.q}</h3>
+                                             <p className="text-white/70 text-sm">{faq.a}</p>
+                                         </div>
+                                     ))}
+                                 </div>
+                                 <div className="mt-8 p-6 bg-white/5 border border-white/10 rounded-lg text-center max-w-2xl mx-auto">
+                                     <p className="text-white/70 text-sm">Have other questions? We're here to help!</p>
+                                     <a href="mailto:vibecodeguide@gmail.com" className="text-tera-neon hover:underline font-semibold mt-2 inline-block">
+                                         Contact us at vibecodeguide@gmail.com
+                                     </a>
+                                 </div>
+                             </div>
 
                             {/* CTA Section */}
                             <div className="border-t border-white/10 pt-12 mt-12 text-center">
@@ -282,7 +286,7 @@ export default function PricingPage() {
                                             </button>
                                             <button
                                                 onClick={() => router.push('/auth/signup')}
-                                                className="px-8 py-3 bg-tera-neon text-black font-semibold rounded-lg hover:bg-tera-neon/90 transition"
+                                                className="px-8 py-3 bg-white text-black font-semibold rounded-lg hover:bg-white/90 transition"
                                             >
                                                 Create Free Account
                                             </button>
@@ -290,19 +294,19 @@ export default function PricingPage() {
                                     ) : (
                                         <button
                                             onClick={() => router.push('/new')}
-                                            className="px-8 py-3 bg-tera-neon text-black font-semibold rounded-lg hover:bg-tera-neon/90 transition"
+                                            className="px-8 py-3 bg-white text-black font-semibold rounded-lg hover:bg-white/90 transition shadow-lg"
                                         >
                                             Start Using Tera
                                         </button>
                                     )}
-                                </div>
+                                    </div>
                             </div>
 
                             <div className="mt-12 text-center border-t border-white/10 pt-8">
-                                <p className="text-sm text-white/40">
-                                    Questions? <a href="mailto:support@teralearn.ai" className="text-tera-neon hover:underline">Contact our support team</a>
-                                </p>
-                            </div>
+                                 <p className="text-sm text-white/40">
+                                     Questions? <a href="mailto:vibecodeguide@gmail.com" className="text-tera-neon hover:underline">Contact our support team</a>
+                                 </p>
+                             </div>
                         </div>
                     </div>
                 </div>
