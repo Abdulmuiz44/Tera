@@ -44,7 +44,7 @@ export default function SignUpPage() {
             }
 
             // Sign up with Supabase
-            const appUrl = typeof window !== 'undefined' ? window.location.origin : (process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000')
+            const appUrl = typeof window !== 'undefined' ? window.location.origin : process.env.NEXT_PUBLIC_APP_URL
             const { data, error: signUpError } = await supabase.auth.signUp({
                 email: email.trim(),
                 password,
@@ -92,7 +92,7 @@ export default function SignUpPage() {
         setLoading(true)
 
         try {
-            const appUrl = typeof window !== 'undefined' ? window.location.origin : process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
+            const appUrl = typeof window !== 'undefined' ? window.location.origin : process.env.NEXT_PUBLIC_APP_URL
             const { data, error: googleError } = await supabase.auth.signInWithOAuth({
                 provider: 'google',
                 options: {
