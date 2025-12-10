@@ -76,20 +76,75 @@ interface CheckoutOptions {
 }
 
 /**
- * Create a Lemon Squeezy checkout URL
+ * Create a Lemon Squeezy checkout URL using the API
  */
 export async function createCheckout(variantId: string, options: CheckoutOptions = {}): Promise<string> {
-  const baseUrl = 'https://checkout.lemonsqueezy.com/checkout/buy'
-  
-  const params = new URLSearchParams({
-    checkout_option_0_value_type: 'license_key',
-    checkout_option_1_key: 'email_address',
-    checkout_option_1_value: options.email || '',
-    checkout_data_custom_user_id: options.userId || '',
-    checkout_return_url: options.returnUrl || `${process.env.NEXT_PUBLIC_APP_URL}/new`
-  })
+  try {
+    const storeId = process.env.NEXT_PUBLIC_LEMON_STORE_ID
+    const apiKey = process.env.LEMON_SQUEEZY_API_KEY
+    
+    if (!storeId || !apiKey) {
+      throw new Error('Missing Lemon Squeezy configuration: Store ID or API Key')
+    }
 
-  return `${baseUrl}/${variantId}?${params.toString()}`
+    // Use Lemon Squeezy API to create checkout
+    const response = await fetch('https://api.lemonsqueezy.com/v1/checkouts', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${apiKey}`,
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+      },
+      body: JSON.stringify({
+        data: {
+          type: 'checkouts',
+          attributes: {
+            checkout_data: {
+              email: options.email || '',
+              custom: {
+                user_id: options.userId || ''
+              }
+            },
+            product_options: {
+              redirect_url: options.returnUrl || `${process.env.NEXT_PUBLIC_APP_URL}/new`
+            }
+          },
+          relationships: {
+            store: {
+              data: {
+                type: 'stores',
+                id: storeId.toString()
+              }
+            },
+            variant: {
+              data: {
+                type: 'variants',
+                id: variantId.toString()
+              }
+            }
+          }
+        }
+      })
+    })
+
+    if (!response.ok) {
+      const error = await response.json()
+      console.error('Lemon Squeezy API error:', error)
+      throw new Error(`Failed to create checkout: ${response.status}`)
+    }
+
+    const data = await response.json()
+    const checkoutUrl = data.data?.attributes?.url
+
+    if (!checkoutUrl) {
+      throw new Error('No checkout URL returned from Lemon Squeezy API')
+    }
+
+    return checkoutUrl
+  } catch (error) {
+    console.error('Checkout creation failed:', error)
+    throw error
+  }
 }
 
 /**
