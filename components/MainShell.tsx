@@ -190,28 +190,28 @@ function MainShellContent() {
           ) : (
             <>
               <button
-                type="button"
-                className="rounded-full bg-white px-4 py-2 text-xs font-bold uppercase tracking-[0.2em] text-[#050505] transition hover:bg-white/90 md:hidden"
-                onClick={() => setAuthDialog('signIn')}
-              >
-                Log In
-              </button>
-              <div className="hidden md:flex md:items-center md:gap-2">
-                <button
-                  type="button"
-                  className="rounded-full bg-white px-4 py-2 text-xs font-bold uppercase tracking-[0.2em] text-[#050505] transition hover:bg-white/90"
-                  onClick={() => setAuthDialog('signIn')}
-                >
-                  Log In
-                </button>
-                <button
-                  type="button"
-                  className="rounded-full bg-white px-3 py-1 text-[0.5rem] font-semibold uppercase tracking-[0.4em] text-[#050505] transition hover:bg-white/90 md:px-4 md:py-2 md:text-xs"
-                  onClick={() => setAuthDialog('signUp')}
-                >
-                  Sign up
-                </button>
-              </div>
+                 type="button"
+                 className="rounded-full bg-white px-4 py-2 text-xs font-bold uppercase tracking-[0.2em] text-[#050505] transition hover:bg-white/90 md:hidden"
+                 onClick={() => router.push('/auth/signin')}
+               >
+                 Log In
+               </button>
+               <div className="hidden md:flex md:items-center md:gap-2">
+                 <button
+                   type="button"
+                   className="rounded-full bg-white px-4 py-2 text-xs font-bold uppercase tracking-[0.2em] text-[#050505] transition hover:bg-white/90"
+                   onClick={() => router.push('/auth/signin')}
+                 >
+                   Log In
+                 </button>
+                 <button
+                   type="button"
+                   className="rounded-full bg-white px-3 py-1 text-[0.5rem] font-semibold uppercase tracking-[0.4em] text-[#050505] transition hover:bg-white/90 md:px-4 md:py-2 md:text-xs"
+                   onClick={() => router.push('/auth/signup')}
+                 >
+                   Sign up
+                 </button>
+               </div>
             </>
           )}
         </div>
