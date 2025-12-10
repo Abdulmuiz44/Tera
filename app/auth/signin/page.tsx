@@ -44,7 +44,7 @@ export default function SignInPage() {
         setLoading(true)
 
         try {
-            const appUrl = typeof window !== 'undefined' ? window.location.origin : process.env.NEXT_PUBLIC_APP_URL
+            const appUrl = process.env.NEXT_PUBLIC_APP_URL
             const { data, error: googleError } = await supabase.auth.signInWithOAuth({
                 provider: 'google',
                 options: {
