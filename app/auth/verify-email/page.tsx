@@ -22,7 +22,10 @@ export default function VerifyEmailPage() {
         setLoading(true)
 
         try {
-            const { error: resendError } = await supabase.auth.resendEnrollmentEmail(email)
+            const { error: resendError } = await supabase.auth.resend({
+                type: 'signup',
+                email: email
+            })
 
             if (resendError) {
                 setError(resendError.message)
