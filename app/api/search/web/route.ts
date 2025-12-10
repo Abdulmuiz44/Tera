@@ -28,18 +28,18 @@ export async function POST(request: NextRequest) {
       const { remaining, total, resetDate } = await getWebSearchRemaining(userId)
       
       if (remaining <= 0) {
-        return NextResponse.json(
-          {
-            success: false,
-            results: [],
-            message: `Monthly web search limit reached (${total} searches). Resets on ${new Date(resetDate!).toLocaleDateString()}`,
-            remaining,
-            total,
-            resetDate
-          },
-          { status: 429 }
-        )
-      }
+         return NextResponse.json(
+           {
+             success: false,
+             results: [],
+             message: `Monthly web search limit reached (${total} searches). Resets on ${resetDate ? new Date(resetDate).toLocaleDateString() : 'next month'}`,
+             remaining,
+             total,
+             resetDate
+           },
+           { status: 429 }
+         )
+       }
 
       // Increment usage
       await incrementWebSearchCount(userId)

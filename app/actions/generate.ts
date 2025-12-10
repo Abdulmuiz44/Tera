@@ -155,9 +155,11 @@ export async function generateAnswer({ prompt, tool, authorId, authorEmail, atta
       .single()
 
     if (error) {
-      throw error
-    }
-    savedChatId = data.id
+       throw error
+     }
+     if (data?.id) {
+       savedChatId = data.id
+     }
   }
 
   // Increment usage counters after successful generation

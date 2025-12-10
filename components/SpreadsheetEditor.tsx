@@ -86,24 +86,27 @@ export default function SpreadsheetEditor({
         await updateSpreadsheetData(userId, spreadsheetId, newData)
 
         // Send to backend for Google Sheets sync
-        await fetch('/api/sheets/edit', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            userId,
-            spreadsheetId,
-            operations: [
-              {
-                type: 'update_cell',
-                rowIndex: selectedCell.row,
-                columnIndex: selectedCell.col,
-                cellValue: cellEditValue
-              }
-            ],
-            syncToGoogle: false
-          })
-        })
-        showMessage('success', 'Cell updated')
+         const response = await fetch('/api/sheets/edit', {
+           method: 'POST',
+           headers: { 'Content-Type': 'application/json' },
+           body: JSON.stringify({
+             userId,
+             spreadsheetId,
+             operations: [
+               {
+                 type: 'update_cell',
+                 rowIndex: selectedCell.row,
+                 columnIndex: selectedCell.col,
+                 cellValue: cellEditValue
+               }
+             ],
+             syncToGoogle: false
+           })
+         })
+         if (!response.ok) {
+           console.error('Failed to sync cell update')
+         }
+         showMessage('success', 'Cell updated')
         onDataChange?.(newData)
       } catch (error) {
         showMessage('error', 'Failed to update cell')
@@ -132,7 +135,7 @@ export default function SpreadsheetEditor({
         await updateSpreadsheetData(userId, spreadsheetId, newData)
 
         // Send to backend for Google Sheets sync
-        await fetch('/api/sheets/edit', {
+        const response = await fetch('/api/sheets/edit', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -147,6 +150,9 @@ export default function SpreadsheetEditor({
             syncToGoogle: false
           })
         })
+        if (!response.ok) {
+          console.error('Failed to sync row addition')
+        }
         showMessage('success', 'Row added')
         onDataChange?.(newData)
       } catch (error) {
@@ -182,7 +188,7 @@ export default function SpreadsheetEditor({
         await updateSpreadsheetData(userId, spreadsheetId, newData)
 
         // Send to backend for Google Sheets sync
-        await fetch('/api/sheets/edit', {
+        const response = await fetch('/api/sheets/edit', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -198,6 +204,9 @@ export default function SpreadsheetEditor({
             syncToGoogle: false
           })
         })
+        if (!response.ok) {
+          console.error('Failed to sync column addition')
+        }
         showMessage('success', 'Column added')
         onDataChange?.(newData)
       } catch (error) {
@@ -226,7 +235,7 @@ export default function SpreadsheetEditor({
         await updateSpreadsheetData(userId, spreadsheetId, newData)
 
         // Send to backend for Google Sheets sync
-        await fetch('/api/sheets/edit', {
+        const response = await fetch('/api/sheets/edit', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -236,6 +245,9 @@ export default function SpreadsheetEditor({
             syncToGoogle: false
           })
         })
+        if (!response.ok) {
+          console.error('Failed to sync row deletion')
+        }
         showMessage('success', 'Row deleted')
         onDataChange?.(newData)
       } catch (error) {
@@ -254,7 +266,7 @@ export default function SpreadsheetEditor({
     setSyncing(true)
     try {
       // Send all current data to Google
-      await fetch('/api/sheets/edit', {
+      const response = await fetch('/api/sheets/edit', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -264,6 +276,9 @@ export default function SpreadsheetEditor({
           syncToGoogle: true
         })
       })
+      if (!response.ok) {
+        throw new Error('Failed to sync spreadsheet')
+      }
 
       showMessage('success', 'Synced to Google Sheets!')
       onSync?.()

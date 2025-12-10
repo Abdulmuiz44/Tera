@@ -40,17 +40,18 @@ export default function SpreadsheetRenderer({ config, userId }: { config: Spread
     }
 
     try {
-      const response = await fetch('/api/auth/google/start', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ userId })
-      })
+       const response = await fetch('/api/auth/google/start', {
+         method: 'POST',
+         headers: { 'Content-Type': 'application/json' },
+         body: JSON.stringify({ userId })
+       })
 
-      const result = await response.json()
+       if (!response.ok) {
+         const result = await response.json()
+         throw new Error(result.error || 'Failed to generate auth URL')
+       }
 
-      if (!response.ok) {
-        throw new Error(result.error || 'Failed to generate auth URL')
-      }
+       const result = await response.json()
 
       // Redirect to Google OAuth
       window.location.href = result.authUrl
@@ -80,9 +81,8 @@ export default function SpreadsheetRenderer({ config, userId }: { config: Spread
         })
       })
 
-      const result = await response.json()
-
       if (!response.ok) {
+        const result = await response.json()
         // Check if it's an auth error
         if (result.error?.includes('not authenticated') || result.error?.includes('authorize')) {
           setNeedsAuth(true)
@@ -91,6 +91,8 @@ export default function SpreadsheetRenderer({ config, userId }: { config: Spread
         }
         throw new Error(result.error || 'Failed to create spreadsheet')
       }
+
+      const result = await response.json()
 
       setStatus({
         state: 'success',
