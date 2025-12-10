@@ -90,18 +90,43 @@ VISUAL & VISION CAPABILITIES:
     - For processes or relationships, use "mermaid".
     - NEVER say "I can't draw". Instead say "Here's a visual for you:" and generate the code block.
 
-WEB SEARCH INTEGRATION - **CRITICAL RULES**:
-⚠️ **IF WEB SEARCH RESULTS ARE PROVIDED**, YOUR RESPONSE MUST BE BASED ON THEM:
-- You MUST use the web search results as the PRIMARY SOURCE for your response
-- You MUST cite specific details, statistics, dates, and quotes FROM THE SEARCH RESULTS
-- You MUST mention the sources and provide the source URLs/names
-- NEVER provide generic information when search results are available
-- NEVER say "I can't browse the web" or "I don't have access to current information" when search results are provided
-- If search results contradict your training data, PRIORITIZE THE SEARCH RESULTS - they are more current
-- Structure your response around the actual search results, not generic knowledge
-- Example: Instead of "AI is advancing", say "According to [SOURCE]: AI advanced by [SPECIFIC DETAIL from results]"
-- **ALWAYS reference which result you're citing (e.g., "Result 1 from [source.com]")**
-- Focus on making the response VISIBLY different and better because of the search results
+🔍 WEB SEARCH INTEGRATION - **ABSOLUTE MANDATORY RULES**:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+**IF SEARCH RESULTS ARE PROVIDED (between box symbols), YOU MUST:**
+
+1. **ONLY USE SEARCH RESULTS** - Your entire response must be ONLY from the search results
+   - Do NOT use your training knowledge
+   - Do NOT provide generic information
+   - Do NOT explain things not mentioned in search results
+   - ONLY what's in the search results counts
+
+2. **CITE SOURCES EXPLICITLY** - Every claim MUST reference its source
+   - Format: "According to [Source Website]: [exact quote or paraphrase from that source]"
+   - Always mention the SOURCE NUMBER from the results (e.g., "[From Source 3: example.com]")
+   - Include the website URL when possible
+
+3. **QUOTE SPECIFICALLY** - Use exact phrases and data from search results
+   - Example WRONG: "AI is advancing"
+   - Example RIGHT: "According to TechCrunch (Source 1), OpenAI released GPT-4 with 1.76 trillion parameters"
+   - Include numbers, dates, percentages, and specific names from the results
+
+4. **STRUCTURE AROUND SEARCH RESULTS** - Organize your response by the search results
+   - First result → first point in your response
+   - Second result → second point
+   - Etc.
+   - This ensures you're using all provided sources
+
+5. **NEVER IGNORE SEARCH RESULTS**
+   - If you see search results, you MUST use them
+   - Do NOT say "I don't have real-time access" (you do - results are provided)
+   - Do NOT provide generic alternatives when real data is given
+   - If results contradict your training, USE THE RESULTS (they're current)
+
+6. **COMPREHENSIVE RESPONSE** - Use ALL provided sources in your answer
+   - Don't skip sources
+   - Don't cherry-pick
+   - Synthesize all sources together to answer thoroughly
 
 GOOGLE SHEETS & SPREADSHEET INTEGRATION:
 
@@ -316,46 +341,70 @@ export async function generateTeacherResponse({
     console.log('🔵 Enhanced prompt with extracted text')
   }
 
-  // Add web search results if enabled
-   let webSearchContext = ''
-   let webSearchPerformed = false
-   if (enableWebSearch) {
-     try {
-       const { searchWeb } = await import('./web-search')
-       console.log('🔍 Starting web search for:', prompt)
-       console.log('📡 Calling SERPER API to fetch current web results...')
-       
-       const searchResults = await searchWeb(prompt, 5, userId)
-       
-       console.log('🔍 Web search response:', { 
-         success: searchResults.success, 
-         resultCount: searchResults.results?.length || 0, 
-         message: searchResults.message 
-       })
-       
-       if (searchResults.success && searchResults.results && searchResults.results.length > 0) {
-         webSearchPerformed = true
-         webSearchContext = '\n\n=== WEB SEARCH RESULTS ===\n'
-         webSearchContext += 'IMPORTANT: These are REAL, CURRENT web search results from the internet. Base your response on these results.\n'
-         webSearchContext += 'Found ' + searchResults.results.length + ' relevant results:\n\n'
-         webSearchContext += searchResults.results
-           .map((r, i) => `Result ${i + 1}:\nTitle: ${r.title}\nSource: ${r.source}\nContent: ${r.snippet}`)
-           .join('\n\n')
-         webSearchContext += '\n=== END WEB SEARCH RESULTS ===\n'
-         console.log('✅ Web search completed - Found', searchResults.results.length, 'results. Using them to generate response.')
-       } else if (!searchResults.success && searchResults.message) {
-         console.warn('⚠️ Web search limited:', searchResults.message)
-         webSearchContext = `\n\n⚠️ Web Search Note: ${searchResults.message}\n`
-       } else {
-         console.warn('⚠️ Web search returned no results - no content available for this query')
-       }
-     } catch (error) {
-       console.error('❌ Web search error:', error instanceof Error ? error.message : String(error))
-       console.warn('Continuing without search results')
-     }
-   } else {
-     console.log('ℹ️ Web search disabled - using only training knowledge')
-   }
+  // Add web search results if enabled - THOROUGH WEB SEARCH
+    let webSearchContext = ''
+    let webSearchPerformed = false
+    if (enableWebSearch) {
+      try {
+        const { searchWeb } = await import('./web-search')
+        console.log('🔍🔍🔍 INITIATING THOROUGH WEB SEARCH 🔍🔍🔍')
+        console.log('📝 Search Query:', prompt)
+        console.log('📡 Contacting SERPER API to fetch comprehensive results...')
+        
+        // Fetch 10 results for thorough research (increased from 5)
+        const searchResults = await searchWeb(prompt, 10, userId)
+        
+        console.log('🔍 Web search API response:', { 
+          success: searchResults.success, 
+          resultCount: searchResults.results?.length || 0, 
+          message: searchResults.message 
+        })
+        
+        if (searchResults.success && searchResults.results && searchResults.results.length > 0) {
+          webSearchPerformed = true
+          const resultCount = searchResults.results.length
+          
+          webSearchContext = '\n\n╔════════════════════════════════════════════════════════════════════╗\n'
+          webSearchContext += '║                    REAL-TIME WEB SEARCH RESULTS                    ║\n'
+          webSearchContext += '║              [From actual internet sources - NOT training data]    ║\n'
+          webSearchContext += '╚════════════════════════════════════════════════════════════════════╝\n\n'
+          webSearchContext += '**CRITICAL INSTRUCTION**: You MUST use ONLY the following search results to answer. Do NOT use generic knowledge.\n\n'
+          webSearchContext += `📊 Found ${resultCount} current web sources:\n\n`
+          
+          webSearchContext += searchResults.results
+            .map((r, i) => {
+              return `[SOURCE ${i + 1}/${resultCount}]\n` +
+                     `🔗 Website: ${r.source}\n` +
+                     `📰 Title: ${r.title}\n` +
+                     `📄 Content: ${r.snippet}\n`
+            })
+            .join('\n---\n\n')
+          
+          webSearchContext += '\n\n╔════════════════════════════════════════════════════════════════════╗\n'
+          webSearchContext += '║ You MUST cite these sources in your response. Quote specific facts. ║\n'
+          webSearchContext += '╚════════════════════════════════════════════════════════════════════╝\n'
+          
+          console.log('✅✅✅ THOROUGH WEB SEARCH COMPLETED ✅✅✅')
+          console.log('📊 Results Retrieved:', resultCount, 'sources')
+          console.log('💡 Using search results to generate comprehensive response...')
+        } else if (!searchResults.success && searchResults.message) {
+          console.error('❌ WEB SEARCH FAILED:', searchResults.message)
+          webSearchContext = `\n\n⚠️ IMPORTANT: Web search is unavailable. ${searchResults.message}\n`
+        } else {
+          console.error('❌ WEB SEARCH RETURNED ZERO RESULTS')
+          console.log('Possible issues:')
+          console.log('1. SERPER_API_KEY not set in environment')
+          console.log('2. Query too specific or no results available')
+          console.log('3. API quota exceeded')
+        }
+      } catch (error) {
+        console.error('❌ CRITICAL: Web search error:', error instanceof Error ? error.message : String(error))
+        console.error('Stack:', error instanceof Error ? error.stack : 'No stack')
+        console.warn('⚠️ Falling back to training knowledge')
+      }
+    } else {
+      console.log('ℹ️ Web search DISABLED - using only training knowledge')
+    }
 
   // Combine all context
   enhancedPrompt = enhancedPrompt + webSearchContext
