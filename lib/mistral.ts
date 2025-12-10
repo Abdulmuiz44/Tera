@@ -90,14 +90,18 @@ VISUAL & VISION CAPABILITIES:
     - For processes or relationships, use "mermaid".
     - NEVER say "I can't draw". Instead say "Here's a visual for you:" and generate the code block.
 
-WEB SEARCH INTEGRATION:
-- When WEB SEARCH RESULTS are provided (between === WEB SEARCH RESULTS === markers), ALWAYS use them to provide current, accurate information
-- Prioritize citing real sources from the search results
-- NEVER ignore or dismiss web search results - they contain up-to-date information
-- Use search results to supplement and verify your knowledge
-- If search results contradict your training data, prioritize the search results as they are more current
-- Provide specific details, statistics, and quotes from the search results
-- Always mention sources and links when citing search results
+WEB SEARCH INTEGRATION - **CRITICAL RULES**:
+⚠️ **IF WEB SEARCH RESULTS ARE PROVIDED**, YOUR RESPONSE MUST BE BASED ON THEM:
+- You MUST use the web search results as the PRIMARY SOURCE for your response
+- You MUST cite specific details, statistics, dates, and quotes FROM THE SEARCH RESULTS
+- You MUST mention the sources and provide the source URLs/names
+- NEVER provide generic information when search results are available
+- NEVER say "I can't browse the web" or "I don't have access to current information" when search results are provided
+- If search results contradict your training data, PRIORITIZE THE SEARCH RESULTS - they are more current
+- Structure your response around the actual search results, not generic knowledge
+- Example: Instead of "AI is advancing", say "According to [SOURCE]: AI advanced by [SPECIFIC DETAIL from results]"
+- **ALWAYS reference which result you're citing (e.g., "Result 1 from [source.com]")**
+- Focus on making the response VISIBLY different and better because of the search results
 
 GOOGLE SHEETS & SPREADSHEET INTEGRATION:
 
@@ -319,6 +323,8 @@ export async function generateTeacherResponse({
      try {
        const { searchWeb } = await import('./web-search')
        console.log('🔍 Starting web search for:', prompt)
+       console.log('📡 Calling SERPER API to fetch current web results...')
+       
        const searchResults = await searchWeb(prompt, 5, userId)
        
        console.log('🔍 Web search response:', { 
@@ -330,22 +336,25 @@ export async function generateTeacherResponse({
        if (searchResults.success && searchResults.results && searchResults.results.length > 0) {
          webSearchPerformed = true
          webSearchContext = '\n\n=== WEB SEARCH RESULTS ===\n'
+         webSearchContext += 'IMPORTANT: These are REAL, CURRENT web search results from the internet. Base your response on these results.\n'
          webSearchContext += 'Found ' + searchResults.results.length + ' relevant results:\n\n'
          webSearchContext += searchResults.results
-           .map((r, i) => `${i + 1}. ${r.title}\nSource: ${r.source}\n${r.snippet}`)
+           .map((r, i) => `Result ${i + 1}:\nTitle: ${r.title}\nSource: ${r.source}\nContent: ${r.snippet}`)
            .join('\n\n')
-         webSearchContext += '\n=== END WEB SEARCH ===\n'
-         console.log('✅ Web search completed with', searchResults.results.length, 'results')
+         webSearchContext += '\n=== END WEB SEARCH RESULTS ===\n'
+         console.log('✅ Web search completed - Found', searchResults.results.length, 'results. Using them to generate response.')
        } else if (!searchResults.success && searchResults.message) {
-         console.warn('⚠️ Web search limitation:', searchResults.message)
-         webSearchContext = `\n\n⚠️ Note: ${searchResults.message}\n`
+         console.warn('⚠️ Web search limited:', searchResults.message)
+         webSearchContext = `\n\n⚠️ Web Search Note: ${searchResults.message}\n`
        } else {
-         console.warn('⚠️ Web search returned no results')
+         console.warn('⚠️ Web search returned no results - no content available for this query')
        }
      } catch (error) {
        console.error('❌ Web search error:', error instanceof Error ? error.message : String(error))
        console.warn('Continuing without search results')
      }
+   } else {
+     console.log('ℹ️ Web search disabled - using only training knowledge')
    }
 
   // Combine all context
@@ -458,12 +467,6 @@ export async function generateTeacherResponse({
     const endsWithPunct = /[.!?]$/.test(trimmed)
     const endsWithQuestion = /\?$/.test(trimmed)
     let finalText = endsWithPunct ? trimmed : `${trimmed}.`
-
-    // If web search was performed, add a sources section at the end
-    if (webSearchPerformed && webSearchContext) {
-      finalText += '\n\n--- SOURCES FROM WEB ---'
-      finalText += webSearchContext
-    }
 
     // Save conversation to memory immediately (fire and forget)
     if (userId) {
