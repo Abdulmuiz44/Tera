@@ -44,11 +44,12 @@ export default function SignUpPage() {
             }
 
             // Sign up with Supabase
+            const appUrl = typeof window !== 'undefined' ? window.location.origin : (process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000')
             const { data, error: signUpError } = await supabase.auth.signUp({
                 email: email.trim(),
                 password,
                 options: {
-                    emailRedirectTo: `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/auth/callback`
+                    emailRedirectTo: `${appUrl}/auth/callback`
                 }
             })
 

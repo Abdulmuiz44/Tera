@@ -1,29 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@supabase/supabase-js'
 
 export async function GET(request: NextRequest) {
+  // OAuth callbacks with Supabase use hash fragments (#) not query params
+  // The Supabase client library automatically handles session creation from the URL
+  // Just render the callback page which handles the redirect
   const requestUrl = new URL(request.url)
-  const code = requestUrl.searchParams.get('code')
-  const next = requestUrl.searchParams.get('next') || '/new'
-
-  if (code) {
-    const supabase = createClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL || '',
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ''
-    )
-
-    try {
-      const { error } = await supabase.auth.exchangeCodeForSession(code)
-      
-      if (!error) {
-        // Redirect to the next page (default: /new)
-        return NextResponse.redirect(new URL(next, requestUrl.origin))
-      }
-    } catch (err) {
-      console.error('Auth callback error:', err)
-    }
+  
+  // For email confirmation links and password reset links (with code param)
+  if (requestUrl.searchParams.has('code')) {
+    return NextResponse.redirect(new URL('/auth/callback-page', requestUrl.origin))
   }
 
-  // Return to an error page with instructions
-  return NextResponse.redirect(new URL('/auth/signin?error=auth_failed', requestUrl.origin))
+  // For OAuth (hash-based) - Supabase auto-detects and creates session
+  // Redirect to the callback page that will handle the redirect
+  return NextResponse.redirect(new URL('/auth/callback-page', requestUrl.origin))
 }

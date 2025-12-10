@@ -179,9 +179,9 @@ export default function SignInPage() {
 
                     {/* Forgot Password Link */}
                     <div className="mt-4 text-center">
-                        <a href="#" className="text-tera-neon/60 hover:text-tera-neon text-xs font-medium transition">
+                        <Link href="/auth/forgot-password" className="text-tera-neon/60 hover:text-tera-neon text-xs font-medium transition">
                             Forgot password?
-                        </a>
+                        </Link>
                     </div>
                 </div>
 
