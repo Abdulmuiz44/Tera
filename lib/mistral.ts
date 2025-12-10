@@ -90,6 +90,15 @@ VISUAL & VISION CAPABILITIES:
     - For processes or relationships, use "mermaid".
     - NEVER say "I can't draw". Instead say "Here's a visual for you:" and generate the code block.
 
+WEB SEARCH INTEGRATION:
+- When WEB SEARCH RESULTS are provided (between === WEB SEARCH RESULTS === markers), ALWAYS use them to provide current, accurate information
+- Prioritize citing real sources from the search results
+- NEVER ignore or dismiss web search results - they contain up-to-date information
+- Use search results to supplement and verify your knowledge
+- If search results contradict your training data, prioritize the search results as they are more current
+- Provide specific details, statistics, and quotes from the search results
+- Always mention sources and links when citing search results
+
 GOOGLE SHEETS & SPREADSHEET INTEGRATION:
 
 1. CREATING SPREADSHEETS:
@@ -312,7 +321,13 @@ export async function generateTeacherResponse({
        console.log('🔍 Starting web search for:', prompt)
        const searchResults = await searchWeb(prompt, 5, userId)
        
-       if (searchResults.success && searchResults.results.length > 0) {
+       console.log('🔍 Web search response:', { 
+         success: searchResults.success, 
+         resultCount: searchResults.results?.length || 0, 
+         message: searchResults.message 
+       })
+       
+       if (searchResults.success && searchResults.results && searchResults.results.length > 0) {
          webSearchPerformed = true
          webSearchContext = '\n\n=== WEB SEARCH RESULTS ===\n'
          webSearchContext += 'Found ' + searchResults.results.length + ' relevant results:\n\n'
@@ -322,11 +337,14 @@ export async function generateTeacherResponse({
          webSearchContext += '\n=== END WEB SEARCH ===\n'
          console.log('✅ Web search completed with', searchResults.results.length, 'results')
        } else if (!searchResults.success && searchResults.message) {
-         console.warn('Web search limitation:', searchResults.message)
+         console.warn('⚠️ Web search limitation:', searchResults.message)
          webSearchContext = `\n\n⚠️ Note: ${searchResults.message}\n`
+       } else {
+         console.warn('⚠️ Web search returned no results')
        }
      } catch (error) {
-       console.warn('Web search failed, continuing without search results:', error)
+       console.error('❌ Web search error:', error instanceof Error ? error.message : String(error))
+       console.warn('Continuing without search results')
      }
    }
 
