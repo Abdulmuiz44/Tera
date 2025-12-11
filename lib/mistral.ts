@@ -364,19 +364,21 @@ export async function generateTeacherResponse({
         webSearchPerformed = true
         const resultCount = searchResults.results.length
         
-        // Format and return raw web search results directly to user
-        const formattedResults = searchResults.results
-          .map((r, i) => {
-            return `[${i + 1}] ${r.title}\nSource: ${r.source}\nSnippet: ${r.snippet}\nURL: ${r.url}\n`
-          })
-          .join('\n')
+        // Format web search results as context for the AI
+        webSearchContext = '\n\n📊 LIVE WEB SEARCH RESULTS (Real-time data from the internet):\n'
+        webSearchContext += '═'.repeat(80) + '\n\n'
         
-        const responseText = `🔍 Web Search Results for "${prompt}"\n\n${formattedResults}`
+        webSearchContext += searchResults.results
+          .map((r, i) => {
+            return `[Result ${i + 1}]\nTitle: ${r.title}\nSource: ${r.source}\nURL: ${r.url}\nContent: ${r.snippet}`
+          })
+          .join('\n\n')
+        
+        webSearchContext += '\n\n' + '═'.repeat(80) + '\n'
+        
         console.log('✅✅✅ WEB SEARCH COMPLETED ✅✅✅')
         console.log('📊 Results Retrieved:', resultCount, 'sources')
-        
-        // RETURN SEARCH RESULTS DIRECTLY - DON'T PASS TO AI
-        return responseText
+        console.log('💡 Providing search context to AI for informed response...')
       } else if (!searchResults.success) {
         console.error('❌ WEB SEARCH FAILED:', searchResults.message)
         webSearchContext = `\n\n⚠️ Web search unavailable: ${searchResults.message}\nFalling back to training knowledge.\n`
