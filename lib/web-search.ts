@@ -1,3 +1,8 @@
+/**
+ * Web Search Client
+ * Calls the /api/search/web endpoint which uses Serper API
+ */
+
 export interface SearchResult {
   title: string
   url: string
@@ -18,7 +23,11 @@ export interface SearchResponse {
 }
 
 /**
- * Search the web for information with full error handling
+ * Search the web for information using Serper API
+ * @param query - Search query
+ * @param limit - Number of results (1-20, default 10)
+ * @param userId - User ID for quota tracking
+ * @returns Search results with metadata
  */
 export async function searchWeb(
   query: string, 
@@ -26,7 +35,9 @@ export async function searchWeb(
   userId?: string
 ): Promise<SearchResponse> {
   try {
+    // Validate input
     if (!query || query.trim().length === 0) {
+      console.warn('⚠️ Search query is empty')
       return {
         success: false,
         results: [],
@@ -35,26 +46,35 @@ export async function searchWeb(
       }
     }
 
-    console.log(`🔍 Client: Initiating web search for "${query}"`)
+    const trimmedQuery = query.trim()
+    const clampedLimit = Math.max(1, Math.min(limit, 20))
 
+    console.log(`🔍 Initiating web search via Serper API`)
+    console.log(`   Query: "${trimmedQuery}"`)
+    console.log(`   Limit: ${clampedLimit}`)
+    if (userId) console.log(`   User: ${userId.slice(0, 8)}...`)
+
+    // Call our API endpoint
     const response = await fetch('/api/search/web', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ 
-        query: query.trim(), 
-        limit: Math.max(5, Math.min(limit, 20)), 
+        query: trimmedQuery, 
+        limit: clampedLimit, 
         userId 
       })
     })
 
-    // Handle rate limiting
+    console.log(`📥 API Response: ${response.status}`)
+
+    // Handle rate limiting (429)
     if (response.status === 429) {
       const data = await response.json()
-      console.warn('⚠️ Web search rate limited:', data.message)
+      console.warn('⚠️ Rate limited or quota reached')
       return {
         success: false,
         results: [],
-        query,
+        query: trimmedQuery,
         message: data.message || 'Monthly search limit reached',
         remaining: data.remaining,
         total: data.total,
@@ -62,14 +82,14 @@ export async function searchWeb(
       }
     }
 
-    // Handle service unavailable
+    // Handle service unavailable (503)
     if (response.status === 503) {
       const data = await response.json()
-      console.error('❌ Web search service unavailable:', data.message)
+      console.error('❌ Service unavailable:', data.message)
       return {
         success: false,
         results: [],
-        query,
+        query: trimmedQuery,
         message: data.message || 'Web search service temporarily unavailable'
       }
     }
@@ -77,45 +97,65 @@ export async function searchWeb(
     // Handle other errors
     if (!response.ok) {
       const error = await response.json().catch(() => ({}))
-      console.error('❌ Web search API error:', error)
+      console.error(`❌ API error ${response.status}:`, error)
       return {
         success: false,
         results: [],
-        query,
+        query: trimmedQuery,
         message: error.message || `Search failed with status ${response.status}`
       }
     }
 
+    // Parse successful response
     const data: SearchResponse = await response.json()
     
     if (!data.success) {
-      console.warn('⚠️ Web search returned unsuccessfully:', data.message)
+      console.warn('⚠️ Search returned success=false:', data.message)
       return {
         success: false,
         results: [],
-        query,
+        query: trimmedQuery,
         message: data.message || 'Search did not return results'
       }
     }
 
     if (!data.results || data.results.length === 0) {
-      console.log('ℹ️ No results found for query')
+      console.log('ℹ️ No results found')
       return {
         success: true,
         results: [],
-        query,
-        message: 'No results found. Try a different search.'
+        query: trimmedQuery,
+        message: 'No results found. Try a different search term.'
       }
     }
 
-    console.log(`✅ Web search successful: ${data.results.length} results`)
-    return data
+    // Validate results
+    const validResults = data.results.filter(r => 
+      r.title && r.url && r.snippet && r.source
+    )
+
+    if (validResults.length === 0) {
+      console.warn('⚠️ Results found but none were valid')
+      return {
+        success: true,
+        results: [],
+        query: trimmedQuery,
+        message: 'Results found but were invalid.'
+      }
+    }
+
+    console.log(`✅ Search successful: ${validResults.length} results`)
+    return {
+      success: true,
+      results: validResults,
+      query: trimmedQuery
+    }
 
   } catch (error) {
-    const message = error instanceof Error ? error.message : 'Unknown error'
+    const message = error instanceof Error ? error.message : String(error)
     console.error('❌ Web search error:', message)
     
-    // Check for specific error types
+    // Provide specific error messages
     if (message.includes('fetch failed') || message.includes('Failed to fetch')) {
       return {
         success: false,
@@ -134,6 +174,15 @@ export async function searchWeb(
       }
     }
 
+    if (message.includes('abort')) {
+      return {
+        success: false,
+        results: [],
+        query,
+        message: 'Search was cancelled. Please try again.'
+      }
+    }
+
     return {
       success: false,
       results: [],
@@ -144,11 +193,12 @@ export async function searchWeb(
 }
 
 /**
- * Format search results as context for AI
+ * Format search results for AI context
+ * Creates structured text for the LLM to use as sources
  */
 export function formatSearchResults(results: SearchResult[]): string {
   if (results.length === 0) {
-    return 'No search results available for context.'
+    return 'No search results available.'
   }
 
   const formatted = results
@@ -169,8 +219,22 @@ export function formatSearchResults(results: SearchResult[]): string {
 }
 
 /**
- * Check if a response contains web search results
+ * Check if search results are valid
  */
-export function hasSearchResults(results: SearchResult[]): boolean {
-  return results.length > 0 && results.every(r => r.title && r.url && r.snippet)
+export function hasValidResults(results: SearchResult[]): boolean {
+  return results.length > 0 && results.every(r => 
+    r.title && r.url && r.snippet && r.source
+  )
+}
+
+/**
+ * Extract domain from URL for display
+ */
+export function getDomain(url: string): string {
+  try {
+    const domain = new URL(url).hostname
+    return domain.replace(/^www\./, '')
+  } catch {
+    return url
+  }
 }
