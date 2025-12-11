@@ -1,5 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getWebSearchRemaining, incrementWebSearchCount } from '@/lib/web-search-usage'
+import { spawn } from 'child_process'
+import { promisify } from 'util'
+
+const execFile = promisify(require('child_process').execFile)
 
 export async function POST(request: NextRequest) {
   try {
@@ -18,19 +22,6 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         { error: 'Query cannot be empty' },
         { status: 400 }
-      )
-    }
-
-    // Validate API key
-    if (!process.env.SERPER_API_KEY) {
-      console.error('❌ SERPER_API_KEY not found in environment variables')
-      return NextResponse.json(
-        {
-          success: false,
-          results: [],
-          message: 'Web search service not configured. Please contact support.'
-        },
-        { status: 503 }
       )
     }
 
@@ -65,106 +56,50 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Perform Serper API search
-    console.log(`🔍 Searching: "${trimmedQuery}" (limit: ${limit})`)
-    const searchResponse = await performSerperSearch(trimmedQuery, limit)
+    // Perform SerpScrap search
+    console.log(`🔍 Searching with SerpScrap: "${trimmedQuery}" (limit: ${limit})`)
+    const searchResults = await performSerpScrapSearch(trimmedQuery, limit)
 
-    // Return response
-    if (searchResponse.ok) {
-      const data = await searchResponse.json()
-      
-      if (!data.organic || data.organic.length === 0) {
-        console.warn(`⚠️ No results for: "${trimmedQuery}"`)
-        return NextResponse.json({
-          success: true,
-          results: [],
-          query: trimmedQuery,
-          message: 'No search results found. Try a different search term.'
-        })
-      }
+    if (!searchResults.success) {
+      console.error(`❌ SerpScrap Error: ${searchResults.message}`)
+      return NextResponse.json({
+        success: false,
+        results: [],
+        query: trimmedQuery,
+        message: searchResults.message || 'Web search failed. Please try again.'
+      }, { status: 500 })
+    }
 
-      // Format results
-      const results = data.organic
-        .slice(0, limit)
-        .map((item: any) => ({
-          title: item.title || 'Untitled',
-          url: item.link || '',
-          snippet: item.snippet || item.description || '',
-          source: item.source || extractDomain(item.link || ''),
-          date: item.date || null,
-          favicon: item.favicon || null
-        }))
-        .filter((r: any) => r.url && r.snippet && r.title)
-
-      if (results.length === 0) {
-        console.warn(`⚠️ No valid results after filtering for: "${trimmedQuery}"`)
-        return NextResponse.json({
-          success: true,
-          results: [],
-          query: trimmedQuery,
-          message: 'No results with content found.'
-        })
-      }
-
-      console.log(`✅ Search successful: ${results.length} results found for "${trimmedQuery}"`)
-
-      // Increment usage counter
-      if (userId) {
-        try {
-          await incrementWebSearchCount(userId)
-          console.log(`📊 Search count incremented for user ${userId}`)
-        } catch (countError) {
-          console.warn('⚠️ Failed to increment search count:', countError)
-          // Don't fail the response if counter update fails
-        }
-      }
-
+    if (!searchResults.results || searchResults.results.length === 0) {
+      console.warn(`⚠️ No results for: "${trimmedQuery}"`)
       return NextResponse.json({
         success: true,
-        results,
-        query: trimmedQuery
+        results: [],
+        query: trimmedQuery,
+        message: 'No search results found. Try a different search term.'
       })
-    } else {
-      // Handle Serper API errors
-      const errorText = await searchResponse.text().catch(() => '')
-      
-      console.error(`❌ Serper API Error: ${searchResponse.status} - ${errorText}`)
-
-      if (searchResponse.status === 429) {
-        return NextResponse.json(
-          {
-            success: false,
-            results: [],
-            message: '🔍 Search service rate limited. Please try again in a moment.'
-          },
-          { status: 429 }
-        )
-      }
-
-      if (searchResponse.status === 403) {
-        return NextResponse.json(
-          {
-            success: false,
-            results: [],
-            message: '🔍 Search service authentication failed. Contact support.'
-          },
-          { status: 503 }
-        )
-      }
-
-      if (searchResponse.status === 402) {
-        return NextResponse.json(
-          {
-            success: false,
-            results: [],
-            message: '🔍 Search quota exceeded. Please try again tomorrow.'
-          },
-          { status: 429 }
-        )
-      }
-
-      throw new Error(`Serper API error: ${searchResponse.status} ${errorText}`)
     }
+
+    const results = searchResults.results.slice(0, limit)
+
+    console.log(`✅ Search successful: ${results.length} results found for "${trimmedQuery}"`)
+
+    // Increment usage counter
+    if (userId) {
+      try {
+        await incrementWebSearchCount(userId)
+        console.log(`📊 Search count incremented for user ${userId}`)
+      } catch (countError) {
+        console.warn('⚠️ Failed to increment search count:', countError)
+        // Don't fail the response if counter update fails
+      }
+    }
+
+    return NextResponse.json({
+      success: true,
+      results,
+      query: trimmedQuery
+    })
 
   } catch (error) {
     console.error('❌ Web search error:', error)
@@ -183,60 +118,45 @@ export async function POST(request: NextRequest) {
 }
 
 /**
- * Perform the actual Serper API search
- * Matches the pattern: POST to google.serper.dev with X-API-KEY header
+ * Perform web search using SerpScrap Python service
  */
-async function performSerperSearch(query: string, limit: number) {
-  const apiKey = process.env.SERPER_API_KEY
-  
-  if (!apiKey) {
-    throw new Error('SERPER_API_KEY not configured')
-  }
-
-  // Build request body
-  const requestBody = {
-    q: query,
-    num: Math.min(Math.max(limit, 1), 20), // Clamp between 1-20
-    gl: 'us',
-    hl: 'en',
-    autocorrect: true,
-    page: 1
-  }
-
-  console.log(`📡 Calling Serper API with query: "${query}"`)
-
-  // Create abort controller for timeout
-  const controller = new AbortController()
-  const timeoutId = setTimeout(() => controller.abort(), 15000) // 15 second timeout
-
+async function performSerpScrapSearch(query: string, limit: number): Promise<any> {
   try {
-    const response = await fetch('https://google.serper.dev/search', {
-      method: 'POST',
-      headers: {
-        'X-API-KEY': apiKey,
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(requestBody),
-      signal: controller.signal
+    const { execFile: exec } = require('child_process')
+    const { promisify } = require('util')
+    const execFileAsync = promisify(exec)
+
+    console.log(`📡 Calling SerpScrap with query: "${query}"`)
+
+    // Call the Python SerpScrap service
+    const { stdout, stderr } = await execFileAsync('python3', [
+      'serpscrap_service.py',
+      '--query', query,
+      '--limit', String(Math.min(Math.max(limit, 1), 20)),
+      '--json'
+    ], {
+      timeout: 30000, // 30 second timeout
+      encoding: 'utf-8'
     })
 
-    console.log(`📥 Serper API Response: ${response.status} ${response.statusText}`)
-    
-    return response
-  } finally {
-    clearTimeout(timeoutId)
-  }
-}
+    if (stderr) {
+      console.warn(`⚠️ SerpScrap stderr: ${stderr}`)
+    }
 
-/**
- * Extract domain from URL
- */
-function extractDomain(url: string): string {
-  try {
-    const domain = new URL(url).hostname
-    return domain.replace('www.', '')
-  } catch {
-    return 'unknown'
+    // Parse JSON output
+    const result = JSON.parse(stdout)
+    console.log(`📥 SerpScrap Response: ${result.success ? 'success' : 'failed'} (${result.count || 0} results)`)
+    
+    return result
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : String(error)
+    console.error(`❌ SerpScrap execution error: ${errorMessage}`)
+    
+    return {
+      success: false,
+      results: [],
+      message: 'SerpScrap search service failed. Please try again.'
+    }
   }
 }
 

@@ -349,7 +349,7 @@ export async function generateTeacherResponse({
       const { searchWeb } = await import('./web-search')
       console.log('🔍🔍🔍 INITIATING THOROUGH WEB SEARCH 🔍🔍🔍')
       console.log('📝 Search Query:', prompt)
-      console.log('📡 Contacting SERPER API to fetch comprehensive results...')
+      console.log('📡 Contacting SerpScrap to fetch comprehensive results...')
       
       // Fetch 10 results for thorough research
       const searchResults = await searchWeb(prompt, 10, userId)

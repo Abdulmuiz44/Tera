@@ -1,6 +1,7 @@
 /**
  * Web Search Client
- * Calls the /api/search/web endpoint which uses Serper API
+ * Calls the /api/search/web endpoint which uses SerpScrap for web scraping
+ * SerpScrap is a free, self-hosted alternative to commercial search APIs
  */
 
 export interface SearchResult {
@@ -23,7 +24,7 @@ export interface SearchResponse {
 }
 
 /**
- * Search the web for information using Serper API
+ * Search the web for information using SerpScrap
  * @param query - Search query
  * @param limit - Number of results (1-20, default 10)
  * @param userId - User ID for quota tracking
@@ -49,7 +50,7 @@ export async function searchWeb(
     const trimmedQuery = query.trim()
     const clampedLimit = Math.max(1, Math.min(limit, 20))
 
-    console.log(`🔍 Initiating web search via Serper API`)
+    console.log(`🔍 Initiating web search via SerpScrap`)
     console.log(`   Query: "${trimmedQuery}"`)
     console.log(`   Limit: ${clampedLimit}`)
     if (userId) console.log(`   User: ${userId.slice(0, 8)}...`)
