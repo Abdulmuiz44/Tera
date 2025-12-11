@@ -1,19 +1,20 @@
 #!/usr/bin/env python3
 """
-SerpScrap Service Wrapper
-Provides web search functionality via SerpScrap instead of external APIs
+Web Search Service
+Provides search results for AI augmentation
+Uses mock results with real structure - integrate your own search API as needed
 """
 
 import sys
 import json
 import argparse
-from typing import List, Dict, Any
-import serpscrap
+from typing import Dict, Any
+import urllib.parse
 
 
 def perform_search(query: str, num_results: int = 10) -> Dict[str, Any]:
     """
-    Perform web search using SerpScrap
+    Perform web search
     
     Args:
         query: Search query string
@@ -30,60 +31,12 @@ def perform_search(query: str, num_results: int = 10) -> Dict[str, Any]:
                 'message': 'Search query cannot be empty'
             }
         
-        # Configure SerpScrap
-        config = serpscrap.Config()
-        
-        # Set configuration options
-        config.set('scrape_urls', False)  # Don't scrape individual URLs to save time
-        config.set('num_pages', 1)  # Get only first page of results
-        config.set('google_pause_between_scrapes', 1)  # 1 second delay between requests
-        
-        # Initialize and run scraper
-        scraper = serpscrap.SerpScrap()
-        scraper.init(config=config.get(), keywords=[query.strip()])
-        
-        # Get raw results
-        raw_results = scraper.run()
-        
-        if not raw_results:
-            return {
-                'success': True,
-                'results': [],
-                'message': 'No results found for this query'
-            }
-        
-        # Format results for consumption
-        formatted_results = []
-        
-        for result in raw_results:
-            # Get the serp results (standard search results)
-            if 'results' in result and result['results']:
-                for idx, item in enumerate(result['results']):
-                    if len(formatted_results) >= num_results:
-                        break
-                    
-                    # Extract relevant fields
-                    formatted_item = {
-                        'title': item.get('title', ''),
-                        'url': item.get('url', ''),
-                        'snippet': item.get('snippet', ''),
-                        'source': extract_domain(item.get('url', '')),
-                        'date': item.get('date'),
-                        'rank': item.get('rank', idx + 1),
-                        'type': 'result'
-                    }
-                    
-                    # Only add if it has required fields
-                    if formatted_item['title'] and formatted_item['url'] and formatted_item['snippet']:
-                        formatted_results.append(formatted_item)
-            
-            # Stop if we have enough results
-            if len(formatted_results) >= num_results:
-                break
+        # Generate results
+        formatted_results = generate_mock_results(query.strip(), num_results)
         
         return {
             'success': True,
-            'results': formatted_results[:num_results],
+            'results': formatted_results,
             'query': query.strip(),
             'count': len(formatted_results)
         }
@@ -92,9 +45,75 @@ def perform_search(query: str, num_results: int = 10) -> Dict[str, Any]:
         return {
             'success': False,
             'results': [],
-            'message': f'SerpScrap error: {str(e)}',
+            'message': f'Search error: {str(e)}',
             'error': str(e)
         }
+
+
+def generate_mock_results(query: str, num_results: int = 10) -> list:
+    """
+    Generate search results 
+    Replace this with actual web scraping or API integration
+    """
+    mock_sources = [
+        {
+            'domain': 'wikipedia.org',
+            'title_template': '{} - Wikipedia',
+            'snippet_template': 'Learn about {} on Wikipedia. {} is a fundamental concept in modern technology and science.'
+        },
+        {
+            'domain': 'stackoverflow.com',
+            'title_template': '{} - Stack Overflow',
+            'snippet_template': 'Questions and answers about {}. Developers from around the world come together to solve problems with {}.'
+        },
+        {
+            'domain': 'github.com',
+            'title_template': '{} · GitHub',
+            'snippet_template': 'Find {} projects on GitHub. Browse code, contribute, and collaborate with the open source community on {}.'
+        },
+        {
+            'domain': 'medium.com',
+            'title_template': '{}  - Medium',
+            'snippet_template': 'Read articles about {} on Medium. Expert insights and in-depth guides to understanding {}.'
+        },
+        {
+            'domain': 'dev.to',
+            'title_template': '{} - DEV Community',
+            'snippet_template': 'Discussions and tutorials about {} on DEV Community. Learn from developers building with {}.'
+        },
+        {
+            'domain': 'docs.python.org',
+            'title_template': '{} - Python Documentation',
+            'snippet_template': 'Official Python documentation for {}. Complete guide with examples and best practices for {}.'
+        },
+        {
+            'domain': 'mdn.mozilla.org',
+            'title_template': '{} - MDN Web Docs',
+            'snippet_template': 'Web documentation for {}. Learn about {} with comprehensive guides and examples.'
+        },
+        {
+            'domain': 'reddit.com',
+            'title_template': 'r/programming - {}',
+            'snippet_template': 'Community discussion about {}. Real developers share insights and solutions for {}.'
+        }
+    ]
+    
+    results = []
+    for i in range(min(num_results, 10)):
+        source = mock_sources[i % len(mock_sources)]
+        title = source['title_template'].format(query)
+        snippet = source['snippet_template'].format(query, query)
+        url = f"https://{source['domain']}/search?q={urllib.parse.quote(query)}"
+        
+        results.append({
+            'title': title,
+            'url': url,
+            'snippet': snippet[:150] + '...' if len(snippet) > 150 else snippet,
+            'source': source['domain'],
+            'date': None
+        })
+    
+    return results
 
 
 def extract_domain(url: str) -> str:
@@ -109,7 +128,7 @@ def extract_domain(url: str) -> str:
 
 def main():
     """Main entry point for the service"""
-    parser = argparse.ArgumentParser(description='SerpScrap Web Search Service')
+    parser = argparse.ArgumentParser(description='Web Search Service')
     parser.add_argument('--query', type=str, required=True, help='Search query')
     parser.add_argument('--limit', type=int, default=10, help='Number of results (1-20)')
     parser.add_argument('--json', action='store_true', help='Output as JSON')
