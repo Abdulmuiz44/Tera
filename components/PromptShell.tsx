@@ -95,8 +95,24 @@ const parseContent = (content: string): ContentBlock[] => {
         // Check if code contains chart keys (relaxed check)
         const isChart = (c: string) => (c.includes('"data"') && c.includes('"type"')) || (c.includes('"series"'))
         const isSpreadsheet = (c: string) => c.includes('"action"') && (c.includes('"data"') || c.includes('"title"'))
+        const isHTML = (c: string) => c.includes('<!DOCTYPE') || c.includes('<html') || c.includes('<body')
+        const isVisualization = (c: string) => c.includes('THREE.') || c.includes('requestAnimationFrame') || c.includes('canvas.getContext')
 
-        if ((lang === 'json' && type === 'spreadsheet') || isSpreadsheet(cleanCode)) {
+        // PRIORITY ORDER: HTML/Visuals > Mermaid > JSON Charts/Spreadsheets > Code
+        
+        // Check for HTML/Three.js/Canvas visualizations FIRST
+        if (type === 'visual' || isHTML(cleanCode) || isVisualization(cleanCode) || ['html', 'svg', 'canvas', 'jsx', 'javascript'].includes(lang || '')) {
+          // Universal visual rendering for HTML, SVG, Canvas, Three.js, etc.
+          blocks.push({ 
+            type: 'universal-visual', 
+            code: cleanCode,
+            language: lang || 'html',
+            title: `${lang?.toUpperCase() || 'Visual'} Visualization`
+          })
+        } else if (lang === 'mermaid') {
+          // Only treat as Mermaid if explicitly marked as mermaid language
+          blocks.push({ type: 'mermaid', chart: cleanCode })
+        } else if ((lang === 'json' && type === 'spreadsheet') || isSpreadsheet(cleanCode)) {
           try {
             // Remove comments from JSON (// and /* */)
             const jsonStr = cleanCode
@@ -132,16 +148,6 @@ const parseContent = (content: string): ContentBlock[] => {
             console.warn('Failed to parse chart JSON', e)
             blocks.push({ type: 'code', language: lang || 'json', code: cleanCode })
           }
-        } else if (lang === 'mermaid') {
-          blocks.push({ type: 'mermaid', chart: cleanCode })
-        } else if (type === 'visual' || ['html', 'svg', 'canvas', 'jsx', 'javascript'].includes(lang || '')) {
-          // Universal visual rendering for HTML, SVG, Canvas, etc.
-          blocks.push({ 
-            type: 'universal-visual', 
-            code: cleanCode,
-            language: lang || 'html',
-            title: `${lang?.toUpperCase() || 'Visual'} Visualization`
-          })
         } else {
           blocks.push({ type: 'code', language: lang || 'text', code: cleanCode })
         }
