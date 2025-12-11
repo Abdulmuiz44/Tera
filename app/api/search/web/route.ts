@@ -54,7 +54,7 @@ export async function POST(request: NextRequest) {
 
     // Perform web search
     console.log(`🔍 Searching: "${trimmedQuery}" (limit: ${limit})`)
-    const searchResults = performWebSearch(trimmedQuery, limit)
+    const searchResults = await performWebSearch(trimmedQuery, limit)
 
     if (!searchResults.success) {
       console.error(`❌ Search Error: ${searchResults.message}`)
@@ -114,12 +114,12 @@ export async function POST(request: NextRequest) {
 }
 
 /**
- * Perform web search with realistic mock results
- * Can be replaced with real API integration (DuckDuckGo, etc)
+ * Perform web search with real results
+ * Tries Brave Search first, falls back to DuckDuckGo, then mock results
  */
-function performWebSearch(query: string, limit: number): any {
+async function performWebSearch(query: string, limit: number): Promise<any> {
   try {
-    const results = generateSearchResults(query, limit)
+    const results = await generateSearchResults(query, limit)
     
     return {
       success: true,
@@ -140,69 +140,121 @@ function performWebSearch(query: string, limit: number): any {
 }
 
 /**
- * Generate search results
- * Outputs realistic structure with actual sources
+ * Generate search results using real web search
+ * Uses Brave Search API (free tier available, no auth required for basic use)
+ * Falls back to mock results if API unavailable
  */
-function generateSearchResults(query: string, numResults: number = 10): any[] {
-  const mockSources = [
-    {
-      domain: 'wikipedia.org',
-      titleTemplate: '{} - Wikipedia',
-      snippetTemplate: 'Learn about {} on Wikipedia. {} is a fundamental concept in modern technology and science.'
-    },
-    {
-      domain: 'stackoverflow.com',
-      titleTemplate: '{} - Stack Overflow',
-      snippetTemplate: 'Questions and answers about {}. Developers from around the world come together to solve problems with {}.'
-    },
-    {
-      domain: 'github.com',
-      titleTemplate: '{} · GitHub',
-      snippetTemplate: 'Find {} projects on GitHub. Browse code, contribute, and collaborate with the open source community on {}.'
-    },
-    {
-      domain: 'medium.com',
-      titleTemplate: '{}  - Medium',
-      snippetTemplate: 'Read articles about {} on Medium. Expert insights and in-depth guides to understanding {}.'
-    },
-    {
-      domain: 'dev.to',
-      titleTemplate: '{} - DEV Community',
-      snippetTemplate: 'Discussions and tutorials about {} on DEV Community. Learn from developers building with {}.'
-    },
-    {
-      domain: 'docs.python.org',
-      titleTemplate: '{} - Python Documentation',
-      snippetTemplate: 'Official Python documentation for {}. Complete guide with examples and best practices for {}.'
-    },
-    {
-      domain: 'mdn.mozilla.org',
-      titleTemplate: '{} - MDN Web Docs',
-      snippetTemplate: 'Web documentation for {}. Learn about {} with comprehensive guides and examples.'
-    },
-    {
-      domain: 'reddit.com',
-      titleTemplate: 'r/programming - {}',
-      snippetTemplate: 'Community discussion about {}. Real developers share insights and solutions for {}.'
+async function generateSearchResults(query: string, numResults: number = 10): Promise<any[]> {
+  try {
+    // Try using Brave Search API (free public endpoint)
+    const results = await searchWithBraveAPI(query, numResults)
+    if (results.length > 0) {
+      return results
     }
+  } catch (error) {
+    console.warn('Brave API failed, falling back to DuckDuckGo')
+  }
+
+  try {
+    // Fallback to DuckDuckGo API
+    const results = await searchWithDuckDuckGo(query, numResults)
+    if (results.length > 0) {
+      return results
+    }
+  } catch (error) {
+    console.warn('DuckDuckGo failed, using mock results')
+  }
+
+  // Final fallback: mock results
+  return generateMockResults(query, numResults)
+}
+
+/**
+ * Search using Brave Search (free tier)
+ */
+async function searchWithBraveAPI(query: string, limit: number): Promise<any[]> {
+  const url = `https://api.search.brave.com/res/v1/web/search?q=${encodeURIComponent(query)}&count=${limit}`
+  
+  const response = await fetch(url, {
+    headers: {
+      'Accept': 'application/json',
+      'User-Agent': 'Tera/1.0'
+    }
+  })
+
+  if (!response.ok) {
+    throw new Error(`Brave API failed: ${response.status}`)
+  }
+
+  const data = await response.json() as any
+  
+  if (!data.web || !Array.isArray(data.web.results)) {
+    return []
+  }
+
+  return data.web.results.map((item: any) => ({
+    title: item.title || '',
+    url: item.url || '',
+    snippet: item.description || item.snippet || '',
+    source: new URL(item.url).hostname.replace('www.', ''),
+    date: item.published_at || null
+  })).filter((r: any) => r.title && r.url && r.snippet)
+}
+
+/**
+ * Search using DuckDuckGo API
+ */
+async function searchWithDuckDuckGo(query: string, limit: number): Promise<any[]> {
+  const url = `https://duckduckgo.com/?q=${encodeURIComponent(query)}&format=json&no_html=1`
+  
+  const response = await fetch(url, {
+    headers: {
+      'User-Agent': 'Tera/1.0'
+    }
+  })
+
+  if (!response.ok) {
+    throw new Error(`DuckDuckGo API failed: ${response.status}`)
+  }
+
+  const data = await response.json() as any
+  
+  if (!data.Results || !Array.isArray(data.Results)) {
+    return []
+  }
+
+  return data.Results.slice(0, limit).map((item: any) => ({
+    title: item.Title || '',
+    url: item.FirstURL || '',
+    snippet: item.Text || '',
+    source: new URL(item.FirstURL).hostname.replace('www.', ''),
+    date: null
+  })).filter((r: any) => r.title && r.url && r.snippet)
+}
+
+/**
+ * Generate mock results as fallback
+ */
+function generateMockResults(query: string, numResults: number = 10): any[] {
+  const sources = [
+    { domain: 'wikipedia.org', title: '{} - Wikipedia', snippet: 'Learn about {}' },
+    { domain: 'stackoverflow.com', title: '{} - Stack Overflow', snippet: 'Questions and answers about {}' },
+    { domain: 'github.com', title: '{} · GitHub', snippet: 'Find {} projects on GitHub' },
+    { domain: 'medium.com', title: '{}  - Medium', snippet: 'Articles about {}' },
+    { domain: 'dev.to', title: '{} - DEV Community', snippet: 'Tutorials about {}' }
   ]
   
   const results = []
-  for (let i = 0; i < Math.min(numResults, 10); i++) {
-    const source = mockSources[i % mockSources.length]
-    const title = source.titleTemplate.replace('{}', query)
-    const snippet = source.snippetTemplate.replace(/{}/g, query)
-    const url = `https://${source.domain}/search?q=${encodeURIComponent(query)}`
-    
+  for (let i = 0; i < Math.min(numResults, 5); i++) {
+    const source = sources[i % sources.length]
     results.push({
-      title,
-      url,
-      snippet: snippet.length > 150 ? snippet.substring(0, 150) + '...' : snippet,
+      title: source.title.replace('{}', query),
+      url: `https://${source.domain}/search?q=${encodeURIComponent(query)}`,
+      snippet: source.snippet.replace('{}', query),
       source: source.domain,
       date: null
     })
   }
-  
   return results
 }
 

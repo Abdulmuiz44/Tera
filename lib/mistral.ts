@@ -341,17 +341,17 @@ export async function generateTeacherResponse({
     console.log('🔵 Enhanced prompt with extracted text')
   }
 
-  // Add web search results if enabled - THOROUGH WEB SEARCH
+  // Add web search results if enabled - RETURN RAW WEB RESULTS
   let webSearchContext = ''
   let webSearchPerformed = false
   if (enableWebSearch) {
     try {
       const { searchWeb } = await import('./web-search')
-      console.log('🔍🔍🔍 INITIATING THOROUGH WEB SEARCH 🔍🔍🔍')
+      console.log('🔍🔍🔍 PERFORMING WEB SEARCH 🔍🔍🔍')
       console.log('📝 Search Query:', prompt)
-      console.log('📡 Contacting SerpScrap to fetch comprehensive results...')
+      console.log('📡 Fetching live web results...')
       
-      // Fetch 10 results for thorough research
+      // Fetch results for user to see
       const searchResults = await searchWeb(prompt, 10, userId)
       
       console.log('🔍 Web search API response:', { 
@@ -364,36 +364,19 @@ export async function generateTeacherResponse({
         webSearchPerformed = true
         const resultCount = searchResults.results.length
         
-        webSearchContext = '\n\n═══════════════════════════════════════════════════════════════════════════\n'
-        webSearchContext += 'REAL-TIME WEB SEARCH RESULTS (From actual internet sources - Current Data)\n'
-        webSearchContext += '═══════════════════════════════════════════════════════════════════════════\n\n'
-        webSearchContext += 'CRITICAL INSTRUCTION FOR AI:\n'
-        webSearchContext += '- You MUST use ONLY the following search results to answer the user question\n'
-        webSearchContext += '- Do NOT use your training knowledge or generic information\n'
-        webSearchContext += '- Quote specific facts and data from these sources\n'
-        webSearchContext += '- Always cite the source number (e.g., "From Source 1", "According to Source 2")\n'
-        webSearchContext += '- If information is not in these results, say so clearly\n\n'
-        webSearchContext += `${resultCount} Current Web Sources Found:\n\n`
-        
-        webSearchContext += searchResults.results
+        // Format and return raw web search results directly to user
+        const formattedResults = searchResults.results
           .map((r, i) => {
-            let content = `[SOURCE ${i + 1}/${resultCount}]\n`
-            content += `Title: ${r.title}\n`
-            content += `Website: ${r.source}\n`
-            if (r.date) content += `Date: ${r.date}\n`
-            content += `Content: ${r.snippet}\n`
-            content += `URL: ${r.url}\n`
-            return content
+            return `[${i + 1}] ${r.title}\nSource: ${r.source}\nSnippet: ${r.snippet}\nURL: ${r.url}\n`
           })
-          .join('\n---\n\n')
+          .join('\n')
         
-        webSearchContext += '\n═══════════════════════════════════════════════════════════════════════════\n'
-        webSearchContext += 'Remember: Use ONLY these sources. Cite them explicitly in your response.\n'
-        webSearchContext += '═══════════════════════════════════════════════════════════════════════════\n'
-        
-        console.log('✅✅✅ THOROUGH WEB SEARCH COMPLETED ✅✅✅')
+        const responseText = `🔍 Web Search Results for "${prompt}"\n\n${formattedResults}`
+        console.log('✅✅✅ WEB SEARCH COMPLETED ✅✅✅')
         console.log('📊 Results Retrieved:', resultCount, 'sources')
-        console.log('💡 Using search results to generate comprehensive response...')
+        
+        // RETURN SEARCH RESULTS DIRECTLY - DON'T PASS TO AI
+        return responseText
       } else if (!searchResults.success) {
         console.error('❌ WEB SEARCH FAILED:', searchResults.message)
         webSearchContext = `\n\n⚠️ Web search unavailable: ${searchResults.message}\nFalling back to training knowledge.\n`
