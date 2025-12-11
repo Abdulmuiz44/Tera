@@ -39,6 +39,7 @@ import dynamic from 'next/dynamic'
 const ChartRenderer = dynamic(() => import('./visuals/ChartRenderer'), { ssr: false })
 const MermaidRenderer = dynamic(() => import('./visuals/MermaidRenderer'), { ssr: false })
 const SpreadsheetRenderer = dynamic(() => import('./visuals/SpreadsheetRenderer'), { ssr: false })
+const UniversalVisualRenderer = dynamic(() => import('./visuals/UniversalVisualRenderer'), { ssr: false })
 
 type ContentBlock =
    | { type: 'text', content: string, isHeader: boolean }
@@ -46,6 +47,7 @@ type ContentBlock =
    | { type: 'mermaid', chart: string }
    | { type: 'code', language: string, code: string }
    | { type: 'spreadsheet', config: any }
+   | { type: 'universal-visual', code: string, language: string, title: string }
    | { type: 'web-sources', sources: Array<{ title: string; url: string; snippet: string; source: string }> }
 
 const parseContent = (content: string): ContentBlock[] => {
@@ -132,6 +134,14 @@ const parseContent = (content: string): ContentBlock[] => {
           }
         } else if (lang === 'mermaid') {
           blocks.push({ type: 'mermaid', chart: cleanCode })
+        } else if (type === 'visual' || ['html', 'svg', 'canvas', 'jsx', 'javascript'].includes(lang || '')) {
+          // Universal visual rendering for HTML, SVG, Canvas, etc.
+          blocks.push({ 
+            type: 'universal-visual', 
+            code: cleanCode,
+            language: lang || 'html',
+            title: `${lang?.toUpperCase() || 'Visual'} Visualization`
+          })
         } else {
           blocks.push({ type: 'code', language: lang || 'text', code: cleanCode })
         }
@@ -741,6 +751,9 @@ export default function PromptShell({
                       <div className="rounded-2xl bg-tera-panel border border-white/5 px-4 md:px-6 py-4 text-white/90 shadow-lg">
                         <div className="space-y-4">
                           {parseContent(entry.assistantMessage.content).map((block, idx) => {
+                             if (block.type === 'universal-visual') {
+                               return <UniversalVisualRenderer key={idx} code={block.code} language={block.language} title={block.title} />
+                             }
                              if (block.type === 'chart') {
                                return <ChartRenderer key={idx} config={block.config} />
                              }
