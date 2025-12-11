@@ -18,6 +18,7 @@ export default function SettingsPage() {
   const { user } = useAuth()
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
+  const [autoSaving, setAutoSaving] = useState(false)
   const [sidebarExpanded, setSidebarExpanded] = useState(false)
   const [activeTab, setActiveTab] = useState<'preferences' | 'privacy' | 'account'>('preferences')
   const [message, setMessage] = useState('')
@@ -38,19 +39,34 @@ export default function SettingsPage() {
   }, [user])
 
   const fetchSettings = async () => {
-    setLoading(true)
-    const { data, error } = await supabase
-      .from('user_settings')
-      .select('*')
-      .eq('user_id', user?.id)
-      .single()
+    try {
+      setLoading(true)
+      const response = await fetch('/api/settings', {
+        method: 'GET',
+        headers: {
+          'x-user-id': user?.id || '',
+        },
+      })
 
-    if (data) {
-      setSettings(data)
-    } else if (error?.code !== 'PGRST116') {
+      if (!response.ok) {
+        throw new Error('Failed to fetch settings')
+      }
+
+      const data = await response.json()
+      setSettings({
+        notifications_enabled: data.notifications_enabled ?? true,
+        dark_mode: data.dark_mode ?? true,
+        email_notifications: data.email_notifications ?? true,
+        marketing_emails: data.marketing_emails ?? false,
+        data_retention_days: data.data_retention_days ?? 90,
+      })
+    } catch (error) {
       console.error('Error fetching settings:', error)
+      setMessageType('error')
+      setMessage('Failed to load settings.')
+    } finally {
+      setLoading(false)
     }
-    setLoading(false)
   }
 
   const handleSave = async () => {
@@ -58,21 +74,30 @@ export default function SettingsPage() {
     setSaving(true)
     setMessage('')
 
-    const { error } = await supabase.from('user_settings').upsert(
-      { user_id: user.id, ...settings, updated_at: new Date() },
-      { onConflict: 'user_id' }
-    )
+    try {
+      const response = await fetch('/api/settings', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-user-id': user.id,
+        },
+        body: JSON.stringify(settings),
+      })
 
-    if (error) {
-      console.error('Error saving settings:', error)
-      setMessageType('error')
-      setMessage('Failed to save settings.')
-    } else {
+      if (!response.ok) {
+        throw new Error('Failed to save settings')
+      }
+
       setMessageType('success')
       setMessage('Settings saved successfully!')
       setTimeout(() => setMessage(''), 3000)
+    } catch (error) {
+      console.error('Error saving settings:', error)
+      setMessageType('error')
+      setMessage('Failed to save settings.')
+    } finally {
+      setSaving(false)
     }
-    setSaving(false)
   }
 
   const handleLogout = async () => {
@@ -87,11 +112,45 @@ export default function SettingsPage() {
   }
 
   const updateSetting = (key: keyof UserSettings, value: any) => {
-    setSettings(prev => ({ ...prev, [key]: value }))
+    setSettings(prev => {
+      const updated = { ...prev, [key]: value }
+      // Auto-save after update
+      saveSettingsAsync(updated)
+      return updated
+    })
   }
 
   const toggleSetting = (key: keyof UserSettings) => {
-    setSettings(prev => ({ ...prev, [key]: !prev[key] }))
+    setSettings(prev => {
+      const updated = { ...prev, [key]: !prev[key] }
+      // Auto-save after toggle
+      saveSettingsAsync(updated)
+      return updated
+    })
+  }
+
+  const saveSettingsAsync = async (settingsToSave: UserSettings) => {
+    if (!user) return
+
+    try {
+      setAutoSaving(true)
+      const response = await fetch('/api/settings', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-user-id': user.id,
+        },
+        body: JSON.stringify(settingsToSave),
+      })
+
+      if (!response.ok) {
+        console.error('Failed to auto-save settings')
+      }
+    } catch (error) {
+      console.error('Error auto-saving settings:', error)
+    } finally {
+      setAutoSaving(false)
+    }
   }
 
   return (
@@ -105,16 +164,22 @@ export default function SettingsPage() {
               <p className="text-xs uppercase tracking-[0.5em] text-white/40">Tera</p>
               <h1 className="text-3xl font-semibold leading-tight text-white">Settings</h1>
             </div>
-            <button
-              onClick={handleSave}
-              disabled={saving}
-              className="flex items-center gap-2 rounded-full border border-white/10 px-4 py-2 text-sm text-white transition hover:border-tera-neon disabled:opacity-50"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
-              </svg>
-              {saving ? 'Saving...' : 'Save changes'}
-            </button>
+            <div className="flex items-center gap-4">
+              {autoSaving && (
+                <div className="flex items-center gap-2 text-white/60 text-xs">
+                  <div className="w-2 h-2 bg-tera-neon rounded-full animate-pulse"></div>
+                  <span>Auto-saving...</span>
+                </div>
+              )}
+              {!autoSaving && !loading && (
+                <div className="flex items-center gap-2 text-white/40 text-xs">
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-3 h-3 text-green-400">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                  </svg>
+                  <span>All saved</span>
+                </div>
+              )}
+            </div>
           </header>
 
           {/* Content */}
