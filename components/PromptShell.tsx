@@ -592,22 +592,39 @@ export default function PromptShell({
     }
   }, [conversations, conversationActive, status])
 
-  // Load web search remaining count
+  // Load web search remaining count and update periodically
   useEffect(() => {
-    if (user?.id) {
-      fetch('/api/user/web-search-status', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ userId: user.id })
-      })
-        .then(r => r.json())
-        .then(data => {
-          if (data.remaining !== undefined) {
-            setWebSearchRemaining(data.remaining)
-          }
+    if (!user?.id) return
+
+    const fetchWebSearchStatus = async () => {
+      try {
+        const response = await fetch('/api/user/web-search-status', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ userId: user.id })
         })
-        .catch(err => console.warn('Failed to fetch web search status:', err))
+
+        if (!response.ok) {
+          console.warn('Failed to fetch web search status:', response.status)
+          return
+        }
+
+        const data = await response.json()
+        if (data.success && data.remaining !== undefined) {
+          setWebSearchRemaining(data.remaining)
+          console.log(`🔍 Web Search Status: ${data.remaining}/${data.total} (${data.plan.toUpperCase()})`)
+        }
+      } catch (err) {
+        console.warn('Failed to fetch web search status:', err)
+      }
     }
+
+    // Fetch immediately
+    fetchWebSearchStatus()
+
+    // Refetch every 30 seconds to keep count updated
+    const interval = setInterval(fetchWebSearchStatus, 30000)
+    return () => clearInterval(interval)
   }, [user?.id])
 
   useEffect(() => {

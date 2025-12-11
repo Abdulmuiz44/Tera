@@ -138,7 +138,7 @@ lib/
 ## Pricing Model
 - **Free**: Core features with limited usage
 - **Pro**: Unlimited access, advanced features ($5/mo)
-- **School**: Team access for educators ($20/mo)
+- **Plus**: Team access for educators ($20/mo)
 
 ## The Tera Difference
 Unlike other AI chatbots that feel robotic and cold, Tera feels like chatting with your smartest, most supportive friend. Whether you're a student stuck on homework at 11pm, a teacher planning Monday's lesson on Sunday night, or someone who just wants to learn something new - Tera's got your back. 💪

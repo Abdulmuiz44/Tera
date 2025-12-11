@@ -2,7 +2,7 @@
  * Web Search Usage Tracking
  * Tracks and limits web searches based on subscription plan:
  * - Free: 5/month
- * - Pro: 50/month
+ * - Pro: 50/month  
  * - Plus: 80/month
  */
 
@@ -14,6 +14,8 @@ const MONTHLY_WEB_SEARCH_LIMITS = {
   pro: 50,
   plus: 80
 }
+
+const RESET_INTERVAL_DAYS = 30
 
 /**
  * Get user's remaining web searches for current month
