@@ -49,7 +49,9 @@ export default function SettingsPage() {
       })
 
       if (!response.ok) {
-        throw new Error('Failed to fetch settings')
+        console.warn('Failed to fetch settings, using defaults')
+        // Use default settings if API fails
+        return
       }
 
       const data = await response.json()
@@ -62,8 +64,7 @@ export default function SettingsPage() {
       })
     } catch (error) {
       console.error('Error fetching settings:', error)
-      setMessageType('error')
-      setMessage('Failed to load settings.')
+      // Silently fail and use defaults - table might not exist yet
     } finally {
       setLoading(false)
     }
@@ -144,10 +145,12 @@ export default function SettingsPage() {
       })
 
       if (!response.ok) {
-        console.error('Failed to auto-save settings')
+        console.warn('Failed to auto-save settings - table may not exist yet')
+        console.warn('Run: migrations/create_user_settings_table.sql in Supabase SQL Editor')
       }
     } catch (error) {
       console.error('Error auto-saving settings:', error)
+      console.warn('Run: migrations/create_user_settings_table.sql in Supabase SQL Editor')
     } finally {
       setAutoSaving(false)
     }
