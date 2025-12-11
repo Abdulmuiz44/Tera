@@ -1,3 +1,3 @@
 # No external dependencies required
-# Uses only Python standard library (urllib, json)
-# Python 3.6+ includes all necessary modules
+# Web search implemented in TypeScript for Vercel compatibility
+# All logic is in app/api/search/web/route.ts
