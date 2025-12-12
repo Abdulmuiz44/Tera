@@ -113,8 +113,8 @@ export default function ProfilePage() {
     .toUpperCase()
     .slice(0, 2)
 
-  const resetDate = profile.planResetDate ? new Date(profile.planResetDate) : null
-  const daysUntilReset = resetDate ? Math.ceil((resetDate.getTime() - Date.now()) / (1000 * 60 * 60 * 24)) : 0
+  const chatResetDate = profile.chatResetDate ? new Date(profile.chatResetDate) : null
+  const daysUntilReset = chatResetDate ? Math.ceil((chatResetDate.getTime() - Date.now()) / (1000 * 60 * 60 * 24)) : 0
 
   return (
     <div className="flex flex-col md:flex-row h-screen w-full bg-[#050505]">
@@ -342,11 +342,11 @@ export default function ProfilePage() {
           </div>
 
           {/* Billing Cycle Info */}
-          {resetDate && (
+          {chatResetDate && (
             <div className="rounded-[28px] bg-tera-muted border border-white/10 p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-white/60">Usage resets in</p>
+                  <p className="text-sm text-white/60">Daily usage resets in</p>
                   <p className="text-lg font-semibold text-white mt-1">
                     {daysUntilReset} {daysUntilReset === 1 ? 'day' : 'days'}
                   </p>
@@ -354,7 +354,7 @@ export default function ProfilePage() {
                 <div className="text-right">
                   <p className="text-sm text-white/60">Next reset date</p>
                   <p className="text-lg font-semibold text-white mt-1">
-                    {resetDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                    {chatResetDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
                   </p>
                 </div>
               </div>
