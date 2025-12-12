@@ -11,6 +11,7 @@ import { compressImage } from '@/lib/image-compression'
 import UpgradePrompt from './UpgradePrompt'
 import VoiceControls from './VoiceControls'
 import WebSearchStatus from './WebSearchStatus'
+import LimitModal from './LimitModal'
 
 type Message = {
   id: string
@@ -209,7 +210,9 @@ export default function PromptShell({
   const [isListening, setIsListening] = useState(false)
   const recognitionRef = useRef<any>(null)
   const [currentSessionId, setCurrentSessionId] = useState<string | null>(sessionId || null)
-  const [upgradePromptType, setUpgradePromptType] = useState<'lesson-plans' | 'chats' | 'file-uploads' | 'web-search' | null>(null)
+  const [upgradePromptType, setUpgradePromptType] = useState<'chats' | 'file-uploads' | 'web-search' | null>(null)
+  const [limitModalType, setLimitModalType] = useState<'chats' | 'file-uploads' | 'web-search' | null>(null)
+  const [currentUserPlan, setCurrentUserPlan] = useState<string>('free')
   const [webSearchEnabled, setWebSearchEnabled] = useState(false)
   const [webSearchRemaining, setWebSearchRemaining] = useState(100)
   const [isWebSearching, setIsWebSearching] = useState(false)
@@ -414,15 +417,15 @@ export default function PromptShell({
         const message = error instanceof Error ? error.message : 'Unable to generate a reply'
         console.error('generateAnswer failed', error)
 
-        // Check for limit errors
+        // Check for limit errors and show modal instead
         if (message.includes('limit') && message.includes('chats')) {
-          setUpgradePromptType('chats')
-        } else if (message.includes('limit') && message.includes('lesson plans')) {
-          setUpgradePromptType('lesson-plans')
+          setLimitModalType('chats')
         } else if (message.includes('limit') && message.includes('file uploads')) {
-          setUpgradePromptType('file-uploads')
+          setLimitModalType('file-uploads')
         } else if (message.includes('limit') && message.includes('web-search')) {
-          setUpgradePromptType('web-search')
+          setLimitModalType('web-search')
+        } else if (message === 'limit web-search') {
+          setLimitModalType('web-search')
         }
 
         setConversations((prev) =>
@@ -1052,6 +1055,13 @@ export default function PromptShell({
           onClose={() => setUpgradePromptType(null)}
         />
       )}
+
+      <LimitModal
+        isOpen={limitModalType !== null}
+        limitType={limitModalType}
+        currentPlan={currentUserPlan}
+        onClose={() => setLimitModalType(null)}
+      />
     </div>
   )
 }

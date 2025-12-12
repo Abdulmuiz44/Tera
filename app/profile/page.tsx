@@ -5,7 +5,7 @@ import { useAuth } from '@/components/AuthProvider'
 import Sidebar from '@/components/Sidebar'
 import { getUserProfile, updateUserProfile, type UserProfile } from '@/lib/usage-tracking'
 import Image from 'next/image'
-import { getPlanConfig, getRemainingLessonPlans, getRemainingChats, getUsagePercentage, type PlanType } from '@/lib/plan-config'
+import { getPlanConfig, getRemainingChats, getUsagePercentage, type PlanType } from '@/lib/plan-config'
 import Link from 'next/link'
 
 export default function ProfilePage() {
@@ -98,13 +98,10 @@ export default function ProfilePage() {
   }
 
   const planConfig = getPlanConfig(profile.subscriptionPlan as PlanType)
-  const remainingLessonPlans = getRemainingLessonPlans(profile.subscriptionPlan as PlanType, profile.monthlyLessonPlans)
   const remainingChats = getRemainingChats(profile.subscriptionPlan as PlanType, profile.dailyChats)
 
-  const lessonPlanLimit = planConfig.limits.lessonPlansPerMonth
   const chatLimit = planConfig.limits.chatsPerDay
 
-  const lessonPlanPercentage = getUsagePercentage(lessonPlanLimit, profile.monthlyLessonPlans)
   const chatPercentage = getUsagePercentage(chatLimit, profile.dailyChats)
 
   const email = user.email || ''
@@ -253,61 +250,7 @@ export default function ProfilePage() {
           </div>
 
           {/* Usage Statistics */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* Lesson Plans Usage */}
-            <div className="rounded-[28px] bg-tera-panel border border-white/10 p-6 shadow-glow-md">
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-semibold text-white">Lesson Plans</h3>
-                <span className="text-2xl">📚</span>
-              </div>
-
-              <div className="space-y-4">
-                <div>
-                  <div className="flex items-baseline gap-2 mb-2">
-                    <span className="text-3xl font-bold text-white">{profile.monthlyLessonPlans}</span>
-                    <span className="text-white/60">
-                      / {lessonPlanLimit === 'unlimited' ? '∞' : lessonPlanLimit} this month
-                    </span>
-                  </div>
-
-                  {lessonPlanLimit !== 'unlimited' && (
-                    <>
-                      <div className="w-full bg-white/10 rounded-full h-2 overflow-hidden">
-                        <div
-                          className={`h-full rounded-full transition-all ${lessonPlanPercentage >= 90
-                            ? 'bg-red-500'
-                            : lessonPlanPercentage >= 70
-                              ? 'bg-yellow-500'
-                              : 'bg-tera-neon'
-                            }`}
-                          style={{ width: `${lessonPlanPercentage}%` }}
-                        />
-                      </div>
-
-                      <p className="text-sm text-white/60 mt-2">
-                        {remainingLessonPlans} remaining
-                      </p>
-                    </>
-                  )}
-
-                  {lessonPlanLimit === 'unlimited' && (
-                    <div className="flex items-center gap-2 text-sm text-tera-neon">
-                      Unlimited usage
-                      <Image src="/images/TERA_LOGO_ONLY.png" alt="Tera" width={16} height={16} className="object-contain inline-block" />
-                    </div>
-                  )}
-                </div>
-
-                {profile.subscriptionPlan === 'free' && lessonPlanPercentage >= 80 && (
-                  <div className="rounded-lg bg-tera-neon/10 border border-tera-neon/30 p-3">
-                    <p className="text-sm text-tera-neon">
-                      ⚠️ You're approaching your monthly limit. <Link href="/pricing" className="underline font-medium">Upgrade to Pro</Link> for unlimited access.
-                    </p>
-                  </div>
-                )}
-              </div>
-            </div>
-
+          <div className="grid grid-cols-1 gap-6">
             {/* Chat Usage */}
             <div className="rounded-[28px] bg-tera-panel border border-white/10 p-6 shadow-glow-md">
               <div className="flex items-center justify-between mb-4">

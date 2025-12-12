@@ -4,7 +4,6 @@
 export type PlanType = 'free' | 'pro' | 'plus'
 
 export interface PlanLimits {
-    lessonPlansPerMonth: number | 'unlimited'
     chatsPerDay: number | 'unlimited'
     fileUploadsPerDay: number | 'unlimited'
     webSearchesPerMonth: number | 'unlimited'
@@ -31,7 +30,6 @@ export const PLAN_CONFIGS: Record<PlanType, PlanConfig> = {
         period: '/month',
         description: 'Start exploring AI-powered learning for free.',
         limits: {
-            lessonPlansPerMonth: 5,
             chatsPerDay: 15,
             fileUploadsPerDay: 5,
             webSearchesPerMonth: 5,
@@ -54,12 +52,11 @@ export const PLAN_CONFIGS: Record<PlanType, PlanConfig> = {
         period: '/month',
         description: 'Unlimited knowledge, unlimited possibilities.',
         limits: {
-            lessonPlansPerMonth: 'unlimited',
             chatsPerDay: 'unlimited',
             fileUploadsPerDay: 20,
             webSearchesPerMonth: 50,
             maxFileSize: 500,
-            features: ['advanced-chat', 'lesson-plans', 'all-tools', 'file-uploads', 'export', 'web-search', 'priority-support']
+            features: ['advanced-chat', 'all-tools', 'file-uploads', 'export', 'web-search', 'priority-support']
         },
         features: [
             'Unlimited AI conversations',
@@ -79,12 +76,11 @@ export const PLAN_CONFIGS: Record<PlanType, PlanConfig> = {
         period: '/month',
         description: 'For power users who need everything.',
         limits: {
-            lessonPlansPerMonth: 'unlimited',
             chatsPerDay: 'unlimited',
             fileUploadsPerDay: 'unlimited',
             webSearchesPerMonth: 80,
             maxFileSize: 2000,
-            features: ['advanced-chat', 'lesson-plans', 'all-tools', 'file-uploads', 'export', 'admin', 'analytics', 'sso', 'web-search', 'priority-support', 'custom-ai']
+            features: ['advanced-chat', 'all-tools', 'file-uploads', 'export', 'admin', 'analytics', 'sso', 'web-search', 'priority-support', 'custom-ai']
         },
         features: [
             'Everything in Pro, plus:',
@@ -111,11 +107,6 @@ export function hasFeature(plan: PlanType, feature: string): boolean {
     return PLAN_CONFIGS[plan].limits.features.includes(feature)
 }
 
-export function canGenerateLessonPlan(plan: PlanType, currentCount: number): boolean {
-    const limit = PLAN_CONFIGS[plan].limits.lessonPlansPerMonth
-    return limit === 'unlimited' || currentCount < limit
-}
-
 export function canStartChat(plan: PlanType, currentCount: number): boolean {
     const limit = PLAN_CONFIGS[plan].limits.chatsPerDay
     return limit === 'unlimited' || currentCount < limit
@@ -129,12 +120,6 @@ export function canUploadFile(plan: PlanType, currentCount: number): boolean {
 export function canPerformWebSearch(plan: PlanType, currentCount: number): boolean {
     const limit = PLAN_CONFIGS[plan].limits.webSearchesPerMonth
     return limit === 'unlimited' || currentCount < limit
-}
-
-export function getRemainingLessonPlans(plan: PlanType, currentCount: number): number | 'unlimited' {
-    const limit = PLAN_CONFIGS[plan].limits.lessonPlansPerMonth
-    if (limit === 'unlimited') return 'unlimited'
-    return Math.max(0, limit - currentCount)
 }
 
 export function getRemainingChats(plan: PlanType, currentCount: number): number | 'unlimited' {

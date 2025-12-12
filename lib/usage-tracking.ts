@@ -5,10 +5,8 @@ import { supabase } from './supabase'
 import type { PlanType } from './plan-config'
 
 export interface UsageStats {
-    monthlyLessonPlans: number
     dailyChats: number
     dailyFileUploads: number
-    planResetDate: Date
     chatResetDate: Date
 }
 
@@ -16,10 +14,8 @@ export interface UserProfile {
     id: string
     email: string
     subscriptionPlan: PlanType
-    monthlyLessonPlans: number
     dailyChats: number
     dailyFileUploads: number
-    planResetDate: Date | null
     chatResetDate: Date | null
     profileImageUrl: string | null
     fullName: string | null
@@ -47,10 +43,8 @@ export async function getUserProfile(userId: string): Promise<UserProfile | null
         id: data.id,
         email: data.email,
         subscriptionPlan: (data.subscription_plan || 'free') as PlanType,
-        monthlyLessonPlans: data.monthly_lesson_plans || 0,
         dailyChats: data.daily_chats || 0,
         dailyFileUploads: data.daily_file_uploads || 0,
-        planResetDate: data.plan_reset_date ? new Date(data.plan_reset_date) : null,
         chatResetDate: data.chat_reset_date ? new Date(data.chat_reset_date) : null,
         profileImageUrl: data.profile_image_url,
         fullName: data.full_name,
@@ -66,7 +60,7 @@ export async function getUserProfile(userId: string): Promise<UserProfile | null
 export async function getUsageStats(userId: string): Promise<UsageStats | null> {
     const { data, error } = await supabase
         .from('users')
-        .select('monthly_lesson_plans, daily_chats, daily_file_uploads, plan_reset_date, chat_reset_date')
+        .select('daily_chats, daily_file_uploads, chat_reset_date')
         .eq('id', userId)
         .single()
 
@@ -76,10 +70,8 @@ export async function getUsageStats(userId: string): Promise<UsageStats | null> 
     }
 
     return {
-        monthlyLessonPlans: data.monthly_lesson_plans || 0,
         dailyChats: data.daily_chats || 0,
         dailyFileUploads: data.daily_file_uploads || 0,
-        planResetDate: data.plan_reset_date ? new Date(data.plan_reset_date) : new Date(),
         chatResetDate: data.chat_reset_date ? new Date(data.chat_reset_date) : new Date()
     }
 }
@@ -90,7 +82,7 @@ export async function getUsageStats(userId: string): Promise<UsageStats | null> 
 export async function checkAndResetUsage(userId: string): Promise<boolean> {
     const { data, error } = await supabase
         .from('users')
-        .select('plan_reset_date, chat_reset_date')
+        .select('chat_reset_date')
         .eq('id', userId)
         .single()
 
@@ -99,15 +91,6 @@ export async function checkAndResetUsage(userId: string): Promise<boolean> {
     const now = new Date()
     const updates: Record<string, any> = {}
     let needsUpdate = false
-
-    // Check monthly lesson plan reset
-    if (data.plan_reset_date && now >= new Date(data.plan_reset_date)) {
-        const nextResetDate = new Date(now)
-        nextResetDate.setMonth(nextResetDate.getMonth() + 1)
-        updates.monthly_lesson_plans = 0
-        updates.plan_reset_date = nextResetDate.toISOString()
-        needsUpdate = true
-    }
 
     // Check daily chat reset
     if (data.chat_reset_date && now >= new Date(data.chat_reset_date)) {
@@ -135,35 +118,7 @@ export async function checkAndResetUsage(userId: string): Promise<boolean> {
     return false
 }
 
-/**
- * Increment lesson plan counter
- */
-export async function incrementLessonPlans(userId: string): Promise<boolean> {
-    // First check and reset if needed
-    await checkAndResetUsage(userId)
 
-    const { error } = await supabase.rpc('increment_lesson_plans', { user_id: userId })
-
-    if (error) {
-        // Fallback if function doesn't exist - manual increment
-        const { data, error: fetchError } = await supabase
-            .from('users')
-            .select('monthly_lesson_plans')
-            .eq('id', userId)
-            .single()
-
-        if (fetchError || !data) return false
-
-        const { error: updateError } = await supabase
-            .from('users')
-            .update({ monthly_lesson_plans: (data.monthly_lesson_plans || 0) + 1 })
-            .eq('id', userId)
-
-        return !updateError
-    }
-
-    return true
-}
 
 /**
  * Increment chat counter

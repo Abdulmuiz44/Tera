@@ -5,9 +5,9 @@ import { supabase } from '@/lib/supabase'
 import { supabaseServer } from '@/lib/supabase-server'
 import { generateTeacherResponse } from '@/lib/mistral'
 import type { AttachmentReference } from '@/lib/attachment'
-import { getUserProfile, incrementLessonPlans, incrementChats, incrementFileUploads } from '@/lib/usage-tracking'
-import { canGenerateLessonPlan, canStartChat, canUploadFile, canPerformWebSearch, getPlanConfig } from '@/lib/plan-config'
-import { getWebSearchRemaining } from '@/lib/web-search-usage'
+import { getUserProfile, incrementChats, incrementFileUploads } from '@/lib/usage-tracking'
+import { canStartChat, canUploadFile, canPerformWebSearch, getPlanConfig } from '@/lib/plan-config'
+import { getWebSearchRemaining, incrementWebSearchCount } from '@/lib/web-search-usage'
 
 type GenerateProps = {
   prompt: string
@@ -46,10 +46,8 @@ export async function generateAnswer({ prompt, tool, authorId, authorEmail, atta
       id: authorId,
       email: authorEmail || '',
       subscriptionPlan: 'free',
-      monthlyLessonPlans: 0,
       dailyChats: 0,
       dailyFileUploads: 0,
-      planResetDate: null,
       chatResetDate: null,
       profileImageUrl: null,
       fullName: null,
@@ -66,17 +64,8 @@ export async function generateAnswer({ prompt, tool, authorId, authorEmail, atta
     throw new Error(`You've reached your daily limit of ${limit} file uploads. Upgrade to Pro for unlimited access.`)
   }
 
-  // Check plan limits based on tool type
-  const isLessonPlanTool = tool === 'lesson-plan-generator'
-  const isChatTool = !isLessonPlanTool
-
-  // Check if user has reached their limits
-  if (isLessonPlanTool && !canGenerateLessonPlan(userProfile.subscriptionPlan, userProfile.monthlyLessonPlans)) {
-    const planConfig = getPlanConfig(userProfile.subscriptionPlan)
-    throw new Error(`You've reached your monthly limit of ${planConfig.limits.lessonPlansPerMonth} lesson plans. Upgrade to Pro for unlimited access.`)
-  }
-
-  if (isChatTool && !canStartChat(userProfile.subscriptionPlan, userProfile.dailyChats)) {
+  // Check if user has reached their chat limit
+  if (!canStartChat(userProfile.subscriptionPlan, userProfile.dailyChats)) {
     const planConfig = getPlanConfig(userProfile.subscriptionPlan)
     const limit = planConfig.limits.chatsPerDay
     throw new Error(`You've reached your daily limit of ${limit} chats. Upgrade to Pro for unlimited access.`)
@@ -162,16 +151,17 @@ export async function generateAnswer({ prompt, tool, authorId, authorEmail, atta
      }
   }
 
-  // Increment usage counters after successful generation
-  if (isLessonPlanTool) {
-    await incrementLessonPlans(authorId)
-  } else {
-    await incrementChats(authorId)
-  }
+  // Increment chat counter after successful generation
+  await incrementChats(authorId)
 
   // Increment file upload counter if attachments were used
   if (attachments.length > 0) {
     await incrementFileUploads(authorId, attachments.length)
+  }
+
+  // Increment web search counter if enabled
+  if (enableWebSearch) {
+    await incrementWebSearchCount(authorId)
   }
 
   revalidatePath('/')
