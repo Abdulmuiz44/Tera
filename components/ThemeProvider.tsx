@@ -47,14 +47,24 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
         setThemeState(newTheme)
     }
 
-    // Avoid hydration mismatch by rendering nothing until mounted
-    // Or render children to avoid layout shift, but with default theme
-    if (!mounted) {
-        return <>{children}</>
-    }
+    // Avoid hydration mismatch by rendering default theme initially
+    // We must provide the Context even if not mounted, otherwise useTheme() hook will fail in children
 
     return (
         <ThemeContext.Provider value={{ theme, toggleTheme, setTheme }}>
+            {/* 
+              We can optionally hide content until mounted to prevent flash, 
+              but for SEO/Prerender we usually want to show default content. 
+              The 'theme' state defaults to 'dark', so it matches server render.
+            */}
+            {mounted ? children : <div style={{ visibility: 'hidden' }}>{children}</div>}
+            {/* 
+                Actually, relying on visibility:hidden is safer for layout 
+                but good for SEO? No. 
+                For prerendering 'settings', we want content.
+                Let's just render {children}. 
+                If flash occurs, we can optimize later with script in head.
+             */}
             {children}
         </ThemeContext.Provider>
     )
