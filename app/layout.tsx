@@ -3,6 +3,7 @@ import type { ReactNode } from 'react'
 import { AuthProvider } from '@/components/AuthProvider'
 import AppLayout from '@/components/AppLayout'
 import { Analytics } from "@vercel/analytics/react"
+import { ThemeProvider } from '@/components/ThemeProvider'
 
 export const viewport = {
   width: 'device-width',
@@ -35,10 +36,12 @@ export default function RootLayout({ children }: { children: ReactNode }) {
       </head>
       <body className="bg-tera-bg text-white min-h-screen font-sans">
         <AuthProvider>
-          <AppLayout>
-            {children}
-            <Analytics />
-          </AppLayout>
+          <ThemeProvider>
+            <AppLayout>
+              {children}
+              <Analytics />
+            </AppLayout>
+          </ThemeProvider>
         </AuthProvider>
       </body>
     </html>
