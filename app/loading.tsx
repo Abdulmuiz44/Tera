@@ -2,7 +2,7 @@ import Image from 'next/image'
 
 export default function Loading() {
     return (
-        <div className="flex min-h-screen items-center justify-center bg-[#050505]">
+        <div className="flex min-h-screen items-center justify-center bg-tera-bg">
             <div className="flex flex-col items-center gap-6">
                 {/* Logo */}
                 <div className="animate-pulse">

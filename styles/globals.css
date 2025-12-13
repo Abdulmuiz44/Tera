@@ -4,7 +4,7 @@
 
 :root {
   color-scheme: dark;
-  
+
   /* Dark Mode (Default) Variables */
   --bg-tera-bg: #050505;
   --bg-tera-panel: #0f0f0f;
@@ -18,11 +18,15 @@
 /* Light Mode Variables override */
 .light {
   color-scheme: light;
-  --bg-tera-bg: #f8f9fa;
+  --bg-tera-bg: #ffffff;
+  /* Pure White */
   --bg-tera-panel: #ffffff;
-  --bg-tera-muted: #f0f2f5;
+  /* Pure White - relying on borders for separation */
+  --bg-tera-muted: #f3f4f6;
+  /* Light Gray for inputs/secondary */
   --border-tera: rgba(0, 0, 0, 0.1);
-  --text-tera-primary: #111827;
+  --text-tera-primary: #000000;
+  /* Pure Black */
   --text-tera-secondary: #4b5563;
   --text-tera-accent: #008f5d;
 }

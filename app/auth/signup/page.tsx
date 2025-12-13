@@ -53,7 +53,7 @@ export default function SignUpPage() {
     }
 
     return (
-        <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#050505] to-[#1a1a1a] px-4">
+        <div className="min-h-screen flex items-center justify-center bg-tera-bg px-4">
             {/* Background glow effect */}
             <div className="absolute inset-0 overflow-hidden pointer-events-none">
                 <div className="absolute -top-40 -right-40 w-80 h-80 bg-tera-neon/10 rounded-full blur-3xl opacity-20"></div>
@@ -62,11 +62,11 @@ export default function SignUpPage() {
 
             {/* Auth Card */}
             <div className="relative w-full max-w-md">
-                <div className="bg-tera-panel/60 border border-white/10 rounded-2xl p-8 shadow-2xl backdrop-blur-xl">
+                <div className="bg-tera-panel/60 border border-tera-border rounded-2xl p-8 shadow-2xl backdrop-blur-xl">
                     {/* Header */}
                     <div className="mb-8 text-center">
-                        <h1 className="text-3xl font-bold text-white mb-2">Create Account</h1>
-                        <p className="text-white/60 text-sm">Start learning with AI-powered insights today</p>
+                        <h1 className="text-3xl font-bold text-tera-primary mb-2">Create Account</h1>
+                        <p className="text-tera-secondary text-sm">Start learning with AI-powered insights today</p>
                     </div>
 
                     {/* Error Message */}
@@ -81,14 +81,14 @@ export default function SignUpPage() {
                             {/* Email Input */}
                             <form onSubmit={handleEmailSubmit} className="mb-6 space-y-4">
                                 <div>
-                                    <label className="block text-white/80 text-sm font-medium mb-2">Email (Optional)</label>
+                                    <label className="block text-tera-primary/80 text-sm font-medium mb-2">Email (Optional)</label>
                                     <input
                                         type="email"
                                         value={email}
                                         onChange={(e) => setEmail(e.target.value)}
                                         placeholder="you@example.com"
                                         disabled={loading}
-                                        className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-lg text-white placeholder-white/40 focus:outline-none focus:border-tera-neon focus:ring-1 focus:ring-tera-neon/50 transition disabled:opacity-50"
+                                        className="w-full px-4 py-2.5 bg-tera-muted border border-tera-border rounded-lg text-tera-primary placeholder-tera-secondary focus:outline-none focus:border-tera-neon focus:ring-1 focus:ring-tera-neon/50 transition disabled:opacity-50"
                                     />
                                 </div>
 
@@ -96,7 +96,7 @@ export default function SignUpPage() {
                                 <button
                                     type="submit"
                                     disabled={loading}
-                                    className="w-full py-2.5 px-4 bg-white text-black font-semibold rounded-lg hover:bg-white/90 transition disabled:opacity-50 disabled:cursor-not-allowed"
+                                    className="w-full py-2.5 px-4 bg-tera-primary text-tera-bg font-semibold rounded-lg hover:opacity-90 transition disabled:opacity-50 disabled:cursor-not-allowed"
                                 >
                                     {loading ? 'Processing...' : 'Continue'}
                                 </button>
@@ -104,16 +104,16 @@ export default function SignUpPage() {
 
                             {/* Divider */}
                             <div className="flex items-center gap-3 mb-6">
-                                <div className="flex-1 h-px bg-gradient-to-r from-white/10 to-transparent"></div>
-                                <span className="text-white/40 text-xs uppercase tracking-wider">OR</span>
-                                <div className="flex-1 h-px bg-gradient-to-l from-white/10 to-transparent"></div>
+                                <div className="flex-1 h-px bg-gradient-to-r from-tera-border to-transparent"></div>
+                                <span className="text-tera-secondary text-xs uppercase tracking-wider">OR</span>
+                                <div className="flex-1 h-px bg-gradient-to-l from-tera-border to-transparent"></div>
                             </div>
 
                             {/* Google Button */}
                             <button
                                 onClick={handleGoogleSignUp}
                                 disabled={loading}
-                                className="w-full py-2.5 px-4 bg-white/5 border border-white/10 hover:bg-white/10 hover:border-white/20 rounded-lg font-medium text-white transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                                className="w-full py-2.5 px-4 bg-tera-muted border border-tera-border hover:bg-tera-muted/80 hover:border-tera-primary/20 rounded-lg font-medium text-tera-primary transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                             >
                                 <svg className="w-5 h-5" viewBox="0 0 24 24">
                                     <path
@@ -147,7 +147,7 @@ export default function SignUpPage() {
                             <button
                                 onClick={handleGoogleSignUp}
                                 disabled={loading}
-                                className="w-full py-2.5 px-4 bg-white text-black font-semibold rounded-lg hover:bg-white/90 transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                                className="w-full py-2.5 px-4 bg-tera-primary text-tera-bg font-semibold rounded-lg hover:opacity-90 transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                             >
                                 <svg className="w-5 h-5" viewBox="0 0 24 24">
                                     <path
@@ -173,7 +173,7 @@ export default function SignUpPage() {
                             {/* Back Button */}
                             <button
                                 onClick={() => setSubmitted(false)}
-                                className="w-full mt-4 py-2.5 px-4 bg-white/5 border border-white/10 hover:bg-white/10 rounded-lg font-medium text-white transition"
+                                className="w-full mt-4 py-2.5 px-4 bg-tera-muted border border-tera-border hover:bg-tera-muted/80 rounded-lg font-medium text-tera-primary transition"
                             >
                                 Back
                             </button>
@@ -182,7 +182,7 @@ export default function SignUpPage() {
 
                     {/* Footer */}
                     <div className="mt-8 text-center">
-                        <p className="text-white/60 text-sm">
+                        <p className="text-tera-secondary text-sm">
                             Already have an account?{' '}
                             <Link href="/auth/signin" className="text-tera-neon hover:text-tera-neon/80 font-semibold transition">
                                 Sign in
@@ -192,7 +192,7 @@ export default function SignUpPage() {
                 </div>
 
                 {/* Terms */}
-                <p className="text-center text-white/40 text-xs mt-6">
+                <p className="text-center text-tera-secondary text-xs mt-6">
                     By creating an account, you agree to our{' '}
                     <Link href="/terms" className="text-tera-neon hover:underline">
                         Terms

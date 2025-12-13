@@ -169,23 +169,23 @@ export default function SettingsPage() {
   }
 
   return (
-    <div className="w-full px-6 py-10">
+    <div className="w-full px-6 py-10 bg-tera-bg text-tera-primary">
       <div className="flex flex-col h-full gap-8">
         {/* Header */}
         <header className="flex items-center justify-between">
           <div>
-            <p className="text-xs uppercase tracking-[0.5em] text-white/40">Tera</p>
-            <h1 className="text-3xl font-semibold leading-tight text-white">Settings</h1>
+            <p className="text-xs uppercase tracking-[0.5em] text-tera-secondary">Tera</p>
+            <h1 className="text-3xl font-semibold leading-tight text-tera-primary">Settings</h1>
           </div>
           <div className="flex items-center gap-4">
             {autoSaving && (
-              <div className="flex items-center gap-2 text-white/60 text-xs">
+              <div className="flex items-center gap-2 text-tera-secondary text-xs">
                 <div className="w-2 h-2 bg-tera-neon rounded-full animate-pulse"></div>
                 <span>Auto-saving...</span>
               </div>
             )}
             {!autoSaving && !loading && (
-              <div className="flex items-center gap-2 text-white/40 text-xs">
+              <div className="flex items-center gap-2 text-tera-secondary text-xs">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-3 h-3 text-green-400">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
                 </svg>
@@ -196,9 +196,9 @@ export default function SettingsPage() {
         </header>
 
         {/* Content */}
-        <div className="flex-1 rounded-[28px] bg-tera-panel border border-white/10 shadow-glow-md overflow-hidden flex">
+        <div className="flex-1 rounded-[28px] bg-tera-panel border border-tera-border shadow-glow-md overflow-hidden flex">
           {/* Sidebar Navigation */}
-          <div className="w-48 border-r border-white/10 p-6 bg-white/5">
+          <div className="w-48 border-r border-tera-border p-6 bg-tera-muted/30">
             <nav className="space-y-2">
               {[
                 { id: 'preferences', label: 'Preferences', icon: 'bell' },
@@ -210,7 +210,7 @@ export default function SettingsPage() {
                   onClick={() => setActiveTab(id as any)}
                   className={`w-full flex items-center gap-3 px-4 py-2 rounded-lg transition text-sm ${activeTab === id
                     ? 'bg-tera-neon/20 text-tera-neon border border-tera-neon'
-                    : 'text-white/60 hover:text-white/80 border border-transparent'
+                    : 'text-tera-secondary hover:text-tera-primary border border-transparent'
                     }`}
                 >
                   {icon === 'bell' && (
@@ -251,26 +251,26 @@ export default function SettingsPage() {
             )}
 
             {loading ? (
-              <div className="text-white/60">Loading settings...</div>
+              <div className="text-tera-secondary">Loading settings...</div>
             ) : (
               <div className="max-w-3xl">
                 {/* Preferences Tab */}
                 {activeTab === 'preferences' && (
                   <div className="space-y-6">
                     <div>
-                      <h2 className="text-xl font-semibold text-white mb-6">Preferences</h2>
+                      <h2 className="text-xl font-semibold text-tera-primary mb-6">Preferences</h2>
                     </div>
 
                     {/* Notification Settings */}
                     <div className="space-y-4">
-                      <div className="border-b border-white/10 pb-4">
-                        <h3 className="text-sm uppercase tracking-wider text-white/60 mb-4">Notifications</h3>
+                      <div className="border-b border-tera-border pb-4">
+                        <h3 className="text-sm uppercase tracking-wider text-tera-secondary mb-4">Notifications</h3>
 
                         <div className="space-y-4">
                           <div className="flex items-center justify-between">
                             <div>
-                              <p className="text-white font-medium">Push Notifications</p>
-                              <p className="text-white/50 text-sm mt-1">Receive notifications about your activities</p>
+                              <p className="text-tera-primary font-medium">Push Notifications</p>
+                              <p className="text-tera-secondary text-sm mt-1">Receive notifications about your activities</p>
                             </div>
                             <label className="relative inline-block w-12 h-6 cursor-pointer">
                               <input
@@ -286,8 +286,8 @@ export default function SettingsPage() {
 
                           <div className="flex items-center justify-between">
                             <div>
-                              <p className="text-white font-medium">Email Notifications</p>
-                              <p className="text-white/50 text-sm mt-1">Get email updates on important changes</p>
+                              <p className="text-tera-primary font-medium">Email Notifications</p>
+                              <p className="text-tera-secondary text-sm mt-1">Get email updates on important changes</p>
                             </div>
                             <label className="relative inline-block w-12 h-6 cursor-pointer">
                               <input
@@ -303,8 +303,8 @@ export default function SettingsPage() {
 
                           <div className="flex items-center justify-between">
                             <div>
-                              <p className="text-white font-medium">Marketing Emails</p>
-                              <p className="text-white/50 text-sm mt-1">Receive tips and feature announcements</p>
+                              <p className="text-tera-primary font-medium">Marketing Emails</p>
+                              <p className="text-tera-secondary text-sm mt-1">Receive tips and feature announcements</p>
                             </div>
                             <label className="relative inline-block w-12 h-6 cursor-pointer">
                               <input
@@ -323,12 +323,12 @@ export default function SettingsPage() {
 
                     {/* Appearance Settings */}
                     <div className="space-y-4">
-                      <div className="border-b border-white/10 pb-4">
-                        <h3 className="text-sm uppercase tracking-wider text-white/60 mb-4">Appearance</h3>
+                      <div className="border-b border-tera-border pb-4">
+                        <h3 className="text-sm uppercase tracking-wider text-tera-secondary mb-4">Appearance</h3>
                         <div className="flex items-center justify-between">
                           <div>
-                            <p className="text-white font-medium">Dark Mode</p>
-                            <p className="text-white/50 text-sm mt-1">Use dark theme throughout the app</p>
+                            <p className="text-tera-primary font-medium">Dark Mode</p>
+                            <p className="text-tera-secondary text-sm mt-1">Use dark theme throughout the app</p>
                           </div>
                           <label className="relative inline-block w-12 h-6 cursor-pointer">
                             <input
@@ -350,23 +350,23 @@ export default function SettingsPage() {
                 {activeTab === 'privacy' && (
                   <div className="space-y-6">
                     <div>
-                      <h2 className="text-xl font-semibold text-white mb-6">Privacy & Data</h2>
+                      <h2 className="text-xl font-semibold text-tera-primary mb-6">Privacy & Data</h2>
                     </div>
 
                     <div className="space-y-4">
-                      <div className="border border-white/10 rounded-lg p-6">
+                      <div className="border border-tera-border rounded-lg p-6">
                         <div className="flex items-start gap-4">
                           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5 text-tera-neon mt-1">
                             <path strokeLinecap="round" strokeLinejoin="round" d="M20.25 6.375c0 2.278-4.022 4.125-9 4.125S2.25 8.653 2.25 6.375m17.5 0c0-2.278-4.022-4.125-9-4.125S2.25 4.097 2.25 6.375m17.5 12.75c0 2.278-4.022 4.125-9 4.125s-9-1.847-9-4.125m17.5-6V21m0 0a9 9 0 01-9 9m9-9a9 9 0 00-9-9m0 0V6.375m0 9.375a9 9 0 009-9" />
                           </svg>
                           <div className="flex-1">
-                            <h3 className="font-semibold text-white mb-2">Data Retention</h3>
-                            <p className="text-white/60 text-sm mb-4">How long we keep your deleted data in our system</p>
+                            <h3 className="font-semibold text-tera-primary mb-2">Data Retention</h3>
+                            <p className="text-tera-secondary text-sm mb-4">How long we keep your deleted data in our system</p>
                             <div className="flex items-center gap-4">
                               <select
                                 value={settings.data_retention_days}
                                 onChange={(e) => updateSetting('data_retention_days', parseInt(e.target.value))}
-                                className="rounded-lg bg-white/10 border border-white/20 px-4 py-2 text-white text-sm focus:outline-none focus:border-tera-neon"
+                                className="rounded-lg bg-tera-muted border border-tera-border px-4 py-2 text-tera-primary text-sm focus:outline-none focus:border-tera-neon"
                               >
                                 <option value={7}>7 days</option>
                                 <option value={30}>30 days</option>
@@ -379,16 +379,16 @@ export default function SettingsPage() {
                         </div>
                       </div>
 
-                      <div className="border border-white/10 rounded-lg p-6 bg-white/5">
-                        <h3 className="font-semibold text-white mb-4">Privacy Policy</h3>
-                        <p className="text-white/60 text-sm mb-4">
+                      <div className="border border-tera-border rounded-lg p-6 bg-tera-muted/30">
+                        <h3 className="font-semibold text-tera-primary mb-4">Privacy Policy</h3>
+                        <p className="text-tera-secondary text-sm mb-4">
                           We take your privacy seriously. Read our detailed privacy policy to understand how we handle your data.
                         </p>
                         <a
                           href="/privacy"
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-white/20 text-white/80 hover:text-white hover:border-white/40 transition text-sm"
+                          className="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-tera-border text-tera-primary/80 hover:text-tera-primary hover:border-tera-primary/40 transition text-sm"
                         >
                           View Privacy Policy →
                         </a>
@@ -401,21 +401,21 @@ export default function SettingsPage() {
                 {activeTab === 'account' && (
                   <div className="space-y-6">
                     <div>
-                      <h2 className="text-xl font-semibold text-white mb-6">Account</h2>
+                      <h2 className="text-xl font-semibold text-tera-primary mb-6">Account</h2>
                     </div>
 
                     <div className="space-y-4">
                       {/* Account Info */}
-                      <div className="border border-white/10 rounded-lg p-6">
-                        <h3 className="font-semibold text-white mb-4">Account Information</h3>
+                      <div className="border border-tera-border rounded-lg p-6">
+                        <h3 className="font-semibold text-tera-primary mb-4">Account Information</h3>
                         <div className="space-y-3">
                           <div>
-                            <p className="text-xs uppercase tracking-wider text-white/50 mb-2">Email Address</p>
-                            <p className="text-white font-medium">{user?.email}</p>
+                            <p className="text-xs uppercase tracking-wider text-tera-secondary mb-2">Email Address</p>
+                            <p className="text-tera-primary font-medium">{user?.email}</p>
                           </div>
                           <div>
-                            <p className="text-xs uppercase tracking-wider text-white/50 mb-2">Account Created</p>
-                            <p className="text-white font-medium">
+                            <p className="text-xs uppercase tracking-wider text-tera-secondary mb-2">Account Created</p>
+                            <p className="text-tera-primary font-medium">
                               {user?.created_at ? new Date(user.created_at).toLocaleDateString() : 'N/A'}
                             </p>
                           </div>
@@ -425,14 +425,14 @@ export default function SettingsPage() {
                       {/* Logout */}
                       <button
                         onClick={handleLogout}
-                        className="w-full flex items-center gap-3 border border-white/10 rounded-lg p-6 hover:bg-white/5 transition"
+                        className="w-full flex items-center gap-3 border border-tera-border rounded-lg p-6 hover:bg-tera-muted/50 transition"
                       >
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5 text-tera-neon">
                           <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 9V5.25A2.25 2.25 0 0110.5 3h6a2.25 2.25 0 012.25 2.25v13.5A2.25 2.25 0 0116.5 21h-6a2.25 2.25 0 01-2.25-2.25V15M12 9l3 3m0 0l-3 3m3-3H2.25" />
                         </svg>
                         <div className="text-left">
-                          <p className="font-semibold text-white">Sign Out</p>
-                          <p className="text-white/50 text-sm">Sign out from your account on this device</p>
+                          <p className="font-semibold text-tera-primary">Sign Out</p>
+                          <p className="text-tera-secondary text-sm">Sign out from your account on this device</p>
                         </div>
                       </button>
 

@@ -76,16 +76,16 @@ export default function ProfilePage() {
 
   if (!user || loading) {
     return (
-      <div className="flex flex-col h-full w-full items-center justify-center">
-        <div className="text-white/40">Loading profile...</div>
+      <div className="flex flex-col h-full w-full items-center justify-center bg-tera-bg text-tera-primary">
+        <div className="text-tera-secondary">Loading profile...</div>
       </div>
     )
   }
 
   if (!profile) {
     return (
-      <div className="flex flex-col h-full w-full items-center justify-center">
-        <div className="text-white/40">Error loading profile</div>
+      <div className="flex flex-col h-full w-full items-center justify-center bg-tera-bg text-tera-primary">
+        <div className="text-tera-secondary">Error loading profile</div>
       </div>
     )
   }
@@ -110,13 +110,13 @@ export default function ProfilePage() {
   const daysUntilReset = chatResetDate ? Math.ceil((chatResetDate.getTime() - Date.now()) / (1000 * 60 * 60 * 24)) : 0
 
   return (
-    <div className="w-full px-4 py-6 md:px-6 md:py-10">
+    <div className="w-full px-4 py-6 md:px-6 md:py-10 bg-tera-bg text-tera-primary">
       <div className="max-w-6xl mx-auto flex flex-col gap-8">
         {/* Header */}
         <header className="flex items-center justify-between">
           <div>
-            <p className="text-xs uppercase tracking-[0.5em] text-white/40">TERA</p>
-            <h1 className="text-3xl font-semibold leading-tight text-white">Profile</h1>
+            <p className="text-xs uppercase tracking-[0.5em] text-tera-secondary">TERA</p>
+            <h1 className="text-3xl font-semibold leading-tight text-tera-primary">Profile</h1>
           </div>
           <div className="flex items-center gap-4">
             {editing ? (
@@ -139,7 +139,7 @@ export default function ProfilePage() {
             ) : (
               <button
                 onClick={() => setEditing(true)}
-                className="rounded-full border border-white/10 px-4 py-2 text-sm text-white transition hover:border-tera-neon"
+                className="rounded-full border border-tera-border px-4 py-2 text-sm text-tera-primary transition hover:border-tera-neon"
               >
                 Edit profile
               </button>
@@ -148,7 +148,7 @@ export default function ProfilePage() {
         </header>
 
         {/* Profile Card */}
-        <div className="rounded-[28px] bg-tera-panel border border-white/10 p-8 shadow-glow-md">
+        <div className="rounded-[28px] bg-tera-panel border border-tera-border p-8 shadow-glow-md">
           <div className="flex items-start gap-6">
             {/* Avatar */}
             <div className="flex h-24 w-24 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-tera-neon/40 to-blue-500/40 text-white font-bold text-3xl">
@@ -160,27 +160,27 @@ export default function ProfilePage() {
               {editing ? (
                 <div className="space-y-4">
                   <div>
-                    <label className="block text-sm font-medium text-white/80 mb-2">Full Name</label>
+                    <label className="block text-sm font-medium text-tera-primary/80 mb-2">Full Name</label>
                     <input
                       type="text"
                       value={formData.fullName}
                       onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
-                      className="w-full rounded-lg bg-tera-muted border border-white/10 px-4 py-2 text-white focus:border-tera-neon focus:outline-none"
+                      className="w-full rounded-lg bg-tera-muted border border-tera-border px-4 py-2 text-tera-primary focus:border-tera-neon focus:outline-none"
                       placeholder="Enter your full name"
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-white/80 mb-2">Organization / Company (Optional)</label>
+                    <label className="block text-sm font-medium text-tera-primary/80 mb-2">Organization / Company (Optional)</label>
                     <input
                       type="text"
                       value={formData.school}
                       onChange={(e) => setFormData({ ...formData, school: e.target.value })}
-                      className="w-full rounded-lg bg-tera-muted border border-white/10 px-4 py-2 text-white focus:border-tera-neon focus:outline-none"
+                      className="w-full rounded-lg bg-tera-muted border border-tera-border px-4 py-2 text-tera-primary focus:border-tera-neon focus:outline-none"
                       placeholder="Enter your organization, company, or institution"
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-white/80 mb-2">Interests (Optional)</label>
+                    <label className="block text-sm font-medium text-tera-primary/80 mb-2">Interests (Optional)</label>
                     <input
                       type="text"
                       value={formData.gradeLevels.join(', ')}
@@ -188,32 +188,32 @@ export default function ProfilePage() {
                         ...formData,
                         gradeLevels: e.target.value.split(',').map(s => s.trim()).filter(Boolean)
                       })}
-                      className="w-full rounded-lg bg-tera-muted border border-white/10 px-4 py-2 text-white focus:border-tera-neon focus:outline-none"
+                      className="w-full rounded-lg bg-tera-muted border border-tera-border px-4 py-2 text-tera-primary focus:border-tera-neon focus:outline-none"
                       placeholder="e.g., Machine Learning, Data Science, Web Development"
                     />
-                    <p className="mt-1 text-xs text-white/40">Separate multiple interests with commas</p>
+                    <p className="mt-1 text-xs text-tera-secondary">Separate multiple interests with commas</p>
                   </div>
                 </div>
               ) : (
                 <>
-                  <h2 className="text-2xl font-semibold text-white">{displayName}</h2>
-                  <p className="text-white/60 mt-1">{email}</p>
+                  <h2 className="text-2xl font-semibold text-tera-primary">{displayName}</h2>
+                  <p className="text-tera-secondary mt-1">{email}</p>
                   {formData.school && (
-                    <p className="text-white/80 mt-2">🏢 {formData.school}</p>
+                    <p className="text-tera-primary/80 mt-2">🏢 {formData.school}</p>
                   )}
                   {formData.gradeLevels.length > 0 && (
                     <div className="flex gap-2 mt-3">
                       {formData.gradeLevels.map((level, idx) => (
                         <span
                           key={idx}
-                          className="px-3 py-1 rounded-full bg-white/10 text-xs text-white/80 border border-white/10"
+                          className="px-3 py-1 rounded-full bg-tera-muted text-xs text-tera-primary/80 border border-tera-border"
                         >
                           {level}
                         </span>
                       ))}
                     </div>
                   )}
-                  <div className="mt-4 text-sm text-white/40">
+                  <div className="mt-4 text-sm text-tera-secondary">
                     Member since {new Date(profile.createdAt).toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
                   </div>
                 </>
@@ -226,7 +226,7 @@ export default function ProfilePage() {
                 ? 'bg-purple-500/20 text-purple-300 border border-purple-500/30'
                 : profile.subscriptionPlan === 'pro'
                   ? 'bg-tera-neon/20 text-tera-neon border border-tera-neon/30'
-                  : 'bg-white/10 text-white/80 border border-white/10'
+                  : 'bg-tera-muted text-tera-primary/80 border border-tera-border'
                 }`}>
                 {planConfig.displayName} Plan
               </div>
@@ -243,24 +243,24 @@ export default function ProfilePage() {
         {/* Usage Statistics */}
         <div className="grid grid-cols-1 gap-6">
           {/* Chat Usage */}
-          <div className="rounded-[28px] bg-tera-panel border border-white/10 p-6 shadow-glow-md">
+          <div className="rounded-[28px] bg-tera-panel border border-tera-border p-6 shadow-glow-md">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold text-white">Chat Sessions</h3>
+              <h3 className="text-lg font-semibold text-tera-primary">Chat Sessions</h3>
               <span className="text-2xl">💬</span>
             </div>
 
             <div className="space-y-4">
               <div>
                 <div className="flex items-baseline gap-2 mb-2">
-                  <span className="text-3xl font-bold text-white">{profile.dailyChats}</span>
-                  <span className="text-white/60">
+                  <span className="text-3xl font-bold text-tera-primary">{profile.dailyChats}</span>
+                  <span className="text-tera-secondary">
                     / {chatLimit === 'unlimited' ? '∞' : chatLimit} today
                   </span>
                 </div>
 
                 {chatLimit !== 'unlimited' && (
                   <>
-                    <div className="w-full bg-white/10 rounded-full h-2 overflow-hidden">
+                    <div className="w-full bg-tera-muted rounded-full h-2 overflow-hidden">
                       <div
                         className={`h-full rounded-full transition-all ${chatPercentage >= 90
                           ? 'bg-red-500'
@@ -272,7 +272,7 @@ export default function ProfilePage() {
                       />
                     </div>
 
-                    <p className="text-sm text-white/60 mt-2">
+                    <p className="text-sm text-tera-secondary mt-2">
                       {remainingChats} remaining
                     </p>
                   </>
@@ -298,26 +298,26 @@ export default function ProfilePage() {
         </div>
 
         {/* Plan Features */}
-        <div className="rounded-[28px] bg-tera-panel border border-white/10 p-8 shadow-glow-md">
-          <h3 className="text-xl font-semibold text-white mb-6">Your {planConfig.displayName} Plan Features</h3>
+        <div className="rounded-[28px] bg-tera-panel border border-tera-border p-8 shadow-glow-md">
+          <h3 className="text-xl font-semibold text-tera-primary mb-6">Your {planConfig.displayName} Plan Features</h3>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {planConfig.features.map((feature, idx) => (
               <div key={idx} className="flex items-start gap-3">
                 <span className="mt-1 text-tera-neon">✓</span>
-                <span className="text-white/80">{feature}</span>
+                <span className="text-tera-primary/80">{feature}</span>
               </div>
             ))}
           </div>
 
           {profile.subscriptionPlan !== 'plus' && (
-            <div className="mt-8 pt-6 border-t border-white/10">
+            <div className="mt-8 pt-6 border-t border-tera-border">
               <div className="flex items-center justify-between">
                 <div>
-                  <h4 className="text-lg font-medium text-white">
+                  <h4 className="text-lg font-medium text-tera-primary">
                     Want more features?
                   </h4>
-                  <p className="text-sm text-white/60 mt-1">
+                  <p className="text-sm text-tera-secondary mt-1">
                     Upgrade to unlock unlimited access and advanced features
                   </p>
                 </div>
@@ -334,17 +334,17 @@ export default function ProfilePage() {
 
         {/* Billing Cycle Info */}
         {chatResetDate && (
-          <div className="rounded-[28px] bg-tera-muted border border-white/10 p-6">
+          <div className="rounded-[28px] bg-tera-muted border border-tera-border p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-white/60">Daily usage resets in</p>
-                <p className="text-lg font-semibold text-white mt-1">
+                <p className="text-sm text-tera-secondary">Daily usage resets in</p>
+                <p className="text-lg font-semibold text-tera-primary mt-1">
                   {daysUntilReset} {daysUntilReset === 1 ? 'day' : 'days'}
                 </p>
               </div>
               <div className="text-right">
-                <p className="text-sm text-white/60">Next reset date</p>
-                <p className="text-lg font-semibold text-white mt-1">
+                <p className="text-sm text-tera-secondary">Next reset date</p>
+                <p className="text-lg font-semibold text-tera-primary mt-1">
                   {chatResetDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
                 </p>
               </div>

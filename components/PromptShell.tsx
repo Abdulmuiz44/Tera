@@ -43,13 +43,13 @@ const SpreadsheetRenderer = dynamic(() => import('./visuals/SpreadsheetRenderer'
 const UniversalVisualRenderer = dynamic(() => import('./visuals/UniversalVisualRenderer'), { ssr: false })
 
 type ContentBlock =
-   | { type: 'text', content: string, isHeader: boolean }
-   | { type: 'chart', config: any }
-   | { type: 'mermaid', chart: string }
-   | { type: 'code', language: string, code: string }
-   | { type: 'spreadsheet', config: any }
-   | { type: 'universal-visual', code: string, language: string, title: string }
-   | { type: 'web-sources', sources: Array<{ title: string; url: string; snippet: string; source: string }> }
+  | { type: 'text', content: string, isHeader: boolean }
+  | { type: 'chart', config: any }
+  | { type: 'mermaid', chart: string }
+  | { type: 'code', language: string, code: string }
+  | { type: 'spreadsheet', config: any }
+  | { type: 'universal-visual', code: string, language: string, title: string }
+  | { type: 'web-sources', sources: Array<{ title: string; url: string; snippet: string; source: string }> }
 
 const parseContent = (content: string): ContentBlock[] => {
   const blocks: ContentBlock[] = []
@@ -100,12 +100,12 @@ const parseContent = (content: string): ContentBlock[] => {
         const isVisualization = (c: string) => c.includes('THREE.') || c.includes('requestAnimationFrame') || c.includes('canvas.getContext')
 
         // PRIORITY ORDER: HTML/Visuals > Mermaid > JSON Charts/Spreadsheets > Code
-        
+
         // Check for HTML/Three.js/Canvas visualizations FIRST
         if (type === 'visual' || isHTML(cleanCode) || isVisualization(cleanCode) || ['html', 'svg', 'canvas', 'jsx', 'javascript'].includes(lang || '')) {
           // Universal visual rendering for HTML, SVG, Canvas, Three.js, etc.
-          blocks.push({ 
-            type: 'universal-visual', 
+          blocks.push({
+            type: 'universal-visual',
             code: cleanCode,
             language: lang || 'html',
             title: `${lang?.toUpperCase() || 'Visual'} Visualization`
@@ -134,7 +134,7 @@ const parseContent = (content: string): ContentBlock[] => {
               .replace(/\/\*[\s\S]*?\*\//g, '')
 
             const config = JSON.parse(jsonStr)
-            
+
             // Validate chart config
             if (!config.data || !Array.isArray(config.data) || config.data.length === 0) {
               console.warn('Invalid chart: missing data array', config)
@@ -707,7 +707,7 @@ export default function PromptShell({
                     <Image src="/images/TERA_LOGO_ONLY.png" alt="Tera" width={120} height={120} className="object-contain" />
                   </span>
                 </div>
-                <h2 className="text-3xl font-semibold text-white">How can Tera help you today?</h2>
+                <h2 className="text-3xl font-semibold text-tera-primary">How can Tera help you today?</h2>
               </div>
             </div>
           ) : (
@@ -730,12 +730,12 @@ export default function PromptShell({
                       </button>
 
                       <div className="flex flex-col items-end gap-1 w-full">
-                        <div className="rounded-2xl bg-white/10 px-6 py-4 text-white backdrop-blur-sm w-full">
+                        <div className="rounded-2xl bg-tera-muted px-6 py-4 text-tera-primary backdrop-blur-sm w-full">
                           <p className="whitespace-pre-wrap leading-relaxed">{entry.userMessage.content}</p>
                           {entry.userMessage.attachments && entry.userMessage.attachments.length > 0 && (
                             <div className="mt-3 flex flex-wrap gap-2">
                               {entry.userMessage.attachments.map((att, idx) => (
-                                <div key={idx} className="flex items-center gap-2 rounded-lg bg-black/20 px-3 py-2 text-xs">
+                                <div key={idx} className="flex items-center gap-2 rounded-lg bg-black/5 px-3 py-2 text-xs">
                                   <span>{att.type === 'image' ? '🖼️' : '📄'}</span>
                                   <span className="truncate max-w-[150px]">{att.name}</span>
                                 </div>
@@ -744,9 +744,9 @@ export default function PromptShell({
                           )}
                         </div>
                         {/* Timestamp and checkmarks */}
-                        <div className="flex items-center gap-1.5 px-2 text-xs text-white/40">
+                        <div className="flex items-center gap-1.5 px-2 text-xs text-tera-secondary">
                           <span>{formatTimestamp(entry.userMessage.timestamp)}</span>
-                          <span className="text-white/50">✓✓</span>
+                          <span className="text-tera-secondary/60">✓✓</span>
                         </div>
                       </div>
                     </div>
@@ -757,72 +757,72 @@ export default function PromptShell({
                 {entry.assistantMessage && (
                   <div className="flex justify-start w-full">
                     <div className="w-full md:max-w-[85%]">
-                      <div className="rounded-2xl bg-tera-panel border border-white/5 px-4 md:px-6 py-4 text-white/90 shadow-lg">
+                      <div className="rounded-2xl bg-tera-panel border border-tera-border px-4 md:px-6 py-4 text-tera-primary shadow-lg">
                         <div className="space-y-4">
                           {parseContent(entry.assistantMessage.content).map((block, idx) => {
-                             if (block.type === 'universal-visual') {
-                               return <UniversalVisualRenderer key={idx} code={block.code} language={block.language} title={block.title} />
-                             }
-                             if (block.type === 'chart') {
-                               return <ChartRenderer key={idx} config={block.config} />
-                             }
-                             if (block.type === 'spreadsheet') {
-                               return <SpreadsheetRenderer key={idx} config={block.config} userId={user?.id} />
-                             }
-                             if (block.type === 'mermaid') {
-                               return <MermaidRenderer key={idx} chart={block.chart} />
-                             }
-                             if (block.type === 'web-sources') {
-                               return (
-                                 <div key={idx} className="my-4 rounded-lg bg-blue-500/10 border border-blue-500/30 p-4">
-                                   <div className="flex items-center gap-2 mb-3 text-blue-200">
-                                     <span className="text-lg">🔍</span>
-                                     <h4 className="font-semibold">Web Sources</h4>
-                                   </div>
-                                   <div className="space-y-3">
-                                     {block.sources.map((source, sidx) => (
-                                       <div key={sidx} className="rounded border border-blue-500/20 bg-blue-500/5 p-3">
-                                         <div className="flex items-start gap-2">
-                                           <span className="text-xs font-semibold text-blue-300 flex-shrink-0 mt-1">{sidx + 1}</span>
-                                           <div className="flex-1 min-w-0">
-                                             <a
-                                               href={source.url}
-                                               target="_blank"
-                                               rel="noopener noreferrer"
-                                               className="font-medium text-blue-300 hover:text-blue-200 text-sm line-clamp-2 break-words"
-                                             >
-                                               {source.title}
-                                             </a>
-                                             <p className="text-xs text-blue-200/60 mt-1">{source.source}</p>
-                                             <p className="text-xs text-white/70 mt-2 line-clamp-2">{source.snippet}</p>
-                                           </div>
-                                         </div>
-                                       </div>
-                                     ))}
-                                   </div>
-                                 </div>
-                               )
-                             }
-                             if (block.type === 'code') {
-                               return (
-                                 <div key={idx} className="my-4 rounded-lg bg-black/30 p-4 font-mono text-xs overflow-x-auto text-tera-neon max-w-full">
-                                   <pre>{block.code}</pre>
-                                 </div>
-                               )
-                             }
-                             return block.isHeader ? (
-                               <h3 key={idx} className="font-bold text-lg mt-2 text-white">
-                                 {block.content}
-                               </h3>
-                             ) : (
-                               <p key={idx} className="leading-relaxed whitespace-pre-wrap">
-                                 {block.content}
-                               </p>
-                             )
-                           })}
+                            if (block.type === 'universal-visual') {
+                              return <UniversalVisualRenderer key={idx} code={block.code} language={block.language} title={block.title} />
+                            }
+                            if (block.type === 'chart') {
+                              return <ChartRenderer key={idx} config={block.config} />
+                            }
+                            if (block.type === 'spreadsheet') {
+                              return <SpreadsheetRenderer key={idx} config={block.config} userId={user?.id} />
+                            }
+                            if (block.type === 'mermaid') {
+                              return <MermaidRenderer key={idx} chart={block.chart} />
+                            }
+                            if (block.type === 'web-sources') {
+                              return (
+                                <div key={idx} className="my-4 rounded-lg bg-blue-500/10 border border-blue-500/30 p-4">
+                                  <div className="flex items-center gap-2 mb-3 text-blue-200">
+                                    <span className="text-lg">🔍</span>
+                                    <h4 className="font-semibold">Web Sources</h4>
+                                  </div>
+                                  <div className="space-y-3">
+                                    {block.sources.map((source, sidx) => (
+                                      <div key={sidx} className="rounded border border-blue-500/20 bg-blue-500/5 p-3">
+                                        <div className="flex items-start gap-2">
+                                          <span className="text-xs font-semibold text-blue-300 flex-shrink-0 mt-1">{sidx + 1}</span>
+                                          <div className="flex-1 min-w-0">
+                                            <a
+                                              href={source.url}
+                                              target="_blank"
+                                              rel="noopener noreferrer"
+                                              className="font-medium text-blue-400 hover:text-blue-500 text-sm line-clamp-2 break-words"
+                                            >
+                                              {source.title}
+                                            </a>
+                                            <p className="text-xs text-blue-400/60 mt-1">{source.source}</p>
+                                            <p className="text-xs text-tera-secondary mt-2 line-clamp-2">{source.snippet}</p>
+                                          </div>
+                                        </div>
+                                      </div>
+                                    ))}
+                                  </div>
+                                </div>
+                              )
+                            }
+                            if (block.type === 'code') {
+                              return (
+                                <div key={idx} className="my-4 rounded-lg bg-black/30 p-4 font-mono text-xs overflow-x-auto text-tera-neon max-w-full">
+                                  <pre>{block.code}</pre>
+                                </div>
+                              )
+                            }
+                            return block.isHeader ? (
+                              <h3 key={idx} className="font-bold text-lg mt-2 text-white">
+                                {block.content}
+                              </h3>
+                            ) : (
+                              <p key={idx} className="leading-relaxed whitespace-pre-wrap">
+                                {block.content}
+                              </p>
+                            )
+                          })}
                         </div>
-                        <div className="flex items-center justify-between mt-3 pt-2 border-t border-white/5">
-                          <span className="text-xs text-white/30">{formatTimestamp(entry.assistantMessage.timestamp)}</span>
+                        <div className="flex items-center justify-between mt-3 pt-2 border-t border-tera-border">
+                          <span className="text-xs text-tera-secondary/60">{formatTimestamp(entry.assistantMessage.timestamp)}</span>
                           <VoiceControls text={entry.assistantMessage.content} messageId={entry.id} />
                         </div>
                       </div>
@@ -832,37 +832,37 @@ export default function PromptShell({
               </div>
             ))
           )}
-           {/* Web Search Status */}
-           {(isWebSearching || webSearchStatus !== 'idle') && (
-             <WebSearchStatus
-               isSearching={isWebSearching}
-               query={currentSearchQuery}
-               status={webSearchStatus}
-               resultCount={webSearchResultCount}
-             />
-           )}
-           {status === 'loading' && (
-             <div className="flex justify-start">
-               <div className="max-w-[85%]">
-                 <div className="flex items-center gap-3 rounded-2xl bg-tera-panel px-6 py-4 text-white/60">
-                   <div className="flex gap-1">
-                     <span className="w-2 h-2 bg-tera-neon/60 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></span>
-                     <span className="w-2 h-2 bg-tera-neon/60 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></span>
-                     <span className="w-2 h-2 bg-tera-neon/60 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></span>
-                   </div>
-                   <span className="font-medium">Tera is Thinking...</span>
-                 </div>
-               </div>
-             </div>
-           )}
-           <div ref={messagesEndRef} />
+          {/* Web Search Status */}
+          {(isWebSearching || webSearchStatus !== 'idle') && (
+            <WebSearchStatus
+              isSearching={isWebSearching}
+              query={currentSearchQuery}
+              status={webSearchStatus}
+              resultCount={webSearchResultCount}
+            />
+          )}
+          {status === 'loading' && (
+            <div className="flex justify-start">
+              <div className="max-w-[85%]">
+                <div className="flex items-center gap-3 rounded-2xl bg-tera-panel px-6 py-4 text-white/60">
+                  <div className="flex gap-1">
+                    <span className="w-2 h-2 bg-tera-neon/60 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></span>
+                    <span className="w-2 h-2 bg-tera-neon/60 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></span>
+                    <span className="w-2 h-2 bg-tera-neon/60 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></span>
+                  </div>
+                  <span className="font-medium">Tera is Thinking...</span>
+                </div>
+              </div>
+            </div>
+          )}
+          <div ref={messagesEndRef} />
         </div>
       </div>
 
       {/* Input Area */}
-      <div className="sticky bottom-0 z-50 border-t border-white/10 bg-[#0a0a0a]/95 px-2 py-4 backdrop-blur-xl md:px-8">
+      <div className="sticky bottom-0 z-50 border-t border-tera-border bg-tera-panel/95 px-2 py-4 backdrop-blur-xl md:px-8">
         <div className="mx-auto max-w-3xl relative">
-          <div className={`relative flex flex-col gap-2 rounded-[24px] border border-white/10 bg-[#1a1a1a] p-2 shadow-2xl ring-1 ring-white/5 transition-all ${conversationActive ? 'focus-within:ring-tera-neon/50 focus-within:border-tera-neon/50' : 'focus-within:ring-white/20'}`}>
+          <div className={`relative flex flex-col gap-2 rounded-[24px] border border-tera-border bg-tera-muted/50 p-2 shadow-2xl ring-1 ring-tera-border/50 transition-all ${conversationActive ? 'focus-within:ring-tera-neon/50 focus-within:border-tera-neon/50' : 'focus-within:ring-tera-primary/20'}`}>
 
             {/* Active Tools & Attachments Preview */}
             <div className="flex flex-wrap items-center gap-2 px-2 pt-2">
@@ -878,12 +878,12 @@ export default function PromptShell({
               {pendingAttachments.length > 0 && (
                 <div className="flex flex-wrap gap-2">
                   {pendingAttachments.map((att, idx) => (
-                    <div key={idx} className="group relative flex items-center gap-2 rounded-lg bg-white/10 px-3 py-2 text-xs text-white">
+                    <div key={idx} className="group relative flex items-center gap-2 rounded-lg bg-tera-panel px-3 py-2 text-xs text-tera-primary border border-tera-border">
                       <span>{att.type === 'image' ? '🖼️' : '📄'}</span>
                       <span className="truncate max-w-[200px]">{att.name}</span>
                       <button
                         onClick={() => setPendingAttachments(prev => prev.filter((_, i) => i !== idx))}
-                        className="ml-2 rounded-full bg-white/10 p-1 hover:bg-white/20"
+                        className="ml-2 rounded-full bg-tera-muted p-1 hover:bg-tera-muted/80"
                       >
                         ✕
                       </button>
@@ -899,34 +899,34 @@ export default function PromptShell({
                 <div className="relative">
                   <button
                     onClick={() => setAttachmentOpen(!attachmentOpen)}
-                    className="rounded-full p-2 text-white/60 transition hover:bg-white/10 hover:text-white"
+                    className="rounded-full p-2 text-tera-secondary transition hover:bg-tera-muted hover:text-tera-primary"
                     title="Add attachment"
                   >
                     <span className="text-xl">⊕</span>
                   </button>
 
                   {attachmentOpen && (
-                    <div className="absolute bottom-full left-0 mb-2 w-56 overflow-hidden rounded-xl border border-white/10 bg-tera-panel shadow-xl backdrop-blur-xl">
+                    <div className="absolute bottom-full left-0 mb-2 w-56 overflow-hidden rounded-xl border border-tera-border bg-tera-panel shadow-xl backdrop-blur-xl">
                       {/* File & Media Section */}
                       <button
                         onClick={() => handleFileSelect('camera')}
-                        className="flex w-full items-center gap-3 px-4 py-3 text-left text-sm text-white hover:bg-white/5 border-b border-white/5"
+                        className="flex w-full items-center gap-3 px-4 py-3 text-left text-sm text-tera-primary hover:bg-tera-muted border-b border-tera-border"
                       >
                         <span>📷</span> Open Camera
                       </button>
                       <button
                         onClick={() => handleFileSelect('image')}
-                        className="flex w-full items-center gap-3 px-4 py-3 text-left text-sm text-white hover:bg-white/5 border-b border-white/5"
+                        className="flex w-full items-center gap-3 px-4 py-3 text-left text-sm text-tera-primary hover:bg-tera-muted border-b border-tera-border"
                       >
                         <span>🖼️</span> Upload image
                       </button>
                       <button
                         onClick={() => handleFileSelect('file')}
-                        className="flex w-full items-center gap-3 px-4 py-3 text-left text-sm text-white hover:bg-white/5 border-b border-white/5"
+                        className="flex w-full items-center gap-3 px-4 py-3 text-left text-sm text-tera-primary hover:bg-tera-muted border-b border-tera-border"
                       >
                         <span>📄</span> Upload file
                       </button>
-                      
+
                       {/* Web Search Option */}
                       <button
                         onClick={() => {
@@ -939,19 +939,18 @@ export default function PromptShell({
                           }
                         }}
                         disabled={webSearchRemaining <= 0}
-                        className={`flex w-full items-center gap-3 px-4 py-3 text-left text-sm transition ${
-                          webSearchRemaining <= 0
-                            ? 'text-red-300/50 cursor-not-allowed opacity-60 hover:bg-red-500/10'
-                            : webSearchEnabled
-                              ? 'text-blue-200 bg-blue-500/20 hover:bg-blue-500/30'
-                              : 'text-white hover:bg-white/5'
-                        }`}
+                        className={`flex w-full items-center gap-3 px-4 py-3 text-left text-sm transition ${webSearchRemaining <= 0
+                          ? 'text-red-300/50 cursor-not-allowed opacity-60 hover:bg-red-500/10'
+                          : webSearchEnabled
+                            ? 'text-blue-500 bg-blue-500/10 hover:bg-blue-500/20'
+                            : 'text-tera-primary hover:bg-tera-muted'
+                          }`}
                         title={webSearchRemaining <= 0 ? 'Monthly web search limit reached - Upgrade to continue' : 'Search the web for current information'}
                       >
                         <span>🔍</span>
                         <div className="flex-1">
                           <div>Web Search {webSearchEnabled ? '(ON)' : ''}</div>
-                          <div className={`text-xs ${webSearchRemaining <= 0 ? 'text-red-300/50' : 'text-white/50'}`}>
+                          <div className={`text-xs ${webSearchRemaining <= 0 ? 'text-red-300/50' : 'text-tera-secondary'}`}>
                             {webSearchRemaining <= 0 ? 'Limit reached' : `${webSearchRemaining} remaining`}
                           </div>
                         </div>
@@ -972,7 +971,7 @@ export default function PromptShell({
                   }
                 }}
                 placeholder={isListening ? "Listening... 🎤" : "Ask Tera Anything..."}
-                className="max-h-[200px] min-h-[52px] w-full resize-none bg-transparent py-3.5 px-2 text-white placeholder-white/40 focus:outline-none"
+                className="max-h-[200px] min-h-[52px] w-full resize-none bg-transparent py-3.5 px-2 text-tera-primary placeholder-tera-secondary focus:outline-none"
                 rows={1}
                 style={{ height: 'auto' }}
                 onInput={(e) => {
@@ -1014,7 +1013,7 @@ export default function PromptShell({
                 {showMicButton && (
                   <button
                     onClick={toggleListening}
-                    className={`flex h-9 w-9 items-center justify-center rounded-full transition ${isListening ? 'bg-red-500/20 text-red-400 animate-pulse' : 'bg-white/10 text-white hover:bg-white/20'}`}
+                    className={`flex h-9 w-9 items-center justify-center rounded-full transition ${isListening ? 'bg-red-500/20 text-red-500 animate-pulse' : 'bg-tera-muted text-tera-primary hover:bg-tera-muted/80'}`}
                     title="Voice input"
                   >
                     <span className="text-xl">🎤</span>

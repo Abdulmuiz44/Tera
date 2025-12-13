@@ -119,19 +119,19 @@ export default function PricingPage() {
     ]
 
     return (
-        <div className="flex flex-col md:flex-row h-screen w-full bg-gradient-to-br from-[#050505] to-[#1a1a1a]">
+        <div className="flex flex-col md:flex-row h-screen w-full bg-tera-bg text-tera-primary">
             <Sidebar expanded={sidebarExpanded} onToggle={() => setSidebarExpanded(!sidebarExpanded)} />
             <main className="relative flex-1 overflow-hidden px-6 py-10">
                 <div className="flex flex-col h-full gap-8">
                     <header className="flex items-center justify-between">
                         <div>
                             <p className="text-xs uppercase tracking-[0.5em] text-tera-neon">Pricing</p>
-                            <h1 className="text-4xl font-bold leading-tight text-white mt-2">Unlock Your Potential</h1>
-                            <p className="text-white/60 mt-2 max-w-2xl">Choose the perfect plan to supercharge your learning and productivity with AI</p>
+                            <h1 className="text-4xl font-bold leading-tight text-tera-primary mt-2">Unlock Your Potential</h1>
+                            <p className="text-tera-secondary mt-2 max-w-2xl">Choose the perfect plan to supercharge your learning and productivity with AI</p>
                         </div>
                     </header>
 
-                    <div className="flex-1 rounded-[28px] bg-tera-panel/40 border border-white/5 p-8 shadow-glow-md overflow-y-auto">
+                    <div className="flex-1 rounded-[28px] bg-tera-panel/40 border border-tera-border p-8 shadow-glow-md overflow-y-auto">
                         {/* Comparison Table */}
                         <div className="max-w-7xl mx-auto">
                             {/* Pricing Cards */}
@@ -141,7 +141,7 @@ export default function PricingPage() {
                                         key={plan.name}
                                         className={`relative flex flex-col rounded-2xl border transition-all duration-300 ${plan.highlighted
                                             ? 'bg-gradient-to-br from-tera-neon/10 to-tera-neon/5 border-tera-neon shadow-[0_0_40px_-10px_rgba(0,255,170,0.4)] scale-105 z-10'
-                                            : 'bg-white/5 border-white/10 hover:border-white/20 hover:bg-white/10'
+                                            : 'bg-tera-muted/30 border-tera-border hover:border-tera-border/60 hover:bg-tera-muted/50'
                                             } p-8`}
                                     >
                                         {plan.highlighted && (
@@ -152,25 +152,25 @@ export default function PricingPage() {
 
                                         {/* Plan Header */}
                                         <div className="mb-6">
-                                            <h3 className="text-2xl font-bold text-white">{plan.displayName}</h3>
-                                            <p className="text-white/60 text-sm mt-1">{plan.description}</p>
+                                            <h3 className="text-2xl font-bold text-tera-primary">{plan.displayName}</h3>
+                                            <p className="text-tera-secondary text-sm mt-1">{plan.description}</p>
                                             <div className="mt-4 flex items-baseline gap-1">
-                                                <span className={`text-4xl font-black ${plan.highlighted ? 'text-tera-neon' : 'text-white'}`}>
+                                                <span className={`text-4xl font-black ${plan.highlighted ? 'text-tera-neon' : 'text-tera-primary'}`}>
                                                     {plan.displayCurrency ? plan.displayCurrency.symbol : '$'}{plan.displayPrice.toFixed(2)}
                                                 </span>
-                                                <span className="text-white/60">{plan.period}</span>
+                                                <span className="text-tera-secondary">{plan.period}</span>
                                             </div>
                                             {currency && currency.code !== 'USD' && (
-                                                <p className="text-xs text-white/40 mt-2">
+                                                <p className="text-xs text-tera-secondary/60 mt-2">
                                                     {currency.code} • Based on {countryCode}
                                                 </p>
                                             )}
                                         </div>
 
                                         {/* Features List */}
-                                        <ul className="mb-8 flex-1 space-y-3 border-t border-white/10 pt-6">
+                                        <ul className="mb-8 flex-1 space-y-3 border-t border-tera-border pt-6">
                                             {plan.features.map((feature, idx) => (
-                                                <li key={idx} className="flex items-start gap-3 text-sm text-white/90">
+                                                <li key={idx} className="flex items-start gap-3 text-sm text-tera-primary/90">
                                                     <span className={`mt-1 text-lg flex-shrink-0 ${plan.highlighted ? 'text-tera-neon' : 'text-tera-neon/60'}`}>✨</span>
                                                     <span>{feature}</span>
                                                 </li>
@@ -205,16 +205,16 @@ export default function PricingPage() {
                             </div>
 
                             {/* Feature Comparison Table */}
-                            <div className="border-t border-white/10 pt-12">
-                                <h2 className="text-2xl font-bold text-white mb-8 text-center">Detailed Comparison</h2>
+                            <div className="border-t border-tera-border pt-12">
+                                <h2 className="text-2xl font-bold text-tera-primary mb-8 text-center">Detailed Comparison</h2>
                                 <div className="overflow-x-auto">
                                     <table className="w-full text-sm">
                                         <thead>
-                                            <tr className="border-b border-white/10">
-                                                <th className="text-left py-4 px-4 font-semibold text-white/80">Feature</th>
-                                                <th className="text-center py-4 px-4 font-semibold text-white/80">Free</th>
-                                                <th className="text-center py-4 px-4 font-semibold text-white/80">Pro</th>
-                                                <th className="text-center py-4 px-4 font-semibold text-white/80">Plus</th>
+                                            <tr className="border-b border-tera-border">
+                                                <th className="text-left py-4 px-4 font-semibold text-tera-primary/80">Feature</th>
+                                                <th className="text-center py-4 px-4 font-semibold text-tera-primary/80">Free</th>
+                                                <th className="text-center py-4 px-4 font-semibold text-tera-primary/80">Pro</th>
+                                                <th className="text-center py-4 px-4 font-semibold text-tera-primary/80">Plus</th>
                                             </tr>
                                         </thead>
                                         <tbody>
@@ -231,11 +231,11 @@ export default function PricingPage() {
                                                 { feature: 'API Access', free: '—', pro: '—', plus: '✓' },
                                                 { feature: 'Custom AI Training', free: '—', pro: '—', plus: '✓' },
                                             ].map((row, idx) => (
-                                                <tr key={idx} className="border-b border-white/5 hover:bg-white/5 transition">
-                                                    <td className="py-4 px-4 text-white font-medium">{row.feature}</td>
-                                                    <td className="py-4 px-4 text-center text-white/70">{row.free}</td>
-                                                    <td className="py-4 px-4 text-center text-white/70">{row.pro}</td>
-                                                    <td className="py-4 px-4 text-center text-white/70">{row.plus}</td>
+                                                <tr key={idx} className="border-b border-tera-border hover:bg-tera-muted/50 transition">
+                                                    <td className="py-4 px-4 text-tera-primary font-medium">{row.feature}</td>
+                                                    <td className="py-4 px-4 text-center text-tera-secondary">{row.free}</td>
+                                                    <td className="py-4 px-4 text-center text-tera-secondary">{row.pro}</td>
+                                                    <td className="py-4 px-4 text-center text-tera-secondary">{row.plus}</td>
                                                 </tr>
                                             ))}
                                         </tbody>
@@ -244,8 +244,8 @@ export default function PricingPage() {
                             </div>
 
                             {/* FAQ Section */}
-                            <div className="border-t border-white/10 pt-12 mt-12">
-                                <h2 className="text-2xl font-bold text-white mb-8 text-center">Frequently Asked Questions</h2>
+                            <div className="border-t border-tera-border pt-12 mt-12">
+                                <h2 className="text-2xl font-bold text-tera-primary mb-8 text-center">Frequently Asked Questions</h2>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto">
                                     {[
                                         { q: 'Can I upgrade my plan?', a: 'Yes! You can upgrade to Pro or Plus anytime. Your new features will be available immediately.' },
@@ -255,14 +255,14 @@ export default function PricingPage() {
                                         { q: 'What payment methods do you accept?', a: 'We accept all major credit cards, PayPal, and more through Lemon Squeezy.' },
                                         { q: 'Is my data secure?', a: 'Yes! We use enterprise-grade encryption and comply with GDPR, CCPA, and other standards.' }
                                     ].map((faq, idx) => (
-                                        <div key={idx} className="bg-white/5 border border-white/10 rounded-lg p-4">
-                                            <h3 className="font-semibold text-white mb-2">{faq.q}</h3>
-                                            <p className="text-white/70 text-sm">{faq.a}</p>
+                                        <div key={idx} className="bg-tera-muted/30 border border-tera-border rounded-lg p-4">
+                                            <h3 className="font-semibold text-tera-primary mb-2">{faq.q}</h3>
+                                            <p className="text-tera-secondary text-sm">{faq.a}</p>
                                         </div>
                                     ))}
                                 </div>
-                                <div className="mt-8 p-6 bg-white/5 border border-white/10 rounded-lg text-center max-w-2xl mx-auto">
-                                    <p className="text-white/70 text-sm">Have other questions? We're here to help!</p>
+                                <div className="mt-8 p-6 bg-tera-muted/30 border border-tera-border rounded-lg text-center max-w-2xl mx-auto">
+                                    <p className="text-tera-secondary text-sm">Have other questions? We're here to help!</p>
                                     <a href="mailto:Teraaiguide@gmail.com" className="text-tera-neon hover:underline font-semibold mt-2 inline-block">
                                         Contact us at Teraaiguide@gmail.com
                                     </a>
@@ -270,9 +270,9 @@ export default function PricingPage() {
                             </div>
 
                             {/* CTA Section */}
-                            <div className="border-t border-white/10 pt-12 mt-12 text-center">
-                                <h2 className="text-2xl font-bold text-white mb-4">Ready to Get Started?</h2>
-                                <p className="text-white/60 mb-8 max-w-2xl mx-auto">
+                            <div className="border-t border-tera-border pt-12 mt-12 text-center">
+                                <h2 className="text-2xl font-bold text-tera-primary mb-4">Ready to Get Started?</h2>
+                                <p className="text-tera-secondary mb-8 max-w-2xl mx-auto">
                                     Join thousands of learners and professionals using Tera to unlock their potential. Start free, upgrade anytime.
                                 </p>
                                 <div className="flex flex-col sm:flex-row gap-4 justify-center">
@@ -302,8 +302,8 @@ export default function PricingPage() {
                                 </div>
                             </div>
 
-                            <div className="mt-12 text-center border-t border-white/10 pt-8">
-                                <p className="text-sm text-white/40">
+                            <div className="mt-12 text-center border-t border-tera-border pt-8">
+                                <p className="text-sm text-tera-secondary">
                                     Questions? <a href="mailto:Teraaiguide@gmail.com" className="text-tera-neon hover:underline">Contact our support team</a>
                                 </p>
                             </div>

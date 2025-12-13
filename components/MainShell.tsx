@@ -143,7 +143,7 @@ function MainShellContent() {
   }
 
   return (
-    <div className="flex min-h-screen w-full bg-[#050505] text-white">
+    <div className="flex min-h-screen w-full bg-tera-bg text-tera-primary">
       <Sidebar
         expanded={sidebarExpanded}
         onToggle={() => setSidebarExpanded(!sidebarExpanded)}
@@ -155,7 +155,7 @@ function MainShellContent() {
       <main className={`relative flex flex-1 flex-col items-center justify-start px-3 pt-10 md:px-6 md:pt-10 transition-all duration-300 ease-in-out ${sidebarExpanded ? 'md:ml-[280px]' : 'md:ml-[72px]'}`}>
         {/* Mobile Menu Button */}
         <button
-          className="absolute left-4 top-4 z-40 rounded-full border border-white/10 bg-tera-panel p-2 text-white md:hidden"
+          className="absolute left-4 top-4 z-40 rounded-full border border-tera-border bg-tera-panel p-2 text-tera-primary md:hidden"
           onClick={() => setSidebarExpanded(true)}
         >
           ☰
@@ -176,14 +176,14 @@ function MainShellContent() {
             <>
               <button
                 type="button"
-                className="rounded-full bg-white px-3 py-1 text-[0.5rem] font-semibold uppercase tracking-[0.4em] text-[#050505] transition hover:bg-white/90 md:hidden"
+                className="rounded-full bg-tera-primary px-3 py-1 text-[0.5rem] font-semibold uppercase tracking-[0.4em] text-tera-bg transition hover:opacity-90 md:hidden"
                 onClick={signOut}
               >
                 Sign out
               </button>
               <button
                 type="button"
-                className="hidden rounded-full bg-white px-3 py-1 text-[0.5rem] font-semibold uppercase tracking-[0.4em] text-[#050505] transition hover:bg-white/90 md:block md:px-4 md:py-2 md:text-xs"
+                className="hidden rounded-full bg-tera-primary px-3 py-1 text-[0.5rem] font-semibold uppercase tracking-[0.4em] text-tera-bg transition hover:opacity-90 md:block md:px-4 md:py-2 md:text-xs"
                 onClick={signOut}
               >
                 Sign out
@@ -192,42 +192,42 @@ function MainShellContent() {
           ) : (
             <>
               <button
-                 type="button"
-                 className="rounded-full bg-white px-4 py-2 text-xs font-bold uppercase tracking-[0.2em] text-[#050505] transition hover:bg-white/90 md:hidden"
-                 onClick={() => router.push('/auth/signin')}
-               >
-                 Log In
-               </button>
-               <div className="hidden md:flex md:items-center md:gap-2">
-                 <button
-                   type="button"
-                   className="rounded-full bg-white px-4 py-2 text-xs font-bold uppercase tracking-[0.2em] text-[#050505] transition hover:bg-white/90"
-                   onClick={() => router.push('/auth/signin')}
-                 >
-                   Log In
-                 </button>
-                 <button
-                   type="button"
-                   className="rounded-full bg-white px-3 py-1 text-[0.5rem] font-semibold uppercase tracking-[0.4em] text-[#050505] transition hover:bg-white/90 md:px-4 md:py-2 md:text-xs"
-                   onClick={() => router.push('/auth/signup')}
-                 >
-                   Sign up
-                 </button>
-               </div>
+                type="button"
+                className="rounded-full bg-tera-primary px-4 py-2 text-xs font-bold uppercase tracking-[0.2em] text-tera-bg transition hover:opacity-90 md:hidden"
+                onClick={() => router.push('/auth/signin')}
+              >
+                Log In
+              </button>
+              <div className="hidden md:flex md:items-center md:gap-2">
+                <button
+                  type="button"
+                  className="rounded-full bg-tera-primary px-4 py-2 text-xs font-bold uppercase tracking-[0.2em] text-tera-bg transition hover:opacity-90"
+                  onClick={() => router.push('/auth/signin')}
+                >
+                  Log In
+                </button>
+                <button
+                  type="button"
+                  className="rounded-full bg-tera-primary px-3 py-1 text-[0.5rem] font-semibold uppercase tracking-[0.4em] text-tera-bg transition hover:opacity-90 md:px-4 md:py-2 md:text-xs"
+                  onClick={() => router.push('/auth/signup')}
+                >
+                  Sign up
+                </button>
+              </div>
             </>
           )}
         </div>
         {authDialog && (
           <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
-            <div className="absolute inset-0 bg-black/70" onClick={() => setAuthDialog(null)} />
-            <div className="relative z-10 w-full max-w-md rounded-3xl border border-white/20 bg-[#060606]/95 p-6 shadow-2xl backdrop-blur">
-              <div className="flex items-center justify-between text-xs uppercase tracking-[0.4em] text-white/50">
+            <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={() => setAuthDialog(null)} />
+            <div className="relative z-10 w-full max-w-md rounded-3xl border border-tera-border bg-tera-panel p-6 shadow-2xl">
+              <div className="flex items-center justify-between text-xs uppercase tracking-[0.4em] text-tera-secondary">
                 <span>{authDialog === 'signIn' ? 'Log In' : 'Sign Up'}</span>
-                <button className="text-white/50 hover:text-white" onClick={() => setAuthDialog(null)}>
+                <button className="text-tera-secondary hover:text-tera-primary" onClick={() => setAuthDialog(null)}>
                   ✕
                 </button>
               </div>
-              <p className="mt-4 text-sm text-white/70">
+              <p className="mt-4 text-sm text-tera-primary/80">
                 {user
                   ? `Signed in as ${user.email}`
                   : authDialog === 'signIn'
@@ -236,7 +236,7 @@ function MainShellContent() {
               </p>
               {!user && (
                 <input
-                  className="mt-4 w-full rounded-2xl border border-white/10 bg-transparent px-4 py-3 text-sm text-white outline-none placeholder:text-white/40"
+                  className="mt-4 w-full rounded-2xl border border-tera-border bg-tera-muted px-4 py-3 text-sm text-tera-primary outline-none placeholder:text-tera-secondary"
                   placeholder="Email"
                   value={email}
                   onChange={(event) => setEmail(event.target.value)}
@@ -246,7 +246,7 @@ function MainShellContent() {
               <div className="mt-6 flex flex-col gap-3">
                 <button
                   type="button"
-                  className="w-full rounded-full border border-white/20 px-4 py-2 text-[0.6rem] font-semibold uppercase tracking-[0.3em] text-white/70 transition hover:border-white hover:text-white"
+                  className="w-full rounded-full border border-tera-border px-4 py-2 text-[0.6rem] font-semibold uppercase tracking-[0.3em] text-tera-secondary transition hover:border-tera-primary hover:text-tera-primary"
                   onClick={() => setAuthDialog(null)}
                 >
                   Cancel
@@ -254,7 +254,7 @@ function MainShellContent() {
                 {!user && (
                   <button
                     type="button"
-                    className="w-full rounded-full bg-white px-4 py-2 text-[0.6rem] font-semibold uppercase tracking-[0.3em] text-[#050505] transition hover:bg-white/90"
+                    className="w-full rounded-full bg-tera-primary px-4 py-2 text-[0.6rem] font-semibold uppercase tracking-[0.3em] text-tera-bg transition hover:opacity-90"
                     onClick={authDialog === 'signIn' ? handleSignIn : handleSignUp}
                     disabled={authLoading}
                   >
@@ -263,27 +263,27 @@ function MainShellContent() {
                 )}
                 <button
                   type="button"
-                  className="w-full rounded-full border border-white/20 bg-white/5 px-4 py-2 text-[0.6rem] font-semibold uppercase tracking-[0.3em] text-white/70 transition hover:border-white hover:text-white"
+                  className="w-full rounded-full border border-tera-border bg-tera-muted px-4 py-2 text-[0.6rem] font-semibold uppercase tracking-[0.3em] text-tera-primary transition hover:border-tera-primary"
                   onClick={handleGoogleSignIn}
                   disabled={authLoading}
                 >
                   Continue with Google
                 </button>
               </div>
-              <p className="mt-4 text-center text-[0.6rem] text-white/40">
+              <p className="mt-4 text-center text-[0.6rem] text-tera-secondary">
                 By continuing, you agree to our{' '}
-                <Link href="/terms" className="underline hover:text-white" onClick={() => setAuthDialog(null)}>
+                <Link href="/terms" className="underline hover:text-tera-primary" onClick={() => setAuthDialog(null)}>
                   Terms
                 </Link>{' '}
                 and{' '}
-                <Link href="/privacy" className="underline hover:text-white" onClick={() => setAuthDialog(null)}>
+                <Link href="/privacy" className="underline hover:text-tera-primary" onClick={() => setAuthDialog(null)}>
                   Privacy Policy
                 </Link>
                 .
               </p>
               {authMessage && <p className="mt-3 text-[0.7rem] uppercase tracking-[0.3em] text-tera-neon">{authMessage}</p>}
               {user && (
-                <p className="mt-4 text-xs text-white/60">You are already signed in. Thank you!</p>
+                <p className="mt-4 text-xs text-tera-secondary">You are already signed in. Thank you!</p>
               )}
             </div>
           </div>
@@ -295,7 +295,7 @@ function MainShellContent() {
 
 export default function MainShell() {
   return (
-    <Suspense fallback={<div className="flex h-screen w-full items-center justify-center bg-[#050505] text-white">Loading...</div>}>
+    <Suspense fallback={<div className="flex h-screen w-full items-center justify-center bg-tera-bg text-tera-primary">Loading...</div>}>
       <MainShellContent />
     </Suspense>
   )
