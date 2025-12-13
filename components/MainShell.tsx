@@ -143,23 +143,9 @@ function MainShellContent() {
   }
 
   return (
-    <div className="flex min-h-screen w-full bg-tera-bg text-tera-primary">
-      <Sidebar
-        expanded={sidebarExpanded}
-        onToggle={() => setSidebarExpanded(!sidebarExpanded)}
-        onNewChat={handleNewChat}
-        user={user}
-        onSignOut={signOut}
-      />
 
-      <main className={`relative flex flex-1 flex-col items-center justify-start px-3 pt-10 md:px-6 md:pt-10 transition-all duration-300 ease-in-out ${sidebarExpanded ? 'md:ml-[280px]' : 'md:ml-[72px]'}`}>
-        {/* Mobile Menu Button */}
-        <button
-          className="absolute left-4 top-4 z-40 rounded-full border border-tera-border bg-tera-panel p-2 text-tera-primary md:hidden"
-          onClick={() => setSidebarExpanded(true)}
-        >
-          ☰
-        </button>
+    <>
+      <div className="relative flex w-full flex-col">
 
         <PromptShell
           key={sessionId}
@@ -288,8 +274,8 @@ function MainShellContent() {
             </div>
           </div>
         )}
-      </main>
-    </div>
+      </div>
+    </>
   )
 }
 

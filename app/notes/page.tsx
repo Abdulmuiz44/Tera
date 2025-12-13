@@ -1,7 +1,6 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import Sidebar from '@/components/Sidebar'
 import { supabase } from '@/lib/supabase'
 import { useAuth } from '@/components/AuthProvider'
 
@@ -19,7 +18,6 @@ export default function NotesPage() {
   const [newNote, setNewNote] = useState('')
   const [editingNote, setEditingNote] = useState<Note | null>(null)
   const [isAdding, setIsAdding] = useState(false)
-  const [sidebarExpanded, setSidebarExpanded] = useState(false)
 
   useEffect(() => {
     if (user) {
@@ -87,26 +85,28 @@ export default function NotesPage() {
   }
 
   return (
-    <div className="flex flex-col md:flex-row h-screen w-full bg-tera-bg">
-      <Sidebar expanded={sidebarExpanded} onToggle={() => setSidebarExpanded(!sidebarExpanded)} />
-      <main className="relative flex-1 overflow-hidden px-6 py-10">
-        <div className="flex flex-col h-full gap-8">
-          <header className="flex items-center justify-between">
-            <div>
-              <p className="text-xs uppercase tracking-[0.5em] text-tera-secondary">TERA</p>
-              <h1 className="text-3xl font-semibold leading-tight text-tera-primary">Notes</h1>
-            </div>
-            <div className="flex items-center gap-4">
-              <button
-                onClick={() => setIsAdding(!isAdding)}
-                className="rounded-full border border-tera-border px-4 py-2 text-sm text-tera-primary transition hover:border-tera-neon"
-              >
-                {isAdding ? 'Cancel' : 'Add note'}
-              </button>
-            </div>
-          </header>
+    <div className="flex min-h-screen w-full bg-tera-bg text-tera-primary relative overflow-hidden">
 
-          <div className="flex-1 rounded-[28px] bg-tera-panel border border-tera-border p-6 shadow-glow-md overflow-y-auto">
+      <main className="flex-1 flex flex-col h-screen overflow-hidden relative z-10">
+
+        {/* Top Bar */}
+        <div className="h-16 border-b border-tera-border flex items-center justify-between px-6 bg-tera-bg/80 backdrop-blur-md">
+          <div>
+            <p className="text-xs uppercase tracking-[0.5em] text-tera-secondary">TERA</p>
+            <h1 className="text-3xl font-semibold leading-tight text-tera-primary">Notes</h1>
+          </div>
+          <div className="flex items-center gap-4">
+            <button
+              onClick={() => setIsAdding(!isAdding)}
+              className="rounded-full border border-tera-border px-4 py-2 text-sm text-tera-primary transition hover:border-tera-neon"
+            >
+              {isAdding ? 'Cancel' : 'Add note'}
+            </button>
+          </div>
+        </div>
+
+        <div className="flex-1 p-6 overflow-hidden">
+          <div className="h-full rounded-[28px] bg-tera-panel border border-tera-border p-6 shadow-glow-md overflow-y-auto">
             <h2 className="text-xl font-semibold text-tera-primary mb-4">Save quick thoughts or reference snippets</h2>
 
             {isAdding && (

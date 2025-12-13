@@ -21,12 +21,8 @@ export default function ToolsPage() {
 
     return (
         <div className="flex flex-col md:flex-row h-screen w-full bg-tera-bg text-tera-primary">
-            <Sidebar
-                expanded={sidebarExpanded}
-                onToggle={() => setSidebarExpanded(!sidebarExpanded)}
-                user={user}
-                onSignOut={signOut}
-            />
+            {/* Sidebar removed (handled by AppLayout) */}
+
 
             <main className="relative flex-1 overflow-y-auto px-4 py-6 md:px-8 md:py-10 transition-all duration-300">
                 {/* Mobile Menu Button */}
