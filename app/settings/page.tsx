@@ -186,7 +186,7 @@ export default function SettingsPage() {
             )}
             {!autoSaving && !loading && (
               <div className="flex items-center gap-2 text-tera-secondary text-xs">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-3 h-3 text-green-400">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-3 h-3 text-tera-primary">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
                 </svg>
                 <span>All saved</span>
@@ -239,7 +239,7 @@ export default function SettingsPage() {
             {message && (
               <div
                 className={`mb-6 p-4 rounded-lg flex items-center gap-2 ${messageType === 'success'
-                  ? 'bg-green-500/10 text-green-400 border border-green-500/20'
+                  ? 'bg-tera-primary text-tera-bg border border-tera-primary'
                   : 'bg-red-500/10 text-red-400 border border-red-500/20'
                   }`}
               >

@@ -86,27 +86,27 @@ export default function SpreadsheetEditor({
         await updateSpreadsheetData(userId, spreadsheetId, newData)
 
         // Send to backend for Google Sheets sync
-         const response = await fetch('/api/sheets/edit', {
-           method: 'POST',
-           headers: { 'Content-Type': 'application/json' },
-           body: JSON.stringify({
-             userId,
-             spreadsheetId,
-             operations: [
-               {
-                 type: 'update_cell',
-                 rowIndex: selectedCell.row,
-                 columnIndex: selectedCell.col,
-                 cellValue: cellEditValue
-               }
-             ],
-             syncToGoogle: false
-           })
-         })
-         if (!response.ok) {
-           console.error('Failed to sync cell update')
-         }
-         showMessage('success', 'Cell updated')
+        const response = await fetch('/api/sheets/edit', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            userId,
+            spreadsheetId,
+            operations: [
+              {
+                type: 'update_cell',
+                rowIndex: selectedCell.row,
+                columnIndex: selectedCell.col,
+                cellValue: cellEditValue
+              }
+            ],
+            syncToGoogle: false
+          })
+        })
+        if (!response.ok) {
+          console.error('Failed to sync cell update')
+        }
+        showMessage('success', 'Cell updated')
         onDataChange?.(newData)
       } catch (error) {
         showMessage('error', 'Failed to update cell')
@@ -116,7 +116,7 @@ export default function SpreadsheetEditor({
 
   // Add row handler
   const handleAddRow = async () => {
-    const rowToAdd = newRowData.length === 0 
+    const rowToAdd = newRowData.length === 0
       ? Array(data[0]?.length || 0).fill('')
       : newRowData
 
@@ -307,8 +307,8 @@ export default function SpreadsheetEditor({
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h3 className="text-xl font-bold text-white">{title}</h3>
-          <p className="text-xs text-white/50 mt-1">
+          <h3 className="text-xl font-bold text-tera-primary">{title}</h3>
+          <p className="text-xs text-tera-secondary mt-1">
             {data.length - 1} rows × {data[0]?.length || 0} columns
           </p>
         </div>
@@ -317,27 +317,26 @@ export default function SpreadsheetEditor({
       {/* Message */}
       {message && (
         <div
-          className={`rounded-lg p-3 text-sm ${
-            message.type === 'error'
-              ? 'bg-red-500/20 text-red-200'
-              : 'bg-green-500/20 text-green-200'
-          }`}
+          className={`rounded-lg p-3 text-sm border ${message.type === 'error'
+              ? 'bg-red-500/10 text-red-500 border-red-500/20'
+              : 'bg-tera-primary text-tera-bg border-tera-primary'
+            }`}
         >
           {message.text}
         </div>
       )}
 
       {/* Table */}
-      <div className="overflow-x-auto rounded-lg border border-white/10 bg-white/5">
+      <div className="overflow-x-auto rounded-lg border border-tera-border bg-tera-panel">
         <table className="w-full text-sm">
           <tbody>
             {data.map((row, rowIdx) => (
               <tr
                 key={rowIdx}
-                className={rowIdx === 0 ? 'bg-white/10 border-b border-white/10' : 'border-b border-white/10'}
+                className={rowIdx === 0 ? 'bg-tera-muted border-b border-tera-border' : 'border-b border-tera-border'}
               >
                 {/* Row number */}
-                <td className="px-2 py-2 text-white/40 text-xs bg-black/20 w-8 text-center">
+                <td className="px-2 py-2 text-tera-secondary text-xs bg-tera-muted w-8 text-center border-r border-tera-border">
                   {rowIdx}
                 </td>
 
@@ -346,13 +345,11 @@ export default function SpreadsheetEditor({
                   <td
                     key={colIdx}
                     onClick={() => rowIdx > 0 && handleCellClick(rowIdx, colIdx)}
-                    className={`px-4 py-2 text-white/80 cursor-pointer transition ${
-                      rowIdx === 0 ? 'font-semibold text-white' : ''
-                    } ${
-                      selectedCell?.row === rowIdx && selectedCell?.col === colIdx
-                        ? 'bg-blue-500/30'
-                        : 'hover:bg-white/5'
-                    }`}
+                    className={`px-4 py-2 text-tera-primary cursor-pointer transition border-r border-tera-border last:border-r-0 ${rowIdx === 0 ? 'font-semibold' : ''
+                      } ${selectedCell?.row === rowIdx && selectedCell?.col === colIdx
+                        ? 'bg-tera-muted/50 ring-2 ring-inset ring-tera-primary'
+                        : 'hover:bg-tera-muted/30'
+                      }`}
                   >
                     {selectedCell?.row === rowIdx && selectedCell?.col === colIdx ? (
                       <input
@@ -364,7 +361,7 @@ export default function SpreadsheetEditor({
                           if (e.key === 'Enter') handleSaveCell()
                           if (e.key === 'Escape') setEditMode('view')
                         }}
-                        className="w-full bg-transparent text-white outline-none border-b border-white/30"
+                        className="w-full bg-transparent text-tera-primary outline-none"
                       />
                     ) : (
                       String(cell ?? '')
@@ -374,10 +371,10 @@ export default function SpreadsheetEditor({
 
                 {/* Delete row button */}
                 {rowIdx > 0 && (
-                  <td className="px-2 py-2">
+                  <td className="px-2 py-2 w-8 text-center">
                     <button
                       onClick={() => handleRemoveRow(rowIdx)}
-                      className="text-red-400 hover:text-red-300 text-xs"
+                      className="text-tera-secondary hover:text-red-500 text-xs transition"
                       title="Delete row"
                     >
                       ✕
@@ -394,14 +391,14 @@ export default function SpreadsheetEditor({
       <div className="flex flex-wrap gap-2">
         <button
           onClick={() => setEditMode(editMode === 'add-row' ? 'view' : 'add-row')}
-          className="rounded-full bg-blue-600 px-4 py-2 text-xs font-bold text-white transition hover:bg-blue-700"
+          className="rounded-full bg-white border border-tera-border px-4 py-2 text-xs font-bold text-black transition hover:bg-gray-100 dark:bg-black dark:text-white dark:hover:bg-gray-900"
         >
           + Row
         </button>
 
         <button
           onClick={() => setEditMode(editMode === 'add-column' ? 'view' : 'add-column')}
-          className="rounded-full bg-blue-600 px-4 py-2 text-xs font-bold text-white transition hover:bg-blue-700"
+          className="rounded-full bg-white border border-tera-border px-4 py-2 text-xs font-bold text-black transition hover:bg-gray-100 dark:bg-black dark:text-white dark:hover:bg-gray-900"
         >
           + Column
         </button>
@@ -409,28 +406,28 @@ export default function SpreadsheetEditor({
         <button
           onClick={handleSync}
           disabled={syncing}
-          className="rounded-full bg-green-600 px-4 py-2 text-xs font-bold text-white transition hover:bg-green-700 disabled:opacity-50"
+          className="rounded-full bg-tera-primary px-4 py-2 text-xs font-bold text-tera-bg transition hover:opacity-90 disabled:opacity-50"
         >
           {syncing ? 'Syncing...' : 'Sync to Google'}
         </button>
 
         {/* Export dropdown */}
         <div className="relative group">
-          <button className="rounded-full bg-purple-600 px-4 py-2 text-xs font-bold text-white transition hover:bg-purple-700">
+          <button className="rounded-full border border-tera-border px-4 py-2 text-xs font-bold text-tera-primary transition hover:bg-tera-muted">
             ↓ Export
           </button>
-          <div className="absolute right-0 top-full hidden group-hover:block bg-black/90 border border-white/10 rounded-lg overflow-hidden z-10 min-w-max">
+          <div className="absolute right-0 top-full hidden group-hover:block bg-tera-panel border border-tera-border rounded-lg overflow-hidden z-10 min-w-max shadow-lg">
             {EXPORT_FORMATS.map(fmt => (
               <button
                 key={fmt.id}
                 onClick={() => handleExport(fmt.id)}
                 disabled={exporting}
-                className="block w-full text-left px-4 py-2 text-xs text-white hover:bg-white/10 transition disabled:opacity-50"
+                className="block w-full text-left px-4 py-2 text-xs text-tera-primary hover:bg-tera-muted transition disabled:opacity-50"
               >
                 {fmt.icon} {fmt.label}
               </button>
             ))}
-            <div className="px-4 py-2 text-xs text-white/50 border-t border-white/10">
+            <div className="px-4 py-2 text-xs text-tera-secondary border-t border-tera-border">
               ~{estimateFileSize(data)}
             </div>
           </div>
@@ -439,8 +436,8 @@ export default function SpreadsheetEditor({
 
       {/* Add row form */}
       {editMode === 'add-row' && (
-        <div className="rounded-lg bg-blue-500/10 border border-blue-500/20 p-4 space-y-3">
-          <h4 className="text-sm font-semibold text-white">Add New Row</h4>
+        <div className="rounded-lg bg-tera-muted border border-tera-border p-4 space-y-3">
+          <h4 className="text-sm font-semibold text-tera-primary">Add New Row</h4>
           <div className="space-y-2">
             {(data[0] || []).map((header, idx) => (
               <input
@@ -452,20 +449,20 @@ export default function SpreadsheetEditor({
                   updated[idx] = e.target.value
                   setNewRowData(updated)
                 }}
-                className="w-full rounded-lg bg-black/20 border border-white/10 px-3 py-2 text-sm text-white placeholder-white/40 outline-none"
+                className="w-full rounded-lg bg-tera-panel border border-tera-border px-3 py-2 text-sm text-tera-primary placeholder-tera-secondary outline-none focus:border-tera-primary"
               />
             ))}
           </div>
           <div className="flex gap-2">
             <button
               onClick={handleAddRow}
-              className="rounded-full bg-white px-3 py-1 text-xs font-bold text-black hover:bg-white/90"
+              className="rounded-full bg-tera-primary px-3 py-1 text-xs font-bold text-tera-bg hover:opacity-90"
             >
               Add Row
             </button>
             <button
               onClick={() => setEditMode('view')}
-              className="rounded-full border border-white/20 px-3 py-1 text-xs font-bold text-white hover:border-white"
+              className="rounded-full border border-tera-border px-3 py-1 text-xs font-bold text-tera-primary hover:bg-tera-panel"
             >
               Cancel
             </button>
@@ -475,24 +472,24 @@ export default function SpreadsheetEditor({
 
       {/* Add column form */}
       {editMode === 'add-column' && (
-        <div className="rounded-lg bg-blue-500/10 border border-blue-500/20 p-4 space-y-3">
-          <h4 className="text-sm font-semibold text-white">Add New Column</h4>
+        <div className="rounded-lg bg-tera-muted border border-tera-border p-4 space-y-3">
+          <h4 className="text-sm font-semibold text-tera-primary">Add New Column</h4>
           <input
             placeholder="Column name"
             value={newColumnName}
             onChange={(e) => setNewColumnName(e.target.value)}
-            className="w-full rounded-lg bg-black/20 border border-white/10 px-3 py-2 text-sm text-white placeholder-white/40 outline-none"
+            className="w-full rounded-lg bg-tera-panel border border-tera-border px-3 py-2 text-sm text-tera-primary placeholder-tera-secondary outline-none focus:border-tera-primary"
           />
           <div className="flex gap-2">
             <button
               onClick={handleAddColumn}
-              className="rounded-full bg-white px-3 py-1 text-xs font-bold text-black hover:bg-white/90"
+              className="rounded-full bg-tera-primary px-3 py-1 text-xs font-bold text-tera-bg hover:opacity-90"
             >
               Add Column
             </button>
             <button
               onClick={() => setEditMode('view')}
-              className="rounded-full border border-white/20 px-3 py-1 text-xs font-bold text-white hover:border-white"
+              className="rounded-full border border-tera-border px-3 py-1 text-xs font-bold text-tera-primary hover:bg-tera-panel"
             >
               Cancel
             </button>

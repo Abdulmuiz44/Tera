@@ -86,8 +86,8 @@ export default function SignInPage() {
 
                     {/* Error Message */}
                     {error && (
-                        <div className="mb-6 p-4 bg-red-500/10 border border-red-500/30 rounded-lg">
-                            <p className="text-red-400 text-sm">{error}</p>
+                        <div className="mb-6 p-4 bg-tera-muted border border-red-500/50 rounded-lg">
+                            <p className="text-red-500 text-sm">{error}</p>
                         </div>
                     )}
 
@@ -155,8 +155,8 @@ export default function SignInPage() {
                     ) : (
                         <>
                             {/* Magic Link Sent */}
-                            <div className="mb-6 p-4 bg-green-500/10 border border-green-500/30 rounded-lg">
-                                <p className="text-green-400 text-sm">Check your email for an authentication link</p>
+                            <div className="mb-6 p-4 bg-tera-primary text-tera-bg border border-tera-primary rounded-lg">
+                                <p className="text-sm">Check your email for an authentication link</p>
                             </div>
 
                             {/* Google as Alternative */}
