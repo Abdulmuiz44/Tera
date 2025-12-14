@@ -259,6 +259,4 @@ function generateMockResults(query: string, numResults: number = 10): any[] {
 }
 
 // Enable streaming for long-running searches
-export const config = {
-  maxDuration: 60, // 60 seconds for Vercel
-}
+export const maxDuration = 60 // 60 seconds for Vercel
