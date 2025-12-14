@@ -6,6 +6,9 @@ import { type TeacherTool } from '@/components/ToolCard'
 import ClientToolPage from './ClientToolPage'
 
 export function generateStaticParams() {
+  if (!Array.isArray(allTools) || allTools.length === 0) {
+    return []
+  }
   return allTools.map((tool) => ({
     slug: slugify(tool.name),
   }))
