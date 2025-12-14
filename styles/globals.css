@@ -4,13 +4,53 @@
 
 :root {
   color-scheme: dark;
+
+  /* Dark Mode (Default) Variables */
+  --bg-tera-bg: #050505;
+  --bg-tera-panel: #0f0f0f;
+  --bg-tera-muted: #161616;
+  --border-tera: rgba(255, 255, 255, 0.07);
+  --text-tera-primary: #ffffff;
+  --text-tera-secondary: rgba(255, 255, 255, 0.6);
+  --text-tera-accent: #ffffff;
+}
+
+/* Light Mode Variables override */
+.light {
+  color-scheme: light;
+  --bg-tera-bg: #ffffff;
+  /* Pure White */
+  --bg-tera-panel: #ffffff;
+  /* Pure White - relying on borders for separation */
+  --bg-tera-muted: #f3f4f6;
+  /* Light Gray for inputs/secondary */
+  --border-tera: rgba(0, 0, 0, 0.1);
+  --text-tera-primary: #000000;
+  /* Pure Black */
+  --text-tera-secondary: #4b5563;
+  --text-tera-accent: #000000;
+}
+
+/* Explicit Dark Mode override (if needed) */
+.dark {
+  color-scheme: dark;
+  --bg-tera-bg: #050505;
+  --bg-tera-panel: #0f0f0f;
+  --bg-tera-muted: #161616;
+  --border-tera: rgba(255, 255, 255, 0.07);
+  --text-tera-primary: #ffffff;
+  --text-tera-secondary: rgba(255, 255, 255, 0.6);
+  --text-tera-accent: #00FFA3;
 }
 
 body {
-  @apply bg-tera-bg text-white min-h-screen font-sans;
+  background-color: var(--bg-tera-bg);
+  color: var(--text-tera-primary);
+  min-height: 100vh;
+  font-family: var(--font-inter), ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
 }
 
 .glow-border {
-  box-shadow: 0 10px 30px rgba(0, 212, 170, 0.45);
-  border: 1px solid rgba(255, 255, 255, 0.05);
+  box-shadow: 0 10px 30px rgba(255, 255, 255, 0.1);
+  border: 1px solid var(--border-tera);
 }

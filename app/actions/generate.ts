@@ -5,7 +5,8 @@ import { supabase } from '@/lib/supabase'
 import { supabaseServer } from '@/lib/supabase-server'
 import { generateTeacherResponse } from '@/lib/mistral'
 import type { AttachmentReference } from '@/lib/attachment'
-import { getUserProfile, incrementChats, incrementFileUploads } from '@/lib/usage-tracking'
+import { getUserProfile } from '@/lib/usage-tracking'
+import { incrementChatsServer, incrementFileUploadsServer } from '@/lib/usage-tracking-server'
 import { canStartChat, canUploadFile, canPerformWebSearch, getPlanConfig } from '@/lib/plan-config'
 import { getWebSearchRemaining, incrementWebSearchCount } from '@/lib/web-search-usage'
 
@@ -144,19 +145,19 @@ export async function generateAnswer({ prompt, tool, authorId, authorEmail, atta
       .single()
 
     if (error) {
-       throw error
-     }
-     if (data?.id) {
-       savedChatId = data.id
-     }
+      throw error
+    }
+    if (data?.id) {
+      savedChatId = data.id
+    }
   }
 
   // Increment chat counter after successful generation
-  await incrementChats(authorId)
+  await incrementChatsServer(authorId)
 
   // Increment file upload counter if attachments were used
   if (attachments.length > 0) {
-    await incrementFileUploads(authorId, attachments.length)
+    await incrementFileUploadsServer(authorId, attachments.length)
   }
 
   // Increment web search counter if enabled

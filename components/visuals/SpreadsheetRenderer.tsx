@@ -3,11 +3,11 @@
 import { useState } from 'react'
 import dynamic from 'next/dynamic'
 
-const SpreadsheetEditor = dynamic(() => import('../SpreadsheetEditor'), { 
+const SpreadsheetEditor = dynamic(() => import('../SpreadsheetEditor'), {
   ssr: false,
   loading: () => <div className="text-white/50 text-sm">Loading editor...</div>
 })
-const SpreadsheetEditHistory = dynamic(() => import('../SpreadsheetEditHistory'), { 
+const SpreadsheetEditHistory = dynamic(() => import('../SpreadsheetEditHistory'), {
   ssr: false,
   loading: () => <div className="text-white/50 text-sm">Loading history...</div>
 })
@@ -40,18 +40,18 @@ export default function SpreadsheetRenderer({ config, userId }: { config: Spread
     }
 
     try {
-       const response = await fetch('/api/auth/google/start', {
-         method: 'POST',
-         headers: { 'Content-Type': 'application/json' },
-         body: JSON.stringify({ userId })
-       })
+      const response = await fetch('/api/auth/google/start', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId })
+      })
 
-       if (!response.ok) {
-         const result = await response.json()
-         throw new Error(result.error || 'Failed to generate auth URL')
-       }
+      if (!response.ok) {
+        const result = await response.json()
+        throw new Error(result.error || 'Failed to generate auth URL')
+      }
 
-       const result = await response.json()
+      const result = await response.json()
 
       // Redirect to Google OAuth
       window.location.href = result.authUrl
@@ -141,7 +141,7 @@ export default function SpreadsheetRenderer({ config, userId }: { config: Spread
             href={status.spreadsheetUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="block w-full rounded-full bg-green-600 px-4 py-2 text-center text-xs font-bold uppercase tracking-[0.2em] text-white transition hover:bg-green-700"
+            className="block w-full rounded-full bg-tera-primary px-4 py-2 text-center text-xs font-bold uppercase tracking-[0.2em] text-tera-bg transition hover:opacity-90"
           >
             Open in Google Sheets →
           </a>
@@ -151,26 +151,26 @@ export default function SpreadsheetRenderer({ config, userId }: { config: Spread
   }
 
   return (
-    <div className="w-full rounded-2xl bg-tera-panel border border-white/10 p-6 my-4">
+    <div className="w-full rounded-2xl bg-tera-panel border border-tera-border p-6 my-4">
       <div className="space-y-4">
         {/* Title */}
         <div>
-          <h3 className="text-lg font-semibold text-white/90">{config.title}</h3>
+          <h3 className="text-lg font-semibold text-tera-primary">{config.title}</h3>
           {config.chartType && (
-            <p className="text-sm text-white/60 mt-1">Chart Type: {config.chartType}</p>
+            <p className="text-sm text-tera-secondary mt-1">Chart Type: {config.chartType}</p>
           )}
         </div>
 
         {/* Data Preview */}
-         <div className="overflow-x-auto">
-           <table className="w-full text-sm">
-             <tbody>
-               {(config.data || []).slice(0, 6).map((row, rowIdx) => (
-                <tr key={rowIdx} className={rowIdx === 0 ? 'bg-white/10' : 'border-t border-white/5'}>
+        <div className="overflow-x-auto rounded-lg border border-tera-border">
+          <table className="w-full text-sm">
+            <tbody>
+              {(config.data || []).slice(0, 6).map((row, rowIdx) => (
+                <tr key={rowIdx} className={rowIdx === 0 ? 'bg-tera-muted' : 'border-t border-tera-border'}>
                   {row.map((cell, colIdx) => (
                     <td
                       key={colIdx}
-                      className={`px-4 py-2 text-white/80 ${rowIdx === 0 ? 'font-semibold text-white' : ''}`}
+                      className={`px-4 py-2 text-tera-primary ${rowIdx === 0 ? 'font-semibold' : ''}`}
                     >
                       {String(cell)}
                     </td>
@@ -180,20 +180,17 @@ export default function SpreadsheetRenderer({ config, userId }: { config: Spread
             </tbody>
           </table>
           {config.data.length > 6 && (
-            <p className="text-xs text-white/50 mt-2">... and {config.data.length - 6} more rows</p>
+            <p className="text-xs text-tera-secondary mt-2">... and {config.data.length - 6} more rows</p>
           )}
         </div>
 
         {/* Status Message */}
         {status.state !== 'idle' && (
           <div
-            className={`rounded-lg p-3 text-sm ${
-              status.state === 'error'
-                ? 'bg-red-500/20 text-red-200'
-                : status.state === 'creating'
-                  ? 'bg-blue-500/20 text-blue-200'
-                  : 'bg-green-500/20 text-green-200'
-            }`}
+            className={`rounded-lg p-3 text-sm border ${status.state === 'error'
+              ? 'bg-red-500/10 text-red-500 border-red-500/20'
+              : 'bg-tera-primary text-tera-bg border-tera-primary'
+              }`}
           >
             {status.message}
           </div>
@@ -203,21 +200,21 @@ export default function SpreadsheetRenderer({ config, userId }: { config: Spread
         {needsAuth || (status.state === 'error' && status.message?.includes('authorize')) ? (
           <button
             onClick={handleAuthorizeGoogle}
-            className="w-full rounded-full bg-blue-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-blue-700"
+            className="w-full rounded-full border border-tera-border px-4 py-2 text-sm font-semibold text-tera-primary transition hover:bg-tera-muted"
           >
             Authorize Google Sheets
           </button>
         ) : status.state === 'creating' ? (
           <button
             disabled
-            className="w-full rounded-full bg-white px-4 py-2 text-xs font-bold uppercase tracking-[0.2em] text-[#050505] transition opacity-50 cursor-not-allowed"
+            className="w-full rounded-full bg-tera-primary px-4 py-2 text-xs font-bold uppercase tracking-[0.2em] text-tera-bg transition opacity-50 cursor-not-allowed"
           >
             Creating...
           </button>
         ) : status.state === 'idle' || status.state === 'error' ? (
           <button
             onClick={handleCreateSpreadsheet}
-            className="w-full rounded-full bg-white px-4 py-2 text-xs font-bold uppercase tracking-[0.2em] text-[#050505] transition hover:bg-white/90"
+            className="w-full rounded-full bg-tera-primary px-4 py-2 text-xs font-bold uppercase tracking-[0.2em] text-tera-bg transition hover:opacity-90"
           >
             Create Spreadsheet
           </button>

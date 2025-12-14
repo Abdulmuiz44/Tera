@@ -35,11 +35,11 @@ export default function WebSearchStatus({
     return (
       <div className="flex justify-start">
         <div className="max-w-[85%]">
-          <div className="flex items-start gap-3 rounded-2xl bg-red-500/10 border border-red-500/30 px-6 py-4 text-red-300">
+          <div className="flex items-start gap-3 rounded-2xl bg-tera-muted border border-tera-border px-6 py-4 text-tera-primary">
             <span className="text-lg mt-1">⚠️</span>
             <div className="flex-1">
               <div className="font-medium">Web Search Failed</div>
-              <div className="text-sm text-red-300/70 mt-1">{error}</div>
+              <div className="text-sm text-tera-secondary mt-1">{error}</div>
             </div>
           </div>
         </div>
@@ -55,21 +55,21 @@ export default function WebSearchStatus({
     return (
       <div className="flex justify-start">
         <div className="max-w-[85%]">
-          <div className="flex items-start gap-3 rounded-2xl bg-blue-500/10 border border-blue-500/30 px-6 py-4 text-blue-200">
+          <div className="flex items-start gap-3 rounded-2xl bg-tera-muted border border-tera-border px-6 py-4 text-tera-primary">
             <div className="mt-1">
               <span className="text-xl">🔍</span>
             </div>
             <div className="flex-1">
               <div className="font-medium">Searching the web{dotDisplay}</div>
               {query && (
-                <div className="text-sm text-blue-200/70 mt-1">
-                  Looking for: <span className="text-blue-200">{query}</span>
+                <div className="text-sm text-tera-secondary mt-1">
+                  Looking for: <span className="text-tera-primary">{query}</span>
                 </div>
               )}
               <div className="mt-2 flex gap-1">
-                <span className="inline-block w-2 h-2 bg-blue-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></span>
-                <span className="inline-block w-2 h-2 bg-blue-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></span>
-                <span className="inline-block w-2 h-2 bg-blue-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></span>
+                <span className="inline-block w-2 h-2 bg-tera-primary rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></span>
+                <span className="inline-block w-2 h-2 bg-tera-primary rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></span>
+                <span className="inline-block w-2 h-2 bg-tera-primary rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></span>
               </div>
             </div>
           </div>
@@ -82,11 +82,11 @@ export default function WebSearchStatus({
     return (
       <div className="flex justify-start">
         <div className="max-w-[85%]">
-          <div className="flex items-start gap-3 rounded-2xl bg-green-500/10 border border-green-500/30 px-6 py-4 text-green-200">
+          <div className="flex items-start gap-3 rounded-2xl bg-tera-muted border border-tera-border px-6 py-4 text-tera-primary">
             <span className="text-lg mt-1">✅</span>
             <div className="flex-1">
               <div className="font-medium">Web search complete</div>
-              <div className="text-sm text-green-200/70 mt-1">
+              <div className="text-sm text-tera-secondary mt-1">
                 Found {resultCount} relevant result{resultCount !== 1 ? 's' : ''}
               </div>
             </div>

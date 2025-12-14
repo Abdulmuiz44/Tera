@@ -31,7 +31,7 @@ export default function Sidebar({ expanded, onToggle, onNewChat, user, onSignOut
 
   return (
     <aside
-      className={`fixed inset-y-0 left-0 z-50 flex flex-col shrink-0 h-screen bg-tera-bg border-r border-white/5 shadow-glow-sm transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] overflow-hidden
+      className={`fixed inset-y-0 left-0 z-50 flex flex-col shrink-0 h-screen bg-tera-bg border-r border-tera-border shadow-glow-sm transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] overflow-hidden
         ${expanded ? 'w-[280px] translate-x-0' : 'w-[280px] -translate-x-full md:w-[72px] md:translate-x-0'}
       `}
     >
@@ -54,7 +54,7 @@ export default function Sidebar({ expanded, onToggle, onNewChat, user, onSignOut
         {/* Menu toggle button */}
         <button
           onClick={onToggle}
-          className={`rounded-full border border-white/10 bg-tera-panel p-2 text-sm text-white hover:bg-tera-muted transition-all duration-300 ${expanded ? '' : 'hover:scale-110'}`}
+          className={`rounded-full border border-tera-border bg-tera-panel p-2 text-sm text-tera-primary hover:bg-tera-muted transition-all duration-300 ${expanded ? '' : 'hover:scale-110'}`}
           aria-label={expanded ? 'Collapse sidebar' : 'Expand sidebar'}
         >
           {expanded ? '<<' : '☰'}
@@ -83,21 +83,21 @@ export default function Sidebar({ expanded, onToggle, onNewChat, user, onSignOut
               className={`group relative flex items-center ${expanded ? 'w-full' : 'justify-center'} transition-all`}
             >
               <span
-                className={`flex shrink-0 h-10 w-10 items-center justify-center rounded-full border border-white/10 bg-tera-panel transition-all duration-200 group-hover:border-white/30 group-hover:bg-tera-muted ${isActive ? 'border-white/50 bg-tera-muted' : ''}`}
+                className={`flex shrink-0 h-10 w-10 items-center justify-center rounded-full border border-tera-border bg-tera-panel transition-all duration-200 group-hover:border-tera-border group-hover:bg-tera-muted ${isActive ? 'border-tera-border bg-tera-muted' : ''}`}
               >
                 <span className="text-base">{item.icon}</span>
               </span>
 
               {/* Label */}
               <span
-                className={`ml-3 text-sm text-white whitespace-nowrap transition-all duration-300 ${expanded ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-4 w-0 overflow-hidden'}`}
+                className={`ml-3 text-sm text-tera-primary whitespace-nowrap transition-all duration-300 ${expanded ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-4 w-0 overflow-hidden'}`}
               >
                 {item.label}
               </span>
 
               {/* Tooltip for collapsed state */}
               {!expanded && (
-                <span className="absolute left-full ml-4 whitespace-nowrap rounded-md border border-white/10 bg-[#0a0a0a] px-3 py-1.5 text-xs font-medium text-white opacity-0 shadow-xl transition-all duration-200 group-hover:opacity-100 group-hover:translate-x-0 -translate-x-2 pointer-events-none z-50">
+                <span className="absolute left-full ml-4 whitespace-nowrap rounded-md border border-tera-border bg-tera-panel px-3 py-1.5 text-xs font-medium text-tera-primary opacity-0 shadow-xl transition-all duration-200 group-hover:opacity-100 group-hover:translate-x-0 -translate-x-2 pointer-events-none z-50">
                   {item.label}
                 </span>
               )}
