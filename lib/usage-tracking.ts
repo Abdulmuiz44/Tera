@@ -173,10 +173,10 @@ export async function incrementFileUploads(userId: string, count: number = 1): P
 export async function updateUserProfile(
     userId: string,
     updates: Partial<{
-        fullName: string
-        school: string
-        gradeLevels: string[]
-        profileImageUrl: string
+        fullName: string | null
+        school: string | null
+        gradeLevels: string[] | null
+        profileImageUrl: string | null
     }>
 ): Promise<boolean> {
     const dbUpdates: Record<string, unknown> = {}
