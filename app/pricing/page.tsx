@@ -2,9 +2,8 @@
 
 import { useState, useEffect } from 'react'
 import { useAuth } from '@/components/AuthProvider'
-import Sidebar from '@/components/Sidebar'
 import { useRouter } from 'next/navigation'
-import { createClient } from '@/lib/supabase/client'
+import { supabase } from '@/lib/supabase'
 
 const PLAN_CONFIGS = {
   free: {
@@ -73,8 +72,6 @@ const convertPrice = (price: number, currencyCode: string): number => {
 export default function PricingPage() {
   const { user } = useAuth()
   const router = useRouter()
-  const supabase = createClient()
-  const [sidebarExpanded, setSidebarExpanded] = useState(false)
   const [loading, setLoading] = useState(false)
   const [currentPlan, setCurrentPlan] = useState<string | null>(null)
   const [currency, setCurrency] = useState<typeof CURRENCY_CODES['USD'] | null>(null)
@@ -192,9 +189,8 @@ export default function PricingPage() {
   ]
 
   return (
-    <div className="flex h-screen w-full bg-tera-bg text-tera-primary custom-scrollbar font-sans selection:bg-tera-neon/30">
-      <Sidebar expanded={sidebarExpanded} onToggle={() => setSidebarExpanded(!sidebarExpanded)} />
-      <main className="flex-1 overflow-y-auto">
+    <div className="w-full bg-tera-bg text-tera-primary custom-scrollbar font-sans selection:bg-tera-neon/30">
+      <main className="overflow-y-auto">
         {/* Background Gradient Mesh */}
         <div className="fixed inset-0 pointer-events-none overflow-hidden">
           <div className="absolute top-[-10%] right-[-5%] w-[500px] h-[500px] bg-tera-neon/5 rounded-full blur-[100px] animate-pulse-slow"></div>
