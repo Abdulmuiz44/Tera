@@ -2,23 +2,18 @@
 
 import { useEffect, useState } from 'react'
 import { useAuth } from '@/components/AuthProvider'
-<<<<<<< HEAD
-import Sidebar from '@/components/Sidebar'
-import { getUserProfile } from '@/lib/usage-tracking'
-import { getPlanConfig, getRemainingChats, getUsagePercentage } from '@/lib/plan-config'
-import type { UserProfile, PlanType } from '@/lib/plan-config'
-=======
-
 import { getUserProfile, updateUserProfile, type UserProfile } from '@/lib/usage-tracking'
-import Image from 'next/image'
 import { getPlanConfig, getRemainingChats, getUsagePercentage, type PlanType } from '@/lib/plan-config'
->>>>>>> ed9d5f91f36688c26cec283eda62004420da3485
 import Link from 'next/link'
+import Image from 'next/image'
 
 export default function ProfilePage() {
   const { user } = useAuth()
   const [profile, setProfile] = useState<UserProfile | null>(null)
   const [loading, setLoading] = useState(true)
+  const [editing, setEditing] = useState(false)
+  const [saving, setSaving] = useState(false)
+  const [formData, setFormData] = useState({ fullName: '', school: '', gradeLevels: [] as string[] })
 
   useEffect(() => {
     if (user) {
@@ -31,37 +26,52 @@ export default function ProfilePage() {
     setLoading(true)
     const data = await getUserProfile(user.id)
     setProfile(data)
+    setFormData({
+      fullName: data?.fullName || '',
+      school: data?.school || '',
+      gradeLevels: data?.gradeLevels || [],
+    })
     setLoading(false)
+  }
+
+  const handleSave = async () => {
+    if (!user || !profile) return
+    setSaving(true)
+    try {
+      await updateUserProfile(user.id, {
+        ...profile,
+        ...formData,
+      })
+      setProfile({ ...profile, ...formData })
+      setEditing(false)
+    } catch (error) {
+      console.error('Error saving profile:', error)
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  const handleCancel = () => {
+    setFormData({
+      fullName: profile?.fullName || '',
+      school: profile?.school || '',
+      gradeLevels: profile?.gradeLevels || [],
+    })
+    setEditing(false)
   }
 
   if (loading) {
     return (
-<<<<<<< HEAD
-      <div className="flex h-screen bg-white dark:bg-black">
-        <Sidebar expanded={sidebarExpanded} onToggle={() => setSidebarExpanded(!sidebarExpanded)} />
-        <main className="flex-1 flex items-center justify-center">
-          <p className="text-gray-600 dark:text-gray-400">Loading...</p>
-        </main>
-=======
       <div className="flex flex-col h-full w-full items-center justify-center bg-tera-bg text-tera-primary">
         <div className="text-tera-secondary">Loading profile...</div>
->>>>>>> ed9d5f91f36688c26cec283eda62004420da3485
       </div>
     )
   }
 
   if (!profile || !user) {
     return (
-<<<<<<< HEAD
-      <div className="flex h-screen bg-white dark:bg-black">
-        <Sidebar expanded={sidebarExpanded} onToggle={() => setSidebarExpanded(!sidebarExpanded)} />
-        <main className="flex-1 flex items-center justify-center">
-          <p className="text-gray-600 dark:text-gray-400">Profile not found</p>
-        </main>
-=======
       <div className="flex flex-col h-full w-full items-center justify-center bg-tera-bg text-tera-primary">
         <div className="text-tera-secondary">Error loading profile</div>
->>>>>>> ed9d5f91f36688c26cec283eda62004420da3485
       </div>
     )
   }
@@ -69,79 +79,7 @@ export default function ProfilePage() {
   const planConfig = getPlanConfig(profile.subscriptionPlan as PlanType)
   const remainingChats = getRemainingChats(profile.subscriptionPlan as PlanType, profile.dailyChats)
   const chatLimit = planConfig.limits.chatsPerDay
-<<<<<<< HEAD
   const chatPercentage = getUsagePercentage(chatLimit as number, profile.dailyChats)
-
-  return (
-    <div className="flex h-screen w-full bg-white dark:bg-black">
-      <Sidebar expanded={sidebarExpanded} onToggle={() => setSidebarExpanded(!sidebarExpanded)} />
-      <main className="flex-1 overflow-y-auto px-6 py-8">
-        <div className="max-w-2xl mx-auto">
-          <h1 className="text-3xl font-bold text-black dark:text-white mb-8">Profile</h1>
-
-          {/* User Info */}
-          <div className="bg-gray-50 dark:bg-gray-900 border border-gray-300 dark:border-gray-800 rounded-lg p-6 mb-8">
-            <div className="flex items-center gap-4 mb-6">
-              <div className="w-16 h-16 rounded-full bg-gray-300 dark:bg-gray-700 flex items-center justify-center text-xl font-bold text-white dark:text-black">
-                {user.email?.[0].toUpperCase()}
-              </div>
-              <div>
-                <h2 className="text-xl font-semibold text-black dark:text-white">{profile.fullName || user.email}</h2>
-                <p className="text-sm text-gray-600 dark:text-gray-400">{user.email}</p>
-              </div>
-            </div>
-          </div>
-
-          {/* Subscription */}
-          <div className="bg-gray-50 dark:bg-gray-900 border border-gray-300 dark:border-gray-800 rounded-lg p-6 mb-8">
-            <h3 className="font-semibold text-black dark:text-white mb-4">Subscription</h3>
-            <div className="flex items-center justify-between mb-4">
-              <span className="text-gray-600 dark:text-gray-400">Plan:</span>
-              <span className="font-semibold text-black dark:text-white capitalize">{profile.subscriptionPlan}</span>
-            </div>
-            {profile.subscriptionPlan === 'free' && (
-              <Link
-                href="/pricing"
-                className="inline-block px-4 py-2 bg-black dark:bg-white text-white dark:text-black rounded font-medium hover:opacity-90 transition"
-              >
-                Upgrade Plan
-              </Link>
-            )}
-          </div>
-
-          {/* Usage */}
-          <div className="bg-gray-50 dark:bg-gray-900 border border-gray-300 dark:border-gray-800 rounded-lg p-6">
-            <h3 className="font-semibold text-black dark:text-white mb-6">Daily Chat Usage</h3>
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <span className="text-gray-600 dark:text-gray-400">Chats today:</span>
-                <span className="font-semibold text-black dark:text-white">
-                  {profile.dailyChats} / {chatLimit === 'unlimited' ? '∞' : chatLimit}
-                </span>
-              </div>
-
-              {chatLimit !== 'unlimited' && (
-                <>
-                  <div className="w-full bg-gray-300 dark:bg-gray-700 rounded-full h-2 overflow-hidden">
-                    <div
-                      className="bg-black dark:bg-white rounded-full h-full transition-all"
-                      style={{ width: `${chatPercentage}%` }}
-                    />
-                  </div>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">
-                    {remainingChats === 'unlimited' ? '∞' : remainingChats} chats remaining today
-                  </p>
-                </>
-              )}
-
-              {chatLimit === 'unlimited' && (
-                <p className="text-sm text-gray-600 dark:text-gray-400">Unlimited usage</p>
-              )}
-            </div>
-          </div>
-=======
-
-  const chatPercentage = getUsagePercentage(chatLimit, profile.dailyChats)
 
   const email = user.email || ''
   const displayName = formData.fullName || profile.fullName || (email ? email.split('@')[0] : '') || 'User'
@@ -327,7 +265,7 @@ export default function ProfilePage() {
                 {chatLimit === 'unlimited' && (
                   <div className="flex items-center gap-2 text-sm text-blue-400">
                     Unlimited usage
-                    <Image src="/images/TERA_LOGO_ONLY.png" alt="Tera" width={16} height={16} className="object-contain inline-block" />
+                    <Image src="/TERA_LOGO_ONLY.png" alt="Tera" width={16} height={16} className="object-contain inline-block" />
                   </div>
                 )}
               </div>
@@ -376,7 +314,6 @@ export default function ProfilePage() {
               </div>
             </div>
           )}
->>>>>>> ed9d5f91f36688c26cec283eda62004420da3485
         </div>
 
         {/* Billing Cycle Info */}
