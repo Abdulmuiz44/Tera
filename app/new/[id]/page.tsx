@@ -1,10 +1,9 @@
 'use client'
 
-import { useState } from 'react'
-import Sidebar from '@/components/Sidebar'
+import { useState, useEffect } from 'react'
+import { useParams } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
 import Link from 'next/link'
-import { useEffect } from 'react'
 
 type ChatSession = {
     id: string
@@ -15,11 +14,11 @@ type ChatSession = {
     created_at: string
 }
 
-export default function ChatSessionPage({ params }: { params: { id: string } }) {
+export default function ChatSessionPage() {
+    const params = useParams()
     const [session, setSession] = useState<ChatSession | null>(null)
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState(false)
-    const [sidebarExpanded, setSidebarExpanded] = useState(false)
 
     useEffect(() => {
         async function loadSession() {
@@ -43,7 +42,7 @@ export default function ChatSessionPage({ params }: { params: { id: string } }) 
         }
 
         loadSession()
-    }, [params.id])
+    }, [params])
 
     if (loading) {
         return (
