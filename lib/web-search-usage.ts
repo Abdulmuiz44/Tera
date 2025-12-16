@@ -45,22 +45,9 @@ export async function getWebSearchRemaining(userId: string): Promise<{ remaining
     const resetDate = data.web_search_reset_date ? new Date(data.web_search_reset_date) : null
     
     if (!resetDate || now > resetDate) {
-      // Reset the counter - next reset is 30 days from now
-      const nextReset = new Date()
-      nextReset.setDate(nextReset.getDate() + 30)
-      
-      await supabaseServer
-        .from('users')
-        .update({
-          monthly_web_searches: 0,
-          web_search_reset_date: nextReset.toISOString()
-        })
-        .eq('id', userId)
-        .then(({ error }) => {
-          if (error) console.error('Failed to reset web search count:', error)
-        })
-
-      return { remaining: limit, total: limit, resetDate: nextReset.toISOString(), plan }
+      // If reset date has passed, the user has the full limit available.
+      // The actual reset of the counter in the DB will be handled by the increment function.
+      return { remaining: limit, total: limit, resetDate: resetDate?.toISOString() || null, plan }
     }
 
     const remaining = Math.max(0, limit - (data.monthly_web_searches || 0))
@@ -84,24 +71,56 @@ export async function canPerformWebSearch(userId: string): Promise<boolean> {
  */
 export async function incrementWebSearchCount(userId: string): Promise<boolean> {
   try {
-    // First check if they can search
-    const canSearch = await canPerformWebSearch(userId)
-    if (!canSearch) {
+    // Get user's status ONCE
+    const { data: user, error: fetchError } = await supabaseServer
+      .from('users')
+      .select('monthly_web_searches, web_search_reset_date, subscription_plan')
+      .eq('id', userId)
+      .single()
+
+    if (fetchError || !user) {
+      console.error('Failed to get user for web search increment:', fetchError)
       return false
     }
 
-    // Increment the counter
-    const { remaining, total } = await getWebSearchRemaining(userId)
-    const newCount = total - (remaining - 1)
-    
-    const { error } = await supabaseServer
+    const plan = (user.subscription_plan || 'free') as 'free' | 'pro' | 'plus'
+    const limit = MONTHLY_WEB_SEARCH_LIMITS[plan]
+    const now = new Date()
+    const resetDate = user.web_search_reset_date ? new Date(user.web_search_reset_date) : null
+
+    let currentSearches = user.monthly_web_searches || 0
+    const updatePayload: { monthly_web_searches: number; web_search_reset_date?: string } = { monthly_web_searches: 0 }
+
+    // Check if we need to reset the count
+    if (!resetDate || now > resetDate) {
+      currentSearches = 0
+      const nextReset = new Date()
+      nextReset.setDate(nextReset.getDate() + 30)
+      updatePayload.web_search_reset_date = nextReset.toISOString()
+    }
+
+    // Check if user has remaining searches
+    if (currentSearches >= limit) {
+      console.warn(`User ${userId} has no remaining web searches.`)
+      return false
+    }
+
+    // Increment and update
+    updatePayload.monthly_web_searches = currentSearches + 1
+
+    const { error: updateError } = await supabaseServer
       .from('users')
-      .update({ monthly_web_searches: newCount })
+      .update(updatePayload)
       .eq('id', userId)
 
-    return !error
+    if (updateError) {
+      console.error('Failed to increment web search count:', updateError)
+      return false
+    }
+
+    return true
   } catch (error) {
-    console.error('Failed to increment web search count:', error)
+    console.error('Error incrementing web search count:', error)
     return false
   }
 }

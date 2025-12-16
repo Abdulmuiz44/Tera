@@ -209,25 +209,6 @@ async function getMemories(userId: string): Promise<string> {
   return data.map((m: any) => `- ${m.memory_text}`).join('\n')
 }
 
-// Get recent conversation history for context
-async function getRecentConversations(userId: string): Promise<string> {
-  const { data } = await supabaseServer
-    .from('chat_sessions')
-    .select('prompt, response, created_at')
-    .eq('user_id', userId)
-    .order('created_at', { ascending: false })
-    .limit(20) // Get last 20 conversations for context
-
-  if (!data || data.length === 0) return ''
-
-  // Format conversations in a readable way
-  const conversations = data.reverse().map((chat: any) => {
-    return `User: ${chat.prompt}\nTera: ${chat.response.substring(0, 150)}...` // Truncate long responses
-  })
-
-  return conversations.join('\n\n')
-}
-
 async function saveMemory(userId: string, memory: string) {
   // Check if similar memory already exists to avoid duplicates
   const { data: existing } = await supabaseServer
@@ -402,20 +383,13 @@ export async function generateTeacherResponse({
   let systemPromptWithMemory = systemMessage
   if (userId) {
     // Get both stored memories AND recent conversation history
-    const [memories, recentConversations] = await Promise.all([
-      getMemories(userId),
-      getRecentConversations(userId)
-    ])
+    const memories = await getMemories(userId)
 
-    if (memories || recentConversations) {
+    if (memories) {
       systemPromptWithMemory += `\n\n=== CONTEXT ABOUT THIS USER ===\n`
 
       if (memories) {
         systemPromptWithMemory += `\nKEY FACTS YOU REMEMBER:\n${memories}\n`
-      }
-
-      if (recentConversations) {
-        systemPromptWithMemory += `\nRECENT CONVERSATION HISTORY:\n${recentConversations}\n`
       }
 
       systemPromptWithMemory += `\n=== END CONTEXT ===\n\nUse this context to provide highly personalized, contextually aware responses. Reference past conversations naturally when relevant. Adapt your teaching/learning style based on what you know about this user.`
