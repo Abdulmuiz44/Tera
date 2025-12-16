@@ -31,7 +31,7 @@ VISUAL & VISION CAPABILITIES:
 
 1. GRAPHS & CHARTS:
    Use a 
-```json:chart block.
+json:chart block.
    Schema:
    {
      "type": "line" | "bar" | "area" | "pie" | "radar" | "scatter" | "composed",
@@ -51,14 +51,14 @@ VISUAL & VISION CAPABILITIES:
 
 2. DIAGRAMS & FLOWCHARTS:
    Use a 
-```mermaid block.
+mermaid block.
    Example:
-   ```mermaid
+   mermaid
    graph TD
      A[Start] --> B{Is it working?}
      B -- Yes --> C[Great!]
      B -- No --> D[Debug]
-   ```
+   
 
 3. RULES:
     - For velocity-time graphs, use "line" chart.
@@ -108,7 +108,7 @@ GOOGLE SHEETS & SPREADSHEET INTEGRATION:
 
 1. CREATING SPREADSHEETS:
    - When users ask to create spreadsheets, generate JSON in 
-```json:spreadsheet block
+json:spreadsheet block
    - Schema:
      {
        "action": "create",
@@ -124,7 +124,7 @@ GOOGLE SHEETS & SPREADSHEET INTEGRATION:
 
 2. EDITING SPREADSHEETS:
    - When users ask to edit existing spreadsheets, generate edit instructions in 
-```json:edit block
+json:edit block
    - Schema:
      {
        "action": "edit",
