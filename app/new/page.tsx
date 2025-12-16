@@ -8,7 +8,7 @@ import type { TeacherTool } from '@/components/ToolCard'
 import { UniversalTool } from '@/lib/tools-data'
 
 export default function ChatPage() {
-  const { user } = useAuth()
+  const { user, userReady } = useAuth()
   const [selectedTool, setSelectedTool] = useState<TeacherTool>(UniversalTool)
   const searchParams = useSearchParams()
   const sessionId = searchParams.get('sessionId')
@@ -20,6 +20,7 @@ export default function ChatPage() {
         onToolChange={setSelectedTool}
         sessionId={sessionId}
         user={user}
+        userReady={userReady}
       />
     </div>
   )
