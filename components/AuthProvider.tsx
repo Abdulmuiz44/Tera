@@ -22,19 +22,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     const ensureUserRow = async (user?: User | null) => {
-      if (!user) {
-        setUserReady(false)
-        return
-      }
-      setUserReady(false)
-      try {
-        await supabase.from('users').upsert({ id: user.id, email: user.email ?? '' })
-      } catch (error) {
-        console.error('Error syncing user:', error)
-        // Even if sync fails, we let the user proceed so we don't block the UI
-      } finally {
-        setUserReady(true)
-      }
+      // The user row in the public.users table is now expected to be created
+      // by a server-side trigger when a new user signs up.
+      // This client-side logic just checks for an authenticated user.
+      setUserReady(!!user)
     }
 
     supabase.auth.getSession().then(({ data: { session } }) => {
