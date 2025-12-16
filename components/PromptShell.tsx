@@ -704,7 +704,7 @@ export default function PromptShell({
               <div className="pointer-events-auto flex flex-col items-center">
                 <div className="mb-8 rounded-full bg-gradient-to-br from-tera-neon/20 to-transparent p-6 mx-auto w-fit">
                   <span className="flex items-center justify-center w-32 h-32">
-                    <Image src="/images/TERA_LOGO_ONLY.png" alt="Tera" width={120} height={120} className="object-contain" />
+                    <Image src="/images/TERA_LOGO_ONLY.png" alt="Tera" width={120} height={120} className="object-contain" priority={false} />
                   </span>
                 </div>
                 <h2 className="text-3xl font-semibold text-tera-primary">How can Tera help you today?</h2>
