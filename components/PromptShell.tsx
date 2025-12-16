@@ -986,7 +986,7 @@ export default function PromptShell({
                 {showStopButton && (
                   <button
                     onClick={handleStop}
-                    className="flex h-9 w-9 items-center justify-center rounded-full bg-tera-neon text-black transition hover:bg-tera-neon/90"
+                    className="flex h-9 w-9 items-center justify-center rounded-full bg-tera-accent text-tera-bg transition hover:bg-tera-accent/90"
                     title="Stop generating"
                   >
                     <div className="h-3 w-3 bg-black rounded-[2px]" />
@@ -996,7 +996,7 @@ export default function PromptShell({
                 {showSendButton && (
                   <button
                     onClick={handleSubmit}
-                    className="flex h-9 w-9 items-center justify-center rounded-full bg-tera-neon text-black transition hover:bg-tera-neon/90"
+                    className="flex h-9 w-9 items-center justify-center rounded-full bg-tera-accent text-tera-bg transition hover:bg-tera-accent/90"
                     title="Send message"
                   >
                     <svg
