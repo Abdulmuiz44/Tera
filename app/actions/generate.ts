@@ -22,21 +22,6 @@ type GenerateProps = {
 }
 
 export async function generateAnswer({ prompt, tool, authorId, authorEmail, attachments = [], sessionId, chatId, enableWebSearch = false }: GenerateProps) {
-
-  // Ensure user exists in users table FIRST
-  if (authorId && authorEmail) {
-    const { error } = await supabaseServer.from('users').upsert({
-      id: authorId,
-      email: authorEmail
-    }, {
-      onConflict: 'id'
-    })
-
-    if (error) {
-      console.error('Error creating/updating user:', error)
-    }
-  }
-
   // Get user profile and check limits
   let userProfile = await getUserProfile(authorId)
 
