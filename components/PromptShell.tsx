@@ -248,7 +248,17 @@ export default function PromptShell({
     })
 
     if (!response.ok) {
-      throw new Error('Unable to upload attachment')
+      // Try to parse the error message
+      let errorMessage = 'Unable to upload attachment'
+      try {
+        const errorData = await response.json()
+        if (errorData.error) {
+          errorMessage = errorData.error
+        }
+      } catch (e) {
+        // Fallback to default error
+      }
+      throw new Error(errorMessage)
     }
 
     return (await response.json()) as AttachmentReference
@@ -286,7 +296,15 @@ export default function PromptShell({
       setAttachmentMessage(null)
     } catch (error) {
       console.error('Upload failed', error)
-      setAttachmentMessage('Upload failed. Please try again.')
+      const message = error instanceof Error ? error.message : 'Upload failed'
+
+      // Check for limit errors and show modal
+      if (message.includes('limit') && (message.includes('upload') || message.includes('file'))) {
+        setLimitModalType('file-uploads')
+        setAttachmentMessage(null)
+      } else {
+        setAttachmentMessage(message)
+      }
     } finally {
       event.target.value = ''
     }
