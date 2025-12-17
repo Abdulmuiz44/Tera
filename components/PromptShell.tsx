@@ -238,6 +238,9 @@ export default function PromptShell({
     const formData = new FormData()
     formData.append('file', file)
     formData.append('type', type)
+    if (user?.id) {
+      formData.append('userId', user.id)
+    }
 
     const response = await fetch('/api/attachments', {
       method: 'POST',

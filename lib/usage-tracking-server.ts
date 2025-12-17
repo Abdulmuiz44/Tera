@@ -87,3 +87,33 @@ export async function incrementFileUploadsServer(userId: string, count: number =
 
     return !updateError
 }
+
+/**
+ * Fetch user profile with usage stats (Server Side)
+ */
+export async function getUserProfileServer(userId: string) {
+    const { data, error } = await supabaseServer
+        .from('users')
+        .select('*')
+        .eq('id', userId)
+        .single()
+
+    if (error) {
+        console.error('Error fetching user profile (server):', error)
+        return null
+    }
+
+    return {
+        id: data.id,
+        email: data.email,
+        subscriptionPlan: (data.subscription_plan || 'free') as 'free' | 'pro' | 'plus',
+        dailyChats: data.daily_chats || 0,
+        dailyFileUploads: data.daily_file_uploads || 0,
+        chatResetDate: data.chat_reset_date ? new Date(data.chat_reset_date) : null,
+        profileImageUrl: data.profile_image_url,
+        fullName: data.full_name,
+        school: data.school,
+        gradeLevels: data.grade_levels,
+        createdAt: new Date(data.created_at)
+    }
+}

@@ -1,14 +1,32 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
+import { getUserProfileServer, incrementFileUploadsServer } from '@/lib/usage-tracking-server'
+import { canUploadFile, getPlanConfig } from '@/lib/plan-config'
 
 export async function POST(request: NextRequest) {
   try {
     const formData = await request.formData()
     const file = formData.get('file') as File
     const type = formData.get('type') as string
+    const userId = formData.get('userId') as string
 
     if (!file) {
       return NextResponse.json({ error: 'No file provided' }, { status: 400 })
+    }
+
+    // Enforce Plan Limits
+    if (userId) {
+      const userProfile = await getUserProfileServer(userId)
+      if (userProfile) {
+        if (!canUploadFile(userProfile.subscriptionPlan, userProfile.dailyFileUploads)) {
+          const planConfig = getPlanConfig(userProfile.subscriptionPlan)
+          const limit = planConfig.limits.fileUploadsPerDay
+          return NextResponse.json(
+            { error: `Daily upload limit reached (${limit}). Upgrade for more.` },
+            { status: 403 }
+          )
+        }
+      }
     }
 
     const supabase = createClient(
@@ -27,6 +45,11 @@ export async function POST(request: NextRequest) {
     if (error) {
       console.error('Supabase upload error:', error)
       return NextResponse.json({ error: 'Upload failed' }, { status: 500 })
+    }
+
+    // Increment Usage Counter
+    if (userId) {
+      await incrementFileUploadsServer(userId)
     }
 
     const { data: { publicUrl } } = supabase.storage

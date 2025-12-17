@@ -140,11 +140,6 @@ export async function generateAnswer({ prompt, tool, authorId, authorEmail, atta
   // Increment chat counter after successful generation
   await incrementChatsServer(authorId)
 
-  // Increment file upload counter if attachments were used
-  if (attachments.length > 0) {
-    await incrementFileUploadsServer(authorId, attachments.length)
-  }
-
   // Increment web search counter if enabled
   if (enableWebSearch) {
     await incrementWebSearchCount(authorId)
