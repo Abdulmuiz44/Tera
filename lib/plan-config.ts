@@ -72,19 +72,19 @@ export const PLAN_CONFIGS: Record<PlanType, PlanConfig> = {
     plus: {
         name: 'plus',
         displayName: 'Plus',
-        price: 19,
+        price: 15,
         period: '/month',
         description: 'For power users who need everything.',
         limits: {
             chatsPerDay: 'unlimited',
             fileUploadsPerDay: 'unlimited',
-            webSearchesPerMonth: 80,
+            webSearchesPerMonth: 'unlimited',
             maxFileSize: 2000,
             features: ['advanced-chat', 'all-tools', 'file-uploads', 'export', 'admin', 'analytics', 'sso', 'web-search', 'priority-support', 'custom-ai']
         },
         features: [
             'Everything in Pro, plus:',
-            '80 web searches per month',
+            'Unlimited web searches',
             'Unlimited file uploads (2GB each)',
             'Advanced analytics dashboard',
             'Team collaboration features',

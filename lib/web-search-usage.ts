@@ -12,7 +12,7 @@ import { getPlanConfig } from './plan-config'
 const MONTHLY_WEB_SEARCH_LIMITS = {
   free: 5,
   pro: 50,
-  plus: 80
+  plus: Infinity // Unlimited
 }
 
 const RESET_INTERVAL_DAYS = 30
@@ -43,11 +43,15 @@ export async function getWebSearchRemaining(userId: string): Promise<{ remaining
     // Check if reset date has passed (reset monthly)
     const now = new Date()
     const resetDate = data.web_search_reset_date ? new Date(data.web_search_reset_date) : null
-    
+
     if (!resetDate || now > resetDate) {
       // If reset date has passed, the user has the full limit available.
       // The actual reset of the counter in the DB will be handled by the increment function.
-      return { remaining: limit, total: limit, resetDate: resetDate?.toISOString() || null, plan }
+      return { remaining: limit === Infinity ? 999999 : limit, total: limit === Infinity ? 999999 : limit, resetDate: resetDate?.toISOString() || null, plan }
+    }
+
+    if (limit === Infinity) {
+      return { remaining: 999999, total: 999999, resetDate: resetDate?.toISOString() || null, plan }
     }
 
     const remaining = Math.max(0, limit - (data.monthly_web_searches || 0))
@@ -99,8 +103,8 @@ export async function incrementWebSearchCount(userId: string): Promise<boolean> 
       updatePayload.web_search_reset_date = nextReset.toISOString()
     }
 
-    // Check if user has remaining searches
-    if (currentSearches >= limit) {
+    // Check if user has remaining searches (skip for unlimited)
+    if (limit !== Infinity && currentSearches >= limit) {
       console.warn(`User ${userId} has no remaining web searches.`)
       return false
     }
@@ -129,15 +133,19 @@ export async function incrementWebSearchCount(userId: string): Promise<boolean> 
  * Get formatted message for web search limit
  */
 export function getWebSearchLimitMessage(remaining: number, total: number): string {
+  if (total === Infinity || total > 9999) {
+    return '🔍 Web Search (Unlimited)'
+  }
+
   if (remaining <= 0) {
     return `🔍 Web Search Limit Reached (${total}/${total} searches used)`
   }
-  
+
   const percentage = Math.round((remaining / total) * 100)
   if (remaining <= 10) {
     return `🔍 Web Search (${remaining}/${total} remaining) - Low`
   }
-  
+
   return `🔍 Web Search (${remaining}/${total})`
 }
 

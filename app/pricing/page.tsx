@@ -38,7 +38,7 @@ const PLAN_CONFIGS = {
   plus: {
     name: 'plus',
     displayName: 'Plus',
-    price: 19,
+    price: 15,
     period: '/month',
     description: 'For professionals',
     features: [
@@ -55,12 +55,55 @@ const PLAN_CONFIGS = {
 }
 
 const CURRENCY_CODES: Record<string, { code: string; symbol: string; rate: number }> = {
+  // North America
   'USD': { code: 'USD', symbol: '$', rate: 1 },
+  'CAD': { code: 'CAD', symbol: 'CA$', rate: 1.35 },
+  'MXN': { code: 'MXN', symbol: 'Mex$', rate: 16.7 },
+
+  // Europe
   'EUR': { code: 'EUR', symbol: '€', rate: 0.92 },
   'GBP': { code: 'GBP', symbol: '£', rate: 0.79 },
-  'JPY': { code: 'JPY', symbol: '¥', rate: 149.5 },
-  'INR': { code: 'INR', symbol: '₹', rate: 83 },
-  'NGN': { code: 'NGN', symbol: '₦', rate: 1550 },
+  'CHF': { code: 'CHF', symbol: 'Fr.', rate: 0.90 },
+  'SEK': { code: 'SEK', symbol: 'kr', rate: 10.6 },
+  'NOK': { code: 'NOK', symbol: 'kr', rate: 10.7 },
+  'DKK': { code: 'DKK', symbol: 'kr', rate: 6.9 },
+  'PLN': { code: 'PLN', symbol: 'zł', rate: 3.95 },
+  'CZK': { code: 'CZK', symbol: 'Kč', rate: 23.5 },
+  'HUF': { code: 'HUF', symbol: 'Ft', rate: 360 },
+  'TRY': { code: 'TRY', symbol: '₺', rate: 32.5 },
+
+  // Asia Pacific
+  'JPY': { code: 'JPY', symbol: '¥', rate: 154 },
+  'AUD': { code: 'AUD', symbol: 'A$', rate: 1.52 },
+  'NZD': { code: 'NZD', symbol: 'NZ$', rate: 1.65 },
+  'CNY': { code: 'CNY', symbol: '¥', rate: 7.24 },
+  'HKD': { code: 'HKD', symbol: 'HK$', rate: 7.83 },
+  'SGD': { code: 'SGD', symbol: 'S$', rate: 1.35 },
+  'KRW': { code: 'KRW', symbol: '₩', rate: 1375 },
+  'INR': { code: 'INR', symbol: '₹', rate: 83.5 },
+  'IDR': { code: 'IDR', symbol: 'Rp', rate: 16100 },
+  'MYR': { code: 'MYR', symbol: 'RM', rate: 4.75 },
+  'PHP': { code: 'PHP', symbol: '₱', rate: 57.5 },
+  'THB': { code: 'THB', symbol: '฿', rate: 36.8 },
+  'VND': { code: 'VND', symbol: '₫', rate: 25450 },
+  'TWD': { code: 'TWD', symbol: 'NT$', rate: 32.5 },
+
+  // Middle East & Africa
+  'AED': { code: 'AED', symbol: 'د.إ', rate: 3.67 },
+  'SAR': { code: 'SAR', symbol: '﷼', rate: 3.75 },
+  'ILS': { code: 'ILS', symbol: '₪', rate: 3.75 },
+  'ZAR': { code: 'ZAR', symbol: 'R', rate: 18.5 },
+  'NGN': { code: 'NGN', symbol: '₦', rate: 1450 },
+  'EGP': { code: 'EGP', symbol: 'E£', rate: 47.5 },
+  'KES': { code: 'KES', symbol: 'KSh', rate: 130 },
+  'GHS': { code: 'GHS', symbol: 'GH₵', rate: 14.5 },
+
+  // South America
+  'BRL': { code: 'BRL', symbol: 'R$', rate: 5.15 },
+  'ARS': { code: 'ARS', symbol: 'AT$', rate: 875 }, // Highly volatile, estimated
+  'CLP': { code: 'CLP', symbol: 'CLP$', rate: 950 },
+  'COP': { code: 'COP', symbol: 'COL$', rate: 3900 },
+  'PEN': { code: 'PEN', symbol: 'S/', rate: 3.75 },
 }
 
 const convertPrice = (price: number, currencyCode: string): number => {
@@ -95,17 +138,17 @@ export default function PricingPage() {
       try {
         // Get authenticated user
         const { data: { user: authUser } } = await supabase.auth.getUser()
-        
+
         if (authUser) {
-            const response = await fetch('/api/subscription/status', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ userId: authUser.id })
-            })
-            const data = await response.json()
-            if (data.success) {
-                setCurrentPlan(data.plan)
-            }
+          const response = await fetch('/api/subscription/status', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ userId: authUser.id })
+          })
+          const data = await response.json()
+          if (data.success) {
+            setCurrentPlan(data.plan)
+          }
         }
       } catch (error) {
         console.error('Error loading user plan:', error)
