@@ -43,8 +43,7 @@
       "bundler": "metro"
     },
     "plugins": [
-      "expo-router",
-      "@react-native-async-storage/async-storage"
+      "expo-router"
     ],
     "scheme": "tera"
   }

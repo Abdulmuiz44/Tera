@@ -40,7 +40,7 @@ export default function SettingsPage() {
   const fetchSettings = async () => {
     try {
       setLoading(true)
-      const response = await fetch('/api/settings', {
+      const response = await fetch('/api/user/settings', {
         method: 'GET',
         headers: {
           'x-user-id': user?.id || '',
@@ -78,7 +78,7 @@ export default function SettingsPage() {
     setMessage('')
 
     try {
-      const response = await fetch('/api/settings', {
+      const response = await fetch('/api/user/settings', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -140,7 +140,7 @@ export default function SettingsPage() {
 
     try {
       setAutoSaving(true)
-      const response = await fetch('/api/settings', {
+      const response = await fetch('/api/user/settings', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

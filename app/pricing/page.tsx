@@ -140,7 +140,7 @@ export default function PricingPage() {
         const { data: { user: authUser } } = await supabase.auth.getUser()
 
         if (authUser) {
-          const response = await fetch('/api/subscription/status', {
+          const response = await fetch('/api/billing/status', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ userId: authUser.id })
@@ -169,7 +169,7 @@ export default function PricingPage() {
 
     setLoading(true)
     try {
-      const response = await fetch('/api/checkout/create-session', {
+      const response = await fetch('/api/billing/create-session', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

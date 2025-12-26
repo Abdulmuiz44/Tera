@@ -242,7 +242,7 @@ export default function PromptShell({
       formData.append('userId', user.id)
     }
 
-    const response = await fetch('/api/attachments', {
+    const response = await fetch('/api/user/attachments', {
       method: 'POST',
       body: formData
     })

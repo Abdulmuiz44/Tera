@@ -1,4 +1,4 @@
-import express, { Express, Request, Response, NextFunction } from 'express';
+import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import authRoutes from './routes/auth.js';
@@ -8,7 +8,7 @@ import searchRoutes from './routes/search.js';
 
 dotenv.config();
 
-const app: Express = express();
+const app: express.Application = express();
 const PORT = process.env.PORT || 5000;
 
 // Middleware
@@ -29,13 +29,13 @@ app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ limit: '50mb', extended: true }));
 
 // Request logging
-app.use((req: Request, res: Response, next: NextFunction) => {
+app.use((req: express.Request, res: express.Response, next: express.NextFunction) => {
   console.log(`[${new Date().toISOString()}] ${req.method} ${req.path}`);
   next();
 });
 
 // Health check
-app.get('/health', (req: Request, res: Response) => {
+app.get('/health', (req: express.Request, res: express.Response) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
 
@@ -49,9 +49,9 @@ app.use('/api/search', searchRoutes);
 app.use(
   (
     err: any,
-    req: Request,
-    res: Response,
-    next: NextFunction
+    req: express.Request,
+    res: express.Response,
+    next: express.NextFunction
   ) => {
     console.error('Error:', err);
 
@@ -67,7 +67,7 @@ app.use(
 );
 
 // 404 handler
-app.use((req: Request, res: Response) => {
+app.use((req: express.Request, res: express.Response) => {
   res.status(404).json({
     success: false,
     error: 'Route not found',
