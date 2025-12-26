@@ -2,22 +2,22 @@ import React from 'react'
 
 export default function TermsPage() {
     return (
-        <div className="mx-auto max-w-4xl px-6 py-12 md:py-20 text-white">
+        <div className="mx-auto max-w-4xl px-6 py-12 md:py-20 text-tera-primary bg-tera-bg min-h-screen">
             <h1 className="mb-8 text-4xl font-bold tracking-tight text-tera-neon">Terms and Conditions</h1>
-            <div className="prose prose-invert max-w-none space-y-8 text-white/80">
+            <div className="prose max-w-none space-y-8 text-tera-secondary">
                 <p className="text-lg leading-relaxed">
                     Welcome to Tera. By accessing or using our website and services, you agree to be bound by these Terms and Conditions.
                 </p>
 
                 <section>
-                    <h2 className="mb-4 text-2xl font-semibold text-white">1. Acceptance of Terms</h2>
+                    <h2 className="mb-4 text-2xl font-semibold text-tera-primary">1. Acceptance of Terms</h2>
                     <p>
                         By creating an account or using Tera, you agree to comply with these terms. If you do not agree, you may not use our services.
                     </p>
                 </section>
 
                 <section>
-                    <h2 className="mb-4 text-2xl font-semibold text-white">2. Description of Service</h2>
+                    <h2 className="mb-4 text-2xl font-semibold text-tera-primary">2. Description of Service</h2>
                     <p>
                         Tera is an AI-powered assistant designed to help teachers with tasks such as lesson planning, quiz generation, and content creation. The services are provided "as is" and may change over time.
                     </p>

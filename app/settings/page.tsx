@@ -272,8 +272,8 @@ export default function SettingsPage() {
                                 onChange={() => toggleSetting('notifications_enabled')}
                                 className="sr-only peer"
                               />
-                              <div className="w-full h-full bg-white/10 peer-checked:bg-tera-neon rounded-full transition peer-checked:shadow-lg peer-checked:shadow-tera-neon/50"></div>
-                              <div className="absolute left-0.5 top-0.5 bg-white w-5 h-5 rounded-full transition peer-checked:translate-x-6"></div>
+                              <div className="w-full h-full bg-tera-primary/10 peer-checked:bg-tera-neon rounded-full transition peer-checked:shadow-lg peer-checked:shadow-tera-neon/50"></div>
+                              <div className="absolute left-0.5 top-0.5 bg-tera-primary w-5 h-5 rounded-full transition peer-checked:translate-x-6"></div>
                             </label>
                           </div>
 
@@ -289,8 +289,8 @@ export default function SettingsPage() {
                                 onChange={() => toggleSetting('email_notifications')}
                                 className="sr-only peer"
                               />
-                              <div className="w-full h-full bg-white/10 peer-checked:bg-tera-neon rounded-full transition peer-checked:shadow-lg peer-checked:shadow-tera-neon/50"></div>
-                              <div className="absolute left-0.5 top-0.5 bg-white w-5 h-5 rounded-full transition peer-checked:translate-x-6"></div>
+                              <div className="w-full h-full bg-tera-primary/10 peer-checked:bg-tera-neon rounded-full transition peer-checked:shadow-lg peer-checked:shadow-tera-neon/50"></div>
+                              <div className="absolute left-0.5 top-0.5 bg-tera-primary w-5 h-5 rounded-full transition peer-checked:translate-x-6"></div>
                             </label>
                           </div>
 
@@ -306,8 +306,8 @@ export default function SettingsPage() {
                                 onChange={() => toggleSetting('marketing_emails')}
                                 className="sr-only peer"
                               />
-                              <div className="w-full h-full bg-white/10 peer-checked:bg-tera-neon rounded-full transition peer-checked:shadow-lg peer-checked:shadow-tera-neon/50"></div>
-                              <div className="absolute left-0.5 top-0.5 bg-white w-5 h-5 rounded-full transition peer-checked:translate-x-6"></div>
+                              <div className="w-full h-full bg-tera-primary/10 peer-checked:bg-tera-neon rounded-full transition peer-checked:shadow-lg peer-checked:shadow-tera-neon/50"></div>
+                              <div className="absolute left-0.5 top-0.5 bg-tera-primary w-5 h-5 rounded-full transition peer-checked:translate-x-6"></div>
                             </label>
                           </div>
                         </div>
