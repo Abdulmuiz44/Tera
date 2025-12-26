@@ -4,8 +4,9 @@ import { createSpreadsheet, appendDataToSheet, updateSheetData } from '@/lib/goo
 import { applyOperations, validateData } from '@/lib/spreadsheet-operations'
 import { getSpreadsheetEditHistory, getSpreadsheetEditCount } from '@/lib/spreadsheet-edit-tracking'
 
-export async function POST(request: NextRequest, { params }: { params: { slug: string[] } }) {
-    const action = params.slug[0]
+export async function POST(request: NextRequest, { params }: { params: Promise<{ slug: string[] }> }) {
+    const { slug } = await params
+    const action = slug[0]
 
     try {
         const body = await request.json()
@@ -67,8 +68,9 @@ export async function POST(request: NextRequest, { params }: { params: { slug: s
     }
 }
 
-export async function GET(request: NextRequest, { params }: { params: { slug: string[] } }) {
-    const action = params.slug[0]
+export async function GET(request: NextRequest, { params }: { params: Promise<{ slug: string[] }> }) {
+    const { slug } = await params
+    const action = slug[0]
 
     if (action === 'edit-history') {
         try {

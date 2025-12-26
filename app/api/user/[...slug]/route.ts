@@ -21,8 +21,9 @@ const DEFAULT_SETTINGS = (userId: string) => ({
     updated_at: new Date().toISOString(),
 })
 
-export async function GET(request: NextRequest, { params }: { params: { slug: string[] } }) {
-    const action = params.slug[0]
+export async function GET(request: NextRequest, { params }: { params: Promise<{ slug: string[] }> }) {
+    const { slug } = await params
+    const action = slug[0]
 
     if (action === 'geo-currency') {
         try {
@@ -59,8 +60,9 @@ export async function GET(request: NextRequest, { params }: { params: { slug: st
     return NextResponse.json({ error: 'Invalid action' }, { status: 400 })
 }
 
-export async function POST(request: NextRequest, { params }: { params: { slug: string[] } }) {
-    const action = params.slug[0]
+export async function POST(request: NextRequest, { params }: { params: Promise<{ slug: string[] }> }) {
+    const { slug } = await params
+    const action = slug[0]
 
     if (action === 'web-search-status') {
         try {

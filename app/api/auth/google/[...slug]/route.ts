@@ -10,8 +10,9 @@ function getOAuth2Client() {
     )
 }
 
-export async function POST(request: NextRequest, { params }: { params: { slug: string[] } }) {
-    const action = params.slug[0]
+export async function POST(request: NextRequest, { params }: { params: Promise<{ slug: string[] }> }) {
+    const { slug } = await params
+    const action = slug[0]
 
     if (action === 'start') {
         try {
@@ -35,8 +36,9 @@ export async function POST(request: NextRequest, { params }: { params: { slug: s
     return NextResponse.json({ error: 'Invalid action' }, { status: 400 })
 }
 
-export async function GET(request: NextRequest, { params }: { params: { slug: string[] } }) {
-    const action = params.slug[0]
+export async function GET(request: NextRequest, { params }: { params: Promise<{ slug: string[] }> }) {
+    const { slug } = await params
+    const action = slug[0]
 
     if (action === 'callback') {
         const searchParams = request.nextUrl.searchParams

@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getWebSearchRemaining, incrementWebSearchCount } from '@/lib/web-search-usage'
 
-export async function POST(request: NextRequest, { params }: { params: { slug: string[] } }) {
-  const action = params.slug[0]
+export async function POST(request: NextRequest, { params }: { params: Promise<{ slug: string[] }> }) {
+  const { slug } = await params
+  const action = slug[0]
 
   if (action === 'web') {
     try {

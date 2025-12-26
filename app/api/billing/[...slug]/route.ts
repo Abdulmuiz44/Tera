@@ -2,8 +2,9 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getCheckoutUrlForPlan } from '@/lib/lemon-squeezy'
 import { supabaseServer } from '@/lib/supabase-server'
 
-export async function POST(request: NextRequest, { params }: { params: { slug: string[] } }) {
-    const action = params.slug[0]
+export async function POST(request: NextRequest, { params }: { params: Promise<{ slug: string[] }> }) {
+    const { slug } = await params
+    const action = slug[0]
 
     try {
         const body = await request.json()
