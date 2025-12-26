@@ -30,14 +30,14 @@ export const PLAN_CONFIGS: Record<PlanType, PlanConfig> = {
         period: '/month',
         description: 'Start exploring AI-powered learning for free.',
         limits: {
-            chatsPerDay: 15,
+            chatsPerDay: 10,
             fileUploadsPerDay: 5,
             webSearchesPerMonth: 5,
             maxFileSize: 25,
             features: ['basic-chat', 'basic-tools', 'file-uploads', 'web-search']
         },
         features: [
-            'Up to 15 AI conversations per day',
+            'Up to 10 AI conversations per day',
             '5 file uploads per day (25MB each)',
             '5 web searches per month',
             'Basic AI tools & features',

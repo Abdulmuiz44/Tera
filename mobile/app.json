@@ -1,0 +1,51 @@
+{
+  "expo": {
+    "name": "Tera",
+    "slug": "tera-mobile",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "dark",
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#000000"
+    },
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "ios": {
+      "supportsTabletMode": true,
+      "bundleIdentifier": "com.teraai.app",
+      "infoPlist": {
+        "NSMicrophoneUsageDescription": "Tera needs access to your microphone for voice input",
+        "NSCameraRollUsageDescription": "Tera needs access to your photos for uploads",
+        "NSPhotoLibraryUsageDescription": "Tera needs access to your photo library"
+      }
+    },
+    "android": {
+      "package": "com.teraai.app",
+      "versionCode": 1,
+      "permissions": [
+        "RECORD_AUDIO",
+        "READ_EXTERNAL_STORAGE",
+        "WRITE_EXTERNAL_STORAGE",
+        "INTERNET",
+        "ACCESS_NETWORK_STATE"
+      ],
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#000000"
+      }
+    },
+    "web": {
+      "favicon": "./assets/favicon.png",
+      "bundler": "metro"
+    },
+    "plugins": [
+      "expo-router",
+      "@react-native-async-storage/async-storage"
+    ],
+    "scheme": "tera"
+  }
+}

@@ -37,12 +37,30 @@ export default function AppLayout({ children }: AppLayoutProps) {
             />
 
             <main className={`relative flex flex-1 flex-col min-h-screen transition-all duration-300 ease-in-out ml-0 ${sidebarExpanded ? 'md:ml-[280px] pb-32' : 'md:ml-[72px]'}`}>
-                {/* Mobile Menu Button */}
+                {/* Mobile Menu Button - Left */}
                 <button
                     className="fixed left-4 top-4 z-40 rounded-full border border-tera-border bg-tera-panel p-2 text-tera-primary md:hidden"
                     onClick={() => setSidebarExpanded(true)}
                 >
                     ☰
+                </button>
+
+                {/* New Chat Button - Right */}
+                <button
+                    className="fixed right-4 top-4 z-40 flex items-center justify-center rounded-full border border-tera-border bg-tera-panel p-2.5 text-tera-primary transition-all hover:bg-tera-muted hover:scale-105 active:scale-95 shadow-glow-sm"
+                    onClick={handleNewChat}
+                    title="Start New Chat"
+                >
+                    <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        strokeWidth={2}
+                        stroke="currentColor"
+                        className="w-5 h-5"
+                    >
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                    </svg>
                 </button>
 
                 {children}

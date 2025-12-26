@@ -3,6 +3,7 @@
 
 import { supabase } from './supabase'
 import type { PlanType } from './plan-config'
+import { PLAN_CONFIGS, canStartChat, canUploadFile, getRemainingChats, getRemainingFileUploads } from './plan-config'
 
 export interface UsageStats {
     dailyChats: number
@@ -119,6 +120,87 @@ export async function checkAndResetUsage(userId: string): Promise<boolean> {
 }
 
 
+
+/**
+ * Check if user can start a new chat
+ */
+export async function canUserStartChat(userId: string): Promise<{ allowed: boolean; remaining: number | 'unlimited'; reason?: string }> {
+    const profile = await getUserProfile(userId)
+    if (!profile) return { allowed: false, remaining: 0, reason: 'User not found' }
+
+    // Reset if needed
+    await checkAndResetUsage(userId)
+
+    // Get fresh stats after potential reset
+    const stats = await getUsageStats(userId)
+    if (!stats) return { allowed: false, remaining: 0, reason: 'Could not fetch usage stats' }
+
+    const allowed = canStartChat(profile.subscriptionPlan, stats.dailyChats)
+    const remaining = getRemainingChats(profile.subscriptionPlan, stats.dailyChats)
+
+    if (!allowed) {
+        const limit = PLAN_CONFIGS[profile.subscriptionPlan].limits.chatsPerDay
+        return {
+            allowed: false,
+            remaining: 0,
+            reason: `You've reached your daily limit of ${limit} chats. Reset at midnight.`
+        }
+    }
+
+    return { allowed: true, remaining }
+}
+
+/**
+ * Check if user can upload files
+ */
+export async function canUserUploadFiles(userId: string, fileCount: number = 1): Promise<{ allowed: boolean; remaining: number | 'unlimited'; reason?: string }> {
+    const profile = await getUserProfile(userId)
+    if (!profile) return { allowed: false, remaining: 0, reason: 'User not found' }
+
+    // Reset if needed
+    await checkAndResetUsage(userId)
+
+    // Get fresh stats after potential reset
+    const stats = await getUsageStats(userId)
+    if (!stats) return { allowed: false, remaining: 0, reason: 'Could not fetch usage stats' }
+
+    const totalAfter = stats.dailyFileUploads + fileCount
+    const allowed = canUploadFile(profile.subscriptionPlan, totalAfter - 1) // Check if we can add this many
+
+    const remaining = getRemainingFileUploads(profile.subscriptionPlan, stats.dailyFileUploads)
+
+    if (!allowed) {
+        const limit = PLAN_CONFIGS[profile.subscriptionPlan].limits.fileUploadsPerDay
+        const remainingStr = remaining === 'unlimited' ? 'unlimited' : remaining
+        return {
+            allowed: false,
+            remaining: remaining === 'unlimited' ? 'unlimited' : 0,
+            reason: `Daily upload limit reached (${limit}). ${remaining} remaining. Reset at midnight.`
+        }
+    }
+
+    return { allowed: true, remaining }
+}
+
+/**
+ * Validate file size against plan limits
+ */
+export async function validateFileSize(userId: string, fileSizeMB: number): Promise<{ allowed: boolean; maxSize: number; reason?: string }> {
+    const profile = await getUserProfile(userId)
+    if (!profile) return { allowed: false, maxSize: 0, reason: 'User not found' }
+
+    const maxFileSize = PLAN_CONFIGS[profile.subscriptionPlan].limits.maxFileSize
+
+    if (fileSizeMB > maxFileSize) {
+        return {
+            allowed: false,
+            maxSize: maxFileSize,
+            reason: `File exceeds max size for ${profile.subscriptionPlan} plan (${maxFileSize}MB limit). Upgrade to increase file size limit.`
+        }
+    }
+
+    return { allowed: true, maxSize: maxFileSize }
+}
 
 /**
  * Increment chat counter

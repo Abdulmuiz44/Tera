@@ -1,0 +1,17 @@
+{
+  "extends": "expo/tsconfig",
+  "compilerOptions": {
+    "strict": true,
+    "jsx": "react-jsx",
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./*"]
+    },
+    "skipLibCheck": true,
+    "resolveJsonModule": true,
+    "declaration": true,
+    "lib": [
+      "ES2020"
+    ]
+  }
+}

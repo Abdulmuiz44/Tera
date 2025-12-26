@@ -13,7 +13,7 @@ const PLAN_CONFIGS = {
     period: '/month',
     description: 'Perfect for getting started',
     features: [
-      '15 AI conversations per day',
+      '10 AI conversations per day',
       '5 file uploads per day',
       '5 web searches per month',
       'Basic tools & features',
@@ -336,7 +336,7 @@ export default function PricingPage() {
                     </thead>
                     <tbody>
                       {[
-                        { feature: 'Daily AI Conversations', free: '15', pro: 'Unlimited', plus: 'Unlimited' },
+                        { feature: 'Daily AI Conversations', free: '10', pro: 'Unlimited', plus: 'Unlimited' },
                         { feature: 'Monthly Web Searches', free: '5', pro: '50', plus: '80' },
                         { feature: 'File Uploads (per day)', free: '5', pro: '20', plus: 'Unlimited' },
                         { feature: 'Max File Size', free: '25 MB', pro: '500 MB', plus: '2 GB' },

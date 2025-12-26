@@ -12,7 +12,7 @@ import { getPlanConfig } from './plan-config'
 const MONTHLY_WEB_SEARCH_LIMITS = {
   free: 5,
   pro: 50,
-  plus: Infinity // Unlimited
+  plus: Infinity // Unlimited (was showing 80 in pricing but Plus should have unlimited)
 }
 
 const RESET_INTERVAL_DAYS = 30

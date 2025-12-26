@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
 import { useAuth } from '@/components/AuthProvider'
 import PromptShell from '@/components/PromptShell'
@@ -14,9 +14,20 @@ export default function ChatPage() {
   const router = useRouter()
   const sessionId = searchParams.get('sessionId')
 
+  // Redirection logic for path-based sessions
+  useEffect(() => {
+    if (!sessionId) {
+      const newId = crypto.randomUUID()
+      router.replace(`/new/${newId}`)
+    }
+  }, [sessionId, router])
+
   const handleRequireSignIn = () => {
     router.push('/auth/signin')
   }
+
+  // If we are redirecting, we can show a loading state or just return null
+  if (!sessionId) return null
 
   return (
     <div className="w-full h-screen bg-white dark:bg-black">
