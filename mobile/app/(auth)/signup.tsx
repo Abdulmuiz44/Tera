@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import * as React from 'react';
+import { useState } from 'react';
 import {
   View,
   Text,
@@ -10,6 +11,7 @@ import {
   KeyboardAvoidingView,
   Platform,
   ScrollView,
+  Alert,
 } from 'react-native';
 import { router } from 'expo-router';
 import { teraAPI } from '@/lib/api';
@@ -50,7 +52,7 @@ export default function SignUpScreen() {
       }
 
       // Show success message and redirect to sign in
-      alert('Account created! Please sign in.');
+      Alert.alert('Success', 'Account created! Please sign in.');
       router.replace('/(auth)/signin');
     } catch (err: any) {
       setError(err.message || 'Sign up failed');

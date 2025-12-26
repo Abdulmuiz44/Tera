@@ -137,7 +137,7 @@ export class TeraAPI {
       return {
         success: false,
         error:
-          axiosError.response?.data?.error ||
+          (axiosError.response?.data as any)?.error ||
           'Failed to send message',
       };
     }

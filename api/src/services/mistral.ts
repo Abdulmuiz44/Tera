@@ -42,11 +42,13 @@ export async function generateResponse(
 
     const response = await client.chat.complete({
       model: 'mistral-large-latest',
-      messages: messages.map(m => ({
-        role: m.role,
-        content: m.content,
-      })),
-      systemPrompt: systemPrompt,
+      messages: [
+        { role: 'system', content: systemPrompt },
+        ...messages.map(m => ({
+          role: m.role as "user" | "assistant",
+          content: m.content,
+        }))
+      ],
       temperature: 0.7,
       maxTokens: 2048,
     });
@@ -57,7 +59,7 @@ export async function generateResponse(
       throw new Error('No content in Mistral response');
     }
 
-    return content;
+    return content as string;
   } catch (error) {
     console.error('Mistral API error:', error);
     throw new Error(`Failed to generate response: ${(error as Error).message}`);
@@ -76,11 +78,13 @@ export async function generateWithStreaming(
 
     const stream = await client.chat.stream({
       model: 'mistral-large-latest',
-      messages: messages.map(m => ({
-        role: m.role,
-        content: m.content,
-      })),
-      systemPrompt: systemPrompt,
+      messages: [
+        { role: 'system', content: systemPrompt },
+        ...messages.map(m => ({
+          role: m.role as "user" | "assistant",
+          content: m.content,
+        }))
+      ],
       temperature: 0.7,
       maxTokens: 2048,
     });
@@ -88,7 +92,7 @@ export async function generateWithStreaming(
     for await (const chunk of stream) {
       const content = chunk.data.choices?.[0]?.delta?.content;
       if (content) {
-        onChunk(content);
+        onChunk(content as string);
       }
     }
   } catch (error) {
@@ -105,16 +109,16 @@ export async function generateTool(
   const toolPrompts: { [key: string]: string } = {
     lessonPlan: `Generate a comprehensive lesson plan based on this input: ${JSON.stringify(input)}. 
       Include: learning objectives, materials needed, estimated time, engagement hooks, activities, assessment methods, and differentiation strategies.`,
-    
+
     worksheet: `Create an educational worksheet based on: ${JSON.stringify(input)}.
       Include: clear instructions, varied question types (multiple choice, short answer, essay), answer key if applicable.`,
-    
+
     rubric: `Build a detailed grading rubric for: ${JSON.stringify(input)}.
       Include: clear criteria, performance levels (exemplary, proficient, developing, beginning), point values.`,
-    
+
     studyGuide: `Create a study guide for: ${JSON.stringify(input)}.
       Include: key concepts, summary notes, practice questions, test-taking tips, recommended resources.`,
-    
+
     conceptExplainer: `Explain this concept in simple, engaging terms: ${JSON.stringify(input)}.
       Use analogies, real-world examples, and break it down into digestible parts.`,
   };

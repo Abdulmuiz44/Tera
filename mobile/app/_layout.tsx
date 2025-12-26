@@ -1,4 +1,5 @@
-import React, { useEffect, useState } from 'react';
+import * as React from 'react';
+import { useEffect, useState } from 'react';
 import { Stack } from 'expo-router';
 import * as SecureStore from 'expo-secure-store';
 
@@ -27,7 +28,7 @@ export default function RootLayout() {
       <Stack
         screenOptions={{
           headerShown: false,
-          animationEnabled: false,
+          animation: 'none',
         }}
       />
     );
@@ -37,21 +38,21 @@ export default function RootLayout() {
     <Stack
       screenOptions={{
         headerShown: false,
-        animationEnabled: true,
+        animation: 'default',
       }}
     >
       {isSignedIn ? (
         <Stack.Screen
           name="(app)"
           options={{
-            animationEnabled: false,
+            animation: 'none',
           }}
         />
       ) : (
         <Stack.Screen
           name="(auth)"
           options={{
-            animationEnabled: false,
+            animation: 'none',
           }}
         />
       )}
