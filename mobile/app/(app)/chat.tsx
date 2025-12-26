@@ -11,7 +11,7 @@ import {
   SafeAreaView,
   Text,
 } from 'react-native';
-import { useFocusEffect } from '@react-navigation/native';
+import { useFocusEffect } from 'expo-router';
 import * as SecureStore from 'expo-secure-store';
 import { teraAPI } from '@/lib/api';
 import { saveMessage, getMessages, saveSession } from '@/lib/storage';
@@ -196,14 +196,13 @@ export default function ChatScreen() {
             value={inputText}
             onChangeText={setInputText}
             multiline
-            maxHeight={100}
             editable={!loading && initialized}
           />
           <TouchableOpacity
             style={[
               styles.sendButton,
               (loading || !inputText.trim() || !initialized) &&
-                styles.sendButtonDisabled,
+              styles.sendButtonDisabled,
             ]}
             onPress={handleSendMessage}
             disabled={loading || !inputText.trim() || !initialized}
