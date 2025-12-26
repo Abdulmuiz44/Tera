@@ -1,10 +1,10 @@
-import { Router, Response, Request } from 'express';
+import * as express from 'express';
 import { supabase } from '../services/supabase.js';
 
-const router = Router();
+const router = express.Router();
 
 // Google OAuth callback handler
-router.post('/google', async (req: Request, res: Response) => {
+router.post('/google', async (req: express.Request, res: express.Response) => {
   try {
     const { idToken } = req.body;
 
@@ -58,7 +58,7 @@ router.post('/google', async (req: Request, res: Response) => {
 });
 
 // Email/password sign in
-router.post('/signin', async (req: Request, res: Response) => {
+router.post('/signin', async (req: express.Request, res: express.Response) => {
   try {
     const { email, password } = req.body;
 
@@ -111,7 +111,7 @@ router.post('/signin', async (req: Request, res: Response) => {
 });
 
 // Email/password sign up
-router.post('/signup', async (req: Request, res: Response) => {
+router.post('/signup', async (req: express.Request, res: express.Response) => {
   try {
     const { email, password, name } = req.body;
 
@@ -169,7 +169,7 @@ router.post('/signup', async (req: Request, res: Response) => {
 });
 
 // Sign out
-router.post('/signout', async (req: Request, res: Response) => {
+router.post('/signout', async (req: express.Request, res: express.Response) => {
   try {
     const { error } = await supabase.auth.signOut();
 

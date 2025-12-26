@@ -1,8 +1,8 @@
-import { Router, Response } from 'express';
+import * as express from 'express';
 import { AuthRequest, authMiddleware } from '../middleware/auth.js';
 import { generateTool } from '../services/mistral.js';
 
-const router = Router();
+const router = express.Router();
 
 // Define available tools
 const TOOLS = [
@@ -61,7 +61,7 @@ router.get('/', authMiddleware, async (req: AuthRequest, res: Response) => {
 });
 
 // Get single tool
-router.get('/:toolId', authMiddleware, async (req: AuthRequest, res: Response) => {
+router.get('/:toolId', authMiddleware, async (req: AuthRequest, res: express.Response) => {
   try {
     const { toolId } = req.params;
     const tool = TOOLS.find(t => t.id === toolId);
@@ -87,7 +87,7 @@ router.get('/:toolId', authMiddleware, async (req: AuthRequest, res: Response) =
 });
 
 // Process tool
-router.post('/:toolId/process', authMiddleware, async (req: AuthRequest, res: Response) => {
+router.post('/:toolId/process', authMiddleware, async (req: AuthRequest, res: express.Response) => {
   try {
     const { toolId } = req.params;
     const { input, context } = req.body;

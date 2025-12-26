@@ -1,14 +1,14 @@
-import { Request, Response, NextFunction } from 'express';
+import * as express from 'express';
 import jwt from 'jsonwebtoken';
 
-export interface AuthRequest extends Request {
+export interface AuthRequest extends express.Request {
   user?: any;
 }
 
 export function authMiddleware(
   req: AuthRequest,
-  res: Response,
-  next: NextFunction
+  res: express.Response,
+  next: express.NextFunction
 ) {
   try {
     const authHeader = req.headers.authorization;
@@ -53,8 +53,8 @@ export function authMiddleware(
 
 export function optionalAuth(
   req: AuthRequest,
-  res: Response,
-  next: NextFunction
+  res: express.Response,
+  next: express.NextFunction
 ) {
   try {
     const authHeader = req.headers.authorization;

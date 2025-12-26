@@ -1,4 +1,4 @@
-import { Router, Response } from 'express';
+import * as express from 'express';
 import { AuthRequest, authMiddleware } from '../middleware/auth.js';
 import {
   saveChatMessage,
@@ -9,10 +9,10 @@ import {
 } from '../services/supabase.js';
 import { generateResponse, Message } from '../services/mistral.js';
 
-const router = Router();
+const router = express.Router();
 
 // Create new chat session
-router.post('/sessions', authMiddleware, async (req: AuthRequest, res: Response) => {
+router.post('/sessions', authMiddleware, async (req: AuthRequest, res: express.Response) => {
   try {
     const { title } = req.body;
     const userId = req.user?.sub;
@@ -40,7 +40,7 @@ router.post('/sessions', authMiddleware, async (req: AuthRequest, res: Response)
 });
 
 // Get all sessions for user
-router.get('/sessions', authMiddleware, async (req: AuthRequest, res: Response) => {
+router.get('/sessions', authMiddleware, async (req: AuthRequest, res: express.Response) => {
   try {
     const userId = req.user?.sub;
 
@@ -67,7 +67,7 @@ router.get('/sessions', authMiddleware, async (req: AuthRequest, res: Response) 
 });
 
 // Get chat history for a session
-router.get('/sessions/:sessionId', authMiddleware, async (req: AuthRequest, res: Response) => {
+router.get('/sessions/:sessionId', authMiddleware, async (req: AuthRequest, res: express.Response) => {
   try {
     const { sessionId } = req.params;
     const userId = req.user?.sub;
@@ -95,7 +95,7 @@ router.get('/sessions/:sessionId', authMiddleware, async (req: AuthRequest, res:
 });
 
 // Send message and get response
-router.post('/messages', authMiddleware, async (req: AuthRequest, res: Response) => {
+router.post('/messages', authMiddleware, async (req: AuthRequest, res: express.Response) => {
   try {
     const { sessionId, message, chatHistory } = req.body;
     const userId = req.user?.sub;

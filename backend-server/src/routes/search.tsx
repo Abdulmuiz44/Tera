@@ -1,11 +1,11 @@
-import { Router, Response, Request } from 'express';
+import * as express from 'express';
 import { AuthRequest, authMiddleware } from '../middleware/auth.js';
 import axios from 'axios';
 
-const router = Router();
+const router = express.Router();
 
 // Web search
-router.post('/web', authMiddleware, async (req: AuthRequest, res: Response) => {
+router.post('/web', authMiddleware, async (req: AuthRequest, res: express.Response) => {
   try {
     const { query, limit = 10 } = req.body;
 
