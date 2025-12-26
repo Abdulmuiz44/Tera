@@ -34,7 +34,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
       <head>
         {/* Favicon is handled by metadata */}
       </head>
-      <body className="bg-tera-bg text-white min-h-screen font-sans">
+      <body className="bg-tera-bg text-tera-primary min-h-screen font-sans">
         <AuthProvider>
           <ThemeProvider>
             <AppLayout>
