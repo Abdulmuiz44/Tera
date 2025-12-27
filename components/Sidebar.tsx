@@ -39,14 +39,20 @@ export default function Sidebar({ expanded, onToggle, onNewChat, user, onSignOut
       <div className={`flex items-center ${expanded ? 'justify-between px-6' : 'justify-center'} h-20 mb-2 transition-all duration-300`}>
         {/* Logo - Only visible when expanded */}
         <div
-          className={`flex items-center justify-center transition-all duration-300 ${expanded ? 'opacity-100 scale-100' : 'opacity-0 scale-0 w-0 overflow-hidden'}`}
+          className={`relative flex items-center justify-center transition-all duration-300 ${expanded ? 'opacity-100 scale-100 w-[60px] h-[20px]' : 'opacity-0 scale-0 w-0 h-0 overflow-hidden'}`}
         >
+          <Image
+            src="/images/TERA_LOGO_ONLY1.png"
+            alt="Tera Logo"
+            fill
+            className="object-contain block dark:hidden opacity-80"
+            priority
+          />
           <Image
             src="/images/TERA_LOGO_ONLY.png"
             alt="Tera Logo"
-            width={60}
-            height={20}
-            className="object-contain dark:brightness-200 brightness-0 opacity-80"
+            fill
+            className="object-contain hidden dark:block opacity-80"
             priority
           />
         </div>
@@ -106,8 +112,11 @@ export default function Sidebar({ expanded, onToggle, onNewChat, user, onSignOut
         })}
       </div>
 
-      {/* User Menu - directly below navigation with minimal spacing */}
-      <div className="w-full px-3 py-3">
+      {/* Spacer to push UserMenu to bottom */}
+      <div className="flex-1" />
+
+      {/* User Menu - Sticky at bottom */}
+      <div className="w-full px-3 py-3 border-t border-tera-border mt-auto">
         <UserMenu user={user || null} expanded={expanded} onSignOut={onSignOut || (() => { })} />
       </div>
     </aside>

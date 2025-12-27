@@ -52,14 +52,14 @@ export default function UserMenu({ user, expanded, onSignOut }: UserMenuProps) {
     }
 
     // Get user's first and last name initials from email
-     const email = user.email || ''
-     const name = user.user_metadata?.full_name || (email ? email.split('@')[0] : '') || 'User'
-     const initials = (name || 'User')
-         .split(' ')
-         .map((n: string) => n[0])
-         .join('')
-         .toUpperCase()
-         .slice(0, 2)
+    const email = user.email || ''
+    const name = user.user_metadata?.full_name || (email ? email.split('@')[0] : '') || 'User'
+    const initials = (name || 'User')
+        .split(' ')
+        .map((n: string) => n[0])
+        .join('')
+        .toUpperCase()
+        .slice(0, 2)
 
     const menuItems = [
         {
@@ -126,7 +126,7 @@ export default function UserMenu({ user, expanded, onSignOut }: UserMenuProps) {
             {/* User Profile Button */}
             <button
                 onClick={() => setDropdownOpen(!dropdownOpen)}
-                className={`flex items-center gap-3 w-full rounded-xl border border-white/10 bg-tera-panel px-3 py-3 hover:bg-tera-muted transition-all ${expanded ? '' : 'justify-center'
+                className={`flex items-center gap-3 w-full rounded-xl border border-tera-border bg-tera-panel px-3 py-3 hover:bg-tera-muted transition-all text-tera-primary ${expanded ? '' : 'justify-center'
                     }`}
             >
                 {/* Avatar */}
@@ -138,8 +138,8 @@ export default function UserMenu({ user, expanded, onSignOut }: UserMenuProps) {
                 {expanded && (
                     <>
                         <div className="flex-1 min-w-0 text-left">
-                            <div className="text-sm font-medium text-white truncate max-w-[120px]">{name}</div>
-                            <div className="text-xs text-white/60">
+                            <div className="text-sm font-medium text-tera-primary truncate max-w-[120px]">{name}</div>
+                            <div className="text-xs text-tera-secondary">
                                 {user.user_metadata?.plan || user.user_metadata?.subscription_plan || 'Free'}
                             </div>
                         </div>

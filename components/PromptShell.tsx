@@ -725,14 +725,22 @@ export default function PromptShell({
                             <div className="pointer-events-auto flex flex-col items-center">
                                 <div className="mb-8 rounded-full bg-gradient-to-br from-tera-neon/20 to-transparent p-6 mx-auto w-fit">
                                     <span className="flex items-center justify-center w-32 h-32">
-                                        <Image
-                                            src="/images/TERA_LOGO_ONLY.png"
-                                            alt="Tera"
-                                            width={120}
-                                            height={120}
-                                            className="object-contain dark:brightness-200 brightness-0 opacity-80"
-                                            priority={false}
-                                        />
+                                        <div className="relative w-[120px] h-[120px]">
+                                            <Image
+                                                src="/images/TERA_LOGO_ONLY1.png"
+                                                alt="Tera"
+                                                fill
+                                                className="object-contain block dark:hidden opacity-80"
+                                                priority={false}
+                                            />
+                                            <Image
+                                                src="/images/TERA_LOGO_ONLY.png"
+                                                alt="Tera"
+                                                fill
+                                                className="object-contain hidden dark:block opacity-80"
+                                                priority={false}
+                                            />
+                                        </div>
                                     </span>
                                 </div>
                                 <h2 className="text-3xl font-semibold text-tera-primary">How can Tera help you today?</h2>
@@ -1030,10 +1038,10 @@ export default function PromptShell({
                                 {showStopButton && (
                                     <button
                                         onClick={handleStop}
-                                        className="flex h-9 w-9 items-center justify-center rounded-full bg-tera-accent text-tera-bg transition hover:bg-tera-accent/90"
+                                        className="flex h-9 w-9 items-center justify-center rounded-full bg-black text-white dark:bg-white dark:text-black border border-white/20 dark:border-black/20 transition hover:bg-black/80 dark:hover:bg-white/90"
                                         title="Stop generating"
                                     >
-                                        <div className="h-3 w-3 bg-black rounded-[2px]" />
+                                        <div className="h-3 w-3 bg-current rounded-[2px]" />
                                     </button>
                                 )}
 
