@@ -451,34 +451,46 @@ export default function SettingsPage() {
                       {/* Subscription Management */}
                       <div className="border border-tera-border rounded-lg p-6">
                         <h3 className="font-semibold text-tera-primary mb-4">Subscription</h3>
-                        <div className="flex items-center justify-between">
-                          <div>
-                            <p className="text-tera-primary font-medium capitalize">
-                              {userProfile?.subscriptionPlan === 'free' ? 'Free Plan' : `${userProfile?.subscriptionPlan} Plan`}
-                            </p>
-                            <p className="text-tera-secondary text-sm">
-                              {userProfile?.subscriptionPlan === 'free'
-                                ? 'Upgrade to unlock more features'
-                                : 'Manage your billing and subscription details'}
-                            </p>
+                        {loading || !userProfile ? (
+                          <div className="flex items-center justify-center py-4">
+                            <div className="text-tera-secondary text-sm">Loading subscription info...</div>
                           </div>
-                          {userProfile?.subscriptionPlan === 'free' ? (
-                            <Link
-                              href="/pricing"
-                              className="px-4 py-2 rounded-lg bg-tera-neon text-black text-sm font-medium hover:bg-tera-neon/90 transition"
-                            >
-                              Upgrade
-                            </Link>
-                          ) : (
-                            <button
-                              onClick={handleManageSubscription}
-                              disabled={portalLoading}
-                              className="px-4 py-2 rounded-lg border border-tera-border text-tera-primary text-sm font-medium hover:bg-tera-muted transition disabled:opacity-50"
-                            >
-                              {portalLoading ? 'Loading...' : 'Manage Subscription'}
-                            </button>
-                          )}
-                        </div>
+                        ) : (
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <p className="text-tera-primary font-medium">
+                                {userProfile.subscriptionPlan === 'free'
+                                  ? 'Free Plan'
+                                  : userProfile.subscriptionPlan === 'pro'
+                                    ? 'Pro Plan'
+                                    : userProfile.subscriptionPlan === 'plus'
+                                      ? 'Plus Plan'
+                                      : 'Free Plan'}
+                              </p>
+                              <p className="text-tera-secondary text-sm">
+                                {userProfile.subscriptionPlan === 'free'
+                                  ? 'Upgrade to unlock more features'
+                                  : 'Manage your billing and subscription details'}
+                              </p>
+                            </div>
+                            {userProfile.subscriptionPlan === 'free' ? (
+                              <Link
+                                href="/pricing"
+                                className="px-4 py-2 rounded-lg bg-tera-neon text-tera-bg dark:text-black text-sm font-medium hover:bg-tera-neon/90 transition"
+                              >
+                                Upgrade
+                              </Link>
+                            ) : (
+                              <button
+                                onClick={handleManageSubscription}
+                                disabled={portalLoading}
+                                className="px-4 py-2 rounded-lg border border-tera-border text-tera-primary text-sm font-medium hover:bg-tera-muted transition disabled:opacity-50"
+                              >
+                                {portalLoading ? 'Loading...' : 'Manage Subscription'}
+                              </button>
+                            )}
+                          </div>
+                        )}
                       </div>
 
                       {/* Logout */}
