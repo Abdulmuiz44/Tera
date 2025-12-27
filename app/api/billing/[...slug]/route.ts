@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getCheckoutUrlForPlan } from '@/lib/lemon-squeezy'
+import { getCheckoutUrlForPlan, getCustomerPortalUrl } from '@/lib/lemon-squeezy'
 import { supabaseServer } from '@/lib/supabase-server'
 
 export async function POST(request: NextRequest, { params }: { params: Promise<{ slug: string[] }> }) {
@@ -16,6 +16,25 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
             }
             const checkoutUrl = await getCheckoutUrlForPlan(plan, email, userId, returnUrl, currencyCode)
             return NextResponse.json({ success: true, checkoutUrl, currency: currencyCode })
+        }
+
+        if (action === 'create-portal-session') {
+            const { userId } = body
+            if (!userId) return NextResponse.json({ error: 'User ID is required' }, { status: 400 })
+
+            // Get customer ID from database
+            const { data: user, error } = await supabaseServer
+                .from('users')
+                .select('lemon_squeezy_customer_id')
+                .eq('id', userId)
+                .single()
+
+            if (error || !user?.lemon_squeezy_customer_id) {
+                return NextResponse.json({ error: 'No subscription found' }, { status: 404 })
+            }
+
+            const portalUrl = await getCustomerPortalUrl(user.lemon_squeezy_customer_id)
+            return NextResponse.json({ success: true, portalUrl })
         }
 
         if (action === 'status') {

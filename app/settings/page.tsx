@@ -1,9 +1,11 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import Link from 'next/link'
 import { supabase } from '@/lib/supabase'
 import { useAuth } from '@/components/AuthProvider'
 import { useTheme } from '@/components/ThemeProvider'
+import { type UserProfile, getUserProfile } from '@/lib/usage-tracking'
 
 type UserSettings = {
   notifications_enabled: boolean
@@ -30,6 +32,8 @@ export default function SettingsPage() {
     marketing_emails: false,
     data_retention_days: 90,
   })
+  const [userProfile, setUserProfile] = useState<UserProfile | null>(null)
+  const [portalLoading, setPortalLoading] = useState(false)
 
   useEffect(() => {
     if (user) {
@@ -46,6 +50,12 @@ export default function SettingsPage() {
           'x-user-id': user?.id || '',
         },
       })
+
+      // Fetch user profile for subscription status
+      if (user) {
+        const profile = await getUserProfile(user.id)
+        setUserProfile(profile)
+      }
 
       if (!response.ok) {
         console.warn('Failed to fetch settings, using defaults')
@@ -133,6 +143,29 @@ export default function SettingsPage() {
       saveSettingsAsync(updated)
       return updated
     })
+  }
+
+
+  const handleManageSubscription = async () => {
+    if (!user) return
+    setPortalLoading(true)
+    try {
+      const response = await fetch('/api/billing/create-portal-session', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId: user.id })
+      })
+
+      if (!response.ok) throw new Error('Failed to create portal session')
+
+      const { portalUrl } = await response.json()
+      if (portalUrl) window.location.href = portalUrl
+    } catch (error) {
+      console.error('Error opening portal:', error)
+      alert('Failed to load billing portal. Please try again.')
+    } finally {
+      setPortalLoading(false)
+    }
   }
 
   const saveSettingsAsync = async (settingsToSave: UserSettings) => {
@@ -412,6 +445,39 @@ export default function SettingsPage() {
                               {user?.created_at ? new Date(user.created_at).toLocaleDateString() : 'N/A'}
                             </p>
                           </div>
+                        </div>
+                      </div>
+
+                      {/* Subscription Management */}
+                      <div className="border border-tera-border rounded-lg p-6">
+                        <h3 className="font-semibold text-tera-primary mb-4">Subscription</h3>
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="text-tera-primary font-medium capitalize">
+                              {userProfile?.subscriptionPlan === 'free' ? 'Free Plan' : `${userProfile?.subscriptionPlan} Plan`}
+                            </p>
+                            <p className="text-tera-secondary text-sm">
+                              {userProfile?.subscriptionPlan === 'free'
+                                ? 'Upgrade to unlock more features'
+                                : 'Manage your billing and subscription details'}
+                            </p>
+                          </div>
+                          {userProfile?.subscriptionPlan === 'free' ? (
+                            <Link
+                              href="/pricing"
+                              className="px-4 py-2 rounded-lg bg-tera-neon text-black text-sm font-medium hover:bg-tera-neon/90 transition"
+                            >
+                              Upgrade
+                            </Link>
+                          ) : (
+                            <button
+                              onClick={handleManageSubscription}
+                              disabled={portalLoading}
+                              className="px-4 py-2 rounded-lg border border-tera-border text-tera-primary text-sm font-medium hover:bg-tera-muted transition disabled:opacity-50"
+                            >
+                              {portalLoading ? 'Loading...' : 'Manage Subscription'}
+                            </button>
+                          )}
                         </div>
                       </div>
 

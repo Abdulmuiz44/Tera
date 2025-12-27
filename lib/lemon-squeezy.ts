@@ -82,7 +82,7 @@ export async function createCheckout(variantId: string, options: CheckoutOptions
   try {
     const storeId = process.env.NEXT_PUBLIC_LEMON_STORE_ID
     const apiKey = process.env.LEMON_SQUEEZY_API_KEY
-    
+
     if (!storeId || !apiKey) {
       throw new Error('Missing Lemon Squeezy configuration: Store ID or API Key')
     }
@@ -205,8 +205,45 @@ export async function getCheckoutUrlForPlan(
   }
 
   return createCheckout(variantId, {
-    email,
-    userId,
     returnUrl
   })
+}
+
+/**
+ * Get customer portal URL
+ */
+export async function getCustomerPortalUrl(customerId: string): Promise<string> {
+  try {
+    const apiKey = process.env.LEMON_SQUEEZY_API_KEY
+    if (!apiKey) throw new Error('Missing Lemon Squeezy API Key')
+
+    // List 'customers' to find the one with this ID, referencing its 'link' to customer portal?
+    // Actually, creating a signed URL is better. But simplest way per LS docs is:
+    // GET https://api.lemonsqueezy.com/v1/customers/:id
+    // response.data.attributes.urls.customer_portal
+
+    const response = await fetch(`https://api.lemonsqueezy.com/v1/customers/${customerId}`, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${apiKey}`,
+        'Accept': 'application/json'
+      }
+    })
+
+    if (!response.ok) {
+      throw new Error(`Failed to fetch customer: ${response.status}`)
+    }
+
+    const data = await response.json()
+    const portalUrl = data.data?.attributes?.urls?.customer_portal
+
+    if (!portalUrl) {
+      throw new Error('No customer portal URL returned')
+    }
+
+    return portalUrl
+  } catch (error) {
+    console.error('Failed to get customer portal URL:', error)
+    throw error
+  }
 }

@@ -17,6 +17,7 @@ export default function ProfilePage() {
   const [formData, setFormData] = useState({ fullName: '', school: '', gradeLevels: [] as string[] })
   const [recentSessions, setRecentSessions] = useState<any[]>([])
   const [sessionsLoading, setSessionsLoading] = useState(true)
+  const [portalLoading, setPortalLoading] = useState(false)
 
   useEffect(() => {
     if (user) {
@@ -82,6 +83,28 @@ export default function ProfilePage() {
       gradeLevels: profile?.gradeLevels || [],
     })
     setEditing(false)
+  }
+
+  const handleManageSubscription = async () => {
+    if (!user) return
+    setPortalLoading(true)
+    try {
+      const response = await fetch('/api/billing/create-portal-session', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId: user.id })
+      })
+
+      if (!response.ok) throw new Error('Failed to create portal session')
+
+      const { portalUrl } = await response.json()
+      if (portalUrl) window.location.href = portalUrl
+    } catch (error) {
+      console.error('Error opening portal:', error)
+      alert('Failed to load billing portal. Please try again.')
+    } finally {
+      setPortalLoading(false)
+    }
   }
 
   if (loading) {
@@ -238,12 +261,23 @@ export default function ProfilePage() {
                 }`}>
                 {planConfig.displayName} Plan
               </div>
-              <Link
-                href="/pricing"
-                className="inline-block mt-3 text-sm text-tera-neon hover:underline"
-              >
-                {profile.subscriptionPlan === 'free' ? 'Upgrade plan →' : 'Change plan →'}
-              </Link>
+              <div className="mt-3 space-x-4">
+                {profile.subscriptionPlan !== 'free' && (
+                  <button
+                    onClick={handleManageSubscription}
+                    disabled={portalLoading}
+                    className="text-sm text-tera-secondary hover:text-tera-primary underline disabled:opacity-50"
+                  >
+                    {portalLoading ? 'Loading...' : 'Manage subscription'}
+                  </button>
+                )}
+                <Link
+                  href="/pricing"
+                  className="text-sm text-tera-neon hover:underline"
+                >
+                  {profile.subscriptionPlan === 'free' ? 'Upgrade plan →' : 'Change plan →'}
+                </Link>
+              </div>
             </div>
           </div>
         </div>
