@@ -64,7 +64,22 @@ export default function UserMenu({ user, expanded, onSignOut }: UserMenuProps) {
     const menuItems = [
         {
             label: 'Upgrade plan',
-            icon: <div className="w-4 h-4 relative flex items-center justify-center"><Image src="/images/TERA_LOGO_ONLY.png" alt="Tera" width={16} height={16} className="object-contain" /></div>,
+            icon: (
+                <div className="w-4 h-4 relative flex items-center justify-center">
+                    <Image
+                        src="/images/TERA_LOGO_ONLY1.png"
+                        alt="Tera"
+                        fill
+                        className="object-contain block dark:hidden"
+                    />
+                    <Image
+                        src="/images/TERA_LOGO_ONLY.png"
+                        alt="Tera"
+                        fill
+                        className="object-contain hidden dark:block"
+                    />
+                </div>
+            ),
             href: '/pricing'
         },
         { label: 'Personalization', icon: '🎨', href: '/settings' },
