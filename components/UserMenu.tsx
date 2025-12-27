@@ -94,7 +94,7 @@ export default function UserMenu({ user, expanded, onSignOut }: UserMenuProps) {
                 <div className="absolute bottom-full left-0 mb-2 w-[280px] rounded-2xl border border-tera-border bg-tera-panel shadow-2xl backdrop-blur-xl overflow-hidden">
                     {/* User Info Section */}
                     <div className="flex items-center gap-3 px-4 py-4 border-b border-tera-border">
-                        <div className="flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br from-tera-neon/40 to-blue-500/40 text-white font-semibold">
+                        <div className="flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br from-tera-neon/40 to-blue-500/40 text-tera-primary font-semibold">
                             {initials}
                         </div>
                         <div className="flex-1 min-w-0">
@@ -145,7 +145,7 @@ export default function UserMenu({ user, expanded, onSignOut }: UserMenuProps) {
                     }`}
             >
                 {/* Avatar */}
-                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-tera-neon/40 to-blue-500/40 text-white font-semibold text-sm">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-tera-neon/40 to-blue-500/40 text-tera-primary font-semibold text-sm">
                     {initials}
                 </div>
 
