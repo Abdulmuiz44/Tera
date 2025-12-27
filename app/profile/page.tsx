@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { useAuth } from '@/components/AuthProvider'
+import { supabase } from '@/lib/supabase'
 import { getUserProfile, updateUserProfile, type UserProfile } from '@/lib/usage-tracking'
 import { getPlanConfig, getRemainingChats, getUsagePercentage, type PlanType } from '@/lib/plan-config'
 import Link from 'next/link'
