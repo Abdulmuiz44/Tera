@@ -309,32 +309,32 @@ export async function generateTeacherResponse({
       console.log('🔍🔍🔍 PERFORMING WEB SEARCH 🔍🔍🔍')
       console.log('📝 Search Query:', prompt)
       console.log('📡 Fetching live web results...')
-      
+
       // Fetch results for user to see
       const searchResults = await searchWeb(prompt, 10, userId)
-      
-      console.log('🔍 Web search API response:', { 
-        success: searchResults.success, 
-        resultCount: searchResults.results?.length || 0, 
-        message: searchResults.message 
+
+      console.log('🔍 Web search API response:', {
+        success: searchResults.success,
+        resultCount: searchResults.results?.length || 0,
+        message: searchResults.message
       })
-      
+
       if (searchResults.success && searchResults.results && searchResults.results.length > 0) {
         webSearchPerformed = true
         const resultCount = searchResults.results.length
-        
+
         // Format web search results as context for the AI
         webSearchContext = '\n\n📊 LIVE WEB SEARCH RESULTS (Real-time data from the internet):\n'
         webSearchContext += '═'.repeat(80) + '\n\n'
-        
+
         webSearchContext += searchResults.results
           .map((r, i) => {
             return `[Result ${i + 1}]\nTitle: ${r.title}\nSource: ${r.source}\nURL: ${r.url}\nContent: ${r.snippet}`
           })
           .join('\n\n')
-        
+
         webSearchContext += '\n\n' + '═'.repeat(80) + '\n'
-        
+
         console.log('✅✅✅ WEB SEARCH COMPLETED ✅✅✅')
         console.log('📊 Results Retrieved:', resultCount, 'sources')
         console.log('💡 Providing search context to AI for informed response...')
@@ -449,14 +449,33 @@ export async function generateTeacherResponse({
         .join('')
     }
 
-    // AGGRESSIVE CLEANING: Remove ALL asterisks to prevent any markdown bold/italics
-    text = text.replace(/\*/g, '')
+    // ENSURE RESPONSIVE FORMATTING: Preserve markdown structure
+    // text = text.replace(/\*/g, '') -- REMOVED aggressive cleaning to allow markdown bold/italic/lists
 
     // Ensure the response ends with proper punctuation
     const trimmed = text.trim()
     const endsWithPunct = /[.!?]$/.test(trimmed)
     const endsWithQuestion = /\?$/.test(trimmed)
     let finalText = endsWithPunct ? trimmed : `${trimmed}.`
+
+    // Append web search sources if performed and not already present
+    if (webSearchPerformed && !finalText.includes('--- SOURCES FROM WEB ---')) {
+      const sourcesSection = '\n\n--- SOURCES FROM WEB ---\n' +
+        webSearchContext.split('═'.repeat(80))[1]?.trim()
+          .split('\n\n')
+          .map((result, idx) => {
+            // Reformat to match PromptShell regex: (\d+)\.\s+(.+?)\nSource:\s+(.+?)\n(.+?)
+            const lines = result.split('\n')
+            const title = lines.find(l => l.startsWith('Title:'))?.replace('Title:', '').trim() || 'Untitled'
+            const source = lines.find(l => l.startsWith('Source:'))?.replace('Source:', '').trim() || 'Unknown'
+            const snippet = lines.find(l => l.startsWith('Content:'))?.replace('Content:', '').trim() || ''
+            return `${idx + 1}. ${title}\nSource: ${source}\n${snippet}`
+          }).join('\n\n') || ''
+
+      if (sourcesSection.trim().length > 30) {
+        finalText += sourcesSection
+      }
+    }
 
     // Save conversation to memory immediately (fire and forget)
     if (userId) {

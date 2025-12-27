@@ -99,11 +99,11 @@ export default function VoiceControls({ text, messageId }: VoiceControlsProps) {
             {/* Compact toggle button */}
             <button
                 onClick={() => setShowControls(!showControls)}
-                className="flex items-center justify-center sm:justify-start gap-2 px-3 py-2 rounded-lg bg-white/5 hover:bg-white/10 text-white/60 hover:text-white/80 text-sm transition border border-white/10 w-full sm:w-auto"
+                className="flex items-center justify-center sm:justify-start gap-2 px-3 py-2 rounded-lg bg-tera-muted/30 hover:bg-tera-muted/50 text-tera-secondary hover:text-tera-primary text-sm transition border border-tera-border w-full sm:w-auto"
                 title="Voice controls"
             >
                 <span className="text-base">🔊</span>
-                <span>{showControls ? 'Hide Voice Controls' : 'Voice Controls'}</span>
+                <span className="font-medium">{showControls ? 'Hide Voice Controls' : 'Voice Controls'}</span>
             </button>
 
             {showControls && (
@@ -163,11 +163,11 @@ export default function VoiceControls({ text, messageId }: VoiceControlsProps) {
                     <select
                         value={selectedVoice}
                         onChange={(e) => setSelectedVoice(e.target.value)}
-                        className="px-3 py-2 rounded-lg bg-white/5 border border-white/10 text-white/80 text-sm focus:border-tera-neon focus:outline-none hover:bg-white/10 transition w-full sm:w-auto"
+                        className="px-3 py-2 rounded-lg bg-tera-panel border border-tera-border text-tera-primary text-sm focus:border-tera-neon focus:outline-none hover:bg-tera-muted transition w-full sm:w-auto"
                         disabled={isPlaying}
                     >
                         {voices.map((voice) => (
-                            <option key={voice.name} value={voice.name} className="bg-tera-panel">
+                            <option key={voice.name} value={voice.name} className="bg-tera-panel text-tera-primary">
                                 {voice.name} ({voice.lang})
                             </option>
                         ))}
@@ -175,7 +175,7 @@ export default function VoiceControls({ text, messageId }: VoiceControlsProps) {
 
                     {/* Speed Control */}
                     <div className="flex items-center gap-2 justify-between sm:justify-start">
-                        <label className="text-sm text-white/60">Speed:</label>
+                        <label className="text-sm text-tera-secondary">Speed:</label>
                         <input
                             type="range"
                             min="0.5"
@@ -186,7 +186,7 @@ export default function VoiceControls({ text, messageId }: VoiceControlsProps) {
                             className="flex-1 sm:w-24 accent-tera-neon"
                             disabled={isPlaying}
                         />
-                        <span className="text-sm text-white/60 min-w-[2.5rem] text-right">{speed.toFixed(1)}x</span>
+                        <span className="text-sm text-tera-secondary min-w-[2.5rem] text-right">{speed.toFixed(1)}x</span>
                     </div>
                 </div>
             )}

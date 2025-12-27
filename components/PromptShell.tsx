@@ -837,7 +837,23 @@ export default function PromptShell({
                                                             </h3>
                                                         ) : (
                                                             <p key={idx} className="leading-relaxed whitespace-pre-wrap">
-                                                                {block.content}
+                                                                {block.content.split(/((?:https?:\/\/|www\.)[^\s]+)/g).map((part, i) => {
+                                                                    if (part.match(/^(https?:\/\/|www\.)/)) {
+                                                                        const href = part.startsWith('http') ? part : `https://${part}`
+                                                                        return (
+                                                                            <a
+                                                                                key={i}
+                                                                                href={href}
+                                                                                target="_blank"
+                                                                                rel="noopener noreferrer"
+                                                                                className="text-tera-neon hover:underline break-all"
+                                                                            >
+                                                                                {part}
+                                                                            </a>
+                                                                        )
+                                                                    }
+                                                                    return part
+                                                                })}
                                                             </p>
                                                         )
                                                     })}
@@ -889,7 +905,7 @@ export default function PromptShell({
                         <div className="flex flex-wrap items-center gap-2 px-2 pt-2">
                             {/* Web Search Toggle Badge */}
                             {webSearchEnabled && (
-                                <div className="flex items-center gap-2 rounded-lg bg-blue-500/30 text-blue-200 border border-blue-500/50 px-3 py-2 text-xs font-medium">
+                                <div className="flex items-center gap-2 rounded-lg bg-blue-500/10 text-blue-500 border border-blue-500/30 px-3 py-2 text-xs font-semibold shadow-sm">
                                     <span>🔍</span>
                                     <span>Web Search ON ({webSearchRemaining})</span>
                                 </div>
