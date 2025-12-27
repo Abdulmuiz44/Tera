@@ -21,13 +21,19 @@ export default function LoadingScreen() {
     <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-[#050505]">
       <div className="flex flex-col items-center gap-6">
         {/* Logo with fade-in animation */}
-        <div className="animate-fade-in">
+        <div className="animate-fade-in relative w-[200px] h-[67px]">
+          <Image
+            src="/images/TERA_LOGO_ONLY1.png"
+            alt="Tera Logo"
+            fill
+            className="object-contain block dark:hidden"
+            priority
+          />
           <Image
             src="/images/TERA_LOGO_ONLY.png"
             alt="Tera Logo"
-            width={200}
-            height={67}
-            className="object-contain"
+            fill
+            className="object-contain hidden dark:block"
             priority
           />
         </div>

@@ -289,7 +289,20 @@ export default function ProfilePage() {
                 {chatLimit === 'unlimited' && (
                   <div className="flex items-center gap-2 text-sm text-blue-400">
                     Unlimited usage
-                    <Image src="/TERA_LOGO_ONLY.png" alt="Tera" width={16} height={16} className="object-contain inline-block" />
+                    <div className="relative inline-block w-4 h-4 ml-1 align-sub">
+                      <Image
+                        src="/images/TERA_LOGO_ONLY1.png"
+                        alt="Tera"
+                        fill
+                        className="object-contain block dark:hidden"
+                      />
+                      <Image
+                        src="/images/TERA_LOGO_ONLY.png"
+                        alt="Tera"
+                        fill
+                        className="object-contain hidden dark:block"
+                      />
+                    </div>
                   </div>
                 )}
               </div>
