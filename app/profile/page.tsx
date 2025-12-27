@@ -316,7 +316,7 @@ export default function ProfilePage() {
                     {recentSessions.map((session) => (
                       <Link
                         key={session.id}
-                        href={`/new?sessionId=${session.session_id}`}
+                        href={`/new/${session.session_id}`}
                         className="flex items-center justify-between p-3 rounded-xl bg-tera-muted/50 border border-tera-border hover:border-tera-neon/50 transition group"
                       >
                         <div className="flex-1 min-w-0">

@@ -135,7 +135,7 @@ export default function HistoryPage() {
               {conversations.map((conversation, index) => (
                 <Link
                   key={`${conversation.session_id}-${conversation.created_at}-${index}`}
-                  href={`/new?sessionId=${conversation.session_id}`}
+                  href={`/new/${conversation.session_id}`}
                   className="block rounded-2xl border border-tera-border bg-tera-muted p-4 transition hover:border-tera-neon"
                 >
                   <div className="flex justify-between items-start">

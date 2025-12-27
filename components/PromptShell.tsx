@@ -717,7 +717,7 @@ export default function PromptShell({
     const showMicButton = !showSendButton && !showStopButton
 
     return (
-        <div className="flex h-full w-full flex-col relative">
+        <div className="flex h-full w-full flex-col relative bg-white dark:bg-black">
             <div className="flex-1 overflow-y-auto px-4 py-6 md:px-8" ref={conversationRef}>
                 <div className="mx-auto max-w-3xl space-y-8">
                     {showInitialPrompt ? (
@@ -725,7 +725,14 @@ export default function PromptShell({
                             <div className="pointer-events-auto flex flex-col items-center">
                                 <div className="mb-8 rounded-full bg-gradient-to-br from-tera-neon/20 to-transparent p-6 mx-auto w-fit">
                                     <span className="flex items-center justify-center w-32 h-32">
-                                        <Image src="/images/TERA_LOGO_ONLY.png" alt="Tera" width={120} height={120} className="object-contain" priority={false} />
+                                        <Image
+                                            src="/images/TERA_LOGO_ONLY.png"
+                                            alt="Tera"
+                                            width={120}
+                                            height={120}
+                                            className="object-contain dark:brightness-200 brightness-0 opacity-80"
+                                            priority={false}
+                                        />
                                     </span>
                                 </div>
                                 <h2 className="text-3xl font-semibold text-tera-primary">How can Tera help you today?</h2>
@@ -1008,7 +1015,7 @@ export default function PromptShell({
                                     }
                                 }}
                                 placeholder={isListening ? "Listening... 🎤" : "Ask Tera Anything..."}
-                                className="max-h-[200px] min-h-[52px] w-full resize-none bg-transparent py-3.5 px-2 text-tera-primary placeholder-tera-secondary focus:outline-none"
+                                className="max-h-[200px] min-h-[52px] w-full resize-none bg-tera-panel rounded-xl py-3.5 px-3 text-tera-primary placeholder-tera-secondary focus:outline-none border border-tera-border shadow-sm m-1"
                                 rows={1}
                                 style={{ height: 'auto' }}
                                 onInput={(e) => {

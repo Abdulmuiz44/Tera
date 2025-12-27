@@ -19,7 +19,7 @@ export default function ChatSessionPage() {
     }
 
     return (
-        <div className="w-full h-screen bg-white dark:bg-black">
+        <div className="w-full h-screen bg-tera-bg overflow-hidden">
             <PromptShell
                 tool={selectedTool}
                 onToolChange={setSelectedTool}
