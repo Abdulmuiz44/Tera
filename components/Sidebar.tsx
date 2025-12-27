@@ -46,7 +46,7 @@ export default function Sidebar({ expanded, onToggle, onNewChat, user, onSignOut
             alt="Tera Logo"
             width={60}
             height={20}
-            className="object-contain"
+            className="object-contain dark:brightness-200 brightness-0 opacity-80"
             priority
           />
         </div>

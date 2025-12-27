@@ -18,7 +18,7 @@
 /* Light Mode Variables override */
 .light {
   color-scheme: light;
-  --bg-tera-bg: #f8fafc;
+  --bg-tera-bg: #ffffff;
   /* Very light slate gray background */
   --bg-tera-panel: #ffffff;
   /* Pure white for panels */
