@@ -14,12 +14,35 @@ export default function ProfilePage() {
   const [editing, setEditing] = useState(false)
   const [saving, setSaving] = useState(false)
   const [formData, setFormData] = useState({ fullName: '', school: '', gradeLevels: [] as string[] })
+  const [recentSessions, setRecentSessions] = useState<any[]>([])
+  const [sessionsLoading, setSessionsLoading] = useState(true)
 
   useEffect(() => {
     if (user) {
       loadProfile()
+      loadRecentSessions()
     }
   }, [user])
+
+  const loadRecentSessions = async () => {
+    if (!user) return
+    setSessionsLoading(true)
+    try {
+      const { data, error } = await supabase
+        .from('chat_sessions')
+        .select('id, session_id, title, created_at, tool')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false })
+        .limit(3)
+
+      if (error) throw error
+      setRecentSessions(data || [])
+    } catch (error) {
+      console.error('Error loading sessions:', error)
+    } finally {
+      setSessionsLoading(false)
+    }
+  }
 
   const loadProfile = async () => {
     if (!user) return
@@ -277,6 +300,42 @@ export default function ProfilePage() {
                   </p>
                 </div>
               )}
+
+              {/* Recent Sessions List */}
+              <div className="mt-6 pt-6 border-t border-tera-border">
+                <h4 className="text-sm font-semibold text-tera-primary mb-4 flex items-center justify-between">
+                  Recent Sessions
+                  <Link href="/history" className="text-xs text-tera-neon hover:underline font-normal">View all →</Link>
+                </h4>
+
+                {sessionsLoading ? (
+                  <div className="text-xs text-tera-secondary animate-pulse">Loading recent sessions...</div>
+                ) : recentSessions.length > 0 ? (
+                  <div className="grid grid-cols-1 gap-2">
+                    {recentSessions.map((session) => (
+                      <Link
+                        key={session.id}
+                        href={`/new?sessionId=${session.session_id}`}
+                        className="flex items-center justify-between p-3 rounded-xl bg-tera-muted/50 border border-tera-border hover:border-tera-neon/50 transition group"
+                      >
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-medium text-tera-primary truncate group-hover:text-tera-neon transition-colors">
+                            {session.title || 'Untitled Session'}
+                          </p>
+                          <p className="text-[10px] text-tera-secondary uppercase tracking-tight mt-0.5">
+                            {session.tool || 'Universal'} • {new Date(session.created_at).toLocaleDateString()}
+                          </p>
+                        </div>
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4 text-tera-secondary group-hover:text-tera-neon transition-colors">
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+                        </svg>
+                      </Link>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-xs text-tera-secondary py-2 italic text-center">No recent sessions found. Start a new chat!</div>
+                )}
+              </div>
             </div>
           </div>
         </div>

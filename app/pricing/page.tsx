@@ -257,8 +257,8 @@ export default function PricingPage() {
                   <div
                     key={plan.name}
                     className={`relative flex flex-col rounded-2xl border transition-all duration-300 ${plan.highlighted
-                      ? 'bg-gradient-to-br from-tera-neon/10 to-tera-neon/5 border-tera-neon shadow-[0_0_40px_-10px_rgba(0,255,170,0.4)] scale-105 z-10'
-                      : 'bg-tera-muted/30 border-tera-border hover:border-tera-border/60 hover:bg-tera-muted/50'
+                      ? 'bg-tera-panel border-tera-neon shadow-[0_0_40px_-10px_rgba(0,255,170,0.3)] scale-105 z-10'
+                      : 'bg-tera-panel border-tera-border hover:border-tera-neon/30'
                       } p-8`}
                   >
                     {plan.highlighted && (
@@ -311,8 +311,8 @@ export default function PricingPage() {
                         }
                       }}
                       className={`w-full py-3 px-4 rounded-lg font-semibold transition-all duration-200 text-base ${plan.current
-                        ? 'bg-white/10 text-white/40 cursor-default'
-                        : 'bg-white text-black hover:bg-white/90 disabled:opacity-50 disabled:cursor-not-allowed'
+                        ? 'bg-tera-muted text-tera-secondary cursor-default'
+                        : 'bg-tera-primary text-tera-bg hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg'
                         }`}
                     >
                       {plan.current ? '✓ Current Plan' : (loading && (plan.name === 'pro' || plan.name === 'plus') ? 'Processing...' : plan.cta)}
@@ -397,13 +397,13 @@ export default function PricingPage() {
                     <>
                       <button
                         onClick={() => router.push('/auth/signin')}
-                        className="px-8 py-3 bg-white text-black font-semibold rounded-lg hover:bg-white/90 transition"
+                        className="px-8 py-3 bg-tera-primary text-tera-bg font-semibold rounded-lg hover:opacity-90 transition shadow-lg"
                       >
                         Sign In
                       </button>
                       <button
                         onClick={() => router.push('/auth/signup')}
-                        className="px-8 py-3 bg-white text-black font-semibold rounded-lg hover:bg-white/90 transition"
+                        className="px-8 py-3 bg-tera-panel border border-tera-border text-tera-primary font-semibold rounded-lg hover:bg-tera-muted transition"
                       >
                         Create Free Account
                       </button>
@@ -411,7 +411,7 @@ export default function PricingPage() {
                   ) : (
                     <button
                       onClick={() => router.push('/new')}
-                      className="px-8 py-3 bg-white text-black font-semibold rounded-lg hover:bg-white/90 transition shadow-lg"
+                      className="px-8 py-3 bg-tera-primary text-tera-bg font-semibold rounded-lg hover:opacity-90 transition shadow-lg"
                     >
                       Start Using Tera
                     </button>

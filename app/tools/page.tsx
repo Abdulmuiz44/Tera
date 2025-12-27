@@ -12,14 +12,14 @@ export default function ToolsPage() {
   const [activeTab, setActiveTab] = useState<'teachers' | 'students' | 'learners'>('teachers')
 
   const allTools = [...teacherTools, ...studentTools, ...learnerTools]
-  
-  const activeTools = 
+
+  const activeTools =
     activeTab === 'teachers' ? teacherTools :
-    activeTab === 'students' ? studentTools :
-    learnerTools
+      activeTab === 'students' ? studentTools :
+        learnerTools
 
   return (
-    <div className="flex h-screen w-full bg-white dark:bg-black">
+    <div className="flex h-screen w-full bg-tera-bg text-tera-primary">
       <Sidebar expanded={sidebarExpanded} onToggle={() => setSidebarExpanded(!sidebarExpanded)} />
       <main className="flex-1 overflow-y-auto px-6 py-8">
         <div className="max-w-6xl mx-auto">
@@ -28,31 +28,28 @@ export default function ToolsPage() {
           <div className="flex gap-2 mb-8">
             <button
               onClick={() => setActiveTab('teachers')}
-              className={`px-4 py-2 rounded font-medium transition-all ${
-                activeTab === 'teachers'
-                  ? 'bg-black dark:bg-white text-white dark:text-black'
-                  : 'bg-gray-200 dark:bg-gray-800 text-black dark:text-white hover:bg-gray-300 dark:hover:bg-gray-700'
-              }`}
+              className={`px-4 py-2 rounded font-medium transition-all ${activeTab === 'teachers'
+                  ? 'bg-tera-primary text-tera-bg'
+                  : 'bg-tera-muted text-tera-secondary hover:bg-tera-border transition-colors'
+                }`}
             >
               For Teachers
             </button>
             <button
               onClick={() => setActiveTab('students')}
-              className={`px-4 py-2 rounded font-medium transition-all ${
-                activeTab === 'students'
-                  ? 'bg-black dark:bg-white text-white dark:text-black'
-                  : 'bg-gray-200 dark:bg-gray-800 text-black dark:text-white hover:bg-gray-300 dark:hover:bg-gray-700'
-              }`}
+              className={`px-4 py-2 rounded font-medium transition-all ${activeTab === 'students'
+                  ? 'bg-tera-primary text-tera-bg'
+                  : 'bg-tera-muted text-tera-secondary hover:bg-tera-border transition-colors'
+                }`}
             >
               For Students
             </button>
             <button
               onClick={() => setActiveTab('learners')}
-              className={`px-4 py-2 rounded font-medium transition-all ${
-                activeTab === 'learners'
-                  ? 'bg-black dark:bg-white text-white dark:text-black'
-                  : 'bg-gray-200 dark:bg-gray-800 text-black dark:text-white hover:bg-gray-300 dark:hover:bg-gray-700'
-              }`}
+              className={`px-4 py-2 rounded font-medium transition-all ${activeTab === 'learners'
+                  ? 'bg-tera-primary text-tera-bg'
+                  : 'bg-tera-muted text-tera-secondary hover:bg-tera-border transition-colors'
+                }`}
             >
               For Everyone
             </button>
@@ -63,13 +60,13 @@ export default function ToolsPage() {
               <Link
                 key={tool.name}
                 href={`/new?tool=${slugify(tool.name)}`}
-                className="p-6 bg-gray-50 dark:bg-gray-900 border border-gray-300 dark:border-gray-800 rounded-lg hover:border-black dark:hover:border-white transition"
+                className="p-6 bg-tera-panel border border-tera-border rounded-lg hover:border-tera-neon transition group"
               >
                 <div className="flex items-start justify-between mb-3">
-                  <h3 className="font-semibold text-black dark:text-white">{tool.name}</h3>
+                  <h3 className="font-semibold text-tera-primary group-hover:text-tera-neon transition-colors">{tool.name}</h3>
                   <span className="text-2xl">{tool.icon}</span>
                 </div>
-                <p className="text-sm text-gray-700 dark:text-gray-300">{tool.description}</p>
+                <p className="text-sm text-tera-secondary">{tool.description}</p>
               </Link>
             ))}
           </div>

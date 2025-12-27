@@ -18,17 +18,20 @@
 /* Light Mode Variables override */
 .light {
   color-scheme: light;
-  --bg-tera-bg: #ffffff;
-  /* Pure White */
+  --bg-tera-bg: #f8fafc;
+  /* Very light slate gray background */
   --bg-tera-panel: #ffffff;
-  /* Pure White - relying on borders for separation */
-  --bg-tera-muted: #f3f4f6;
-  /* Light Gray for inputs/secondary */
-  --border-tera: rgba(0, 0, 0, 0.1);
-  --text-tera-primary: #000000;
-  /* Pure Black */
-  --text-tera-secondary: #4b5563;
-  --text-tera-accent: #000000;
+  /* Pure white for panels */
+  --bg-tera-muted: #f1f5f9;
+  /* Slate 100 for muted elements */
+  --border-tera: rgba(0, 0, 0, 0.08);
+  /* Slightly softer border */
+  --text-tera-primary: #0f172a;
+  /* Slate 900 for primary text */
+  --text-tera-secondary: #64748b;
+  /* Slate 500 for secondary text */
+  --text-tera-accent: #0f172a;
+  /* Slate 900 for accent in light mode */
 }
 
 /* Explicit Dark Mode override (if needed) */

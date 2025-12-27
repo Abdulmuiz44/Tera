@@ -751,7 +751,7 @@ export default function PromptShell({
                                             </button>
 
                                             <div className="flex flex-col items-end gap-1 w-full">
-                                                <div className="rounded-2xl bg-tera-muted px-6 py-4 text-tera-primary backdrop-blur-sm w-full">
+                                                <div className="rounded-2xl bg-tera-muted border border-tera-border/50 px-6 py-4 text-tera-primary backdrop-blur-sm w-full">
                                                     <p className="whitespace-pre-wrap leading-relaxed">{entry.userMessage.content}</p>
                                                     {entry.userMessage.attachments && entry.userMessage.attachments.length > 0 && (
                                                         <div className="mt-3 flex flex-wrap gap-2">
@@ -826,7 +826,7 @@ export default function PromptShell({
                                                         }
                                                         if (block.type === 'code') {
                                                             return (
-                                                                <div key={idx} className="my-4 rounded-lg bg-black/30 p-4 font-mono text-xs overflow-x-auto text-tera-neon max-w-full">
+                                                                <div key={idx} className="my-4 rounded-lg bg-black/5 dark:bg-black/30 p-4 font-mono text-xs overflow-x-auto text-tera-primary dark:text-tera-neon max-w-full border border-tera-border">
                                                                     <pre>{block.code}</pre>
                                                                 </div>
                                                             )
@@ -865,7 +865,7 @@ export default function PromptShell({
                     {status === 'loading' && (
                         <div className="flex justify-start">
                             <div className="max-w-[85%]">
-                                <div className="flex items-center gap-3 rounded-2xl bg-tera-panel px-6 py-4 text-tera-primary/60">
+                                <div className="flex items-center gap-3 rounded-2xl bg-tera-panel border border-tera-border px-6 py-4 text-tera-primary/60 shadow-md">
                                     <div className="flex gap-1">
                                         <span className="w-2 h-2 bg-tera-neon/60 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></span>
                                         <span className="w-2 h-2 bg-tera-neon/60 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></span>
@@ -881,9 +881,9 @@ export default function PromptShell({
             </div>
 
             {/* Input Area */}
-            <div className="sticky bottom-0 z-50 border-t border-tera-border bg-tera-panel/95 px-2 py-4 backdrop-blur-xl md:px-8">
+            <div className="sticky bottom-0 z-50 border-t border-tera-border bg-tera-bg/95 px-2 py-4 backdrop-blur-xl md:px-8">
                 <div className="mx-auto max-w-3xl relative">
-                    <div className={`relative flex flex-col gap-2 rounded-[24px] border border-tera-border bg-tera-muted/50 p-2 shadow-2xl ring-1 ring-tera-border/50 transition-all ${conversationActive ? 'focus-within:ring-tera-neon/50 focus-within:border-tera-neon/50' : 'focus-within:ring-tera-primary/20'}`}>
+                    <div className={`relative flex flex-col gap-2 rounded-[24px] border border-tera-border bg-tera-panel p-2 shadow-2xl ring-1 ring-tera-border/50 transition-all ${conversationActive ? 'focus-within:ring-tera-neon/30 focus-within:border-tera-neon/30' : 'focus-within:ring-tera-primary/10'}`}>
 
                         {/* Active Tools & Attachments Preview */}
                         <div className="flex flex-wrap items-center gap-2 px-2 pt-2">
