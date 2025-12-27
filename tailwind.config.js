@@ -15,7 +15,8 @@ export default {
         'tera-neon': 'var(--text-tera-accent)',
         'tera-primary': 'var(--text-tera-primary)',
         'tera-secondary': 'var(--text-tera-secondary)',
-        'tera-accent': 'var(--text-tera-accent)'
+        'tera-accent': 'var(--text-tera-accent)',
+        'tera-input': 'var(--bg-tera-input)'
       },
       fontFamily: {
         sans: ['Inter', 'ui-sans-serif', 'system-ui']

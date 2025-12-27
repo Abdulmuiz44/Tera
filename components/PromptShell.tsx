@@ -717,7 +717,7 @@ export default function PromptShell({
     const showMicButton = !showSendButton && !showStopButton
 
     return (
-        <div className="flex h-full w-full flex-col relative bg-white dark:bg-black">
+        <div className="flex h-full w-full flex-col relative bg-tera-bg text-tera-primary">
             <div className="flex-1 overflow-y-auto px-4 py-6 md:px-8" ref={conversationRef}>
                 <div className="mx-auto max-w-3xl space-y-8">
                     {showInitialPrompt ? (
@@ -1015,7 +1015,7 @@ export default function PromptShell({
                                     }
                                 }}
                                 placeholder={isListening ? "Listening... 🎤" : "Ask Tera Anything..."}
-                                className="max-h-[200px] min-h-[52px] w-full resize-none bg-tera-panel rounded-xl py-3.5 px-3 text-tera-primary placeholder-tera-secondary focus:outline-none border border-tera-border shadow-sm m-1"
+                                className="max-h-[200px] min-h-[52px] w-full resize-none bg-tera-input rounded-xl py-3.5 px-3 text-tera-primary placeholder-tera-secondary focus:outline-none border border-tera-border shadow-sm m-1"
                                 rows={1}
                                 style={{ height: 'auto' }}
                                 onInput={(e) => {
