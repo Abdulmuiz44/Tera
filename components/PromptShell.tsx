@@ -954,7 +954,9 @@ export default function PromptShell({
                                         className="rounded-full p-2 text-tera-secondary transition hover:bg-tera-muted hover:text-tera-primary"
                                         title="Add attachment"
                                     >
-                                        <span className="text-xl">⊕</span>
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
+                                            <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                                        </svg>
                                     </button>
 
                                     {attachmentOpen && (
@@ -1023,7 +1025,7 @@ export default function PromptShell({
                                     }
                                 }}
                                 placeholder={isListening ? "Listening... 🎤" : "Ask Tera Anything..."}
-                                className="max-h-[200px] min-h-[52px] w-full resize-none bg-tera-input rounded-xl py-3.5 px-3 text-tera-primary placeholder-tera-secondary focus:outline-none border border-tera-border shadow-sm m-1"
+                                className="max-h-[200px] min-h-[52px] w-full resize-none bg-tera-input rounded-xl py-3.5 px-3 text-tera-primary placeholder-tera-secondary focus:outline-none shadow-sm m-1"
                                 rows={1}
                                 style={{ height: 'auto' }}
                                 onInput={(e) => {

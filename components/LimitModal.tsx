@@ -57,6 +57,20 @@ export default function LimitModal({ isOpen, limitType, currentPlan, onClose }: 
           }`}
         onClick={(e) => e.stopPropagation()}
       >
+        {/* Close Button */}
+        <button
+          onClick={() => {
+            setIsClosing(true)
+            setTimeout(onClose, 300)
+          }}
+          className="absolute top-4 right-4 text-tera-secondary hover:text-tera-primary transition-colors"
+          aria-label="Close modal"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+
         {/* Icon */}
         <div className="flex justify-center mb-6">
           <div className="w-16 h-16 rounded-full dark:bg-tera-neon/20 dark:border-tera-neon dark:border bg-tera-neon/20 border border-tera-neon flex items-center justify-center">
@@ -155,7 +169,7 @@ export default function LimitModal({ isOpen, limitType, currentPlan, onClose }: 
         <div className="flex gap-3">
           <button
             onClick={handleUpgrade}
-            className="w-full px-4 py-2.5 rounded-lg bg-tera-neon dark:text-black text-black font-semibold hover:bg-tera-neon/90 transition-colors"
+            className="w-full px-4 py-2.5 rounded-lg bg-tera-neon text-tera-bg dark:text-black font-semibold hover:bg-tera-neon/90 transition-colors"
           >
             Upgrade to Pro/Plus
           </button>
