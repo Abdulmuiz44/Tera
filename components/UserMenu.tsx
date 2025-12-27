@@ -76,15 +76,15 @@ export default function UserMenu({ user, expanded, onSignOut }: UserMenuProps) {
         <div className="relative" ref={dropdownRef}>
             {/* Dropdown Menu */}
             {dropdownOpen && (
-                <div className="absolute bottom-full left-0 mb-2 w-[280px] rounded-2xl border border-white/10 bg-[#1a1a1a] shadow-2xl backdrop-blur-xl overflow-hidden">
+                <div className="absolute bottom-full left-0 mb-2 w-[280px] rounded-2xl border border-tera-border bg-tera-panel shadow-2xl backdrop-blur-xl overflow-hidden">
                     {/* User Info Section */}
-                    <div className="flex items-center gap-3 px-4 py-4 border-b border-white/5">
+                    <div className="flex items-center gap-3 px-4 py-4 border-b border-tera-border">
                         <div className="flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br from-tera-neon/40 to-blue-500/40 text-white font-semibold">
                             {initials}
                         </div>
                         <div className="flex-1 min-w-0">
-                            <div className="text-sm font-medium text-white truncate">{name}</div>
-                            <div className="text-xs text-white/60 truncate">@{email.split('@')[0]}</div>
+                            <div className="text-sm font-medium text-tera-primary truncate">{name}</div>
+                            <div className="text-xs text-tera-secondary truncate">@{email.split('@')[0]}</div>
                         </div>
                     </div>
 
@@ -94,19 +94,19 @@ export default function UserMenu({ user, expanded, onSignOut }: UserMenuProps) {
                             <Link
                                 key={item.label}
                                 href={item.href}
-                                className="flex items-center justify-between px-4 py-3 text-white hover:bg-white/5 transition-colors"
+                                className="flex items-center justify-between px-4 py-3 text-tera-primary hover:bg-tera-muted transition-colors"
                                 onClick={() => setDropdownOpen(false)}
                             >
                                 <div className="flex items-center gap-3">
                                     <span className="text-base">{item.icon}</span>
                                     <span className="text-sm font-medium">{item.label}</span>
                                 </div>
-                                {item.hasChevron && <span className="text-white/40">›</span>}
+                                {item.hasChevron && <span className="text-tera-secondary/40">›</span>}
                             </Link>
                         ))}
 
                         {/* Separator */}
-                        <div className="h-px bg-white/5 my-2" />
+                        <div className="h-px bg-tera-border my-2" />
 
                         {/* Logout */}
                         <button
@@ -114,7 +114,7 @@ export default function UserMenu({ user, expanded, onSignOut }: UserMenuProps) {
                                 onSignOut()
                                 setDropdownOpen(false)
                             }}
-                            className="flex items-center gap-3 px-4 py-3 text-white hover:bg-white/5 transition-colors w-full text-left"
+                            className="flex items-center gap-3 px-4 py-3 text-tera-primary hover:bg-tera-muted transition-colors w-full text-left"
                         >
                             <span className="text-base">🚪</span>
                             <span className="text-sm font-medium">Log out</span>
@@ -147,7 +147,7 @@ export default function UserMenu({ user, expanded, onSignOut }: UserMenuProps) {
                         {/* Upgrade Button */}
                         <Link
                             href="/pricing"
-                            className="px-3 py-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-xs font-medium text-white transition-colors"
+                            className="px-3 py-1.5 rounded-lg bg-black/5 hover:bg-black/10 dark:bg-white/10 dark:hover:bg-white/20 text-xs font-medium text-tera-primary transition-colors"
                             onClick={(e) => e.stopPropagation()}
                         >
                             Upgrade
