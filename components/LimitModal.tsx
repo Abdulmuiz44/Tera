@@ -19,7 +19,7 @@ export default function LimitModal({ isOpen, limitType, currentPlan, onClose }: 
   const limitInfo: Record<string, { title: string; message: string; current: number; upgrade: string }> = {
     'chats': {
       title: 'Daily Chat Limit Reached',
-      message: 'You\'ve reached your daily conversation limit.',
+      message: 'You\'ve reached your daily limit of prompts/messages you can send.',
       current: 10,
       upgrade: 'Pro or Plus',
     },
@@ -119,15 +119,15 @@ export default function LimitModal({ isOpen, limitType, currentPlan, onClose }: 
             <>
               <div className="flex justify-between dark:text-white/80 text-black/70">
                 <span>Free:</span>
-                <span className="font-medium">10 conversations/day</span>
+                <span className="font-medium">10 prompts/day</span>
               </div>
               <div className="flex justify-between dark:text-white/80 text-black/70">
                 <span>Pro:</span>
-                <span className="font-medium text-tera-neon">Unlimited</span>
+                <span className="font-medium text-tera-neon">Unlimited prompts/day</span>
               </div>
               <div className="flex justify-between dark:text-white/80 text-black/70">
                 <span>Plus:</span>
-                <span className="font-medium text-tera-neon">Unlimited</span>
+                <span className="font-medium text-tera-neon">Unlimited prompts/day</span>
               </div>
             </>
           )}
