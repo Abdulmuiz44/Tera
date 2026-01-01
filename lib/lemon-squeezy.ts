@@ -205,6 +205,8 @@ export async function getCheckoutUrlForPlan(
   }
 
   return createCheckout(variantId, {
+    email,
+    userId,
     returnUrl
   })
 }
