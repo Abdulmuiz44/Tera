@@ -255,34 +255,50 @@ export default function ChartRenderer({ config }: ChartRendererProps) {
     }
 
     return (
-        <div ref={chartRef} className="w-full my-4 rounded-xl border border-white/10 bg-[#0A0A0A] p-4 shadow-lg overflow-hidden relative group">
-            {title && (
-                <div className="flex justify-between items-center mb-4 px-2">
-                    <h3 className="text-sm font-semibold text-white/80 uppercase tracking-wider text-center flex-1">
-                        {title}
+        <div className="w-full my-4 space-y-3">
+            {/* Code Section */}
+            <div className="rounded-lg border border-white/10 bg-[#0a0a0a]/60 overflow-hidden">
+                <div className="flex items-center justify-between px-4 py-2 border-b border-white/10 bg-white/5">
+                    <h3 className="text-xs font-semibold text-white/60 uppercase tracking-wider">
+                        📝 Chart Configuration (JSON)
                     </h3>
-                    <button
-                        onClick={handleDownload}
-                        className="opacity-0 group-hover:opacity-100 transition-opacity p-1 text-white/40 hover:text-tera-neon"
-                        title="Download Chart"
-                    >
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5M7.5 12 12 16.5m0 0 4.5-4.5M12 16.5V3" />
-                        </svg>
-                    </button>
                 </div>
-            )}
-            <div className="h-[300px] w-full text-xs">
-                <ResponsiveContainer width="100%" height="100%">
-                    {renderChart() || (
-                        <div className="flex flex-col items-center justify-center h-full text-white/40 space-y-2">
-                            <span>Invalid Chart Config</span>
-                            <span className="text-xs font-mono text-white/20">
-                                Type received: {String(type || 'undefined')}
-                            </span>
-                        </div>
-                    )}
-                </ResponsiveContainer>
+                <pre className="p-4 text-xs text-white/70 overflow-x-auto max-h-[200px]">
+                    <code>{JSON.stringify({ type, data, series, xAxisKey, yAxisKey }, null, 2)}</code>
+                </pre>
+            </div>
+
+            {/* Chart Rendering Section */}
+            <div ref={chartRef} className="w-full rounded-xl border border-white/10 bg-[#0A0A0A] p-4 shadow-lg overflow-hidden relative group">
+                {title && (
+                    <div className="flex justify-between items-center mb-4 px-2">
+                        <h3 className="text-sm font-semibold text-white/80 uppercase tracking-wider text-center flex-1 flex items-center justify-center gap-2">
+                            <span>✨</span>
+                            {title}
+                        </h3>
+                        <button
+                            onClick={handleDownload}
+                            className="opacity-0 group-hover:opacity-100 transition-opacity p-1 text-white/40 hover:text-tera-neon"
+                            title="Download Chart"
+                        >
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5M7.5 12 12 16.5m0 0 4.5-4.5M12 16.5V3" />
+                            </svg>
+                        </button>
+                    </div>
+                )}
+                <div className="h-[300px] w-full text-xs">
+                    <ResponsiveContainer width="100%" height="100%">
+                        {renderChart() || (
+                            <div className="flex flex-col items-center justify-center h-full text-white/40 space-y-2">
+                                <span>Invalid Chart Config</span>
+                                <span className="text-xs font-mono text-white/20">
+                                    Type received: {String(type || 'undefined')}
+                                </span>
+                            </div>
+                        )}
+                    </ResponsiveContainer>
+                </div>
             </div>
         </div>
     )
