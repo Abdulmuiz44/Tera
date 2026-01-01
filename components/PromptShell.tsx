@@ -718,7 +718,7 @@ export default function PromptShell({
 
     return (
         <div className="flex h-full w-full flex-col relative bg-tera-bg text-tera-primary">
-            <div className="flex-1 overflow-y-auto px-4 py-6 md:px-8" ref={conversationRef}>
+            <div className="flex-1 overflow-y-auto px-4 py-6 md:px-8 pb-28 md:pb-6" ref={conversationRef}>
                 <div className="mx-auto max-w-3xl space-y-8">
                     {showInitialPrompt ? (
                         <div className="fixed inset-0 flex items-center justify-center text-center pointer-events-none -mt-20">
@@ -912,9 +912,9 @@ export default function PromptShell({
             </div>
 
             {/* Input Area */}
-            <div className="sticky bottom-0 z-50 border-t border-tera-border bg-tera-bg/95 px-2 py-4 backdrop-blur-xl md:px-8">
+            <div className="fixed bottom-0 left-0 right-0 z-50 border-t border-tera-border bg-tera-bg px-2 py-3 backdrop-blur-xl md:sticky md:py-4 md:px-8">
                 <div className="mx-auto max-w-3xl relative">
-                    <div className={`relative flex flex-col gap-2 rounded-[24px] border border-tera-border bg-tera-panel p-2 shadow-2xl ring-1 ring-tera-border/50 transition-all ${conversationActive ? 'focus-within:ring-tera-neon/30 focus-within:border-tera-neon/30' : 'focus-within:ring-tera-primary/10'}`}>
+                    <div className={`relative flex flex-col gap-2 rounded-xl md:rounded-[24px] border border-tera-border bg-tera-panel p-2 shadow-2xl ring-1 ring-tera-border/50 transition-all ${conversationActive ? 'focus-within:ring-tera-neon/30 focus-within:border-tera-neon/30' : 'focus-within:ring-tera-primary/10'}`}>
 
                         {/* Active Tools & Attachments Preview */}
                         <div className="flex flex-wrap items-center gap-2 px-2 pt-2">
@@ -1025,13 +1025,13 @@ export default function PromptShell({
                                     }
                                 }}
                                 placeholder={isListening ? "Listening... 🎤" : "Ask Tera Anything..."}
-                                className="max-h-[200px] min-h-[52px] w-full resize-none bg-tera-input rounded-xl py-3.5 px-3 text-tera-primary placeholder-tera-secondary focus:outline-none shadow-sm m-1"
+                                className="max-h-[120px] min-h-[44px] w-full resize-none bg-transparent text-base text-tera-primary placeholder-tera-secondary/60 focus:outline-none m-0 p-3 font-normal leading-relaxed"
                                 rows={1}
                                 style={{ height: 'auto' }}
                                 onInput={(e) => {
                                     const target = e.target as HTMLTextAreaElement
                                     target.style.height = 'auto'
-                                    target.style.height = `${Math.min(target.scrollHeight, 200)}px`
+                                    target.style.height = `${Math.min(target.scrollHeight, 120)}px`
                                 }}
                             />
 
