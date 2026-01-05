@@ -59,7 +59,10 @@ export default function AdminPage() {
         try {
             const response = await fetch('/api/admin/analytics', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'x-user-id': user?.id || ''
+                },
                 body: JSON.stringify({ userId: user?.id })
             })
 
