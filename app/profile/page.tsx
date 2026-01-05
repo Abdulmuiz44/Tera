@@ -349,11 +349,13 @@ export default function ProfilePage() {
 
                 {/* Usage Statistics */}
                 <div className="grid grid-cols-1 gap-6">
-                    {/* Chat Usage */}
+                    {/* Message Usage */}
                     <div className="rounded-[28px] bg-tera-panel border border-tera-border p-6 shadow-glow-md">
                         <div className="flex items-center justify-between mb-4">
-                            <h3 className="text-lg font-semibold text-tera-primary">Chat Sessions</h3>
-                            <span className="text-2xl">💬</span>
+                            <h3 className="text-lg font-semibold text-tera-primary">Daily Messages</h3>
+                            <svg className="w-6 h-6 text-tera-neon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+                            </svg>
                         </div>
 
                         <div className="space-y-4">
@@ -361,7 +363,7 @@ export default function ProfilePage() {
                                 <div className="flex items-baseline gap-2 mb-2">
                                     <span className="text-3xl font-bold text-tera-primary">{profile.dailyChats}</span>
                                     <span className="text-tera-secondary">
-                                        / {chatLimit === 'unlimited' ? '∞' : chatLimit} today
+                                        / {chatLimit === 'unlimited' ? '∞' : chatLimit} messages today
                                     </span>
                                 </div>
 

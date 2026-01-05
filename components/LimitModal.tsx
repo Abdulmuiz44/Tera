@@ -47,8 +47,8 @@ export default function LimitModal({ isOpen, limitType, currentPlan, onClose, un
 
     const limitInfo: Record<string, { title: string; message: string; current: number; upgrade: string }> = {
         'chats': {
-            title: 'Daily Chat Limit Reached',
-            message: 'You\'ve reached your daily limit of prompts/messages you can send.',
+            title: 'Daily Message Limit Reached',
+            message: 'You\'ve reached your daily limit of 10 messages. Access unlocks in 24 hours.',
             current: 10,
             upgrade: 'Pro or Plus',
         },
@@ -140,7 +140,7 @@ export default function LimitModal({ isOpen, limitType, currentPlan, onClose, un
                 <div className="dark:bg-white/10 dark:border-white/20 bg-black/5 border border-black/10 rounded-lg p-3 mb-4">
                     <div className="flex items-center justify-between">
                         <span className="dark:text-white/60 text-black/60 text-xs md:text-sm">Your Free Plan:</span>
-                        <span className="text-tera-neon font-semibold text-xs md:text-sm">{info.current} per day</span>
+                        <span className="text-tera-neon font-semibold text-xs md:text-sm">{info.current} messages/day</span>
                     </div>
                 </div>
 
@@ -158,15 +158,15 @@ export default function LimitModal({ isOpen, limitType, currentPlan, onClose, un
                         <>
                             <div className="flex justify-between dark:text-white/80 text-black/70">
                                 <span>Free:</span>
-                                <span className="font-medium">10 prompts/day</span>
+                                <span className="font-medium">10 messages/day</span>
                             </div>
                             <div className="flex justify-between dark:text-white/80 text-black/70">
                                 <span>Pro:</span>
-                                <span className="font-medium text-tera-neon">Unlimited prompts/day</span>
+                                <span className="font-medium text-tera-neon">Unlimited messages/day</span>
                             </div>
                             <div className="flex justify-between dark:text-white/80 text-black/70">
                                 <span>Plus:</span>
-                                <span className="font-medium text-tera-neon">Unlimited prompts/day</span>
+                                <span className="font-medium text-tera-neon">Unlimited messages/day</span>
                             </div>
                         </>
                     )}

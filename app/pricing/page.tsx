@@ -13,7 +13,7 @@ const PLAN_CONFIGS = {
     period: '/month',
     description: 'Perfect for getting started',
     features: [
-      '10 AI conversations per day',
+      '10 messages per day',
       '5 file uploads per day',
       '5 web searches per month',
       'Basic tools & features',

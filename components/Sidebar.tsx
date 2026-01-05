@@ -7,14 +7,14 @@ import UserMenu from './UserMenu'
 import type { User } from '@supabase/supabase-js'
 
 export const navigation = [
-  { label: 'Chat', icon: '💬', href: '/new' },
-  { label: 'Tools', icon: '🧰', href: '/tools' },
-  { label: 'History', icon: '⏱️', href: '/history' },
-  { label: 'Notes', icon: '📝', href: '/notes' },
-  { label: 'Settings', icon: '⚙️', href: '/settings' },
-  { label: 'Profile', icon: '👤', href: '/profile' },
-  { label: 'Pricing', icon: '💳', href: '/pricing' },
-  { label: 'About', icon: 'ℹ️', href: '/about' },
+  { label: 'Chat', icon: 'chat', href: '/new' },
+  { label: 'Tools', icon: 'tools', href: '/tools' },
+  { label: 'History', icon: 'history', href: '/history' },
+  { label: 'Notes', icon: 'notes', href: '/notes' },
+  { label: 'Settings', icon: 'settings', href: '/settings' },
+  { label: 'Profile', icon: 'profile', href: '/profile' },
+  { label: 'Pricing', icon: 'pricing', href: '/pricing' },
+  { label: 'About', icon: 'about', href: '/about' },
 ]
 
 interface SidebarProps {
@@ -25,34 +25,107 @@ interface SidebarProps {
   onSignOut?: () => void
 }
 
+// Icon components - clean SVG icons
+const IconChat = () => (
+  <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+  </svg>
+)
+
+const IconTools = () => (
+  <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+    <path d="M12 6V2M12 6a10 10 0 1 0 0 20M12 6v2m0 14v-2" />
+    <path d="M16.24 7.76a6 6 0 0 0-8.48 0M7.76 16.24a6 6 0 0 0 8.48 0" />
+  </svg>
+)
+
+const IconHistory = () => (
+  <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+    <circle cx="12" cy="12" r="10" />
+    <polyline points="12 6 12 12 16 14" />
+  </svg>
+)
+
+const IconNotes = () => (
+  <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
+  </svg>
+)
+
+const IconSettings = () => (
+  <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+    <circle cx="12" cy="12" r="3" />
+    <path d="M12 1v6m0 6v6M4.22 4.22l4.24 4.24m2.12 2.12l4.24 4.24M1 12h6m6 0h6m-17.78 7.78l4.24-4.24m2.12-2.12l4.24-4.24" />
+  </svg>
+)
+
+const IconProfile = () => (
+  <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+    <circle cx="12" cy="7" r="4" />
+  </svg>
+)
+
+const IconPricing = () => (
+  <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+    <rect x="2" y="7" width="20" height="14" rx="2" ry="2" />
+    <path d="M16 5V3M8 5V3" />
+    <circle cx="9" cy="13" r="1" />
+    <circle cx="15" cy="13" r="1" />
+  </svg>
+)
+
+const IconAbout = () => (
+  <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+    <circle cx="12" cy="12" r="10" />
+    <path d="M12 16v-4M12 8h.01" />
+  </svg>
+)
+
+const getIcon = (iconName: string) => {
+  const icons: Record<string, () => JSX.Element> = {
+    chat: IconChat,
+    tools: IconTools,
+    history: IconHistory,
+    notes: IconNotes,
+    settings: IconSettings,
+    profile: IconProfile,
+    pricing: IconPricing,
+    about: IconAbout,
+  }
+  const Icon = icons[iconName]
+  return Icon ? <Icon /> : null
+}
+
 export default function Sidebar({ expanded, onToggle, onNewChat, user, onSignOut }: SidebarProps) {
   const pathname = usePathname()
   const isToolsRoute = pathname?.startsWith('/tools')
 
   return (
     <aside
-      className={`fixed inset-y-0 left-0 z-50 flex flex-col shrink-0 h-screen bg-tera-bg border-r border-tera-border shadow-glow-sm transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] overflow-hidden
-        ${expanded ? 'w-[280px] translate-x-0' : 'w-[280px] -translate-x-full md:w-[72px] md:translate-x-0'}
+      className={`fixed inset-y-0 left-0 z-50 flex flex-col shrink-0 h-screen bg-tera-bg border-r border-tera-border transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] overflow-hidden
+        ${expanded ? 'w-[260px] translate-x-0' : 'w-[260px] -translate-x-full md:w-20 md:translate-x-0'}
       `}
     >
       {/* Header Section */}
-      <div className={`flex items-center ${expanded ? 'justify-between px-6' : 'justify-center'} h-20 mb-2 transition-all duration-300`}>
+      <div className={`flex items-center ${expanded ? 'justify-between px-5' : 'justify-center'} h-20 border-b border-tera-border transition-all duration-300`}>
         {/* Logo - Only visible when expanded */}
         <div
-          className={`relative flex items-center justify-center transition-all duration-300 ${expanded ? 'opacity-100 scale-100 w-[60px] h-[20px]' : 'opacity-0 scale-0 w-0 h-0 overflow-hidden'}`}
+          className={`relative flex items-center justify-center transition-all duration-300 ${expanded ? 'opacity-100 scale-100 w-[50px] h-[18px]' : 'opacity-0 scale-0 w-0 h-0 overflow-hidden'}`}
         >
           <Image
             src="/images/TERA_LOGO_ONLY1.png"
             alt="Tera Logo"
             fill
-            className="object-contain block dark:hidden opacity-80"
+            className="object-contain block dark:hidden"
             priority
           />
           <Image
             src="/images/TERA_LOGO_ONLY.png"
             alt="Tera Logo"
             fill
-            className="object-contain hidden dark:block opacity-80"
+            className="object-contain hidden dark:block"
             priority
           />
         </div>
@@ -60,15 +133,21 @@ export default function Sidebar({ expanded, onToggle, onNewChat, user, onSignOut
         {/* Menu toggle button */}
         <button
           onClick={onToggle}
-          className={`rounded-full border border-tera-border bg-tera-panel p-2 text-sm text-tera-primary hover:bg-tera-muted transition-all duration-300 ${expanded ? '' : 'hover:scale-110'}`}
+          className="flex items-center justify-center w-9 h-9 rounded-lg text-tera-secondary hover:text-tera-primary hover:bg-tera-muted transition-all duration-200"
           aria-label={expanded ? 'Collapse sidebar' : 'Expand sidebar'}
         >
-          {expanded ? '<<' : '☰'}
+          <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+            {expanded ? (
+              <path d="M15 19l-7-7 7-7M8 19l-7-7 7-7" />
+            ) : (
+              <path d="M3 12h18M3 6h18M3 18h18" />
+            )}
+          </svg>
         </button>
       </div>
 
       {/* Navigation Items */}
-      <div className="flex flex-col gap-3 w-full px-3 overflow-y-auto max-h-[calc(100vh-280px)]">
+      <nav className="flex-1 flex flex-col gap-1 w-full px-3 py-4 overflow-y-auto">
         {navigation.map((item) => {
           const isActive =
             item.href === '/new'
@@ -86,37 +165,42 @@ export default function Sidebar({ expanded, onToggle, onNewChat, user, onSignOut
                   onNewChat()
                 }
               }}
-              className={`group relative flex items-center ${expanded ? 'w-full' : 'justify-center'} transition-all`}
+              className={`group relative flex items-center gap-3 px-3.5 py-2.5 rounded-lg transition-all duration-200 ${
+                isActive
+                  ? 'bg-tera-neon/10 text-tera-neon'
+                  : 'text-tera-secondary hover:text-tera-primary hover:bg-tera-muted'
+              }`}
             >
-              <span
-                className={`flex shrink-0 h-10 w-10 items-center justify-center rounded-full border border-tera-border bg-tera-panel transition-all duration-200 group-hover:border-tera-border group-hover:bg-tera-muted ${isActive ? 'border-tera-border bg-tera-muted' : ''}`}
-              >
-                <span className="text-base">{item.icon}</span>
-              </span>
+              {/* Icon */}
+              <div className="flex-shrink-0 flex items-center justify-center w-5 h-5">
+                {getIcon(item.icon)}
+              </div>
 
               {/* Label */}
               <span
-                className={`ml-3 text-sm text-tera-primary whitespace-nowrap transition-all duration-300 ${expanded ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-4 w-0 overflow-hidden'}`}
+                className={`text-sm font-medium whitespace-nowrap transition-all duration-300 ${
+                  expanded ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-4 absolute left-full w-0 overflow-hidden'
+                }`}
               >
                 {item.label}
               </span>
 
               {/* Tooltip for collapsed state */}
               {!expanded && (
-                <span className="absolute left-full ml-4 whitespace-nowrap rounded-md border border-tera-border bg-tera-panel px-3 py-1.5 text-xs font-medium text-tera-primary opacity-0 shadow-xl transition-all duration-200 group-hover:opacity-100 group-hover:translate-x-0 -translate-x-2 pointer-events-none z-50">
+                <span className="absolute left-full ml-3 px-2.5 py-1.5 bg-tera-panel text-tera-primary text-xs font-medium rounded-md border border-tera-border shadow-lg opacity-0 pointer-events-none transition-opacity duration-200 group-hover:opacity-100 whitespace-nowrap z-50">
                   {item.label}
                 </span>
               )}
             </Link>
           )
         })}
-      </div>
+      </nav>
 
-      {/* Spacer to push UserMenu to bottom */}
-      <div className="flex-1" />
+      {/* Divider */}
+      <div className="h-px bg-tera-border" />
 
       {/* User Menu - Sticky at bottom */}
-      <div className="w-full px-3 py-3 border-t border-tera-border mt-auto">
+      <div className={`w-full px-3 py-4 ${expanded ? '' : 'flex justify-center'}`}>
         <UserMenu user={user || null} expanded={expanded} onSignOut={onSignOut || (() => { })} />
       </div>
     </aside>

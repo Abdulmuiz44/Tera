@@ -4,7 +4,7 @@
 export type PlanType = 'free' | 'pro' | 'plus'
 
 export interface PlanLimits {
-    chatsPerDay: number | 'unlimited'
+    messagesPerDay: number | 'unlimited'
     fileUploadsPerDay: number | 'unlimited'
     webSearchesPerMonth: number | 'unlimited'
     maxFileSize: number // in MB
@@ -30,14 +30,14 @@ export const PLAN_CONFIGS: Record<PlanType, PlanConfig> = {
         period: '/month',
         description: 'Start exploring AI-powered learning for free.',
         limits: {
-            chatsPerDay: 10,
+            messagesPerDay: 10,
             fileUploadsPerDay: 5,
             webSearchesPerMonth: 5,
             maxFileSize: 25,
             features: ['basic-chat', 'basic-tools', 'file-uploads', 'web-search']
         },
         features: [
-            'Up to 10 AI conversations per day',
+            '10 messages per day',
             '5 file uploads per day (25MB each)',
             '5 web searches per month',
             'Basic AI tools & features',
@@ -52,7 +52,7 @@ export const PLAN_CONFIGS: Record<PlanType, PlanConfig> = {
         period: '/month',
         description: 'Unlimited knowledge, unlimited possibilities.',
         limits: {
-            chatsPerDay: 'unlimited',
+            messagesPerDay: 'unlimited',
             fileUploadsPerDay: 20,
             webSearchesPerMonth: 50,
             maxFileSize: 500,
@@ -76,7 +76,7 @@ export const PLAN_CONFIGS: Record<PlanType, PlanConfig> = {
         period: '/month',
         description: 'For power users who need everything.',
         limits: {
-            chatsPerDay: 'unlimited',
+            messagesPerDay: 'unlimited',
             fileUploadsPerDay: 'unlimited',
             webSearchesPerMonth: 'unlimited',
             maxFileSize: 2000,
@@ -108,7 +108,7 @@ export function hasFeature(plan: PlanType, feature: string): boolean {
 }
 
 export function canStartChat(plan: PlanType, currentCount: number): boolean {
-    const limit = PLAN_CONFIGS[plan].limits.chatsPerDay
+    const limit = PLAN_CONFIGS[plan].limits.messagesPerDay
     return limit === 'unlimited' || currentCount < limit
 }
 
@@ -123,7 +123,7 @@ export function canPerformWebSearch(plan: PlanType, currentCount: number): boole
 }
 
 export function getRemainingChats(plan: PlanType, currentCount: number): number | 'unlimited' {
-    const limit = PLAN_CONFIGS[plan].limits.chatsPerDay
+    const limit = PLAN_CONFIGS[plan].limits.messagesPerDay
     if (limit === 'unlimited') return 'unlimited'
     return Math.max(0, limit - currentCount)
 }
