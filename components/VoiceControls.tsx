@@ -40,6 +40,30 @@ export default function VoiceControls({ text, messageId }: VoiceControlsProps) {
         }
     }, [])
 
+    const cleanTextForSpeech = (rawText: string): string => {
+        return rawText
+            // Remove markdown formatting
+            .replace(/#{1,6}\s/g, '') // Remove markdown headers
+            .replace(/\*\*/g, '') // Remove bold markers
+            .replace(/__(.*?)__/g, '$1') // Remove underline markers
+            .replace(/_(.*?)_/g, '$1') // Remove italic markers
+            .replace(/`(.*?)`/g, '$1') // Remove inline code markers
+            .replace(/~~(.*?)~~/g, '$1') // Remove strikethrough markers
+            // Remove hashtags and special markers
+            .replace(/#\w+/g, '') // Remove hashtags
+            .replace(/\[\[.*?\]\]/g, '') // Remove double bracket links
+            .replace(/\[.*?\]\(.*?\)/g, (match) => {
+                // Extract link text, not URL: [text](url) -> text
+                const textMatch = match.match(/\[(.*?)\]/)
+                return textMatch ? textMatch[1] : ''
+            })
+            // Clean up code blocks
+            .replace(/```[\s\S]*?```/g, '') // Remove code blocks
+            // Clean up extra spaces
+            .replace(/\s+/g, ' ')
+            .trim()
+    }
+
     const handlePlay = () => {
         if (isPaused) {
             window.speechSynthesis.resume()
@@ -49,7 +73,9 @@ export default function VoiceControls({ text, messageId }: VoiceControlsProps) {
             // Cancel any ongoing speech
             window.speechSynthesis.cancel()
 
-            const utterance = new SpeechSynthesisUtterance(text)
+            // Clean text before speaking
+            const cleanText = cleanTextForSpeech(text)
+            const utterance = new SpeechSynthesisUtterance(cleanText)
             utteranceRef.current = utterance
 
             // Apply settings

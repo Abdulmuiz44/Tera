@@ -54,22 +54,23 @@ async function getAnalyticsData() {
   const { data: upgradedAfterLimit } = await supabase
     .from('users')
     .select('id, email, subscription_plan, limit_hit_chat_at, limit_hit_upload_at, created_at')
-    .not('subscription_plan', 'eq', 'free')
-    .or('limit_hit_chat_at.not.is.null,limit_hit_upload_at.not.is.null')
+    .neq('subscription_plan', 'free')
+    .or('limit_hit_chat_at.not.is.null, limit_hit_upload_at.not.is.null')
 
   // Users still locked out
   const now = new Date()
+  const oneDayAgo = new Date(now.getTime() - 24 * 60 * 60 * 1000).toISOString()
   const { data: lockedOutUsers } = await supabase
     .from('users')
     .select('id, email, subscription_plan, limit_hit_chat_at, limit_hit_upload_at')
-    .or(`limit_hit_chat_at.gt.${new Date(now.getTime() - 24 * 60 * 60 * 1000).toISOString()},limit_hit_upload_at.gt.${new Date(now.getTime() - 24 * 60 * 60 * 1000).toISOString()}`)
+    .or(`limit_hit_chat_at.gt.${oneDayAgo}, limit_hit_upload_at.gt.${oneDayAgo}`)
 
   // Recent limit hits (last 7 days)
   const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000).toISOString()
   const { data: recentLimitHits } = await supabase
     .from('users')
     .select('id, email, subscription_plan, limit_hit_chat_at, limit_hit_upload_at, created_at')
-    .or(`limit_hit_chat_at.gte.${sevenDaysAgo},limit_hit_upload_at.gte.${sevenDaysAgo}`)
+    .or(`limit_hit_chat_at.gte.${sevenDaysAgo}, limit_hit_upload_at.gte.${sevenDaysAgo}`)
     .order('created_at', { ascending: false })
     .limit(50)
 
