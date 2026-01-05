@@ -185,7 +185,7 @@ export default function ProfilePage() {
 
     const planConfig = getPlanConfig(profile.subscriptionPlan as PlanType)
     const remainingChats = getRemainingChats(profile.subscriptionPlan as PlanType, profile.dailyChats)
-    const chatLimit = planConfig.limits.chatsPerDay
+    const chatLimit = planConfig.limits.messagesPerDay
     const chatPercentage = getUsagePercentage(chatLimit as number, profile.dailyChats)
 
     // File upload calculations

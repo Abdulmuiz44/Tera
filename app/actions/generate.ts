@@ -55,8 +55,8 @@ export async function generateAnswer({ prompt, tool, authorId, authorEmail, atta
   // Check if user has reached their chat limit
   if (!canStartChat(userProfile.subscriptionPlan, userProfile.dailyChats)) {
     const planConfig = getPlanConfig(userProfile.subscriptionPlan)
-    const limit = planConfig.limits.chatsPerDay
-    throw new Error(`You've reached your daily limit of ${limit} chats. Upgrade to Pro for unlimited access.`)
+    const limit = planConfig.limits.messagesPerDay
+    throw new Error(`You've reached your daily limit of ${limit} messages. Upgrade to Pro for unlimited access.`)
   }
 
   // Check web search limits if enabled

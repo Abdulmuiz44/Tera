@@ -168,7 +168,7 @@ export async function canUserStartChat(userId: string): Promise<{ allowed: boole
     const remaining = getRemainingChats(profile.subscriptionPlan, stats.dailyChats)
 
     if (!allowed) {
-        const limit = PLAN_CONFIGS[profile.subscriptionPlan].limits.chatsPerDay
+        const limit = PLAN_CONFIGS[profile.subscriptionPlan].limits.messagesPerDay
 
         // Calculate unlock time (24 hours from when limit was first hit)
         let unlocksAt: Date | undefined
@@ -184,7 +184,7 @@ export async function canUserStartChat(userId: string): Promise<{ allowed: boole
         return {
             allowed: false,
             remaining: 0,
-            reason: `You've reached your daily limit of ${limit} chats. Access unlocks in 24 hours.`,
+            reason: `You've reached your daily limit of ${limit} messages. Access unlocks in 24 hours.`,
             unlocksAt
         }
     }
