@@ -7,19 +7,16 @@ import { supabase } from '@/lib/supabase'
 export default function CallbackPage() {
   const router = useRouter()
   const [error, setError] = useState<string | null>(null)
-  const [mounted, setMounted] = useState(false)
 
   useEffect(() => {
-    setMounted(true)
-  }, [])
-
-  useEffect(() => {
-    if (!mounted) return
+    let isMounted = true
 
     const handleCallback = async () => {
       try {
         // Check if there's a valid session (handles both OAuth and email confirmation)
         const { data: { session }, error: sessionError } = await supabase.auth.getSession()
+
+        if (!isMounted) return
 
         if (sessionError || !session) {
           setError('Authentication failed. Please try again.')
@@ -30,6 +27,7 @@ export default function CallbackPage() {
         // Session exists, redirect to dashboard
         router.push('/new')
       } catch (err) {
+        if (!isMounted) return
         console.error('Callback error:', err)
         setError('An error occurred during authentication')
         setTimeout(() => router.push('/auth/signin'), 2000)
@@ -37,7 +35,11 @@ export default function CallbackPage() {
     }
 
     handleCallback()
-  }, [mounted, router])
+    
+    return () => {
+      isMounted = false
+    }
+  }, [router])
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#050505] to-[#1a1a1a]">
