@@ -1,5 +1,6 @@
 "use client"
 
+import React from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { usePathname } from 'next/navigation'
@@ -83,8 +84,8 @@ const IconAbout = () => (
   </svg>
 )
 
-const getIcon = (iconName: string) => {
-  const icons: Record<string, () => JSX.Element> = {
+const getIcon = (iconName: string): React.ReactNode => {
+  const icons: Record<string, () => React.ReactNode> = {
     chat: IconChat,
     tools: IconTools,
     history: IconHistory,
