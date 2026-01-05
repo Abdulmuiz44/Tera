@@ -25,10 +25,20 @@ export async function POST(request: NextRequest) {
       .single()
 
     if (!existingUser) {
-      // Insert new user record
+      // Insert new user record with default values
       const { error: insertError } = await supabase.from('users').insert({
         id: userId,
-        email: email.toLowerCase()
+        email: email.toLowerCase(),
+        subscription_plan: 'free',
+        daily_chats: 0,
+        daily_file_uploads: 0,
+        chat_reset_date: null,
+        limit_hit_chat_at: null,
+        limit_hit_upload_at: null,
+        profile_image_url: null,
+        full_name: null,
+        school: null,
+        grade_levels: null
       })
 
       if (insertError) {

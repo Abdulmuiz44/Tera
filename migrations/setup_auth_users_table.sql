@@ -1,10 +1,20 @@
 -- Setup Users Table for Authentication
--- This migration ensures the users table is properly created with RLS policies
+-- This migration ensures the users table is properly created with RLS policies and usage tracking
 
 -- Create users table (extends auth.users)
 CREATE TABLE IF NOT EXISTS users (
   id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
   email TEXT UNIQUE NOT NULL,
+  subscription_plan TEXT DEFAULT 'free',
+  daily_chats INTEGER DEFAULT 0,
+  daily_file_uploads INTEGER DEFAULT 0,
+  chat_reset_date TIMESTAMP WITH TIME ZONE,
+  limit_hit_chat_at TIMESTAMP WITH TIME ZONE,
+  limit_hit_upload_at TIMESTAMP WITH TIME ZONE,
+  profile_image_url TEXT,
+  full_name TEXT,
+  school TEXT,
+  grade_levels TEXT[],
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
@@ -12,6 +22,7 @@ CREATE TABLE IF NOT EXISTS users (
 -- Create index on email for faster lookups
 CREATE INDEX IF NOT EXISTS idx_users_email ON users(email);
 CREATE INDEX IF NOT EXISTS idx_users_created_at ON users(created_at);
+CREATE INDEX IF NOT EXISTS idx_users_subscription ON users(subscription_plan);
 
 -- Enable Row Level Security
 ALTER TABLE users ENABLE ROW LEVEL SECURITY;
