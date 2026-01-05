@@ -13,15 +13,44 @@ export async function GET(request: NextRequest) {
         process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
       )
 
-      const { error } = await supabase.auth.exchangeCodeForSession(code)
+      const { data, error } = await supabase.auth.exchangeCodeForSession(code)
       
       if (error) {
         console.error('Code exchange error:', error.message)
-        // Redirect to callback-page which will handle the error on client side
         return NextResponse.redirect(new URL('/auth/callback-page?error=confirmation_failed', requestUrl.origin))
       }
 
-      // Success - redirect to dashboard directly
+      if (!data.user) {
+        console.error('No user returned from code exchange')
+        return NextResponse.redirect(new URL('/auth/callback-page?error=no_user', requestUrl.origin))
+      }
+
+      // Create or verify user record in the users table
+      const supabaseAdmin = createClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+      )
+
+      const { data: existingUser } = await supabaseAdmin
+        .from('users')
+        .select('id')
+        .eq('id', data.user.id)
+        .single()
+
+      if (!existingUser) {
+        // Insert new user record
+        const { error: insertError } = await supabaseAdmin.from('users').insert({
+          id: data.user.id,
+          email: data.user.email || ''
+        })
+
+        if (insertError) {
+          console.error('Error creating user record:', insertError)
+          // Continue anyway - the session is valid
+        }
+      }
+
+      // Success - redirect to dashboard
       return NextResponse.redirect(new URL('/new', requestUrl.origin))
     } catch (err) {
       console.error('Callback error:', err)
@@ -30,6 +59,5 @@ export async function GET(request: NextRequest) {
   }
 
   // For OAuth (hash-based) - Supabase auto-detects and creates session
-  // Redirect to the callback page that will handle the redirect
   return NextResponse.redirect(new URL('/auth/callback-page', requestUrl.origin))
 }

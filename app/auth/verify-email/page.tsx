@@ -22,19 +22,27 @@ export default function VerifyEmailPage() {
         setLoading(true)
 
         try {
+            // Use Supabase resend for OTP emails
             const { error: resendError } = await supabase.auth.resend({
                 type: 'signup',
-                email: email
+                email: email.trim(),
+                options: {
+                    emailRedirectTo: `${process.env.NEXT_PUBLIC_APP_URL}/auth/callback`
+                }
             })
 
             if (resendError) {
-                setError(resendError.message)
+                console.error('Resend error:', resendError)
+                setError(resendError.message || 'Failed to resend email')
+                setLoading(false)
                 return
             }
 
             setResent(true)
+            // Show success message for 3 seconds
             setTimeout(() => setResent(false), 3000)
         } catch (err) {
+            console.error('Resend email error:', err)
             setError(err instanceof Error ? err.message : 'Failed to resend email')
         } finally {
             setLoading(false)

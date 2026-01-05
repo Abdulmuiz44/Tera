@@ -18,23 +18,32 @@ export default function SignInPage() {
         setLoading(true)
 
         try {
-            // Validate that email exists in Supabase by attempting magic link sign in
-            // This validates the email exists without requiring a password
-            const { error: signInError } = await supabase.auth.signInWithOtp({
-                email: email.trim(),
-                options: {
-                    emailRedirectTo: `${process.env.NEXT_PUBLIC_APP_URL}/auth/callback`,
-                    shouldCreateUser: false
-                }
-            })
-
-            if (signInError) {
-                setError(signInError.message)
+            if (!email.trim()) {
+                setError('Please enter your email address')
                 setLoading(false)
                 return
             }
 
-            // If successful, proceed with Google OAuth
+            // Call signin API route - it validates user exists in database
+            const response = await fetch('/api/auth/signin', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email: email.trim() })
+            })
+
+            const data = await response.json()
+
+            if (!response.ok) {
+                setError(data.error || 'Sign in failed')
+                if (data.signUpRequired) {
+                    // Suggest signup
+                    setError(data.error + ' Click "Sign up" to create an account.')
+                }
+                setLoading(false)
+                return
+            }
+
+            // Email validation successful, show confirmation message
             setSubmitted(true)
             setLoading(false)
         } catch (err) {

@@ -23,23 +23,23 @@ export default function SignUpPage() {
                 return
             }
 
-            // Send OTP signup confirmation email
-            const { error: signUpError } = await supabase.auth.signInWithOtp({
-                email: email.trim(),
-                options: {
-                    emailRedirectTo: `${process.env.NEXT_PUBLIC_APP_URL}/auth/callback`,
-                    shouldCreateUser: true
-                }
+            // Call signup API route - it handles OTP and user validation
+            const response = await fetch('/api/auth/signup', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email: email.trim() })
             })
 
-            if (signUpError) {
-                setError(signUpError.message)
+            const data = await response.json()
+
+            if (!response.ok) {
+                setError(data.error || 'Sign up failed')
                 setLoading(false)
                 return
             }
 
             // Redirect to verify email page
-            router.push(`/auth/verify-email?email=${encodeURIComponent(email)}`)
+            router.push(`/auth/verify-email?email=${encodeURIComponent(email.trim())}`)
         } catch (err) {
             setError(err instanceof Error ? err.message : 'Sign up failed')
             setLoading(false)
