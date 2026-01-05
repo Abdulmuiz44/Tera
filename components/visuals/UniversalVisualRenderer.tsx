@@ -77,31 +77,58 @@ export default function UniversalVisualRenderer({
         <script src="https://d3js.org/d3.v7.min.js"><\/script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"><\/script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"><\/script>
+        <script src="https://code.jquery.com/jquery-3.6.0.min.js"><\/script>
         <style>
           * { margin: 0; padding: 0; box-sizing: border-box; }
-          body { 
+          html, body { 
+            width: 100%;
+            height: 100%;
             background: #0a0a0a; 
             color: #ffffff; 
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica', 'Arial', sans-serif;
-            padding: 20px;
-            min-height: 100vh;
           }
-          canvas { display: block; }
+          body { 
+            padding: 20px;
+            overflow: auto;
+          }
+          #root {
+            width: 100%;
+            min-height: 100%;
+          }
+          canvas { 
+            display: block;
+            max-width: 100%;
+            height: auto;
+          }
+          svg {
+            max-width: 100%;
+            height: auto;
+          }
         </style>
       </head>
       <body>
         <div id="root"></div>
         <script>
-          try {
-            ${code}
-          } catch (e) {
-            document.body.innerHTML = '<div style="color: #ff6b6b; padding: 20px; font-family: monospace; white-space: pre-wrap;">' + 
-              'Error: ' + (e.message || e) + 
-              '\\n\\n' + 
-              (e.stack || '') + 
+          window.onerror = function(msg, url, lineNo, columnNo, error) {
+            console.error('Global error:', msg, error);
+            document.body.innerHTML = '<div style="color: #ff6b6b; padding: 20px; font-family: monospace; white-space: pre-wrap; word-break: break-word;">' + 
+              'Error: ' + msg + 
+              (error && error.stack ? '\\n\\nStack:\\n' + error.stack : '') + 
               '</div>';
-            console.error('Code execution error:', e);
-          }
+            return false;
+          };
+          
+          (function() {
+            try {
+              ${code}
+            } catch (e) {
+              console.error('Code execution error:', e);
+              document.body.innerHTML = '<div style="color: #ff6b6b; padding: 20px; font-family: monospace; white-space: pre-wrap; word-break: break-word;">' + 
+                'Error: ' + (e.message || e) + 
+                (e.stack ? '\\n\\nStack:\\n' + e.stack : '') + 
+                '</div>';
+            }
+          })();
         <\/script>
       </body>
       </html>
