@@ -7,6 +7,8 @@ export interface LemonSqueezyCheckoutData {
   email?: string
   custom?: {
     user_id?: string
+    return_url?: string
+    [key: string]: string | undefined
   }
 }
 
