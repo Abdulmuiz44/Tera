@@ -810,7 +810,7 @@ export default function PromptShell({
                                                         }
                                                         if (block.type === 'web-sources') {
                                                             return (
-                                                                <div key={idx} className="my-4 rounded-lg bg-blue-500/10 border border-blue-500/30 p-4">
+                                                                <div key={idx} className="my-4 rounded-lg bg-blue-500/10 border border-blue-500/30 p-4 animate-in fade-in duration-300">
                                                                     <div className="flex items-center gap-2 mb-3 text-blue-200">
                                                                         <span className="text-lg">🔍</span>
                                                                         <h4 className="font-semibold">Web Sources</h4>
@@ -841,7 +841,7 @@ export default function PromptShell({
                                                         }
                                                         if (block.type === 'code') {
                                                             return (
-                                                                <div key={idx} className="my-4 rounded-lg bg-black/5 dark:bg-black/30 border border-tera-border overflow-hidden w-full">
+                                                                <div key={idx} className="my-4 rounded-lg bg-black/5 dark:bg-black/30 border border-tera-border overflow-hidden w-full animate-in fade-in slide-in-from-bottom-2 duration-300">
                                                                     <div className="flex items-center justify-between px-3 md:px-4 py-2 border-b border-tera-border/50 bg-black/10 gap-2">
                                                                         <span className="text-xs font-semibold text-white/60 uppercase tracking-wider truncate">
                                                                             {block.language || 'code'}
@@ -865,11 +865,11 @@ export default function PromptShell({
                                                             )
                                                         }
                                                         return block.isHeader ? (
-                                                            <h3 key={idx} className="font-bold text-base md:text-lg mt-2 text-tera-primary w-full break-words">
+                                                            <h3 key={idx} className="font-bold text-base md:text-lg mt-2 text-tera-primary w-full break-words animate-in fade-in slide-in-from-left duration-300">
                                                                 {block.content}
                                                             </h3>
                                                         ) : (
-                                                            <p key={idx} className="leading-relaxed whitespace-pre-wrap text-sm md:text-base w-full break-words">
+                                                            <p key={idx} className="leading-relaxed whitespace-pre-wrap text-sm md:text-base w-full break-words animate-in fade-in duration-300">
                                                                 {block.content.split(/((?:https?:\/\/|www\.)[^\s]+)/g).map((part, i) => {
                                                                     if (part.match(/^(https?:\/\/|www\.)/)) {
                                                                         const href = part.startsWith('http') ? part : `https://${part}`
