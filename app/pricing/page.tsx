@@ -181,12 +181,13 @@ export default function PricingPage() {
         })
       })
 
+      const data = await response.json()
+      
       if (!response.ok) {
-        const error = await response.json()
-        throw new Error(error.error || 'Failed to create checkout session')
+        const details = data.details || data.error || 'Failed to create checkout session'
+        throw new Error(details)
       }
 
-      const data = await response.json()
       if (data.checkoutUrl) {
         window.location.href = data.checkoutUrl
       } else {

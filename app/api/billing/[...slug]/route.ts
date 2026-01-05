@@ -57,7 +57,11 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
 
         return NextResponse.json({ error: 'Invalid action' }, { status: 400 })
     } catch (error) {
-        console.error(`Billing API error (${action}):`, error)
-        return NextResponse.json({ error: 'Failed' }, { status: 500 })
+        const errorMessage = error instanceof Error ? error.message : 'Unknown error'
+        console.error(`Billing API error (${action}):`, errorMessage)
+        return NextResponse.json({ 
+            error: 'Failed',
+            details: errorMessage 
+        }, { status: 500 })
     }
 }
