@@ -1,25 +1,37 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
 
 export default function CallbackPage() {
   const router = useRouter()
+  const searchParams = useSearchParams()
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
-    let isMounted = true
-
     const handleCallback = async () => {
       try {
-        // Check if there's a valid session (handles both OAuth and email confirmation)
+        const errorParam = searchParams.get('error')
+        
+        if (errorParam) {
+          setError('Authentication failed. Redirecting to sign in...')
+          setTimeout(() => router.push('/auth/signin'), 2000)
+          return
+        }
+
+        // Check if there's a valid session
         const { data: { session }, error: sessionError } = await supabase.auth.getSession()
 
-        if (!isMounted) return
+        if (sessionError) {
+          console.error('Session error:', sessionError)
+          setError('Error checking session. Redirecting...')
+          setTimeout(() => router.push('/auth/signin'), 2000)
+          return
+        }
 
-        if (sessionError || !session) {
-          setError('Authentication failed. Please try again.')
+        if (!session) {
+          setError('No session found. Redirecting...')
           setTimeout(() => router.push('/auth/signin'), 2000)
           return
         }
@@ -27,19 +39,14 @@ export default function CallbackPage() {
         // Session exists, redirect to dashboard
         router.push('/new')
       } catch (err) {
-        if (!isMounted) return
         console.error('Callback error:', err)
-        setError('An error occurred during authentication')
+        setError('An error occurred. Redirecting...')
         setTimeout(() => router.push('/auth/signin'), 2000)
       }
     }
 
     handleCallback()
-    
-    return () => {
-      isMounted = false
-    }
-  }, [router])
+  }, [router, searchParams])
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#050505] to-[#1a1a1a]">

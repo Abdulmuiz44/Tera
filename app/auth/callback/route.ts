@@ -16,15 +16,16 @@ export async function GET(request: NextRequest) {
       const { error } = await supabase.auth.exchangeCodeForSession(code)
       
       if (error) {
-        console.error('Code exchange error:', error)
-        return NextResponse.redirect(new URL('/auth/signin?error=invalid_code', requestUrl.origin))
+        console.error('Code exchange error:', error.message)
+        // Redirect to callback-page which will handle the error on client side
+        return NextResponse.redirect(new URL('/auth/callback-page?error=confirmation_failed', requestUrl.origin))
       }
 
-      // Email confirmed successfully, redirect to confirmation success page
-      return NextResponse.redirect(new URL('/auth/confirmation-success', requestUrl.origin))
+      // Success - redirect to dashboard directly
+      return NextResponse.redirect(new URL('/new', requestUrl.origin))
     } catch (err) {
       console.error('Callback error:', err)
-      return NextResponse.redirect(new URL('/auth/signin?error=callback_error', requestUrl.origin))
+      return NextResponse.redirect(new URL('/auth/callback-page?error=server_error', requestUrl.origin))
     }
   }
 
