@@ -88,6 +88,42 @@ export async function createCheckout(variantId: string, options: CheckoutOptions
     }
 
     // Use Lemon Squeezy API to create checkout
+    const checkoutData = {
+      data: {
+        type: 'checkouts',
+        attributes: {
+          checkout_data: {
+            email: options.email,
+            custom: {
+              user_id: options.userId
+            }
+          },
+          preview: false,
+          expires_at: null
+        },
+        relationships: {
+          store: {
+            data: {
+              type: 'stores',
+              id: storeId
+            }
+          },
+          variant: {
+            data: {
+              type: 'variants',
+              id: variantId
+            }
+          }
+        }
+      }
+    }
+
+    console.log('[Lemon Squeezy] Request payload:', JSON.stringify(checkoutData, null, 2))
+    console.log('[Lemon Squeezy] Store ID:', storeId)
+    console.log('[Lemon Squeezy] Variant ID:', variantId)
+    console.log('[Lemon Squeezy] Email:', options.email)
+    console.log('[Lemon Squeezy] User ID:', options.userId)
+
     const response = await fetch('https://api.lemonsqueezy.com/v1/checkouts', {
       method: 'POST',
       headers: {
@@ -95,36 +131,7 @@ export async function createCheckout(variantId: string, options: CheckoutOptions
         'Content-Type': 'application/json',
         'Accept': 'application/json'
       },
-      body: JSON.stringify({
-        data: {
-          type: 'checkouts',
-          attributes: {
-            checkout_data: {
-              email: options.email || '',
-              custom: {
-                user_id: options.userId || ''
-              }
-            },
-            product_options: {
-              redirect_url: options.returnUrl || `${process.env.NEXT_PUBLIC_APP_URL}/new`
-            }
-          },
-          relationships: {
-            store: {
-              data: {
-                type: 'stores',
-                id: storeId.toString()
-              }
-            },
-            variant: {
-              data: {
-                type: 'variants',
-                id: variantId.toString()
-              }
-            }
-          }
-        }
-      })
+      body: JSON.stringify(checkoutData)
     })
 
     if (!response.ok) {
@@ -142,11 +149,17 @@ export async function createCheckout(variantId: string, options: CheckoutOptions
     const data = await response.json()
     console.log('[Lemon Squeezy] Checkout response:', JSON.stringify(data))
     
-    const checkoutUrl = data.data?.attributes?.url
+    let checkoutUrl = data.data?.attributes?.url
 
     if (!checkoutUrl) {
       console.error('[Lemon Squeezy] No URL in response:', JSON.stringify(data))
       throw new Error(`No checkout URL in Lemon Squeezy response`)
+    }
+
+    // Append return URL as parameter if provided
+    if (options.returnUrl) {
+      const separator = checkoutUrl.includes('?') ? '&' : '?'
+      checkoutUrl = `${checkoutUrl}${separator}checkout[custom][return_url]=${encodeURIComponent(options.returnUrl)}`
     }
 
     console.log('[Lemon Squeezy] Checkout URL created:', checkoutUrl)
