@@ -90,15 +90,21 @@ export async function createCheckout(variantId: string, options: CheckoutOptions
     }
 
     // Use Lemon Squeezy API to create checkout
+    const customData: Record<string, string | undefined> = {
+      user_id: options.userId
+    }
+    
+    if (options.returnUrl) {
+      customData.return_url = options.returnUrl
+    }
+
     const checkoutData = {
       data: {
         type: 'checkouts',
         attributes: {
           checkout_data: {
             email: options.email,
-            custom: {
-              user_id: options.userId
-            }
+            custom: customData
           },
           preview: false,
           expires_at: null
@@ -117,14 +123,6 @@ export async function createCheckout(variantId: string, options: CheckoutOptions
             }
           }
         }
-      }
-    }
-
-    // Add return URL to custom data if provided (Lemon Squeezy will handle via webhook)
-    if (options.returnUrl) {
-      checkoutData.data.attributes.checkout_data.custom = {
-        ...checkoutData.data.attributes.checkout_data.custom,
-        return_url: options.returnUrl
       }
     }
 
