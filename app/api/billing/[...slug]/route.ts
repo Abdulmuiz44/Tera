@@ -6,15 +6,21 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     const { slug } = await params
     const action = slug[0]
 
+    console.log(`[Billing API] Received request for action: ${action}`)
+
     try {
         const body = await request.json()
+        console.log(`[Billing API] Request body:`, { action, plan: body.plan, email: body.email, userId: body.userId })
 
         if (action === 'create-session') {
             const { plan, email, userId, returnUrl, currencyCode } = body
             if (!plan || !['pro', 'plus'].includes(plan) || !email || !userId) {
+                console.log(`[Billing API] Missing required fields`, { plan, email, userId })
                 return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
             }
+            console.log(`[Billing API] Creating checkout for plan: ${plan}`)
             const checkoutUrl = await getCheckoutUrlForPlan(plan, email, userId, returnUrl, currencyCode)
+            console.log(`[Billing API] Checkout URL created successfully`)
             return NextResponse.json({ success: true, checkoutUrl, currency: currencyCode })
         }
 
@@ -57,11 +63,14 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
 
         return NextResponse.json({ error: 'Invalid action' }, { status: 400 })
     } catch (error) {
-        const errorMessage = error instanceof Error ? error.message : 'Unknown error'
-        console.error(`Billing API error (${action}):`, errorMessage)
+        const errorMessage = error instanceof Error ? error.message : String(error)
+        const errorStack = error instanceof Error ? error.stack : ''
+        console.error(`[Billing API] Error (${action}):`, errorMessage)
+        console.error(`[Billing API] Stack:`, errorStack)
         return NextResponse.json({ 
             error: 'Failed',
-            details: errorMessage 
+            details: errorMessage,
+            action: action
         }, { status: 500 })
     }
 }
