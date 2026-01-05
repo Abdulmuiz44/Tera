@@ -35,6 +35,8 @@ export async function generateAnswer({ prompt, tool, authorId, authorEmail, atta
       dailyChats: 0,
       dailyFileUploads: 0,
       chatResetDate: null,
+      limitHitChatAt: null,
+      limitHitUploadAt: null,
       profileImageUrl: null,
       fullName: null,
       school: null,
