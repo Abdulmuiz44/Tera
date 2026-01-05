@@ -82,15 +82,15 @@ export default function UserMenu({ user, expanded, onSignOut }: UserMenuProps) {
             href: '/settings' 
         },
         { 
-            label: 'Help', 
+            label: 'About', 
             icon: (
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <circle cx="12" cy="12" r="10" />
                     <path d="M12 16v-4M12 8h.01" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" />
                 </svg>
             ),
-            href: '/help', 
-            hasChevron: true 
+            href: '/about', 
+            hasChevron: false 
         },
     ]
 

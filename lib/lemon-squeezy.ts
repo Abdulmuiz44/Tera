@@ -196,12 +196,23 @@ export async function getCheckoutUrlForPlan(
   returnUrl?: string,
   currencyCode?: string
 ): Promise<string> {
+  // Validate environment variables
+  const storeId = process.env.NEXT_PUBLIC_LEMON_STORE_ID
+  const apiKey = process.env.LEMON_SQUEEZY_API_KEY
+  
+  if (!storeId) {
+    throw new Error('NEXT_PUBLIC_LEMON_STORE_ID not configured')
+  }
+  if (!apiKey) {
+    throw new Error('LEMON_SQUEEZY_API_KEY not configured')
+  }
+
   const variantId = plan === 'pro'
     ? process.env.LEMON_SQUEEZY_PRO_VARIANT_ID
     : process.env.LEMON_SQUEEZY_PLUS_VARIANT_ID
 
   if (!variantId) {
-    throw new Error(`Lemon Squeezy variant ID not configured for ${plan} plan`)
+    throw new Error(`LEMON_SQUEEZY_${plan.toUpperCase()}_VARIANT_ID not configured`)
   }
 
   return createCheckout(variantId, {
