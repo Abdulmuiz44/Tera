@@ -118,6 +118,14 @@ export async function createCheckout(variantId: string, options: CheckoutOptions
       }
     }
 
+    // Add return URL to custom data if provided (Lemon Squeezy will handle via webhook)
+    if (options.returnUrl) {
+      checkoutData.data.attributes.checkout_data.custom = {
+        ...checkoutData.data.attributes.checkout_data.custom,
+        return_url: options.returnUrl
+      }
+    }
+
     console.log('[Lemon Squeezy] Request payload:', JSON.stringify(checkoutData, null, 2))
     console.log('[Lemon Squeezy] Store ID:', storeId)
     console.log('[Lemon Squeezy] Variant ID:', variantId)
@@ -149,17 +157,11 @@ export async function createCheckout(variantId: string, options: CheckoutOptions
     const data = await response.json()
     console.log('[Lemon Squeezy] Checkout response:', JSON.stringify(data))
     
-    let checkoutUrl = data.data?.attributes?.url
+    const checkoutUrl = data.data?.attributes?.url
 
     if (!checkoutUrl) {
       console.error('[Lemon Squeezy] No URL in response:', JSON.stringify(data))
       throw new Error(`No checkout URL in Lemon Squeezy response`)
-    }
-
-    // Append return URL as parameter if provided
-    if (options.returnUrl) {
-      const separator = checkoutUrl.includes('?') ? '&' : '?'
-      checkoutUrl = `${checkoutUrl}${separator}checkout[custom][return_url]=${encodeURIComponent(options.returnUrl)}`
     }
 
     console.log('[Lemon Squeezy] Checkout URL created:', checkoutUrl)
