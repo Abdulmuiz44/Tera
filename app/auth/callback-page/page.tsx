@@ -7,8 +7,15 @@ import { supabase } from '@/lib/supabase'
 export default function CallbackPage() {
   const router = useRouter()
   const [error, setError] = useState<string | null>(null)
+  const [mounted, setMounted] = useState(false)
 
   useEffect(() => {
+    setMounted(true)
+  }, [])
+
+  useEffect(() => {
+    if (!mounted) return
+
     const handleCallback = async () => {
       try {
         // Check if there's a valid session (handles both OAuth and email confirmation)
@@ -30,7 +37,7 @@ export default function CallbackPage() {
     }
 
     handleCallback()
-  }, [router])
+  }, [mounted, router])
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#050505] to-[#1a1a1a]">
