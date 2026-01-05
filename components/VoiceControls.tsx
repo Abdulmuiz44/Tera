@@ -44,7 +44,7 @@ export default function VoiceControls({ text, messageId }: VoiceControlsProps) {
         return rawText
             // Remove markdown formatting
             .replace(/#{1,6}\s/g, '') // Remove markdown headers
-            .replace(/\*\*/g, '') // Remove bold markers
+            .replace(/\*+/g, '') // Remove all asterisks (bold, italic, bullet points)
             .replace(/__(.*?)__/g, '$1') // Remove underline markers
             .replace(/_(.*?)_/g, '$1') // Remove italic markers
             .replace(/`(.*?)`/g, '$1') // Remove inline code markers
@@ -59,8 +59,9 @@ export default function VoiceControls({ text, messageId }: VoiceControlsProps) {
             })
             // Clean up code blocks
             .replace(/```[\s\S]*?```/g, '') // Remove code blocks
-            // Clean up extra spaces
+            // Clean up extra spaces and punctuation artifacts
             .replace(/\s+/g, ' ')
+            .replace(/\s+([,.!?;:])/g, '$1') // Remove space before punctuation
             .trim()
     }
 
