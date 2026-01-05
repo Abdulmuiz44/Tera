@@ -31,11 +31,18 @@ export default function AdminPage() {
     const [activeTab, setActiveTab] = useState<'overview' | 'locked' | 'conversions'>('overview')
 
     useEffect(() => {
-        if (!user) {
-            router.push('/login')
+        // If user not loaded yet, wait
+        if (!user && loading) {
             return
         }
 
+        // If user doesn't exist, redirect to signin
+        if (!user) {
+            router.push('/auth/signin')
+            return
+        }
+
+        // Check if user is an admin
         if (!isAdminUser(user.email)) {
             setError('Access Denied: You do not have admin permissions')
             setAuthorized(false)
@@ -45,7 +52,7 @@ export default function AdminPage() {
 
         setAuthorized(true)
         fetchAnalytics()
-    }, [user, router])
+    }, [user, router, loading])
 
     const fetchAnalytics = async () => {
         setLoading(true)

@@ -361,6 +361,21 @@ export default function PricingPage() {
                 </div>
               </div>
 
+              {/* Help Link */}
+              <div className="border-t border-tera-border pt-12 mt-12 mb-12">
+                <div className="p-6 bg-tera-neon/10 border border-tera-neon/30 rounded-lg text-center">
+                  <p className="text-tera-secondary mb-3">
+                    Need help with billing, payments, or have other questions?
+                  </p>
+                  <a
+                    href="/help"
+                    className="inline-block px-6 py-2 bg-tera-neon text-black font-semibold rounded-lg hover:opacity-90 transition"
+                  >
+                    Visit Our Help Center
+                  </a>
+                </div>
+              </div>
+
               {/* FAQ Section */}
               <div className="border-t border-tera-border pt-12 mt-12">
                 <h2 className="text-2xl font-bold text-tera-primary mb-8 text-center">Frequently Asked Questions</h2>
