@@ -34,18 +34,18 @@ export default function UserMenu({ user, expanded, onSignOut }: UserMenuProps) {
 
     if (!user) {
         return (
-            <div className={`flex items-center gap-2 ${!expanded ? 'flex-col' : ''}`}>
+            <div className={`flex items-center gap-2 w-full ${!expanded ? 'flex-col justify-center' : ''}`}>
                 <Link
                     href="/auth/signin"
-                    className={`w-full text-center px-4 py-2 rounded-lg bg-white text-black dark:bg-black dark:text-white font-semibold text-sm transition-colors hover:bg-gray-200 dark:hover:bg-gray-800 ${!expanded ? 'w-auto' : ''}`}
+                    className={`flex-1 text-center px-3 py-2 rounded-lg bg-tera-neon/10 text-tera-neon font-medium text-sm transition-colors hover:bg-tera-neon/20 border border-tera-neon/30 ${!expanded ? 'flex-none' : ''}`}
                 >
-                    {expanded ? 'Login' : '🚪'}
+                    {expanded ? 'Login' : 'In'}
                 </Link>
                 <Link
                     href="/auth/signup"
-                    className={`w-full text-center px-4 py-2 rounded-lg bg-white text-black dark:bg-black dark:text-white font-semibold text-sm transition-colors hover:bg-gray-200 dark:hover:bg-gray-800 ${!expanded ? 'w-auto' : ''}`}
+                    className={`flex-1 text-center px-3 py-2 rounded-lg bg-tera-neon/10 text-tera-neon font-medium text-sm transition-colors hover:bg-tera-neon/20 border border-tera-neon/30 ${!expanded ? 'flex-none' : ''}`}
                 >
-                    {expanded ? 'Sign Up' : '👤'}
+                    {expanded ? 'Sign Up' : 'Up'}
                 </Link>
             </div>
         )
@@ -65,26 +65,33 @@ export default function UserMenu({ user, expanded, onSignOut }: UserMenuProps) {
         {
             label: 'Upgrade plan',
             icon: (
-                <div className="w-4 h-4 relative flex items-center justify-center">
-                    <Image
-                        src="/images/TERA_LOGO_ONLY1.png"
-                        alt="Tera"
-                        fill
-                        className="object-contain block dark:hidden"
-                    />
-                    <Image
-                        src="/images/TERA_LOGO_ONLY.png"
-                        alt="Tera"
-                        fill
-                        className="object-contain hidden dark:block"
-                    />
-                </div>
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                </svg>
             ),
             href: '/pricing'
         },
-        { label: 'Personalization', icon: '🎨', href: '/settings' },
-        { label: 'Settings', icon: '⚙️', href: '/settings' },
-        { label: 'Help', icon: '❓', href: '/help', hasChevron: true },
+        { 
+            label: 'Settings', 
+            icon: (
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <circle cx="12" cy="12" r="3" />
+                    <path d="M12 1v6m0 6v6M4.22 4.22l4.24 4.24m2.12 2.12l4.24 4.24M1 12h6m6 0h6m-17.78 7.78l4.24-4.24m2.12-2.12l4.24-4.24" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" />
+                </svg>
+            ),
+            href: '/settings' 
+        },
+        { 
+            label: 'Help', 
+            icon: (
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <circle cx="12" cy="12" r="10" />
+                    <path d="M12 16v-4M12 8h.01" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" />
+                </svg>
+            ),
+            href: '/help', 
+            hasChevron: true 
+        },
     ]
 
     return (
@@ -113,7 +120,9 @@ export default function UserMenu({ user, expanded, onSignOut }: UserMenuProps) {
                                 onClick={() => setDropdownOpen(false)}
                             >
                                 <div className="flex items-center gap-3">
-                                    <span className="text-base">{item.icon}</span>
+                                    <div className="flex items-center justify-center w-4 h-4 text-tera-secondary">
+                                        {item.icon}
+                                    </div>
                                     <span className="text-sm font-medium">{item.label}</span>
                                 </div>
                                 {item.hasChevron && <span className="text-tera-secondary/40">›</span>}
@@ -129,9 +138,11 @@ export default function UserMenu({ user, expanded, onSignOut }: UserMenuProps) {
                                 onSignOut()
                                 setDropdownOpen(false)
                             }}
-                            className="flex items-center gap-3 px-4 py-3 text-tera-primary hover:bg-tera-muted transition-colors w-full text-left"
+                            className="flex items-center gap-3 px-4 py-3 text-tera-primary hover:bg-red-500/10 hover:text-red-400 transition-colors w-full text-left"
                         >
-                            <span className="text-base">🚪</span>
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                            </svg>
                             <span className="text-sm font-medium">Log out</span>
                         </button>
                     </div>
