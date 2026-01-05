@@ -105,15 +105,17 @@ export default function Sidebar({ expanded, onToggle, onNewChat, user, onSignOut
 
   return (
     <aside
-      className={`fixed inset-y-0 left-0 z-50 flex flex-col shrink-0 h-screen bg-tera-bg border-r border-tera-border transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] overflow-hidden
-        ${expanded ? 'w-[260px] translate-x-0' : 'w-[260px] -translate-x-full md:w-20 md:translate-x-0'}
+      className={`fixed inset-y-0 left-0 z-50 flex flex-col shrink-0 h-screen bg-tera-bg border-r border-tera-border transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)]
+        ${expanded ? 'w-64 translate-x-0' : 'w-64 -translate-x-full md:w-20 md:translate-x-0'}
       `}
     >
-      {/* Header Section */}
-      <div className={`flex items-center ${expanded ? 'justify-between px-5' : 'justify-center'} h-20 border-b border-tera-border transition-all duration-300`}>
+      {/* Header Section - Always visible */}
+      <div className="flex items-center justify-between h-16 px-3 md:px-2 border-b border-tera-border flex-shrink-0">
         {/* Logo - Only visible when expanded */}
         <div
-          className={`relative flex items-center justify-center transition-all duration-300 ${expanded ? 'opacity-100 scale-100 w-[50px] h-[18px]' : 'opacity-0 scale-0 w-0 h-0 overflow-hidden'}`}
+          className={`relative flex items-center justify-center transition-all duration-300 ${
+            expanded ? 'opacity-100 scale-100 w-12 h-5' : 'opacity-0 scale-0 w-0 h-0 overflow-hidden'
+          }`}
         >
           <Image
             src="/images/TERA_LOGO_ONLY1.png"
@@ -131,10 +133,10 @@ export default function Sidebar({ expanded, onToggle, onNewChat, user, onSignOut
           />
         </div>
 
-        {/* Menu toggle button */}
+        {/* Menu toggle button - Always visible */}
         <button
           onClick={onToggle}
-          className="flex items-center justify-center w-9 h-9 rounded-lg text-tera-secondary hover:text-tera-primary hover:bg-tera-muted transition-all duration-200"
+          className="flex items-center justify-center w-8 h-8 rounded-md text-tera-secondary hover:text-tera-primary hover:bg-tera-muted transition-all duration-200"
           aria-label={expanded ? 'Collapse sidebar' : 'Expand sidebar'}
         >
           <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
@@ -147,8 +149,8 @@ export default function Sidebar({ expanded, onToggle, onNewChat, user, onSignOut
         </button>
       </div>
 
-      {/* Navigation Items */}
-      <nav className="flex-1 flex flex-col gap-1 w-full px-3 py-4 overflow-y-auto">
+      {/* Navigation Items - Fixed height, no scrolling */}
+      <nav className="flex flex-col gap-0.5 w-full px-2 py-3 flex-shrink-0">
         {navigation.map((item) => {
           const isActive =
             item.href === '/new'
@@ -166,7 +168,7 @@ export default function Sidebar({ expanded, onToggle, onNewChat, user, onSignOut
                   onNewChat()
                 }
               }}
-              className={`group relative flex items-center gap-3 px-3.5 py-2.5 rounded-lg transition-all duration-200 ${
+              className={`group relative flex items-center gap-3 px-3 py-2 rounded-lg transition-all duration-200 min-h-10 ${
                 isActive
                   ? 'bg-tera-neon/10 text-tera-neon'
                   : 'text-tera-secondary hover:text-tera-primary hover:bg-tera-muted'
@@ -180,7 +182,7 @@ export default function Sidebar({ expanded, onToggle, onNewChat, user, onSignOut
               {/* Label */}
               <span
                 className={`text-sm font-medium whitespace-nowrap transition-all duration-300 ${
-                  expanded ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-4 absolute left-full w-0 overflow-hidden'
+                  expanded ? 'opacity-100 translate-x-0 flex-1' : 'opacity-0 -translate-x-4 absolute left-full w-0 overflow-hidden'
                 }`}
               >
                 {item.label}
@@ -188,7 +190,7 @@ export default function Sidebar({ expanded, onToggle, onNewChat, user, onSignOut
 
               {/* Tooltip for collapsed state */}
               {!expanded && (
-                <span className="absolute left-full ml-3 px-2.5 py-1.5 bg-tera-panel text-tera-primary text-xs font-medium rounded-md border border-tera-border shadow-lg opacity-0 pointer-events-none transition-opacity duration-200 group-hover:opacity-100 whitespace-nowrap z-50">
+                <span className="absolute left-full ml-2 px-2 py-1 bg-tera-panel text-tera-primary text-xs font-medium rounded-md border border-tera-border shadow-lg opacity-0 pointer-events-none transition-opacity duration-200 group-hover:opacity-100 whitespace-nowrap z-50">
                   {item.label}
                 </span>
               )}
@@ -197,11 +199,14 @@ export default function Sidebar({ expanded, onToggle, onNewChat, user, onSignOut
         })}
       </nav>
 
-      {/* Divider */}
-      <div className="h-px bg-tera-border" />
+      {/* Spacer - Takes remaining vertical space */}
+      <div className="flex-1" />
 
-      {/* User Menu - Sticky at bottom */}
-      <div className={`w-full px-3 py-4 ${expanded ? '' : 'flex justify-center'}`}>
+      {/* Divider */}
+      <div className="h-px bg-tera-border flex-shrink-0" />
+
+      {/* User Menu - Stuck to bottom */}
+      <div className={`w-full px-2 py-3 border-t border-tera-border flex-shrink-0 ${expanded ? '' : 'flex justify-center'}`}>
         <UserMenu user={user || null} expanded={expanded} onSignOut={onSignOut || (() => { })} />
       </div>
     </aside>
