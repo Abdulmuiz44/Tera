@@ -212,6 +212,7 @@ export default function PromptShell({
     const [currentSessionId, setCurrentSessionId] = useState<string | null>(sessionId || null)
     const [upgradePromptType, setUpgradePromptType] = useState<'chats' | 'file-uploads' | 'web-search' | null>(null)
     const [limitModalType, setLimitModalType] = useState<'chats' | 'file-uploads' | 'web-search' | null>(null)
+    const [limitUnlocksAt, setLimitUnlocksAt] = useState<Date | undefined>(undefined)
     const [currentUserPlan, setCurrentUserPlan] = useState<string>('free')
     const [webSearchEnabled, setWebSearchEnabled] = useState(false)
     const [webSearchRemaining, setWebSearchRemaining] = useState(100)
@@ -301,6 +302,10 @@ export default function PromptShell({
             // Check for limit errors and show modal
             if (message.includes('limit') && (message.includes('upload') || message.includes('file'))) {
                 setLimitModalType('file-uploads')
+                // Try to extract unlocksAt from error or calculate it
+                const now = new Date()
+                const unlocksAt = new Date(now.getTime() + 24 * 60 * 60 * 1000)
+                setLimitUnlocksAt(unlocksAt)
                 setAttachmentMessage(null)
             } else {
                 setAttachmentMessage(message)
@@ -439,14 +444,21 @@ export default function PromptShell({
                 console.error('generateAnswer failed', error)
 
                 // Check for limit errors and show modal instead
+                const now = new Date()
+                const unlocksAt = new Date(now.getTime() + 24 * 60 * 60 * 1000)
+
                 if (message.includes('limit') && message.includes('chats')) {
                     setLimitModalType('chats')
+                    setLimitUnlocksAt(unlocksAt)
                 } else if (message.includes('limit') && message.includes('file uploads')) {
                     setLimitModalType('file-uploads')
+                    setLimitUnlocksAt(unlocksAt)
                 } else if (message.includes('limit') && message.includes('web-search')) {
                     setLimitModalType('web-search')
+                    setLimitUnlocksAt(unlocksAt)
                 } else if (message === 'limit web-search') {
                     setLimitModalType('web-search')
+                    setLimitUnlocksAt(unlocksAt)
                 }
 
                 setConversations((prev) =>
@@ -1131,7 +1143,11 @@ export default function PromptShell({
                 isOpen={limitModalType !== null}
                 limitType={limitModalType}
                 currentPlan={currentUserPlan}
-                onClose={() => setLimitModalType(null)}
+                unlocksAt={limitUnlocksAt}
+                onClose={() => {
+                    setLimitModalType(null)
+                    setLimitUnlocksAt(undefined)
+                }}
             />
         </div>
     )

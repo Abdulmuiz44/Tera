@@ -18,6 +18,8 @@ export interface UserProfile {
     dailyChats: number
     dailyFileUploads: number
     chatResetDate: Date | null
+    limitHitChatAt: Date | null
+    limitHitUploadAt: Date | null
     profileImageUrl: string | null
     fullName: string | null
     school: string | null
@@ -47,6 +49,8 @@ export async function getUserProfile(userId: string): Promise<UserProfile | null
         dailyChats: data.daily_chats || 0,
         dailyFileUploads: data.daily_file_uploads || 0,
         chatResetDate: data.chat_reset_date ? new Date(data.chat_reset_date) : null,
+        limitHitChatAt: data.limit_hit_chat_at ? new Date(data.limit_hit_chat_at) : null,
+        limitHitUploadAt: data.limit_hit_upload_at ? new Date(data.limit_hit_upload_at) : null,
         profileImageUrl: data.profile_image_url,
         fullName: data.full_name,
         school: data.school,
@@ -79,11 +83,12 @@ export async function getUsageStats(userId: string): Promise<UsageStats | null> 
 
 /**
  * Check if counters need to be reset
+ * Supports both daily reset and 24-hour unlock from when limit was hit
  */
 export async function checkAndResetUsage(userId: string): Promise<boolean> {
     const { data, error } = await supabase
         .from('users')
-        .select('chat_reset_date')
+        .select('chat_reset_date, limit_hit_chat_at, limit_hit_upload_at')
         .eq('id', userId)
         .single()
 
@@ -93,8 +98,32 @@ export async function checkAndResetUsage(userId: string): Promise<boolean> {
     const updates: Record<string, any> = {}
     let needsUpdate = false
 
-    // Check daily chat reset
-    if (data.chat_reset_date && now >= new Date(data.chat_reset_date)) {
+    // Check 24-hour unlock from when chat limit was hit
+    if (data.limit_hit_chat_at) {
+        const hitTime = new Date(data.limit_hit_chat_at)
+        const unlockTime = new Date(hitTime.getTime() + 24 * 60 * 60 * 1000) // 24 hours later
+
+        if (now >= unlockTime) {
+            updates.daily_chats = 0
+            updates.limit_hit_chat_at = null
+            needsUpdate = true
+        }
+    }
+
+    // Check 24-hour unlock from when upload limit was hit
+    if (data.limit_hit_upload_at) {
+        const hitTime = new Date(data.limit_hit_upload_at)
+        const unlockTime = new Date(hitTime.getTime() + 24 * 60 * 60 * 1000) // 24 hours later
+
+        if (now >= unlockTime) {
+            updates.daily_file_uploads = 0
+            updates.limit_hit_upload_at = null
+            needsUpdate = true
+        }
+    }
+
+    // Fallback: Check daily reset at midnight if no 24-hour unlock is active
+    if (data.chat_reset_date && now >= new Date(data.chat_reset_date) && !data.limit_hit_chat_at) {
         const nextChatResetDate = new Date(now)
         nextChatResetDate.setDate(nextChatResetDate.getDate() + 1)
         updates.daily_chats = 0
@@ -124,7 +153,7 @@ export async function checkAndResetUsage(userId: string): Promise<boolean> {
 /**
  * Check if user can start a new chat
  */
-export async function canUserStartChat(userId: string): Promise<{ allowed: boolean; remaining: number | 'unlimited'; reason?: string }> {
+export async function canUserStartChat(userId: string): Promise<{ allowed: boolean; remaining: number | 'unlimited'; reason?: string; unlocksAt?: Date }> {
     const profile = await getUserProfile(userId)
     if (!profile) return { allowed: false, remaining: 0, reason: 'User not found' }
 
@@ -140,10 +169,23 @@ export async function canUserStartChat(userId: string): Promise<{ allowed: boole
 
     if (!allowed) {
         const limit = PLAN_CONFIGS[profile.subscriptionPlan].limits.chatsPerDay
+
+        // Calculate unlock time (24 hours from when limit was first hit)
+        let unlocksAt: Date | undefined
+        if (profile.limitHitChatAt) {
+            unlocksAt = new Date(profile.limitHitChatAt.getTime() + 24 * 60 * 60 * 1000)
+        } else {
+            // If not yet recorded, record it now
+            const now = new Date()
+            await recordChatLimitHit(userId)
+            unlocksAt = new Date(now.getTime() + 24 * 60 * 60 * 1000)
+        }
+
         return {
             allowed: false,
             remaining: 0,
-            reason: `You've reached your daily limit of ${limit} chats. Reset at midnight.`
+            reason: `You've reached your daily limit of ${limit} chats. Access unlocks in 24 hours.`,
+            unlocksAt
         }
     }
 
@@ -153,7 +195,7 @@ export async function canUserStartChat(userId: string): Promise<{ allowed: boole
 /**
  * Check if user can upload files
  */
-export async function canUserUploadFiles(userId: string, fileCount: number = 1): Promise<{ allowed: boolean; remaining: number | 'unlimited'; reason?: string }> {
+export async function canUserUploadFiles(userId: string, fileCount: number = 1): Promise<{ allowed: boolean; remaining: number | 'unlimited'; reason?: string; unlocksAt?: Date }> {
     const profile = await getUserProfile(userId)
     if (!profile) return { allowed: false, remaining: 0, reason: 'User not found' }
 
@@ -172,10 +214,23 @@ export async function canUserUploadFiles(userId: string, fileCount: number = 1):
     if (!allowed) {
         const limit = PLAN_CONFIGS[profile.subscriptionPlan].limits.fileUploadsPerDay
         const remainingStr = remaining === 'unlimited' ? 'unlimited' : remaining
+
+        // Calculate unlock time (24 hours from when limit was first hit)
+        let unlocksAt: Date | undefined
+        if (profile.limitHitUploadAt) {
+            unlocksAt = new Date(profile.limitHitUploadAt.getTime() + 24 * 60 * 60 * 1000)
+        } else {
+            // If not yet recorded, record it now
+            const now = new Date()
+            await recordUploadLimitHit(userId)
+            unlocksAt = new Date(now.getTime() + 24 * 60 * 60 * 1000)
+        }
+
         return {
             allowed: false,
             remaining: remaining === 'unlimited' ? 'unlimited' : 0,
-            reason: `Daily upload limit reached (${limit}). ${remaining} remaining. Reset at midnight.`
+            reason: `Daily upload limit reached (${limit}). Access unlocks in 24 hours.`,
+            unlocksAt
         }
     }
 
@@ -200,6 +255,38 @@ export async function validateFileSize(userId: string, fileSizeMB: number): Prom
     }
 
     return { allowed: true, maxSize: maxFileSize }
+}
+
+/**
+ * Record that user hit their chat limit
+ */
+async function recordChatLimitHit(userId: string): Promise<boolean> {
+    const { error } = await supabase
+        .from('users')
+        .update({ limit_hit_chat_at: new Date().toISOString() })
+        .eq('id', userId)
+
+    if (error) {
+        console.error('Error recording chat limit hit:', error)
+        return false
+    }
+    return true
+}
+
+/**
+ * Record that user hit their file upload limit
+ */
+async function recordUploadLimitHit(userId: string): Promise<boolean> {
+    const { error } = await supabase
+        .from('users')
+        .update({ limit_hit_upload_at: new Date().toISOString() })
+        .eq('id', userId)
+
+    if (error) {
+        console.error('Error recording upload limit hit:', error)
+        return false
+    }
+    return true
 }
 
 /**
@@ -283,14 +370,28 @@ export async function updateUserProfile(
 
 /**
  * Update user subscription plan
+ * Also clears limit locks when upgrading (auto-unlock)
  */
 export async function updateSubscriptionPlan(
     userId: string,
     plan: PlanType
 ): Promise<boolean> {
+    const updates: Record<string, any> = {
+        subscription_plan: plan
+    }
+
+    // Auto-unlock if upgrading from free plan
+    // Pro and Plus users don't have limits anyway
+    if (plan !== 'free') {
+        updates.limit_hit_chat_at = null
+        updates.limit_hit_upload_at = null
+        updates.daily_chats = 0
+        updates.daily_file_uploads = 0
+    }
+
     const { error } = await supabase
         .from('users')
-        .update({ subscription_plan: plan })
+        .update(updates)
         .eq('id', userId)
 
     if (error) {
@@ -299,4 +400,27 @@ export async function updateSubscriptionPlan(
     }
 
     return true
+}
+
+/**
+ * Calculate remaining time until unlock (in milliseconds)
+ * Returns negative if unlock time has passed
+ */
+export function getTimeUntilUnlock(unlocksAt: Date): number {
+    return unlocksAt.getTime() - new Date().getTime()
+}
+
+/**
+ * Format remaining time as human-readable string
+ */
+export function formatTimeUntilUnlock(milliseconds: number): string {
+    if (milliseconds <= 0) return 'Available now'
+
+    const hours = Math.floor(milliseconds / (60 * 60 * 1000))
+    const minutes = Math.floor((milliseconds % (60 * 60 * 1000)) / (60 * 1000))
+
+    if (hours > 0) {
+        return `${hours}h ${minutes}m`
+    }
+    return `${minutes}m`
 }
