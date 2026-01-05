@@ -128,21 +128,32 @@ export async function createCheckout(variantId: string, options: CheckoutOptions
     })
 
     if (!response.ok) {
-      const error = await response.json()
-      console.error('Lemon Squeezy API error:', error)
-      throw new Error(`Failed to create checkout: ${response.status}`)
+      let errorDetails = ''
+      try {
+        const error = await response.json()
+        errorDetails = JSON.stringify(error)
+      } catch (e) {
+        errorDetails = await response.text()
+      }
+      console.error(`[Lemon Squeezy] API error (${response.status}):`, errorDetails)
+      throw new Error(`Lemon Squeezy API error (${response.status}): ${errorDetails}`)
     }
 
     const data = await response.json()
+    console.log('[Lemon Squeezy] Checkout response:', JSON.stringify(data))
+    
     const checkoutUrl = data.data?.attributes?.url
 
     if (!checkoutUrl) {
-      throw new Error('No checkout URL returned from Lemon Squeezy API')
+      console.error('[Lemon Squeezy] No URL in response:', JSON.stringify(data))
+      throw new Error(`No checkout URL in Lemon Squeezy response`)
     }
 
+    console.log('[Lemon Squeezy] Checkout URL created:', checkoutUrl)
     return checkoutUrl
   } catch (error) {
-    console.error('Checkout creation failed:', error)
+    const msg = error instanceof Error ? error.message : String(error)
+    console.error('[Lemon Squeezy] Checkout creation failed:', msg)
     throw error
   }
 }
@@ -200,6 +211,10 @@ export async function getCheckoutUrlForPlan(
   const storeId = process.env.NEXT_PUBLIC_LEMON_STORE_ID
   const apiKey = process.env.LEMON_SQUEEZY_API_KEY
   
+  console.log('[Lemon Squeezy] Validating config for plan:', plan)
+  console.log('[Lemon Squeezy] Store ID:', storeId ? 'present' : 'MISSING')
+  console.log('[Lemon Squeezy] API Key:', apiKey ? 'present' : 'MISSING')
+  
   if (!storeId) {
     throw new Error('NEXT_PUBLIC_LEMON_STORE_ID not configured')
   }
@@ -211,10 +226,13 @@ export async function getCheckoutUrlForPlan(
     ? process.env.LEMON_SQUEEZY_PRO_VARIANT_ID
     : process.env.LEMON_SQUEEZY_PLUS_VARIANT_ID
 
+  console.log('[Lemon Squeezy] Variant ID for', plan, ':', variantId ? 'present' : 'MISSING')
+
   if (!variantId) {
     throw new Error(`LEMON_SQUEEZY_${plan.toUpperCase()}_VARIANT_ID not configured`)
   }
 
+  console.log('[Lemon Squeezy] Creating checkout for plan:', plan, 'email:', email, 'userId:', userId)
   return createCheckout(variantId, {
     email,
     userId,
