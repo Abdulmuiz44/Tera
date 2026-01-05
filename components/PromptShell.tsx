@@ -792,9 +792,9 @@ export default function PromptShell({
                                 {/* Assistant Message */}
                                 {entry.assistantMessage && (
                                     <div className="flex justify-start w-full">
-                                        <div className="w-full md:max-w-[85%]">
-                                            <div className="rounded-2xl bg-tera-panel border border-tera-border px-4 md:px-6 py-4 text-tera-primary shadow-lg">
-                                                <div className="space-y-4">
+                                        <div className="w-full">
+                                            <div className="rounded-xl md:rounded-2xl bg-tera-panel border border-tera-border px-3 md:px-6 py-3 md:py-4 text-tera-primary shadow-lg">
+                                                <div className="space-y-4 w-full">
                                                     {parseContent(entry.assistantMessage.content).map((block, idx) => {
                                                         if (block.type === 'universal-visual') {
                                                             return <UniversalVisualRenderer key={idx} code={block.code} language={block.language} title={block.title} />
@@ -841,17 +841,35 @@ export default function PromptShell({
                                                         }
                                                         if (block.type === 'code') {
                                                             return (
-                                                                <div key={idx} className="my-4 rounded-lg bg-black/5 dark:bg-black/30 p-4 font-mono text-xs overflow-x-auto text-tera-primary dark:text-tera-neon max-w-full border border-tera-border">
-                                                                    <pre>{block.code}</pre>
+                                                                <div key={idx} className="my-4 rounded-lg bg-black/5 dark:bg-black/30 border border-tera-border overflow-hidden w-full">
+                                                                    <div className="flex items-center justify-between px-3 md:px-4 py-2 border-b border-tera-border/50 bg-black/10 gap-2">
+                                                                        <span className="text-xs font-semibold text-white/60 uppercase tracking-wider truncate">
+                                                                            {block.language || 'code'}
+                                                                        </span>
+                                                                        <button
+                                                                            onClick={() => {
+                                                                                navigator.clipboard.writeText(block.code)
+                                                                            }}
+                                                                            className="p-1.5 text-white/40 hover:text-tera-neon transition-colors flex-shrink-0"
+                                                                            title="Copy code"
+                                                                        >
+                                                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4">
+                                                                                <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 3.75H19.5A2.25 2.25 0 0121.75 6v10.5A2.25 2.25 0 0119.5 18.75h-2.25m-16.5 0h2.25m0 0v2.25m0-2.25v-8.25m0 0H3.75A2.25 2.25 0 015.25 5.25H7.5" />
+                                                                            </svg>
+                                                                        </button>
+                                                                    </div>
+                                                                    <pre className="p-3 md:p-4 font-mono text-xs md:text-sm overflow-x-auto text-tera-primary dark:text-tera-neon w-full">
+                                                                        <code>{block.code}</code>
+                                                                    </pre>
                                                                 </div>
                                                             )
                                                         }
                                                         return block.isHeader ? (
-                                                            <h3 key={idx} className="font-bold text-lg mt-2 text-tera-primary">
+                                                            <h3 key={idx} className="font-bold text-base md:text-lg mt-2 text-tera-primary w-full break-words">
                                                                 {block.content}
                                                             </h3>
                                                         ) : (
-                                                            <p key={idx} className="leading-relaxed whitespace-pre-wrap">
+                                                            <p key={idx} className="leading-relaxed whitespace-pre-wrap text-sm md:text-base w-full break-words">
                                                                 {block.content.split(/((?:https?:\/\/|www\.)[^\s]+)/g).map((part, i) => {
                                                                     if (part.match(/^(https?:\/\/|www\.)/)) {
                                                                         const href = part.startsWith('http') ? part : `https://${part}`
