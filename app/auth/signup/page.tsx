@@ -23,15 +23,12 @@ export default function SignUpPage() {
                 return
             }
 
-            // Send signup confirmation email
-            const { error: signUpError } = await supabase.auth.signUp({
+            // Send OTP signup confirmation email
+            const { error: signUpError } = await supabase.auth.signInWithOtp({
                 email: email.trim(),
-                password: Math.random().toString(36).slice(-12), // Temporary password for email auth
                 options: {
                     emailRedirectTo: `${process.env.NEXT_PUBLIC_APP_URL}/auth/callback`,
-                    data: {
-                        signup_method: 'email'
-                    }
+                    shouldCreateUser: true
                 }
             })
 
