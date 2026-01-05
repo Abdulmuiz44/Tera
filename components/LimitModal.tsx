@@ -78,11 +78,11 @@ export default function LimitModal({ isOpen, limitType, currentPlan, onClose, un
 
     return (
         <div
-            className={`fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 transition-opacity duration-300 ${isClosing ? 'opacity-0' : 'opacity-100'
+            className={`fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 transition-opacity duration-300 overflow-auto p-4 ${isClosing ? 'opacity-0' : 'opacity-100'
                 }`}
         >
             <div
-                className={`dark:bg-black dark:border-tera-neon bg-white border-tera-neon border rounded-2xl p-8 max-w-md w-full mx-4 transition-all duration-300 transform ${isClosing ? 'scale-95 opacity-0' : 'scale-100 opacity-100'
+                className={`dark:bg-black dark:border-tera-neon bg-white border-tera-neon border rounded-2xl p-6 md:p-8 max-w-md w-full my-auto transition-all duration-300 transform max-h-[90vh] overflow-y-auto ${isClosing ? 'scale-95 opacity-0' : 'scale-100 opacity-100'
                     }`}
                 onClick={(e) => e.stopPropagation()}
             >
@@ -101,15 +101,15 @@ export default function LimitModal({ isOpen, limitType, currentPlan, onClose, un
                 </button>
 
                 {/* Icon */}
-                <div className="flex justify-center mb-6">
-                    <div className="w-16 h-16 rounded-full dark:bg-tera-neon/20 dark:border-tera-neon dark:border bg-tera-neon/20 border border-tera-neon flex items-center justify-center">
+                <div className="flex justify-center mb-4 md:mb-6">
+                    <div className="w-14 h-14 md:w-16 md:h-16 rounded-full dark:bg-tera-neon/20 dark:border-tera-neon dark:border bg-tera-neon/20 border border-tera-neon flex items-center justify-center">
                         <svg
                             xmlns="http://www.w3.org/2000/svg"
                             fill="none"
                             viewBox="0 0 24 24"
                             strokeWidth={1.5}
                             stroke="currentColor"
-                            className="w-8 h-8 text-tera-neon"
+                            className="w-7 h-7 md:w-8 md:h-8 text-tera-neon"
                         >
                             <path
                                 strokeLinecap="round"
@@ -121,39 +121,39 @@ export default function LimitModal({ isOpen, limitType, currentPlan, onClose, un
                 </div>
 
                 {/* Title */}
-                <h2 className="text-2xl font-bold dark:text-white text-black text-center mb-3">{info.title}</h2>
+                <h2 className="text-xl md:text-2xl font-bold dark:text-white text-black text-center mb-2 md:mb-3">{info.title}</h2>
 
                 {/* Message */}
-                <p className="dark:text-white/80 text-black/70 text-center mb-2">{info.message}</p>
+                <p className="dark:text-white/80 text-black/70 text-center mb-2 text-sm md:text-base">{info.message}</p>
 
                 {/* Unlock Time Info */}
                 {timeRemaining && (
-                    <div className="dark:bg-orange-500/20 dark:border-orange-500/50 bg-orange-50 border border-orange-200 rounded-lg p-4 mb-6">
-                        <p className="dark:text-orange-200 text-orange-800 text-center text-sm">
+                    <div className="dark:bg-orange-500/20 dark:border-orange-500/50 bg-orange-50 border border-orange-200 rounded-lg p-3 mb-4">
+                        <p className="dark:text-orange-200 text-orange-800 text-center text-xs md:text-sm">
                             <span className="font-semibold">Access Unlocks In:</span>
-                            <span className="block mt-1 text-tera-neon font-medium">{timeRemaining}</span>
+                            <span className="block mt-1 text-tera-neon font-medium text-sm">{timeRemaining}</span>
                         </p>
                     </div>
                 )}
 
                 {/* Limit Info */}
-                <div className="dark:bg-white/10 dark:border-white/20 bg-black/5 border border-black/10 rounded-lg p-4 mb-6">
+                <div className="dark:bg-white/10 dark:border-white/20 bg-black/5 border border-black/10 rounded-lg p-3 mb-4">
                     <div className="flex items-center justify-between">
-                        <span className="dark:text-white/60 text-black/60 text-sm">Your Free Plan:</span>
-                        <span className="text-tera-neon font-semibold">{info.current} per day</span>
+                        <span className="dark:text-white/60 text-black/60 text-xs md:text-sm">Your Free Plan:</span>
+                        <span className="text-tera-neon font-semibold text-xs md:text-sm">{info.current} per day</span>
                     </div>
                 </div>
 
                 {/* Upgrade Info */}
-                <div className="dark:bg-tera-neon/10 dark:border-tera-neon/30 bg-tera-neon/10 border border-tera-neon/30 rounded-lg p-4 mb-6">
-                    <p className="dark:text-white text-black text-sm">
+                <div className="dark:bg-tera-neon/10 dark:border-tera-neon/30 bg-tera-neon/10 border border-tera-neon/30 rounded-lg p-3 mb-4">
+                    <p className="dark:text-white text-black text-xs md:text-sm">
                         <span className="font-semibold">Upgrade to {info.upgrade}</span>
                         <span className="dark:text-white/70 text-black/70 ml-2">for higher limits and more features</span>
                     </p>
                 </div>
 
                 {/* Plan Comparison */}
-                <div className="space-y-2 mb-6 text-sm">
+                <div className="space-y-1.5 mb-4 text-xs md:text-sm">
                     {limitType === 'chats' && (
                         <>
                             <div className="flex justify-between dark:text-white/80 text-black/70">
@@ -205,10 +205,10 @@ export default function LimitModal({ isOpen, limitType, currentPlan, onClose, un
                 </div>
 
                 {/* Buttons - Only Upgrade button (forced) */}
-                <div className="flex gap-3">
+                <div className="flex gap-3 mt-4">
                     <button
                         onClick={handleUpgrade}
-                        className="w-full px-4 py-2.5 rounded-lg bg-tera-neon text-tera-bg dark:text-black font-semibold hover:bg-tera-neon/90 transition-colors"
+                        className="w-full px-4 py-2 md:py-2.5 rounded-lg bg-tera-neon text-tera-bg dark:text-black font-semibold hover:bg-tera-neon/90 transition-colors text-sm md:text-base"
                     >
                         Upgrade to Pro/Plus
                     </button>
