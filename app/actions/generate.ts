@@ -49,14 +49,18 @@ export async function generateAnswer({ prompt, tool, authorId, authorEmail, atta
   if (attachments.length > 0 && !canUploadFile(userProfile.subscriptionPlan, userProfile.dailyFileUploads)) {
     const planConfig = getPlanConfig(userProfile.subscriptionPlan)
     const limit = planConfig.limits.fileUploadsPerDay
-    throw new Error(`You've reached your daily limit of ${limit} file uploads. Upgrade to Pro for unlimited access.`)
+    const errorMessage = `You've reached your daily limit of ${limit} file uploads. Upgrade to Pro for unlimited access.`
+    console.error('File upload limit reached:', errorMessage)
+    throw new Error(errorMessage)
   }
 
   // Check if user has reached their chat limit
   if (!canStartChat(userProfile.subscriptionPlan, userProfile.dailyChats)) {
     const planConfig = getPlanConfig(userProfile.subscriptionPlan)
     const limit = planConfig.limits.messagesPerDay
-    throw new Error(`You've reached your daily limit of ${limit} messages. Upgrade to Pro for unlimited access.`)
+    const errorMessage = `You've reached your daily limit of ${limit} messages. Upgrade to Pro for unlimited access.`
+    console.error('Chat limit reached:', errorMessage)
+    throw new Error(errorMessage)
   }
 
   // Check web search limits if enabled
