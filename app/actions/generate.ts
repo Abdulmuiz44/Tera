@@ -51,7 +51,12 @@ export async function generateAnswer({ prompt, tool, authorId, authorEmail, atta
     const limit = planConfig.limits.fileUploadsPerDay
     const errorMessage = `You've reached your daily limit of ${limit} file uploads. Upgrade to Pro for unlimited access.`
     console.error('File upload limit reached:', errorMessage)
-    throw new Error(errorMessage)
+    return {
+      answer: errorMessage,
+      sessionId: sessionId,
+      chatId: chatId,
+      error: errorMessage
+    }
   }
 
   // Check if user has reached their chat limit
@@ -60,14 +65,25 @@ export async function generateAnswer({ prompt, tool, authorId, authorEmail, atta
     const limit = planConfig.limits.messagesPerDay
     const errorMessage = `You've reached your daily limit of ${limit} messages. Upgrade to Pro for unlimited access.`
     console.error('Chat limit reached:', errorMessage)
-    throw new Error(errorMessage)
+    return {
+      answer: errorMessage,
+      sessionId: sessionId,
+      chatId: chatId,
+      error: errorMessage
+    }
   }
 
   // Check web search limits if enabled
   if (enableWebSearch) {
     const { remaining } = await getWebSearchRemaining(authorId)
     if (remaining <= 0) {
-      throw new Error('limit web-search')
+      const errorMessage = 'You have reached your web search limit. Upgrade to Pro for unlimited access.'
+      return {
+        answer: errorMessage,
+        sessionId: sessionId,
+        chatId: chatId,
+        error: errorMessage
+      }
     }
   }
 

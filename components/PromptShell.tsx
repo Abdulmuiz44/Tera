@@ -382,7 +382,7 @@ export default function PromptShell({
                     setWebSearchResultCount(0)
                 }
 
-                const { answer, sessionId: newSessionId, chatId: savedChatId } = await generateAnswer({
+                const result = await generateAnswer({
                     prompt: messageToSend,
                     tool: tool.name,
                     authorId: user?.id ?? '',
@@ -392,6 +392,8 @@ export default function PromptShell({
                     chatId: editingMessageId ?? undefined,
                     enableWebSearch: webSearchEnabled
                 })
+
+                const { answer, sessionId: newSessionId, chatId: savedChatId, error: limitError } = result
 
                 // Clear web search status
                 if (webSearchEnabled) {
@@ -407,6 +409,41 @@ export default function PromptShell({
                 // Check if this request is still valid (hasn't been stopped or superseded)
                 if (currentRequestId !== requestIdRef.current) {
                     console.log('🛑 Request cancelled/superseded, ignoring response')
+                    return
+                }
+
+                // Handle limit errors
+                if (limitError) {
+                    const now = new Date()
+                    const unlocksAt = new Date(now.getTime() + 24 * 60 * 60 * 1000)
+                    
+                    if (limitError.includes('messages')) {
+                        setLimitModalType('chats')
+                        setLimitUnlocksAt(unlocksAt)
+                    } else if (limitError.includes('file uploads')) {
+                        setLimitModalType('file-uploads')
+                        setLimitUnlocksAt(unlocksAt)
+                    } else if (limitError.includes('web search')) {
+                        setLimitModalType('web-search')
+                        setLimitUnlocksAt(unlocksAt)
+                    }
+
+                    setConversations((prev) =>
+                        prev.map((entry) =>
+                            entry.id === entryId
+                                ? {
+                                    ...entry,
+                                    assistantMessage: {
+                                        id: createId(),
+                                        role: 'tera',
+                                        content: limitError
+                                    }
+                                }
+                                : entry
+                        )
+                    )
+                    setAttachmentMessage(limitError)
+                    setStatus('idle')
                     return
                 }
 
