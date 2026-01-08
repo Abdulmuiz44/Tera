@@ -1,6 +1,6 @@
 import { supabaseServer } from '@/lib/supabase-server'
 import { NextRequest, NextResponse } from 'next/server'
-import { v4 as uuidv4 } from 'uuid'
+import { randomUUID } from 'crypto'
 
 export async function GET(request: NextRequest) {
   try {
@@ -69,7 +69,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Create training job
-    const jobId = uuidv4()
+    const jobId = randomUUID()
     const { data: job, error } = await supabaseServer
       .from('training_jobs')
       .insert({
