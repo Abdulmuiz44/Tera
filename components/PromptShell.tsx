@@ -447,7 +447,7 @@ export default function PromptShell({
                 const now = new Date()
                 const unlocksAt = new Date(now.getTime() + 24 * 60 * 60 * 1000)
 
-                if (message.includes('limit') && message.includes('chats')) {
+                if (message.includes('limit') && (message.includes('chats') || message.includes('messages'))) {
                     setLimitModalType('chats')
                     setLimitUnlocksAt(unlocksAt)
                 } else if (message.includes('limit') && message.includes('file uploads')) {

@@ -1,8 +1,9 @@
-# CRITICAL FIX - Users Table Schema Update
+# CRITICAL FIX - Users Table Schema Update & Email Not Saving
 
-**Issue**: Chat functionality was returning 500 errors due to missing database columns
+**Issue 1**: Chat functionality was returning 500 errors due to missing database columns
+**Issue 2**: New users' emails are not being saved to Supabase users table
 
-**Status**: ✅ FIXED in latest commit
+**Status**: 🔴 IN PROGRESS - Email saving issue identified and fixed
 
 ## What Was Wrong
 
@@ -158,4 +159,69 @@ After applying this fix:
 
 ---
 
-**IMPORTANT**: Do not skip this fix if you want chat functionality to work!
+## NEW ISSUE: Email Not Saving for New Users
+
+**Problem**: When users sign up, their email is not being stored in the `users` table.
+
+**Root Causes**:
+1. The callback route was allowing empty emails (`email: data.user.email || ''`)
+2. RLS policies may have been blocking service role inserts
+3. No email validation before database insert
+4. User metadata (avatar_url, full_name) not captured from OAuth
+
+**Status**: ✅ FIXED - Applied three fixes:
+
+### Fix Applied (Code Changes)
+
+1. **app/auth/callback/route.ts**
+   - Added email validation - rejects signup if email is missing
+   - Changed `email || ''` to `email.toLowerCase()` - ensures email is always valid
+   - Added fallback update logic for users with missing emails
+   - Captures profile picture and full name from OAuth metadata
+
+2. **app/api/auth/confirm/route.ts**
+   - Added email format validation (`email.includes('@')`)
+   - Ensures trimmed email is stored
+   - Can update email for existing users with missing emails
+
+3. **migrations/fix_email_rls.sql** (NEW)
+   - Fixed RLS policies to ensure service role can insert
+   - Ensures email column is NOT NULL
+   - Creates unique constraint on email
+
+## What You Need to Do
+
+### Step 1: Apply Code Changes (DONE)
+✅ Updated `app/auth/callback/route.ts`
+✅ Updated `app/api/auth/confirm/route.ts`
+✅ Created `migrations/fix_email_rls.sql`
+
+### Step 2: Run RLS Migration in Supabase
+1. Go to Supabase Dashboard → SQL Editor
+2. Copy and paste content from `migrations/fix_email_rls.sql`
+3. Click "Run"
+
+### Step 3: Test the Fix
+1. Create a new account with email signup
+2. Click the confirmation link
+3. Go to Supabase → Table Editor → users
+4. Verify the new user has their email populated
+
+### Step 4: Fix Existing Users (Optional)
+If you have existing users without emails, run this in Supabase SQL Editor:
+
+```sql
+-- This will show users with missing emails
+SELECT id, email FROM users WHERE email IS NULL OR email = '';
+
+-- If any exist, you'll need to manually populate them from auth.users
+UPDATE users u
+SET email = a.email
+FROM auth.users a
+WHERE u.id = a.id
+  AND (u.email IS NULL OR u.email = '');
+```
+
+---
+
+**IMPORTANT**: Do not skip this fix if you want new users to be properly registered!

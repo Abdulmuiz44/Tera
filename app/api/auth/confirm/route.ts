@@ -17,18 +17,28 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    const trimmedEmail = email.trim().toLowerCase()
+
+    // Validate email format
+    if (!trimmedEmail || !trimmedEmail.includes('@')) {
+      return NextResponse.json(
+        { error: 'Invalid email format' },
+        { status: 400 }
+      )
+    }
+
     // Create or verify user record in users table
     const { data: existingUser, error: checkError } = await supabase
       .from('users')
-      .select('id')
+      .select('id, email')
       .eq('id', userId)
       .single()
 
     if (!existingUser) {
-      // Insert new user record with default values
+      // Insert new user record with email (required field)
       const { error: insertError } = await supabase.from('users').insert({
         id: userId,
-        email: email.toLowerCase(),
+        email: trimmedEmail,
         subscription_plan: 'free',
         daily_chats: 0,
         daily_file_uploads: 0,
@@ -45,6 +55,20 @@ export async function POST(request: NextRequest) {
         console.error('Error creating user record:', insertError)
         return NextResponse.json(
           { error: 'Failed to create user record' },
+          { status: 500 }
+        )
+      }
+    } else if (!existingUser.email) {
+      // User exists but email is missing - update it
+      const { error: updateError } = await supabase
+        .from('users')
+        .update({ email: trimmedEmail })
+        .eq('id', userId)
+
+      if (updateError) {
+        console.error('Error updating user email:', updateError)
+        return NextResponse.json(
+          { error: 'Failed to update user email' },
           { status: 500 }
         )
       }
