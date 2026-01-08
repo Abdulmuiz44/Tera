@@ -2,7 +2,7 @@
 
 -- Team Members Table
 CREATE TABLE IF NOT EXISTS team_members (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   owner_id UUID REFERENCES users(id) ON DELETE CASCADE NOT NULL,
   member_email TEXT NOT NULL,
   role TEXT DEFAULT 'collaborator',
@@ -15,7 +15,7 @@ CREATE INDEX IF NOT EXISTS idx_team_members_email ON team_members(member_email);
 
 -- API Keys Table
 CREATE TABLE IF NOT EXISTS api_keys (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   user_id UUID REFERENCES users(id) ON DELETE CASCADE NOT NULL,
   key_hash TEXT UNIQUE NOT NULL,
   masked_key TEXT NOT NULL,
@@ -30,7 +30,7 @@ CREATE INDEX IF NOT EXISTS idx_api_keys_hash ON api_keys(key_hash);
 
 -- Training Jobs Table
 CREATE TABLE IF NOT EXISTS training_jobs (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   user_id UUID REFERENCES users(id) ON DELETE CASCADE NOT NULL,
   name TEXT NOT NULL,
   status TEXT DEFAULT 'pending',
@@ -49,7 +49,7 @@ CREATE INDEX IF NOT EXISTS idx_training_jobs_status ON training_jobs(status);
 
 -- Usage Logs Table (for advanced analytics)
 CREATE TABLE IF NOT EXISTS usage_logs (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   user_id UUID REFERENCES users(id) ON DELETE CASCADE NOT NULL,
   event_type TEXT NOT NULL,
   tool_name TEXT,
@@ -63,7 +63,7 @@ CREATE INDEX IF NOT EXISTS idx_usage_logs_created ON usage_logs(created_at);
 
 -- Support Tickets Table (for priority support)
 CREATE TABLE IF NOT EXISTS support_tickets (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   user_id UUID REFERENCES users(id) ON DELETE CASCADE NOT NULL,
   subject TEXT NOT NULL,
   message TEXT NOT NULL,
