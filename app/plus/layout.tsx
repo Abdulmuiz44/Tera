@@ -3,6 +3,7 @@
 import { useAuth } from '@/components/AuthProvider'
 import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
+import { supabase } from '@/lib/supabase'
 
 export default function PlusLayout({ children }: { children: React.ReactNode }) {
   const { user, userReady } = useAuth()
@@ -10,12 +11,27 @@ export default function PlusLayout({ children }: { children: React.ReactNode }) 
   const [isAuthorized, setIsAuthorized] = useState(false)
 
   useEffect(() => {
-    if (userReady) {
-      if (user?.subscriptionPlan === 'plus') {
-        setIsAuthorized(true)
-      } else {
-        router.push('/upgrade?reason=plus-only')
+    const checkSubscription = async () => {
+      if (!user) {
+        router.push('/login')
+        return
       }
+
+      const { data, error } = await supabase
+        .from('users')
+        .select('subscription_plan')
+        .eq('id', user.id)
+        .single()
+
+      if (error || data?.subscription_plan !== 'plus') {
+        router.push('/upgrade?reason=plus-only')
+      } else {
+        setIsAuthorized(true)
+      }
+    }
+
+    if (userReady && user) {
+      void checkSubscription()
     }
   }, [user, userReady, router])
 
