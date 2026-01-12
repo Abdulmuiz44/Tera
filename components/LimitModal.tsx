@@ -5,7 +5,7 @@ import { useState, useEffect } from 'react'
 
 interface LimitModalProps {
     isOpen: boolean
-    limitType: 'chats' | 'file-uploads' | 'web-search' | null
+    limitType: 'chats' | 'file-uploads' | 'web-search' | 'research-mode' | null
     currentPlan: string
     onClose: () => void
     unlocksAt?: Date
@@ -63,6 +63,12 @@ export default function LimitModal({ isOpen, limitType, currentPlan, onClose, un
             message: 'You\'ve reached your monthly web search limit.',
             current: 5,
             upgrade: 'Pro for 50 searches, Plus for 80',
+        },
+        'research-mode': {
+            title: 'Research Mode Limit',
+            message: 'Research Mode is a Pro/Plus feature.',
+            current: 0,
+            upgrade: 'Pro or Plus',
         },
     }
 

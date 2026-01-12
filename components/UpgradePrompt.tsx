@@ -3,7 +3,7 @@
 import Link from 'next/link'
 
 interface UpgradePromptProps {
-    type: 'lesson-plans' | 'chats' | 'file-uploads' | 'web-search'
+    type: 'lesson-plans' | 'chats' | 'file-uploads' | 'web-search' | 'research-mode'
     onClose?: () => void
     inline?: boolean
 }
@@ -33,6 +33,12 @@ export default function UpgradePrompt({ type, onClose, inline = false }: Upgrade
             description: "You've reached your monthly limit of 5 web searches on the Free plan.",
             benefit: 'Upgrade to Pro (50/month) or Plus (80/month) to unlock more searches.',
             icon: '🔍'
+        },
+        'research-mode': {
+            title: 'Research Mode is for Pro/Plus',
+            description: "Deep Research mode (multi-query parallel search) is only available on Pro and Plus plans.",
+            benefit: 'Upgrade to access Deep Research and other advanced features.',
+            icon: '🔭'
         }
     }
 
