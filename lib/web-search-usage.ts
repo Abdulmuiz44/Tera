@@ -29,8 +29,15 @@ export async function getWebSearchRemaining(userId: string): Promise<{ remaining
       .single()
 
     if (error) {
+      // PGRST116: The result contains 0 rows
+      if (error.code === 'PGRST116') {
+        // User not found in DB yet (likely inconsistent state or new user lag)
+        // Default to free plan settings
+        return { remaining: 5, total: 5, resetDate: null, plan: 'free' }
+      }
+
       console.error('Failed to get web search usage:', error)
-      return { remaining: 3, total: 3, resetDate: null, plan: 'free' }
+      return { remaining: 5, total: 5, resetDate: null, plan: 'free' }
     }
 
     if (!data) {
@@ -83,6 +90,15 @@ export async function incrementWebSearchCount(userId: string): Promise<boolean> 
       .single()
 
     if (fetchError || !user) {
+      // Handle "User not found" case
+      if (fetchError?.code === 'PGRST116') {
+        console.warn(`User ${userId} not found when incrementing search count. Usage not tracked.`)
+        // Allow search anyway if we can't track it? Or block?
+        // Blocking is safer for abuse, allowing is better for UX.
+        // Let's return TRUE (allow) but log it, assuming it's a transient sync issue.
+        return true
+      }
+
       console.error('Failed to get user for web search increment:', fetchError)
       return false
     }
