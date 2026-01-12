@@ -60,7 +60,7 @@ export default function ResearchModeToggle({
                     />
                 </svg>
 
-                <span>Deep Research</span>
+                <span className="hidden sm:inline">Deep Research</span>
 
                 {!isPro && (
                     <span className="bg-gradient-to-r from-amber-500 to-orange-500 text-black text-[10px] font-bold px-1.5 py-0.5 rounded ml-1">

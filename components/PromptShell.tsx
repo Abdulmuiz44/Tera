@@ -1019,7 +1019,7 @@ export default function PromptShell({
                             )}
 
                             {/* Research Mode Toggle */}
-                            <div className="hidden md:block">
+                            <div>
                                 <ResearchModeToggle
                                     enabled={researchMode}
                                     onToggle={setResearchMode}
