@@ -12,6 +12,9 @@ import UpgradePrompt from './UpgradePrompt'
 import VoiceControls from './VoiceControls'
 import WebSearchStatus from './WebSearchStatus'
 import LimitModal from './LimitModal'
+import SourcesPanel from './search/SourcesPanel'
+import { shouldEnableWebSearch } from '@/lib/smart-query-detector'
+import { saveSearchQuery, saveBookmark, isBookmarked, deleteBookmark } from '@/lib/search-history'
 
 type Message = {
     id: string
@@ -40,7 +43,10 @@ import dynamic from 'next/dynamic'
 const ChartRenderer = dynamic(() => import('./visuals/ChartRenderer'), { ssr: false })
 const MermaidRenderer = dynamic(() => import('./visuals/MermaidRenderer'), { ssr: false })
 const SpreadsheetRenderer = dynamic(() => import('./visuals/SpreadsheetRenderer'), { ssr: false })
+const SpreadsheetRenderer = dynamic(() => import('./visuals/SpreadsheetRenderer'), { ssr: false })
 const UniversalVisualRenderer = dynamic(() => import('./visuals/UniversalVisualRenderer'), { ssr: false })
+const SourcesPanelRenderer = dynamic(() => import('./search/SourcesPanel'), { ssr: false })
+const SearchHistoryRenderer = dynamic(() => import('./search/SearchHistory'), { ssr: false })
 
 type ContentBlock =
     | { type: 'text', content: string, isHeader: boolean }
@@ -77,7 +83,14 @@ const parseContent = (content: string): ContentBlock[] => {
 
         // Add web sources block if we found any
         if (webSources.length > 0) {
-            blocks.push({ type: 'web-sources', sources: webSources })
+            blocks.push({
+                type: 'web-sources',
+                sources: webSources.map(s => ({
+                    ...s,
+                    // Try to generate a favicon URL if not present
+                    favicon: `https://www.google.com/s2/favicons?domain=${s.source}&sz=32`
+                }))
+            })
         }
     }
 
@@ -374,12 +387,29 @@ export default function PromptShell({
         }
         startTransition(async () => {
             try {
+                // Check if we should auto-enable web search based on query content
+                // Only if not explicitly toggled by user (we rely on current toggle state if set)
+                let useWebSearch = webSearchEnabled
+
+                if (!webSearchEnabled && shouldEnableWebSearch(messageToSend)) {
+                    // Auto-enable for real-time queries
+                    useWebSearch = true
+                    console.log('🤖 Auto-enabled web search for:', messageToSend)
+                }
+
                 // Set up web search tracking
-                if (webSearchEnabled) {
+                if (useWebSearch) {
                     setIsWebSearching(true)
                     setCurrentSearchQuery(messageToSend)
                     setWebSearchStatus('searching')
                     setWebSearchResultCount(0)
+
+                    // Track search in history
+                    if (user?.id) {
+                        // Fire and forget save to history
+                        saveSearchQuery(user.id, messageToSend, 0)
+                            .catch(err => console.error('Failed to save search history', err))
+                    }
                 }
 
                 const result = await generateAnswer({
@@ -390,13 +420,13 @@ export default function PromptShell({
                     attachments: attachmentsToSend,
                     sessionId: currentSessionId,
                     chatId: editingMessageId ?? undefined,
-                    enableWebSearch: webSearchEnabled
+                    enableWebSearch: useWebSearch
                 })
 
                 const { answer, sessionId: newSessionId, chatId: savedChatId, error: limitError } = result
 
                 // Clear web search status
-                if (webSearchEnabled) {
+                if (useWebSearch) {
                     setIsWebSearching(false)
                     setWebSearchStatus('complete')
                     // Auto-reset after 2 seconds
@@ -416,7 +446,7 @@ export default function PromptShell({
                 if (limitError) {
                     const now = new Date()
                     const unlocksAt = new Date(now.getTime() + 24 * 60 * 60 * 1000)
-                    
+
                     if (limitError.includes('messages')) {
                         setLimitModalType('chats')
                         setLimitUnlocksAt(unlocksAt)
@@ -859,32 +889,16 @@ export default function PromptShell({
                                                         }
                                                         if (block.type === 'web-sources') {
                                                             return (
-                                                                <div key={idx} className="my-4 rounded-lg bg-blue-500/10 border border-blue-500/30 p-4 animate-in fade-in duration-300">
-                                                                    <div className="flex items-center gap-2 mb-3 text-blue-200">
-                                                                        <span className="text-lg">🔍</span>
-                                                                        <h4 className="font-semibold">Web Sources</h4>
-                                                                    </div>
-                                                                    <div className="space-y-3">
-                                                                        {block.sources.map((source, sidx) => (
-                                                                            <div key={sidx} className="rounded border border-blue-500/20 bg-blue-500/5 p-3">
-                                                                                <div className="flex items-start gap-2">
-                                                                                    <span className="text-xs font-semibold text-blue-300 flex-shrink-0 mt-1">{sidx + 1}</span>
-                                                                                    <div className="flex-1 min-w-0">
-                                                                                        <a
-                                                                                            href={source.url}
-                                                                                            target="_blank"
-                                                                                            rel="noopener noreferrer"
-                                                                                            className="font-medium text-blue-400 hover:text-blue-500 text-sm line-clamp-2 break-words"
-                                                                                        >
-                                                                                            {source.title}
-                                                                                        </a>
-                                                                                        <p className="text-xs text-blue-400/60 mt-1">{source.source}</p>
-                                                                                        <p className="text-xs text-tera-secondary mt-2 line-clamp-2">{source.snippet}</p>
-                                                                                    </div>
-                                                                                </div>
-                                                                            </div>
-                                                                        ))}
-                                                                    </div>
+                                                                <div key={idx} className="my-4 animate-in fade-in duration-300">
+                                                                    <SourcesPanelRenderer
+                                                                        sources={block.sources.map(s => ({
+                                                                            ...s,
+                                                                            // Try to generate a favicon URL if not present
+                                                                            favicon: s.favicon || `https://www.google.com/s2/favicons?domain=${s.source}&sz=32`
+                                                                        }))}
+                                                                        collapsible={true}
+                                                                        defaultExpanded={false}
+                                                                    />
                                                                 </div>
                                                             )
                                                         }
@@ -953,12 +967,14 @@ export default function PromptShell({
                     )}
                     {/* Web Search Status */}
                     {(isWebSearching || webSearchStatus !== 'idle') && (
-                        <WebSearchStatus
-                            isSearching={isWebSearching}
-                            query={currentSearchQuery}
-                            status={webSearchStatus}
-                            resultCount={webSearchResultCount}
-                        />
+                        <div className="flex items-center gap-4">
+                            <WebSearchStatus
+                                isSearching={isWebSearching}
+                                query={currentSearchQuery}
+                                status={webSearchStatus}
+                                resultCount={webSearchResultCount}
+                            />
+                        </div>
                     )}
                     {status === 'loading' && (
                         <div className="flex justify-start">
@@ -1076,6 +1092,19 @@ export default function PromptShell({
                                                     </div>
                                                 </div>
                                             </button>
+
+                                            {/* Search History Option - Only show if user is logged in */}
+                                            {user?.id && (
+                                                <button
+                                                    onClick={() => {
+                                                        setSearchHistoryOpen(true)
+                                                        setAttachmentOpen(false)
+                                                    }}
+                                                    className="flex w-full items-center gap-3 px-4 py-3 text-left text-sm text-tera-primary hover:bg-tera-muted"
+                                                >
+                                                    <span>🕒</span> Search History
+                                                </button>
+                                            )}
                                         </div>
                                     )}
                                 </div>
@@ -1146,6 +1175,7 @@ export default function PromptShell({
                 </div>
             </div>
 
+
             {/* Hidden Inputs */}
             <input
                 type="file"
@@ -1153,6 +1183,35 @@ export default function PromptShell({
                 className="hidden"
                 onChange={(e) => handleAttachmentUpload(e, 'file')}
             />
+            {/* ... other inputs ... */}
+
+            {/* Search History Modal */}
+            {
+                searchHistoryOpen && user?.id && (
+                    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 animate-in fade-in duration-200">
+                        <div className="relative w-full max-w-md">
+                            <button
+                                onClick={() => setSearchHistoryOpen(false)}
+                                className="absolute -top-10 right-0 text-white/80 hover:text-white"
+                            >
+                                Close ✕
+                            </button>
+                            <SearchHistoryRenderer
+                                userId={user.id}
+                                onSelectQuery={(query) => {
+                                    setPrompt(query)
+                                    setSearchHistoryOpen(false)
+                                    if (!webSearchEnabled) setWebSearchEnabled(true)
+                                }}
+                                onSelectBookmark={(url) => {
+                                    window.open(url, '_blank')
+                                }}
+                            />
+                        </div>
+                    </div>
+                )
+            }
+
             <input
                 type="file"
                 ref={imageInputRef}
@@ -1169,12 +1228,14 @@ export default function PromptShell({
                 onChange={(e) => handleAttachmentUpload(e, 'image')}
             />
 
-            {upgradePromptType && (
-                <UpgradePrompt
-                    type={upgradePromptType}
-                    onClose={() => setUpgradePromptType(null)}
-                />
-            )}
+            {
+                upgradePromptType && (
+                    <UpgradePrompt
+                        type={upgradePromptType}
+                        onClose={() => setUpgradePromptType(null)}
+                    />
+                )
+            }
 
             <LimitModal
                 isOpen={limitModalType !== null}
@@ -1186,6 +1247,6 @@ export default function PromptShell({
                     setLimitUnlocksAt(undefined)
                 }}
             />
-        </div>
+        </div >
     )
 }

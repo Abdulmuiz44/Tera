@@ -307,7 +307,22 @@ export async function generateTeacherResponse({
   // Add web search results if enabled - RETURN RAW WEB RESULTS
   let webSearchContext = ''
   let webSearchPerformed = false
-  if (enableWebSearch) {
+
+  // Check fast/smart detection if not explicitly enabled
+  let shouldSearch = enableWebSearch
+  if (!shouldSearch && prompt) {
+    try {
+      const { shouldEnableWebSearch } = await import('./smart-query-detector')
+      if (shouldEnableWebSearch(prompt)) {
+        shouldSearch = true
+        console.log('🤖 Auto-enabled web search via smart detection')
+      }
+    } catch (e) {
+      // Fallback
+    }
+  }
+
+  if (shouldSearch) {
     try {
       const { searchWeb } = await import('./web-search')
       console.log('🔍🔍🔍 PERFORMING WEB SEARCH 🔍🔍🔍')
