@@ -45,6 +45,7 @@ const MermaidRenderer = dynamic(() => import('./visuals/MermaidRenderer'), { ssr
 const SpreadsheetRenderer = dynamic(() => import('./visuals/SpreadsheetRenderer'), { ssr: false })
 const UniversalVisualRenderer = dynamic(() => import('./visuals/UniversalVisualRenderer'), { ssr: false })
 const SourcesPanelRenderer = dynamic(() => import('./search/SourcesPanel'), { ssr: false })
+const ResearchModeToggle = dynamic(() => import('./search/ResearchModeToggle'), { ssr: false })
 const SearchHistoryRenderer = dynamic(() => import('./search/SearchHistory'), { ssr: false })
 
 type ContentBlock =
@@ -55,6 +56,9 @@ type ContentBlock =
     | { type: 'spreadsheet', config: any }
     | { type: 'universal-visual', code: string, language: string, title: string }
     | { type: 'web-sources', sources: Array<{ title: string; url: string; snippet: string; source: string; favicon?: string }> }
+
+
+
 
 const parseContent = (content: string): ContentBlock[] => {
     const blocks: ContentBlock[] = []
@@ -227,6 +231,7 @@ export default function PromptShell({
     const [limitUnlocksAt, setLimitUnlocksAt] = useState<Date | undefined>(undefined)
     const [currentUserPlan, setCurrentUserPlan] = useState<string>('free')
     const [webSearchEnabled, setWebSearchEnabled] = useState(false)
+    const [researchMode, setResearchMode] = useState(false)
     const [webSearchRemaining, setWebSearchRemaining] = useState(100)
     const [isWebSearching, setIsWebSearching] = useState(false)
     const [currentSearchQuery, setCurrentSearchQuery] = useState('')
@@ -420,7 +425,8 @@ export default function PromptShell({
                     attachments: attachmentsToSend,
                     sessionId: currentSessionId,
                     chatId: editingMessageId ?? undefined,
-                    enableWebSearch: useWebSearch
+                    enableWebSearch: useWebSearch,
+                    researchMode: researchMode && useWebSearch // Only send researchMode if web search is enabled/active
                 })
 
                 const { answer, sessionId: newSessionId, chatId: savedChatId, error: limitError } = result
@@ -731,7 +737,10 @@ export default function PromptShell({
                 const data = await response.json()
                 if (data.success && data.remaining !== undefined) {
                     setWebSearchRemaining(data.remaining)
-                    console.log(`🔍 Web Search Status: ${data.remaining}/${data.total} (${data.plan.toUpperCase()})`)
+                    if (data.plan) {
+                        setCurrentUserPlan(data.plan)
+                    }
+                    console.log(`🔍 Web Search Status: ${data.remaining}/${data.total} (${data.plan?.toUpperCase()})`)
                 }
             } catch (err) {
                 console.warn('Failed to fetch web search status:', err)
@@ -1008,6 +1017,17 @@ export default function PromptShell({
                                     <span>Web Search ON ({webSearchRemaining})</span>
                                 </div>
                             )}
+
+                            {/* Research Mode Toggle */}
+                            <div className="hidden md:block">
+                                <ResearchModeToggle
+                                    enabled={researchMode}
+                                    onToggle={setResearchMode}
+                                    isSearching={isWebSearching}
+                                    sourceCount={webSearchResultCount}
+                                    userPlan={currentUserPlan}
+                                />
+                            </div>
 
                             {/* Attachments Preview */}
                             {pendingAttachments.length > 0 && (

@@ -19,7 +19,7 @@ CORE PRINCIPLES:
 - Be Clear: Use simple language and structure your responses for easy understanding.
 - Be Adaptable: Adjust your response style to the user's query. If they are asking for a lesson plan, provide a well-structured lesson plan. If they are asking for a simple explanation, provide a simple explanation.
 - Use Visuals: When appropriate, use charts, diagrams, and other visuals to help explain your answer.
-- NEVER use asterisks (*) in responses at all - not for bold, not for emphasis, not anywhere.
+- ABSOLUTE RULE: NEVER use asterisks (*) in responses. Do not use them for bold, lists, or headers. Use hyphens (-) for lists.
 
 FORMATTING:
 - Use Markdown for formatting when it enhances clarity (e.g., lists, code blocks).
@@ -263,7 +263,8 @@ export async function generateTeacherResponse({
   attachments = [] as AttachmentReference[],
   history = [] as { role: 'user' | 'assistant'; content: string }[],
   userId,
-  enableWebSearch = false
+  enableWebSearch = false,
+  researchMode = false
 }: {
   prompt: string
   tool: string
@@ -271,6 +272,7 @@ export async function generateTeacherResponse({
   history?: { role: 'user' | 'assistant'; content: string }[]
   userId?: string
   enableWebSearch?: boolean
+  researchMode?: boolean
 }) {
   // Build user message content, handling image attachments for vision support
   const imageAttachments = attachments.filter(att => att.type === 'image')
@@ -326,16 +328,85 @@ export async function generateTeacherResponse({
     try {
       const { searchWeb } = await import('./web-search')
       console.log('🔍🔍🔍 PERFORMING WEB SEARCH 🔍🔍🔍')
-      console.log('📝 Search Query:', prompt)
-      console.log('📡 Fetching live web results...')
 
-      // Fetch results for user to see
-      const searchResults = await searchWeb(prompt, 10, userId)
+      let searchResults: any = { success: false, results: [] }
+      let queriesToRun = [prompt]
 
-      console.log('🔍 Web search API response:', {
+      // RESEARCH MODE: Generate sub-queries
+      if (researchMode) {
+        console.log('🚀 RESEARCH MODE ACTIVE: Generating sub-queries...')
+        try {
+          const subQueryPrompt = `Generate 3 distinct, high-quality google search queries to comprehensively research this topic: "${prompt}". Return ONLY the queries as a JSON array of strings. Example: ["query 1", "query 2", "query 3"]`
+
+          const subQueryResponse = await fetch('https://api.mistral.ai/v1/chat/completions', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${process.env.MISTRAL_API_KEY}`
+            },
+            body: JSON.stringify({
+              model: 'mistral-small-latest',
+              messages: [{ role: 'user', content: subQueryPrompt }],
+              temperature: 0.3,
+              response_format: { type: "json_object" }
+            })
+          })
+
+          const data = await subQueryResponse.json()
+          const content = data.choices?.[0]?.message?.content
+          if (content) {
+            const parsed = JSON.parse(content)
+            if (Array.isArray(parsed.queries)) {
+              queriesToRun = [...queriesToRun, ...parsed.queries]
+            } else if (Array.isArray(parsed)) {
+              queriesToRun = [...queriesToRun, ...parsed]
+            }
+            // Handle raw object with key like "results" or just taking values if not sure
+            else {
+              // Fallback: try to extract array values
+              const values = Object.values(parsed).flat().filter(v => typeof v === 'string')
+              if (values.length > 0) queriesToRun = [...queriesToRun, ...(values as string[])]
+            }
+          }
+          console.log('🔗 Generated Sub-queries:', queriesToRun.slice(1))
+        } catch (e) {
+          console.error('Failed to generate sub-queries, falling back to single search', e)
+        }
+      }
+
+      console.log(`📡 Fetching live web results for ${queriesToRun.length} queries...`)
+
+      // Execute searches in parallel
+      const searchPromises = queriesToRun.map(q => searchWeb(q, 10, userId))
+      const resultsArray = await Promise.all(searchPromises)
+
+      // Aggregate and deduplicate results
+      const allResults: any[] = []
+      const seenUrls = new Set<string>()
+
+      resultsArray.forEach(res => {
+        if (res.success && res.results) {
+          res.results.forEach((item: any) => {
+            if (!seenUrls.has(item.url)) {
+              seenUrls.add(item.url)
+              allResults.push(item)
+            }
+          })
+        }
+      })
+
+      // Sort by relevance (basic assumption: earlier results in original query are most relevant)
+      // For now, just taking top 30
+      searchResults = {
+        success: allResults.length > 0,
+        results: allResults.slice(0, 30),
+        message: allResults.length > 0 ? 'Success' : 'No results found'
+      }
+
+      console.log('🔍 Comprehensive Web Search Response:', {
         success: searchResults.success,
-        resultCount: searchResults.results?.length || 0,
-        message: searchResults.message
+        totalRawResults: allResults.length,
+        finalDedupedCount: searchResults.results.length
       })
 
       if (searchResults.success && searchResults.results && searchResults.results.length > 0) {
@@ -347,7 +418,7 @@ export async function generateTeacherResponse({
         webSearchContext += '═'.repeat(80) + '\n\n'
 
         webSearchContext += searchResults.results
-          .map((r, i) => {
+          .map((r: any, i: number) => {
             return `[Result ${i + 1}]\nTitle: ${r.title}\nSource: ${r.source}\nURL: ${r.url}\nContent: ${r.snippet}`
           })
           .join('\n\n')
@@ -358,6 +429,7 @@ export async function generateTeacherResponse({
         console.log('📊 Results Retrieved:', resultCount, 'sources')
         console.log('💡 Providing search context to AI for informed response...')
       } else if (!searchResults.success) {
+        // ... error handling similar to before
         console.error('❌ WEB SEARCH FAILED:', searchResults.message)
         webSearchContext = `\n\n⚠️ Web search unavailable: ${searchResults.message}\nFalling back to training knowledge.\n`
       } else {
@@ -469,7 +541,8 @@ export async function generateTeacherResponse({
     }
 
     // ENSURE RESPONSIVE FORMATTING: Preserve markdown structure
-    // text = text.replace(/\*/g, '') -- REMOVED aggressive cleaning to allow markdown bold/italic/lists
+    // STRICT REQUIREMENT: Remove all asterisks to prevent "**" bold artifacts
+    text = text.replace(/\*/g, '')
 
     // Ensure the response ends with proper punctuation
     const trimmed = text.trim()

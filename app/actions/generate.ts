@@ -19,9 +19,10 @@ type GenerateProps = {
   sessionId?: string | null
   chatId?: string
   enableWebSearch?: boolean
+  researchMode?: boolean
 }
 
-export async function generateAnswer({ prompt, tool, authorId, authorEmail, attachments = [], sessionId, chatId, enableWebSearch = false }: GenerateProps) {
+export async function generateAnswer({ prompt, tool, authorId, authorEmail, attachments = [], sessionId, chatId, enableWebSearch = false, researchMode = false }: GenerateProps) {
   // Get user profile and check limits
   let userProfile = await getUserProfile(authorId)
 
@@ -111,7 +112,7 @@ export async function generateAnswer({ prompt, tool, authorId, authorEmail, atta
   }
 
   // Generate the AI response
-  const answer = await generateTeacherResponse({ prompt, tool, attachments, history, userId: authorId, enableWebSearch })
+  const answer = await generateTeacherResponse({ prompt, tool, attachments, history, userId: authorId, enableWebSearch, researchMode })
 
   const currentSessionId = sessionId || crypto.randomUUID()
   // Simple title generation: first 50 chars of prompt

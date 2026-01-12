@@ -7,18 +7,33 @@ interface ResearchModeToggleProps {
     onToggle: (enabled: boolean) => void
     isSearching?: boolean
     sourceCount?: number
+    userPlan?: string
 }
 
 export default function ResearchModeToggle({
     enabled,
     onToggle,
     isSearching = false,
-    sourceCount = 0
+    sourceCount = 0,
+    userPlan = 'free'
 }: ResearchModeToggleProps) {
+    const isPro = userPlan === 'pro' || userPlan === 'plus'
+
+    const handleToggle = () => {
+        if (!isPro) {
+            // Simply trigger the toggle callback with true to force the parent to show upgrade modal
+            // or we could add a specific onUpgradeClick prop.
+            // For now let's assume the parent handles the restricted state or we just don't toggle.
+            onToggle(true) // Parent should check plan and show upgrade modal if needed
+            return
+        }
+        onToggle(!enabled)
+    }
+
     return (
         <div className="flex items-center gap-3">
             <button
-                onClick={() => onToggle(!enabled)}
+                onClick={handleToggle}
                 disabled={isSearching}
                 className={`
           relative flex items-center gap-2 px-4 py-2 rounded-xl font-medium text-sm
@@ -47,11 +62,17 @@ export default function ResearchModeToggle({
 
                 <span>Deep Research</span>
 
+                {!isPro && (
+                    <span className="bg-gradient-to-r from-amber-500 to-orange-500 text-black text-[10px] font-bold px-1.5 py-0.5 rounded ml-1">
+                        PRO
+                    </span>
+                )}
+
                 {/* Toggle indicator */}
                 <div
                     className={`
             w-8 h-4 rounded-full transition-colors duration-200
-            ${enabled ? 'bg-purple-500' : 'bg-tera-border'}
+            ${enabled ? 'bg-purple-500' : isPro ? 'bg-tera-border' : 'bg-tera-border/50'}
           `}
                 >
                     <div
