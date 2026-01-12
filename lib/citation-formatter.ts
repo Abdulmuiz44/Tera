@@ -102,7 +102,7 @@ export function getFormatDisplayName(format: CitationFormat): string {
         case 'chicago':
             return 'Chicago (17th Edition)'
         default:
-            return format.toUpperCase()
+            return (format as string).toUpperCase()
     }
 }
 

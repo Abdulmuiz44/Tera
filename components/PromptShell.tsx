@@ -43,7 +43,6 @@ import dynamic from 'next/dynamic'
 const ChartRenderer = dynamic(() => import('./visuals/ChartRenderer'), { ssr: false })
 const MermaidRenderer = dynamic(() => import('./visuals/MermaidRenderer'), { ssr: false })
 const SpreadsheetRenderer = dynamic(() => import('./visuals/SpreadsheetRenderer'), { ssr: false })
-const SpreadsheetRenderer = dynamic(() => import('./visuals/SpreadsheetRenderer'), { ssr: false })
 const UniversalVisualRenderer = dynamic(() => import('./visuals/UniversalVisualRenderer'), { ssr: false })
 const SourcesPanelRenderer = dynamic(() => import('./search/SourcesPanel'), { ssr: false })
 const SearchHistoryRenderer = dynamic(() => import('./search/SearchHistory'), { ssr: false })
@@ -55,7 +54,7 @@ type ContentBlock =
     | { type: 'code', language: string, code: string }
     | { type: 'spreadsheet', config: any }
     | { type: 'universal-visual', code: string, language: string, title: string }
-    | { type: 'web-sources', sources: Array<{ title: string; url: string; snippet: string; source: string }> }
+    | { type: 'web-sources', sources: Array<{ title: string; url: string; snippet: string; source: string; favicon?: string }> }
 
 const parseContent = (content: string): ContentBlock[] => {
     const blocks: ContentBlock[] = []
@@ -63,7 +62,7 @@ const parseContent = (content: string): ContentBlock[] => {
     // Extract web sources section if present
     const webSourcesMatch = content.match(/--- SOURCES FROM WEB ---\n([\s\S]*?)$/i)
     let contentToProcess = content
-    let webSources: Array<{ title: string; url: string; snippet: string; source: string }> = []
+    let webSources: Array<{ title: string; url: string; snippet: string; source: string; favicon?: string }> = []
 
     if (webSourcesMatch) {
         contentToProcess = content.substring(0, webSourcesMatch.index || 0)
@@ -233,6 +232,7 @@ export default function PromptShell({
     const [currentSearchQuery, setCurrentSearchQuery] = useState('')
     const [webSearchStatus, setWebSearchStatus] = useState<'idle' | 'searching' | 'processing' | 'complete'>('idle')
     const [webSearchResultCount, setWebSearchResultCount] = useState(0)
+    const [searchHistoryOpen, setSearchHistoryOpen] = useState(false)
     const requestIdRef = useRef(0)
 
 

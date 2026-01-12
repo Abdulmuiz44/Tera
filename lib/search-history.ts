@@ -129,7 +129,7 @@ export async function saveBookmark(
 ): Promise<boolean> {
     try {
         // Check if already bookmarked
-        const { data: existing } = await supabaseServer
+        const { data: existing } = await supabase
             .from('search_bookmarks')
             .select('id')
             .eq('user_id', userId)
