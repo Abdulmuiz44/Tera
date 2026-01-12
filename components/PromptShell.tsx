@@ -1104,18 +1104,7 @@ export default function PromptShell({
                                                 </div>
                                             </button>
 
-                                            {/* Search History Option - Only show if user is logged in */}
-                                            {user?.id && (
-                                                <button
-                                                    onClick={() => {
-                                                        setSearchHistoryOpen(true)
-                                                        setAttachmentOpen(false)
-                                                    }}
-                                                    className="flex w-full items-center gap-3 px-4 py-3 text-left text-sm text-tera-primary hover:bg-tera-muted"
-                                                >
-                                                    <span>🕒</span> Search History
-                                                </button>
-                                            )}
+
 
                                             {/* Research Mode Toggle - Moved from main UI */}
                                             <button

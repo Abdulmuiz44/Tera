@@ -46,16 +46,17 @@ export default function UpgradePrompt({ type, onClose, inline = false }: Upgrade
 
     if (inline) {
         return (
+        return (
             <div className="rounded-xl bg-tera-neon/10 border border-tera-neon/30 p-4">
                 <div className="flex items-start gap-3">
                     <span className="text-2xl">{message.icon}</span>
                     <div className="flex-1">
-                        <h3 className="font-semibold text-white mb-1">{message.title}</h3>
-                        <p className="text-sm text-white/70 mb-3">{message.description}</p>
-                        <p className="text-sm text-tera-neon mb-3">{message.benefit}</p>
+                        <h3 className="font-semibold text-tera-primary mb-1">{message.title}</h3>
+                        <p className="text-sm text-tera-primary/70 mb-3">{message.description}</p>
+                        <p className="text-sm text-tera-neon font-medium mb-3">{message.benefit}</p>
                         <Link
                             href="/pricing"
-                            className="inline-block px-4 py-2 rounded-lg bg-tera-neon text-black text-sm font-medium hover:bg-tera-neon/90 transition"
+                            className="inline-block px-4 py-2 rounded-lg bg-tera-neon text-tera-bg dark:text-black text-sm font-medium hover:bg-tera-neon/90 transition"
                         >
                             View Plans
                         </Link>
@@ -63,7 +64,7 @@ export default function UpgradePrompt({ type, onClose, inline = false }: Upgrade
                     {onClose && (
                         <button
                             onClick={onClose}
-                            className="text-white/40 hover:text-white transition"
+                            className="text-tera-secondary hover:text-tera-primary transition"
                             aria-label="Close"
                         >
                             ✕
@@ -72,15 +73,16 @@ export default function UpgradePrompt({ type, onClose, inline = false }: Upgrade
                 </div>
             </div>
         )
+        )
     }
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
-            <div className="relative max-w-md w-full mx-4 rounded-2xl bg-tera-panel border border-white/10 shadow-2xl p-6">
+            <div className="relative max-w-md w-full mx-4 rounded-2xl bg-tera-panel border border-tera-border shadow-2xl p-6">
                 {onClose && (
                     <button
                         onClick={onClose}
-                        className="absolute top-4 right-4 text-white/40 hover:text-white transition"
+                        className="absolute top-4 right-4 text-tera-secondary hover:text-tera-primary transition"
                         aria-label="Close"
                     >
                         ✕
@@ -89,22 +91,22 @@ export default function UpgradePrompt({ type, onClose, inline = false }: Upgrade
 
                 <div className="text-center">
                     <div className="text-5xl mb-4">{message.icon}</div>
-                    <h2 className="text-2xl font-bold text-white mb-2">{message.title}</h2>
-                    <p className="text-white/70 mb-4">{message.description}</p>
-                    <p className="text-tera-neon mb-6">{message.benefit}</p>
+                    <h2 className="text-2xl font-bold text-tera-primary mb-2">{message.title}</h2>
+                    <p className="text-tera-primary/70 mb-4">{message.description}</p>
+                    <p className="text-tera-neon mb-6 font-medium">{message.benefit}</p>
 
                     <div className="flex gap-3">
                         {onClose && (
                             <button
                                 onClick={onClose}
-                                className="flex-1 px-4 py-3 rounded-lg border border-white/10 text-white hover:bg-white/5 transition"
+                                className="flex-1 px-4 py-3 rounded-lg border border-tera-border text-tera-primary hover:bg-tera-muted transition"
                             >
                                 Maybe Later
                             </button>
                         )}
                         <Link
                             href="/pricing"
-                            className="flex-1 px-4 py-3 rounded-lg bg-tera-neon text-black font-medium hover:bg-tera-neon/90 transition text-center"
+                            className="flex-1 px-4 py-3 rounded-lg bg-tera-neon text-tera-bg dark:text-black font-semibold hover:bg-tera-neon/90 transition text-center"
                         >
                             View Plans
                         </Link>
