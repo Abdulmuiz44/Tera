@@ -1018,16 +1018,7 @@ export default function PromptShell({
                                 </div>
                             )}
 
-                            {/* Research Mode Toggle */}
-                            <div>
-                                <ResearchModeToggle
-                                    enabled={researchMode}
-                                    onToggle={setResearchMode}
-                                    isSearching={isWebSearching}
-                                    sourceCount={webSearchResultCount}
-                                    userPlan={currentUserPlan}
-                                />
-                            </div>
+                            {/* Research Mode Toggle - Moved to Dropdown */}
 
                             {/* Attachments Preview */}
                             {pendingAttachments.length > 0 && (
@@ -1125,6 +1116,31 @@ export default function PromptShell({
                                                     <span>🕒</span> Search History
                                                 </button>
                                             )}
+
+                                            {/* Research Mode Toggle - Moved from main UI */}
+                                            <button
+                                                onClick={() => {
+                                                    const isPro = currentUserPlan === 'pro' || currentUserPlan === 'plus' || currentUserPlan === 'lifetime'
+                                                    if (!isPro) {
+                                                        setAttachmentOpen(false)
+                                                        setUpgradePromptType('research-mode') // Reuse or create a type
+                                                        return
+                                                    }
+                                                    setResearchMode(!researchMode)
+                                                    setAttachmentOpen(false)
+                                                }}
+                                                className={`flex w-full items-center gap-3 px-4 py-3 text-left text-sm border-t border-tera-border transition ${researchMode ? 'text-tera-neon bg-tera-neon/5' : 'text-tera-primary hover:bg-tera-muted'
+                                                    }`}
+                                            >
+                                                <span>🔭</span>
+                                                <div className="flex-1 flex items-center justify-between">
+                                                    <span>Deep Research</span>
+                                                    {researchMode && <span className="text-[10px] font-bold bg-tera-neon/20 px-1.5 py-0.5 rounded text-tera-neon">ON</span>}
+                                                    {!(currentUserPlan === 'pro' || currentUserPlan === 'plus' || currentUserPlan === 'lifetime') && (
+                                                        <span className="text-[10px] font-bold bg-gradient-to-r from-amber-500 to-orange-500 text-black px-1.5 py-0.5 rounded ml-2">PRO</span>
+                                                    )}
+                                                </div>
+                                            </button>
                                         </div>
                                     )}
                                 </div>
