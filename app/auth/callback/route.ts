@@ -4,7 +4,7 @@ import { createClient } from '@supabase/supabase-js'
 export async function GET(request: NextRequest) {
   const requestUrl = new URL(request.url)
   const code = requestUrl.searchParams.get('code')
-  
+
   // For OTP/email confirmation links (with code param)
   if (code) {
     try {
@@ -14,7 +14,7 @@ export async function GET(request: NextRequest) {
       )
 
       const { data, error } = await supabase.auth.exchangeCodeForSession(code)
-      
+
       if (error) {
         console.error('Code exchange error:', error.message)
         return NextResponse.redirect(new URL('/auth/callback-page?error=confirmation_failed', requestUrl.origin))
@@ -32,12 +32,9 @@ export async function GET(request: NextRequest) {
       }
 
       // Create or verify user record in the users table
-      const supabaseAdmin = createClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL!,
-        process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-      )
-
-      const { data: existingUser } = await supabaseAdmin
+      // We prioritize using the authenticated client 'supabase' which has the user's session
+      // This works if RLS allows "Users can insert their own profile"
+      const { data: existingUser } = await supabase
         .from('users')
         .select('id, email')
         .eq('id', data.user.id)
@@ -60,19 +57,37 @@ export async function GET(request: NextRequest) {
           grade_levels: null
         }
 
-        console.log('Attempting to insert user:', insertData)
+        console.log('Attempting to insert user profile:', insertData.email)
 
-        const { error: insertError } = await supabaseAdmin.from('users').insert(insertData)
+        // Try insert with authenticated client first (Standard RLS)
+        const { error: insertError } = await supabase.from('users').insert(insertData)
 
         if (insertError) {
-          console.error('INSERT FAILED - Full error:', JSON.stringify(insertError, null, 2))
-          console.error('Trying to insert:', insertData)
+          console.warn('Authenticated insert failed, trying admin client...', insertError.message)
+
+          // Fallback to Admin client (if Service Key is present)
+          const supabaseAdmin = createClient(
+            process.env.NEXT_PUBLIC_SUPABASE_URL!,
+            process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+          )
+
+          const { error: adminInsertError } = await supabaseAdmin.from('users').insert(insertData)
+
+          if (adminInsertError) {
+            console.error('CRITICAL: User profile creation failed even with admin client', adminInsertError)
+            // We don't block the login, but the user will have a degraded experience (missing profile)
+            // Redirecting to error page might be better, or let them land on dashboard and retry there?
+            // For now, let them pass, but component checks might need to handle missing profile.
+          } else {
+            console.log('User profile created via Admin client')
+          }
         } else {
-          console.log('User inserted successfully')
+          console.log('User profile created successfully')
         }
       } else if (!existingUser.email) {
         // User exists but email is missing - update it
-        const { error: updateError } = await supabaseAdmin
+        // Try with authenticated client
+        const { error: updateError } = await supabase
           .from('users')
           .update({ email: data.user.email.toLowerCase() })
           .eq('id', data.user.id)

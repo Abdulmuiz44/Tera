@@ -122,13 +122,22 @@ export async function checkAndResetUsage(userId: string): Promise<boolean> {
         }
     }
 
-    // Fallback: Check daily reset at midnight if no 24-hour unlock is active
-    if (data.chat_reset_date && now >= new Date(data.chat_reset_date) && !data.limit_hit_chat_at) {
+    // DAILY RESET LOGIC (Overrules 24h lock if the day cycle has passed)
+    // If chat_reset_date is passed OR missing, we reset everything
+    const resetDate = data.chat_reset_date ? new Date(data.chat_reset_date) : null
+
+    if (!resetDate || now >= resetDate) {
         const nextChatResetDate = new Date(now)
         nextChatResetDate.setDate(nextChatResetDate.getDate() + 1)
+
         updates.daily_chats = 0
         updates.daily_file_uploads = 0
         updates.chat_reset_date = nextChatResetDate.toISOString()
+
+        // Clear locks on daily reset - give user a fresh start
+        updates.limit_hit_chat_at = null
+        updates.limit_hit_upload_at = null
+
         needsUpdate = true
     }
 
