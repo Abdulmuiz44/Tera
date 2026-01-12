@@ -27,9 +27,9 @@ const PLAN_CONFIGS = {
     period: '/month',
     description: 'For serious learners',
     features: [
+      '30 web searches per month',
       'Unlimited AI conversations',
-      '20 file uploads per day',
-      '50 web searches per month',
+      'Deep Research Mode',
       'All tools & features',
       'Priority support',
       'Export to PDF/Word'
@@ -45,6 +45,7 @@ const PLAN_CONFIGS = {
       'Everything in Pro',
       'Unlimited file uploads',
       'Unlimited web searches',
+      'Deep Research Mode',
       'Advanced analytics',
       'Team collaboration',
       '24/7 priority support',
@@ -182,7 +183,7 @@ export default function PricingPage() {
       })
 
       const data = await response.json()
-      
+
       if (!response.ok) {
         const details = data.details || data.error || 'Failed to create checkout session'
         throw new Error(details)
@@ -339,6 +340,7 @@ export default function PricingPage() {
                       {[
                         { feature: 'Daily AI Conversations', free: '10', pro: 'Unlimited', plus: 'Unlimited' },
                         { feature: 'Monthly Web Searches', free: '5', pro: '50', plus: '80' },
+                        { feature: 'Deep Research Mode', free: '—', pro: '✓', plus: '✓' },
                         { feature: 'File Uploads (per day)', free: '5', pro: '20', plus: 'Unlimited' },
                         { feature: 'Max File Size', free: '25 MB', pro: '500 MB', plus: '2 GB' },
                         { feature: 'All Tools & Features', free: '✓ Basic', pro: '✓ All', plus: '✓ All' },
