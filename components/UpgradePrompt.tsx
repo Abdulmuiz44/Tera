@@ -46,7 +46,6 @@ export default function UpgradePrompt({ type, onClose, inline = false }: Upgrade
 
     if (inline) {
         return (
-        return (
             <div className="rounded-xl bg-tera-neon/10 border border-tera-neon/30 p-4">
                 <div className="flex items-start gap-3">
                     <span className="text-2xl">{message.icon}</span>
@@ -72,7 +71,6 @@ export default function UpgradePrompt({ type, onClose, inline = false }: Upgrade
                     )}
                 </div>
             </div>
-        )
         )
     }
 
