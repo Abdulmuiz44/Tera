@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 import { useAuth } from '@/components/AuthProvider'
 import { supabase } from '@/lib/supabase'
-import { getUserProfile, updateUserProfile, type UserProfile } from '@/lib/usage-tracking'
+import { getUserProfile, updateUserProfile, checkAndResetUsage, type UserProfile } from '@/lib/usage-tracking'
 import { getPlanConfig, getRemainingChats, getRemainingFileUploads, getUsagePercentage, type PlanType } from '@/lib/plan-config'
 import Link from 'next/link'
 import Image from 'next/image'
@@ -46,15 +46,18 @@ export default function ProfilePage() {
 
             if (diff <= 0) {
                 setChatUnlockTime('Available now')
+                // Auto-refresh profile when timer reaches zero
+                loadProfile()
             } else {
                 const hours = Math.floor(diff / (60 * 60 * 1000))
                 const minutes = Math.floor((diff % (60 * 60 * 1000)) / (60 * 1000))
-                setChatUnlockTime(`${hours}h ${minutes}m`)
+                const seconds = Math.floor((diff % (60 * 1000)) / 1000)
+                setChatUnlockTime(`${hours}h ${minutes}m ${seconds}s`)
             }
         }
 
         calculateTime()
-        const interval = setInterval(calculateTime, 60000) // Update every minute
+        const interval = setInterval(calculateTime, 1000) // Update every second
         return () => clearInterval(interval)
     }, [profile?.limitHitChatAt])
 
@@ -74,15 +77,18 @@ export default function ProfilePage() {
 
             if (diff <= 0) {
                 setUploadUnlockTime('Available now')
+                // Auto-refresh profile when timer reaches zero
+                loadProfile()
             } else {
                 const hours = Math.floor(diff / (60 * 60 * 1000))
                 const minutes = Math.floor((diff % (60 * 60 * 1000)) / (60 * 1000))
-                setUploadUnlockTime(`${hours}h ${minutes}m`)
+                const seconds = Math.floor((diff % (60 * 1000)) / 1000)
+                setUploadUnlockTime(`${hours}h ${minutes}m ${seconds}s`)
             }
         }
 
         calculateTime()
-        const interval = setInterval(calculateTime, 60000) // Update every minute
+        const interval = setInterval(calculateTime, 1000) // Update every second
         return () => clearInterval(interval)
     }, [profile?.limitHitUploadAt])
 
@@ -109,6 +115,9 @@ export default function ProfilePage() {
     const loadProfile = async () => {
         if (!user) return
         setLoading(true)
+        // Trigger usage reset check before loading profile
+        // This ensures limits are cleared after 24h has passed
+        await checkAndResetUsage(user.id)
         const data = await getUserProfile(user.id)
         setProfile(data)
         setFormData({

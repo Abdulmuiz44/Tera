@@ -2,11 +2,12 @@ import { supabaseServer } from './supabase-server'
 
 /**
  * Check if counters need to be reset (Server Side)
+ * Supports both daily reset and 24-hour unlock from when limit was hit
  */
 export async function checkAndResetUsageServer(userId: string): Promise<boolean> {
     const { data, error } = await supabaseServer
         .from('users')
-        .select('chat_reset_date')
+        .select('chat_reset_date, limit_hit_chat_at, limit_hit_upload_at')
         .eq('id', userId)
         .single()
 
@@ -16,13 +17,46 @@ export async function checkAndResetUsageServer(userId: string): Promise<boolean>
     const updates: Record<string, any> = {}
     let needsUpdate = false
 
-    // Check daily chat reset
-    if (data.chat_reset_date && now >= new Date(data.chat_reset_date)) {
+    // Check 24-hour unlock from when chat limit was hit
+    if (data.limit_hit_chat_at) {
+        const hitTime = new Date(data.limit_hit_chat_at)
+        const unlockTime = new Date(hitTime.getTime() + 24 * 60 * 60 * 1000) // 24 hours later
+
+        if (now >= unlockTime) {
+            updates.daily_chats = 0
+            updates.limit_hit_chat_at = null
+            needsUpdate = true
+        }
+    }
+
+    // Check 24-hour unlock from when upload limit was hit
+    if (data.limit_hit_upload_at) {
+        const hitTime = new Date(data.limit_hit_upload_at)
+        const unlockTime = new Date(hitTime.getTime() + 24 * 60 * 60 * 1000) // 24 hours later
+
+        if (now >= unlockTime) {
+            updates.daily_file_uploads = 0
+            updates.limit_hit_upload_at = null
+            needsUpdate = true
+        }
+    }
+
+    // DAILY RESET LOGIC (Overrules 24h lock if the day cycle has passed)
+    // If chat_reset_date is passed OR missing, we reset everything
+    const resetDate = data.chat_reset_date ? new Date(data.chat_reset_date) : null
+
+    if (!resetDate || now >= resetDate) {
         const nextChatResetDate = new Date(now)
         nextChatResetDate.setDate(nextChatResetDate.getDate() + 1)
+
         updates.daily_chats = 0
         updates.daily_file_uploads = 0
         updates.chat_reset_date = nextChatResetDate.toISOString()
+
+        // Clear locks on daily reset - give user a fresh start
+        updates.limit_hit_chat_at = null
+        updates.limit_hit_upload_at = null
+
         needsUpdate = true
     }
 
@@ -41,6 +75,7 @@ export async function checkAndResetUsageServer(userId: string): Promise<boolean>
 
     return false
 }
+
 
 /**
  * Increment chat counter (Server Side)
