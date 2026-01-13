@@ -5,12 +5,35 @@ const sheets = google.sheets('v4')
 const drive = google.drive('v3')
 
 // Get OAuth2 client
-function getOAuth2Client() {
-  return new google.auth.OAuth2(
+function getOAuth2Client(userId?: string) {
+  const client = new google.auth.OAuth2(
     process.env.GOOGLE_CLIENT_ID,
     process.env.GOOGLE_CLIENT_SECRET,
     process.env.GOOGLE_REDIRECT_URI || 'http://localhost:3000/api/auth/google/callback'
   )
+
+  // If userId is provided, listen for token updates and save them
+  if (userId) {
+    client.on('tokens', async (tokens) => {
+      console.log('🔄 Google tokens refreshed automatically')
+      if (tokens.access_token) {
+        // We need the existing refresh token if the new one is missing
+        let refreshToken = tokens.refresh_token
+        if (!refreshToken) {
+          // Fetch existing refresh token to ensure we don't lose it
+          const existing = await getUserGoogleToken(userId)
+          refreshToken = existing?.google_refresh_token
+        }
+
+        if (refreshToken) {
+          await saveGoogleTokens(userId, tokens.access_token, refreshToken)
+          console.log('✅ Refreshed Google tokens saved to DB')
+        }
+      }
+    })
+  }
+
+  return client
 }
 
 // Get user's stored Google access token
@@ -35,7 +58,10 @@ export async function saveGoogleTokens(userId: string, accessToken: string, refr
       updated_at: new Date()
     })
 
-  if (error) throw error
+  if (error) {
+    console.error('Error saving Google tokens:', error)
+    // Don't throw here to avoid breaking the request flow if DB fails specifically on save
+  }
 }
 
 // Create authenticated sheets client
@@ -45,7 +71,9 @@ async function getAuthenticatedSheetsClient(userId: string) {
     throw new Error('User has not authorized Google Sheets access')
   }
 
-  const oauth2Client = getOAuth2Client()
+  // Pass userId so we can listen for refreshes
+  const oauth2Client = getOAuth2Client(userId)
+
   oauth2Client.setCredentials({
     access_token: tokens.google_access_token,
     refresh_token: tokens.google_refresh_token
@@ -57,19 +85,9 @@ async function getAuthenticatedSheetsClient(userId: string) {
 // Create a new spreadsheet
 export async function createSpreadsheet(userId: string, title: string, sheetTitle?: string) {
   try {
-    const oauth2Client = getOAuth2Client()
-    const tokens = await getUserGoogleToken(userId)
+    // Use the authenticated client helper to ensure token refresh logic is active
+    const sheetsClient = await getAuthenticatedSheetsClient(userId)
 
-    if (!tokens?.google_access_token) {
-      throw new Error('User not authenticated with Google')
-    }
-
-    oauth2Client.setCredentials({
-      access_token: tokens.google_access_token,
-      refresh_token: tokens.google_refresh_token
-    })
-
-    const sheetsClient = google.sheets({ version: 'v4', auth: oauth2Client })
 
     // Create spreadsheet
     const response = await sheetsClient.spreadsheets.create({

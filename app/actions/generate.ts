@@ -100,14 +100,14 @@ export async function generateAnswer({ prompt, tool, authorId, authorEmail, atta
       .limit(10)
 
     if (historyData) {
-      // Format history and reverse to chronological order
+      // Format history: Reverse first to get chronological order (Oldest -> Newest), then map
       history = historyData
+        .reverse()
         .map(msg => [
           { role: 'user' as const, content: msg.prompt },
           { role: 'assistant' as const, content: msg.response }
         ])
         .flat()
-        .reverse()
     }
   }
 

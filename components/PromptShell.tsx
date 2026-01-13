@@ -47,7 +47,8 @@ const UniversalVisualRenderer = dynamic(() => import('./visuals/UniversalVisualR
 const SourcesPanelRenderer = dynamic(() => import('./search/SourcesPanel'), { ssr: false })
 const ResearchModeToggle = dynamic(() => import('./search/ResearchModeToggle'), { ssr: false })
 const SearchHistoryRenderer = dynamic(() => import('./search/SearchHistory'), { ssr: false })
-
+const ContentBlockRenderer = dynamic(() => import('./visuals/UniversalVisualRenderer'), { ssr: false })
+const MarkdownRenderer = dynamic(() => import('./MarkdownRenderer'), { ssr: false })
 type ContentBlock =
     | { type: 'text', content: string, isHeader: boolean }
     | { type: 'chart', config: any }
@@ -172,18 +173,16 @@ const parseContent = (content: string): ContentBlock[] => {
             }
         }
 
-        // Process regular text paragraphs
-        const paragraphs = part.split(/\n\n+/).filter(p => p.trim())
-        paragraphs.forEach(p => {
-            const isMarkdownHeader = p.startsWith('#')
-            const isAllCapsHeader = p === p.toUpperCase() && p.length < 50 && !p.includes('.')
-
+        // Process regular text content
+        // We no longer split by paragraphs here, we return the full text block 
+        // to let the MarkdownRenderer handle tables, lists, and math properly.
+        if (part.trim()) {
             blocks.push({
                 type: 'text',
-                content: p.replace(/^#+\s*/, ''),
-                isHeader: isMarkdownHeader || isAllCapsHeader
+                content: part,
+                isHeader: false // Deprecated but kept for type compatibility
             })
-        })
+        }
     })
 
     return blocks
@@ -936,31 +935,11 @@ export default function PromptShell({
                                                                 </div>
                                                             )
                                                         }
-                                                        return block.isHeader ? (
-                                                            <h3 key={idx} className="font-bold text-base md:text-lg mt-2 text-tera-primary w-full break-words animate-in fade-in slide-in-from-left duration-300">
-                                                                {block.content}
-                                                            </h3>
-                                                        ) : (
-                                                            <p key={idx} className="leading-relaxed whitespace-pre-wrap text-sm md:text-base w-full break-words animate-in fade-in duration-300">
-                                                                {block.content.split(/((?:https?:\/\/|www\.)[^\s]+)/g).map((part, i) => {
-                                                                    if (part.match(/^(https?:\/\/|www\.)/)) {
-                                                                        const href = part.startsWith('http') ? part : `https://${part}`
-                                                                        return (
-                                                                            <a
-                                                                                key={i}
-                                                                                href={href}
-                                                                                target="_blank"
-                                                                                rel="noopener noreferrer"
-                                                                                className="text-tera-neon hover:underline break-all"
-                                                                            >
-                                                                                {part}
-                                                                            </a>
-                                                                        )
-                                                                    }
-                                                                    return part
-                                                                })}
-                                                            </p>
-                                                        )
+                                                        return block.type === 'text' ? (
+                                                            <div key={idx} className="w-full animate-in fade-in duration-300">
+                                                                <MarkdownRenderer content={block.content} />
+                                                            </div>
+                                                        ) : null
                                                     })}
                                                 </div>
                                                 <div className="flex items-center justify-between mt-3 pt-2 border-t border-tera-border">
