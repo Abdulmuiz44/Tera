@@ -1,6 +1,7 @@
 "use client"
 
 import React, { ChangeEvent, useCallback, useEffect, useRef, useState, useTransition } from 'react'
+import Image from 'next/image'
 import { generateAnswer } from '@/app/actions/generate'
 import type { TeacherTool } from './ToolCard'
 import type { User } from '@supabase/supabase-js'
