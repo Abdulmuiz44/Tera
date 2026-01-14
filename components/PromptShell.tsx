@@ -3,6 +3,7 @@
 import React, { ChangeEvent, useCallback, useEffect, useRef, useState, useTransition } from 'react'
 import { generateAnswer } from '@/app/actions/generate'
 import type { TeacherTool } from './ToolCard'
+import type { User } from '@supabase/supabase-js'
 import type { AttachmentReference, AttachmentType } from '@/lib/attachment'
 import { supabase } from '@/lib/supabase'
 import { compressImage } from '@/lib/image-compression'
