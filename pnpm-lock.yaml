@@ -20,6 +20,9 @@ importers:
       googleapis:
         specifier: ^167.0.0
         version: 167.0.0
+      katex:
+        specifier: ^0.16.27
+        version: 0.16.27
       mammoth:
         specifier: ^1.11.0
         version: 1.11.0
