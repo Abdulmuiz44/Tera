@@ -69,7 +69,7 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({ content }) => {
                         <tbody className="divide-y divide-tera-border/30">{children}</tbody>
                     ),
                     tr: ({ node, children }) => (
-                        <tr className="hover:bg-white/5 transition-colors">{children}</td>
+                        <tr className="hover:bg-white/5 transition-colors">{children}</tr>
                     ),
                     th: ({ node, children }) => (
                         <th className="px-4 py-3 font-medium whitespace-nowrap">{children}</th>
