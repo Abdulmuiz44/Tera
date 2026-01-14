@@ -14,7 +14,7 @@ function getOAuth2Client(userId?: string) {
 
   // If userId is provided, listen for token updates and save them
   if (userId) {
-    client.on('tokens', async (tokens) => {
+    (client as any).on('tokens', async (tokens: any) => {
       console.log('🔄 Google tokens refreshed automatically')
       if (tokens.access_token) {
         // We need the existing refresh token if the new one is missing
