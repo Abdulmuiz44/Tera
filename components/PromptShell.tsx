@@ -49,6 +49,7 @@ const ResearchModeToggle = dynamic(() => import('./search/ResearchModeToggle'), 
 const SearchHistoryRenderer = dynamic(() => import('./search/SearchHistory'), { ssr: false })
 const ContentBlockRenderer = dynamic(() => import('./visuals/UniversalVisualRenderer'), { ssr: false })
 const MarkdownRenderer = dynamic(() => import('./MarkdownRenderer'), { ssr: false })
+const QuizRenderer = dynamic(() => import('./visuals/QuizRenderer'), { ssr: false })
 type ContentBlock =
     | { type: 'text', content: string, isHeader: boolean }
     | { type: 'chart', config: any }
@@ -57,6 +58,7 @@ type ContentBlock =
     | { type: 'spreadsheet', config: any }
     | { type: 'universal-visual', code: string, language: string, title: string }
     | { type: 'web-sources', sources: Array<{ title: string; url: string; snippet: string; source: string; favicon?: string }> }
+    | { type: 'quiz', config: { action: 'quiz'; topic: string; questions: any[] } }
 
 
 
@@ -112,7 +114,8 @@ const parseContent = (content: string): ContentBlock[] => {
 
                 // Check if code contains chart keys (relaxed check)
                 const isChart = (c: string) => (c.includes('"data"') && c.includes('"type"')) || (c.includes('"series"'))
-                const isSpreadsheet = (c: string) => c.includes('"action"') && (c.includes('"data"') || c.includes('"title"'))
+                const isSpreadsheet = (c: string) => c.includes('"action"') && (c.includes('"data"') || c.includes('"title"')) && !c.includes('"questions"')
+                const isQuiz = (c: string) => c.includes('"action"') && c.includes('"quiz"') && c.includes('"questions"')
                 const isHTML = (c: string) => c.includes('<!DOCTYPE') || c.includes('<html') || c.includes('<body')
                 const isVisualization = (c: string) => c.includes('THREE.') || c.includes('requestAnimationFrame') || c.includes('canvas.getContext')
 
@@ -130,6 +133,21 @@ const parseContent = (content: string): ContentBlock[] => {
                 } else if (lang === 'mermaid') {
                     // Only treat as Mermaid if explicitly marked as mermaid language
                     blocks.push({ type: 'mermaid', chart: cleanCode })
+                } else if ((lang === 'json' && type === 'quiz') || isQuiz(cleanCode)) {
+                    try {
+                        const jsonStr = cleanCode
+                            .replace(/\/\/.*$/gm, '')
+                            .replace(/\/\*[\s\S]*?\*\//g, '')
+                        const config = JSON.parse(jsonStr)
+                        if (config.action === 'quiz' && config.questions) {
+                            blocks.push({ type: 'quiz', config })
+                        } else {
+                            blocks.push({ type: 'code', language: 'json', code: cleanCode })
+                        }
+                    } catch (e) {
+                        console.warn('Failed to parse quiz JSON', e)
+                        blocks.push({ type: 'code', language: 'json', code: cleanCode })
+                    }
                 } else if ((lang === 'json' && type === 'spreadsheet') || isSpreadsheet(cleanCode)) {
                     try {
                         // Remove comments from JSON (// and /* */)
@@ -894,6 +912,9 @@ export default function PromptShell({
                                                         }
                                                         if (block.type === 'mermaid') {
                                                             return <MermaidRenderer key={idx} chart={block.chart} />
+                                                        }
+                                                        if (block.type === 'quiz') {
+                                                            return <QuizRenderer key={idx} quiz={block.config} />
                                                         }
                                                         if (block.type === 'web-sources') {
                                                             return (
