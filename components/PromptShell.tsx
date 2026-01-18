@@ -1022,14 +1022,37 @@ export default function PromptShell({
 
                             {/* Attachments Preview */}
                             {pendingAttachments.length > 0 && (
-                                <div className="flex flex-wrap gap-2">
+                                <div className="flex flex-wrap gap-3 p-2">
                                     {pendingAttachments.map((att, idx) => (
-                                        <div key={idx} className="group relative flex items-center gap-2 rounded-lg bg-tera-panel px-3 py-2 text-xs text-tera-primary border border-tera-border">
-                                            <span>{att.type === 'image' ? '🖼️' : '📄'}</span>
-                                            <span className="truncate max-w-[200px]">{att.name}</span>
+                                        <div
+                                            key={idx}
+                                            className="group relative rounded-xl overflow-hidden border border-tera-border bg-tera-panel shadow-lg"
+                                        >
+                                            {att.type === 'image' ? (
+                                                // Image thumbnail preview
+                                                <div className="relative w-24 h-24 md:w-32 md:h-32">
+                                                    <img
+                                                        src={att.url}
+                                                        alt={att.name}
+                                                        className="w-full h-full object-cover"
+                                                    />
+                                                    {/* Hover overlay with filename */}
+                                                    <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-2">
+                                                        <span className="text-xs text-white truncate w-full">{att.name}</span>
+                                                    </div>
+                                                </div>
+                                            ) : (
+                                                // File preview (non-image)
+                                                <div className="flex items-center gap-2 px-4 py-3 min-w-[120px]">
+                                                    <span className="text-2xl">📄</span>
+                                                    <span className="text-xs text-tera-primary truncate max-w-[150px]">{att.name}</span>
+                                                </div>
+                                            )}
+                                            {/* Remove button */}
                                             <button
                                                 onClick={() => setPendingAttachments(prev => prev.filter((_, i) => i !== idx))}
-                                                className="ml-2 rounded-full bg-tera-muted p-1 hover:bg-tera-muted/80"
+                                                className="absolute top-1 right-1 w-6 h-6 rounded-full bg-black/70 hover:bg-red-500 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all text-sm"
+                                                title="Remove"
                                             >
                                                 ✕
                                             </button>
