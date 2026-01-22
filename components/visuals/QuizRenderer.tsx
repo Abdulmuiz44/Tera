@@ -163,8 +163,8 @@ export default function QuizRenderer({ quiz, onComplete }: QuizRendererProps) {
                             <div
                                 key={result.questionId}
                                 className={`p-4 rounded-lg border ${result.correct
-                                        ? 'border-green-500/30 bg-green-500/10'
-                                        : 'border-red-500/30 bg-red-500/10'
+                                    ? 'border-green-500/30 bg-green-500/10'
+                                    : 'border-red-500/30 bg-red-500/10'
                                     }`}
                             >
                                 <div className="flex items-start gap-3">
@@ -195,7 +195,7 @@ export default function QuizRenderer({ quiz, onComplete }: QuizRendererProps) {
                                         </p>
 
                                         {result.explanation && (
-                                            <p className="text-sm text-tera-secondary italic">
+                                            <p className="text-sm text-tera-secondary italic whitespace-pre-wrap">
                                                 💡 {result.explanation}
                                             </p>
                                         )}
@@ -254,9 +254,9 @@ export default function QuizRenderer({ quiz, onComplete }: QuizRendererProps) {
                         key={question.id}
                         className="p-4 rounded-lg bg-black/20 border border-tera-border/50"
                     >
-                        <p className="text-tera-primary font-medium mb-3">
+                        <div className="text-tera-primary font-medium mb-3 whitespace-pre-wrap">
                             <span className="text-tera-neon">{idx + 1}.</span> {question.question}
-                        </p>
+                        </div>
 
                         {/* Multiple Choice / True-False */}
                         {(question.type === 'multiple_choice' || question.type === 'true_false') && question.options && (
@@ -265,8 +265,8 @@ export default function QuizRenderer({ quiz, onComplete }: QuizRendererProps) {
                                     <label
                                         key={optIdx}
                                         className={`flex items-center gap-3 p-3 rounded-lg cursor-pointer transition-colors ${answers[question.id] === optIdx
-                                                ? 'bg-tera-neon/20 border-tera-neon'
-                                                : 'bg-black/20 border-transparent hover:bg-white/5'
+                                            ? 'bg-tera-neon/20 border-tera-neon'
+                                            : 'bg-black/20 border-transparent hover:bg-white/5'
                                             } border`}
                                     >
                                         <input
@@ -302,8 +302,8 @@ export default function QuizRenderer({ quiz, onComplete }: QuizRendererProps) {
                     onClick={handleSubmit}
                     disabled={answeredCount < quiz.questions.length}
                     className={`px-6 py-3 rounded-lg font-medium transition-all ${answeredCount === quiz.questions.length
-                            ? 'bg-tera-neon text-black hover:bg-tera-neon/80'
-                            : 'bg-tera-border text-tera-secondary cursor-not-allowed'
+                        ? 'bg-tera-neon text-black hover:bg-tera-neon/80'
+                        : 'bg-tera-border text-tera-secondary cursor-not-allowed'
                         }`}
                 >
                     {answeredCount === quiz.questions.length

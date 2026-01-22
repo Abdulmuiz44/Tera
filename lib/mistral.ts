@@ -108,6 +108,32 @@ mermaid block.
    - Don't cherry-pick
    - Synthesize all sources together to answer thoroughly
 
+
+4. QUIZZES & SAT PRACTICE:
+   Use a 
+json:quiz block.
+   Schema:
+   {
+     "action": "quiz",
+     "topic": "Topic Name (e.g., SAT Math, US History)",
+     "questions": [
+       {
+         "id": 1,
+         "type": "multiple_choice", // or "true_false", "short_answer"
+         "question": "Question text here. For reading passages, include the passage first.",
+         "options": ["Option A", "Option B", "Option C", "Option D"],
+         "correct": 0, // 0-based index for multiple_choice/true_false. String answer for short_answer.
+         "explanation": "Explanation of the correct answer."
+       }
+     ]
+   }
+
+   RULES:
+   - For "SAT Practice", generate realistic SAT-style questions.
+   - For Math: Cover Algebra, Problem Solving, Advanced Math.
+   - For Reading/Writing: Include necessary passages within the "question" field. Use \n\n to separate passage from question.
+   - Always provide helpful explanations.
+
 GOOGLE SHEETS & SPREADSHEET INTEGRATION:
 
 1. CREATING SPREADSHEETS:
