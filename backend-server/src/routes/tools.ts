@@ -1,4 +1,4 @@
-import * as express from 'express';
+import express from 'express';
 import { AuthRequest, authMiddleware } from '../middleware/auth.js';
 import { generateTool } from '../services/mistral.js';
 
@@ -45,7 +45,7 @@ const TOOLS = [
 ];
 
 // Get all tools
-router.get('/', authMiddleware, async (req: AuthRequest, res: Response) => {
+router.get('/', authMiddleware, async (req: AuthRequest, res: express.Response) => {
   try {
     res.json({
       success: true,

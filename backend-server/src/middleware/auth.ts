@@ -1,4 +1,4 @@
-import * as express from 'express';
+import express from 'express';
 import jwt from 'jsonwebtoken';
 
 export interface AuthRequest extends express.Request {

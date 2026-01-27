@@ -1,4 +1,4 @@
-import * as express from 'express';
+import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import authRoutes from './routes/auth.js';
@@ -8,7 +8,7 @@ import searchRoutes from './routes/search.js';
 
 dotenv.config();
 
-const app: express.Express = express.default();
+const app: express.Express = express();
 const PORT = process.env.PORT || 5000;
 
 // Middleware

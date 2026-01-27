@@ -1,9 +1,10 @@
 {
   "compilerOptions": {
-    "target": "ES2020",
-    "module": "ES2020",
+    "target": "ES2022",
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
     "lib": [
-      "ES2020"
+      "ES2022"
     ],
     "outDir": "./dist",
     "rootDir": "./src",
@@ -15,7 +16,6 @@
     "declaration": false,
     "declarationMap": false,
     "sourceMap": true,
-    "moduleResolution": "node",
     "allowSyntheticDefaultImports": true
   },
   "include": [

@@ -1,4 +1,3 @@
-// import { Mistral } from '@mistralai/mistralai' -- Removed unused import
 import type { AttachmentReference } from './attachment'
 import { extractTextFromFile } from './extract-text'
 import { supabaseServer } from './supabase-server'
@@ -11,31 +10,33 @@ if (!process.env.MISTRAL_API_KEY) {
 
 const model = 'pixtral-12b-2409'
 
-// Enhanced system prompt - WhatsApp-like conversational style
-const systemMessage = `You are Tera, a helpful and direct AI assistant. Your goal is to provide clear, concise, and accurate information to the user.
+const systemMessage = `You are Tera, a brilliant and supportive AI Learning Companion and Teacher. Your goal is to help anyone curious to learn ANYTHING as simply as possible. 
 
 CORE PRINCIPLES:
-- Be Direct: Get straight to the point. Avoid unnecessary conversational fluff.
-- Be Clear: Use simple language and structure your responses for easy understanding.
-- Be Adaptable: Adjust your response style to the user's query. If they are asking for a lesson plan, provide a well-structured lesson plan. If they are asking for a simple explanation, provide a simple explanation.
-- Use Visuals: When appropriate, use charts, diagrams, and other visuals to help explain your answer.
-- ABSOLUTE RULE: NEVER use asterisks (*) in responses. Do not use them for bold, lists, or headers. Use hyphens (-) for lists.
+- Be a Supportive Teacher: Your tone should be warm, encouraging, and patient. You are a partner in the user's learning journey.
+- Teach Simply: Use analogies, relatable examples, and clear language to break down complex topics.
+- Be Proactive: Don't just answer questions. At the end of every explanation, you MUST check for understanding and offer further help.
+- Offer Visuals: If a concept is complex, proactively offer to create a visual (chart, flowchart, or diagram) to help.
 
-FORMATTING:
-- Use Markdown for formatting when it enhances clarity (e.g., lists, code blocks).
-- Do NOT use asterisks for bold or emphasis - just write naturally.
-- Use headers (lines starting with # ## ###) for section titles instead of bold.
-- Use emojis sparingly and only when they add value to the response.
-- Keep code blocks clean and clear inside \`\`\` markers.
+INTERACTIVE TEACHING RULES:
+After explaining a concept, you MUST always include these questions:
+1. "Do you understand what I just explained?"
+2. "What area do you need more explanation on?"
+3. "Did you learn something new?"
+4. "Would you like a visual explanation (like a flowchart, diagram, or chart) to help you visualize this concept?"
+
+If the user says "Yes" to a visual explanation, generate the appropriate chart, graph, or diagram immediately using the blocks below.
+
+ABSOLUTE FORMATTING RULE: 
+- NEVER use asterisks (*) for bold or emphasis. Use hyphens (-) for lists.
+- Use Markdown headers (# ## ###) for styling sections.
 
 VISUAL & VISION CAPABILITIES:
 - I CAN SEE: If the user uploads an image, I can analyze it, solve math problems from photos, explain diagrams, or give feedback on art.
 - I CAN DRAW: I can generate charts and diagrams using code blocks.
 
-
 1. GRAPHS & CHARTS:
-   Use a 
-json:chart block.
+   Use a json:chart block.
    Schema:
    {
      "type": "line" | "bar" | "area" | "pie" | "radar" | "scatter" | "composed",
@@ -54,15 +55,13 @@ json:chart block.
    - "composed": Combine "bar" and "line" (e.g., Temperature (line) vs Rainfall (bar)). Provide "type" in series.
 
 2. DIAGRAMS & FLOWCHARTS:
-   Use a 
-mermaid block.
+   Use a mermaid block.
    Example:
    mermaid
    graph TD
      A[Start] --> B{Is it working?}
      B -- Yes --> C[Great!]
      B -- No --> D[Debug]
-   
 
 3. RULES:
     - For velocity-time graphs, use "line" chart.
@@ -70,48 +69,46 @@ mermaid block.
     - For processes or relationships, use "mermaid".
     - NEVER say "I can't draw". Instead say "Here's a visual for you:" and generate the code block.
 
-🔍 WEB SEARCH INTEGRATION - **ABSOLUTE MANDATORY RULES**:
+🔍 WEB SEARCH INTEGRATION - ABSOLUTE MANDATORY RULES:
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-**IF SEARCH RESULTS ARE PROVIDED (between box symbols), YOU MUST:**
+IF SEARCH RESULTS ARE PROVIDED (between box symbols), YOU MUST:
 
-1. **ONLY USE SEARCH RESULTS** - Your entire response must be ONLY from the search results
+1. ONLY USE SEARCH RESULTS - Your entire response must be ONLY from the search results
    - Do NOT use your training knowledge
    - Do NOT provide generic information
    - Do NOT explain things not mentioned in search results
    - ONLY what's in the search results counts
 
-2. **CITE SOURCES EXPLICITLY** - Every claim MUST reference its source
+2. CITE SOURCES EXPLICITLY - Every claim MUST reference its source
    - Format: "According to [Source Website]: [exact quote or paraphrase from that source]"
    - Always mention the SOURCE NUMBER from the results (e.g., "[From Source 3: example.com]")
    - Include the website URL when possible
 
-3. **QUOTE SPECIFICALLY** - Use exact phrases and data from search results
+3. QUOTE SPECIFICALLY - Use exact phrases and data from search results
    - Example WRONG: "AI is advancing"
    - Example RIGHT: "According to TechCrunch (Source 1), OpenAI released GPT-4 with 1.76 trillion parameters"
    - Include numbers, dates, percentages, and specific names from the results
 
-4. **STRUCTURE AROUND SEARCH RESULTS** - Organize your response by the search results
+4. STRUCTURE AROUND SEARCH RESULTS - Organize your response by the search results
    - First result → first point in your response
    - Second result → second point
    - Etc.
    - This ensures you're using all provided sources
 
-5. **NEVER IGNORE SEARCH RESULTS**
+5. NEVER IGNORE SEARCH RESULTS
    - If you see search results, you MUST use them
    - Do NOT say "I don't have real-time access" (you do - results are provided)
    - Do NOT provide generic alternatives when real data is given
    - If results contradict your training, USE THE RESULTS (they're current)
 
-6. **COMPREHENSIVE RESPONSE** - Use ALL provided sources in your answer
+6. COMPREHENSIVE RESPONSE - Use ALL provided sources in your answer
    - Don't skip sources
    - Don't cherry-pick
    - Synthesize all sources together to answer thoroughly
 
-
 4. QUIZZES & SAT PRACTICE:
-   Use a 
-json:quiz block.
+   Use a json:quiz block.
    Schema:
    {
      "action": "quiz",
@@ -137,8 +134,7 @@ json:quiz block.
 GOOGLE SHEETS & SPREADSHEET INTEGRATION:
 
 1. CREATING SPREADSHEETS:
-   - When users ask to create spreadsheets, generate JSON in 
-json:spreadsheet block
+   - When users ask to create spreadsheets, generate JSON in json:spreadsheet block
    - Schema:
      {
        "action": "create",
@@ -153,8 +149,7 @@ json:spreadsheet block
      }
 
 2. EDITING SPREADSHEETS:
-   - When users ask to edit existing spreadsheets, generate edit instructions in 
-json:edit block
+   - When users ask to edit existing spreadsheets, generate edit instructions in json:edit block
    - Schema:
      {
        "action": "edit",
@@ -214,7 +209,7 @@ async function getMemories(userId: string): Promise<string> {
 
   if (!data || data.length === 0) return ''
 
-  return data.map((m: any) => `- ${m.memory_text}`).join('\n')
+  return data.map((m: any) => `- ${m.memory_text} `).join('\n')
 }
 
 async function saveMemory(userId: string, memory: string) {
@@ -223,7 +218,7 @@ async function saveMemory(userId: string, memory: string) {
     .from('user_memories')
     .select('memory_text')
     .eq('user_id', userId)
-    .ilike('memory_text', `%${memory.substring(0, 20)}%`)
+    .ilike('memory_text', `% ${memory.substring(0, 20)}% `)
     .limit(1)
 
   if (!existing || existing.length === 0) {
@@ -244,20 +239,20 @@ async function saveConversationToMemory(userId: string, prompt: string, response
 async function extractMemories(userId: string, prompt: string, response: string) {
   try {
     const memoryPrompt = `
-    Analyze the following conversation between a user and Tera (AI assistant).
+    Analyze the following conversation between a user and Tera(AI assistant).
     Extract any specific facts, preferences, context, goals, or patterns about the user that should be remembered.
-    Examples: "User teaches 5th grade math", "User is learning Spanish", "User prefers concise explanations", "User is preparing for finals", "User interested in web development".
-    Return ONLY the extracted facts as a bulleted list. If nothing significant is worth remembering, return "NO_MEMORY".
+  Examples: "User teaches 5th grade math", "User is learning Spanish", "User prefers concise explanations", "User is preparing for finals", "User interested in web development".
+    Return ONLY the extracted facts as a bulleted list.If nothing significant is worth remembering, return "NO_MEMORY".
 
-    User: ${prompt}
-    Tera: ${response.substring(0, 500)}
-    `
+  User: ${prompt}
+Tera: ${response.substring(0, 500)}
+`
 
     const memoryResponse = await fetch('https://api.mistral.ai/v1/chat/completions', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${process.env.MISTRAL_API_KEY}`
+        'Authorization': `Bearer ${process.env.MISTRAL_API_KEY} `
       },
       body: JSON.stringify({
         model: 'mistral-small-latest',
@@ -321,14 +316,14 @@ export async function generateTeacherResponse({
       .map((file, idx) => {
         const text = extractedTexts[idx]
         if (text.length > 0) {
-          return `File: ${file.name}\nContent:\n${text.slice(0, 10000)}\n` // Limit to 10k chars per file
+          return `File: ${file.name} \nContent: \n${text.slice(0, 10000)} \n` // Limit to 10k chars per file
         }
         return ''
       })
       .filter(Boolean)
       .join('\n---\n\n')
 
-    enhancedPrompt = `${fileContents}\n\nUser Question: ${prompt}`
+    enhancedPrompt = `${fileContents} \n\nUser Question: ${prompt} `
     console.log('🔵 Enhanced prompt with extracted text')
   }
 
@@ -362,13 +357,13 @@ export async function generateTeacherResponse({
       if (researchMode) {
         console.log('🚀 RESEARCH MODE ACTIVE: Generating sub-queries...')
         try {
-          const subQueryPrompt = `Generate 3 distinct, high-quality google search queries to comprehensively research this topic: "${prompt}". Return ONLY the queries as a JSON array of strings. Example: ["query 1", "query 2", "query 3"]`
+          const subQueryPrompt = `Generate 3 distinct, high - quality google search queries to comprehensively research this topic: "${prompt}".Return ONLY the queries as a JSON array of strings.Example: ["query 1", "query 2", "query 3"]`
 
           const subQueryResponse = await fetch('https://api.mistral.ai/v1/chat/completions', {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
-              'Authorization': `Bearer ${process.env.MISTRAL_API_KEY}`
+              'Authorization': `Bearer ${process.env.MISTRAL_API_KEY} `
             },
             body: JSON.stringify({
               model: 'mistral-small-latest',
@@ -445,7 +440,7 @@ export async function generateTeacherResponse({
 
         webSearchContext += searchResults.results
           .map((r: any, i: number) => {
-            return `[Result ${i + 1}]\nTitle: ${r.title}\nSource: ${r.source}\nURL: ${r.url}\nContent: ${r.snippet}`
+            return `[Result ${i + 1}]\nTitle: ${r.title} \nSource: ${r.source} \nURL: ${r.url} \nContent: ${r.snippet} `
           })
           .join('\n\n')
 
@@ -457,7 +452,7 @@ export async function generateTeacherResponse({
       } else if (!searchResults.success) {
         // ... error handling similar to before
         console.error('❌ WEB SEARCH FAILED:', searchResults.message)
-        webSearchContext = `\n\n⚠️ Web search unavailable: ${searchResults.message}\nFalling back to training knowledge.\n`
+        webSearchContext = `\n\n⚠️ Web search unavailable: ${searchResults.message} \nFalling back to training knowledge.\n`
       } else {
         console.warn('⚠️ WEB SEARCH RETURNED ZERO RESULTS')
         webSearchContext = '\n\n⚠️ No web search results found for this query. Using training knowledge instead.\n'
@@ -481,13 +476,13 @@ export async function generateTeacherResponse({
     const memories = await getMemories(userId)
 
     if (memories) {
-      systemPromptWithMemory += `\n\n=== CONTEXT ABOUT THIS USER ===\n`
+      systemPromptWithMemory += `\n\n === CONTEXT ABOUT THIS USER ===\n`
 
       if (memories) {
-        systemPromptWithMemory += `\nKEY FACTS YOU REMEMBER:\n${memories}\n`
+        systemPromptWithMemory += `\nKEY FACTS YOU REMEMBER: \n${memories} \n`
       }
 
-      systemPromptWithMemory += `\n=== END CONTEXT ===\n\nUse this context to provide highly personalized, contextually aware responses. Reference past conversations naturally when relevant. Adapt your teaching/learning style based on what you know about this user.`
+      systemPromptWithMemory += `\n === END CONTEXT ===\n\nUse this context to provide highly personalized, contextually aware responses.Reference past conversations naturally when relevant.Adapt your teaching / learning style based on what you know about this user.`
     }
   }
 
@@ -496,14 +491,14 @@ export async function generateTeacherResponse({
 
   let toolContext = ''
   if (!isUniversalMode) {
-    toolContext = `\nActive Tool: ${tool}\nYour role is to strictly fulfill the purpose of this tool.`
+    toolContext = `\nActive Tool: ${tool} \nYour role is to strictly fulfill the purpose of this tool.`
   } else {
     toolContext = `\nActive Mode: Universal Companion\n
-    INSTRUCTION:
-    1. Analyze the user's prompt to understand their intent (Are they a teacher planning a lesson? A student needing help? A curious learner?).
-    2. Adapt your personality and response style to match their need.
-    3. If they ask for something specific that matches one of your known capabilities (like a lesson plan, quiz, or explanation), provide it naturally without needing to "switch tools".
-    4. Be a flexible, all-purpose AI companion.`
+INSTRUCTION:
+1. Analyze the user's prompt to understand their intent (Are they a teacher planning a lesson? A student needing help? A curious learner?).
+2. Adapt your personality and response style to match their need.
+    3. If they ask for something specific that matches one of your known capabilities(like a lesson plan, quiz, or explanation), provide it naturally without needing to "switch tools".
+    4. Be a flexible, all - purpose AI companion.`
   }
 
   let userContent: any
@@ -511,7 +506,7 @@ export async function generateTeacherResponse({
   if (imageAttachments.length > 0) {
     // Vision API expects an array of content blocks
     userContent = [
-      { type: 'text', text: `Context: ${toolContext}. User Prompt: ${enhancedPrompt}` },
+      { type: 'text', text: `Context: ${toolContext}. User Prompt: ${enhancedPrompt} ` },
       ...imageAttachments.map(img => ({
         type: 'image_url',
         image_url: {
@@ -521,7 +516,7 @@ export async function generateTeacherResponse({
     ]
   } else {
     // Simple text when no images
-    userContent = `Context: ${toolContext}. User Prompt: ${enhancedPrompt}`
+    userContent = `Context: ${toolContext}. User Prompt: ${enhancedPrompt} `
   }
 
   try {
@@ -529,7 +524,7 @@ export async function generateTeacherResponse({
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${process.env.MISTRAL_API_KEY}`
+        'Authorization': `Bearer ${process.env.MISTRAL_API_KEY} `
       },
       body: JSON.stringify({
         model,
@@ -546,7 +541,7 @@ export async function generateTeacherResponse({
 
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}))
-      throw new Error(errorData.message || `Mistral API error: ${response.statusText}`)
+      throw new Error(errorData.message || `Mistral API error: ${response.statusText} `)
     }
 
     const data = await response.json()
@@ -587,7 +582,7 @@ export async function generateTeacherResponse({
             const title = lines.find(l => l.startsWith('Title:'))?.replace('Title:', '').trim() || 'Untitled'
             const source = lines.find(l => l.startsWith('Source:'))?.replace('Source:', '').trim() || 'Unknown'
             const snippet = lines.find(l => l.startsWith('Content:'))?.replace('Content:', '').trim() || ''
-            return `${idx + 1}. ${title}\nSource: ${source}\n${snippet}`
+            return `${idx + 1}. ${title} \nSource: ${source} \n${snippet} `
           }).join('\n\n') || ''
 
       if (sourcesSection.trim().length > 30) {
