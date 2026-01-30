@@ -1,7 +1,7 @@
 {
   "name": "tera",
   "version": "1.0.0",
-  "description": "",
+  "description": "Tera - Your AI Learning Companion",
   "private": true,
   "type": "module",
   "scripts": {

@@ -15,10 +15,10 @@ export default function AboutPage() {
         <div className="mx-auto max-w-4xl px-6 py-12 md:py-20 text-tera-primary">
           <div className="mb-16 text-center">
             <h1 className="mb-6 text-5xl font-bold tracking-tight text-tera-primary md:text-6xl">
-              Your AI Companion for Learning & Teaching
+              Your AI Learning Companion
             </h1>
             <p className="mx-auto max-w-2xl text-xl text-tera-secondary">
-              Tera feels like chatting with your smartest, most supportive friend. Whether you're learning something new or teaching others, we've got your back.
+              Tera is your AI Learning Companion — making learning simple, personal, and powerful. Get homework help, explore new skills, master any concept, and achieve your learning goals.
             </p>
           </div>
 
@@ -248,7 +248,7 @@ export default function AboutPage() {
           <div className="mb-16 text-center">
             <h2 className="mb-8 text-3xl font-bold text-tera-primary">Ready to Get Started?</h2>
             <p className="mb-8 text-lg text-tera-secondary">
-              Join thousands of learners and educators using Tera to unlock their potential.
+              Join thousands of learners using Tera — your AI Learning Companion — to unlock their potential.
             </p>
             <Link
               href="/new"

@@ -19,7 +19,7 @@ export default function TermsPage() {
                 <section>
                     <h2 className="mb-4 text-2xl font-semibold text-tera-primary">2. Description of Service</h2>
                     <p>
-                        Tera is an AI-powered assistant designed to help teachers with tasks such as lesson planning, quiz generation, and content creation. The services are provided "as is" and may change over time.
+                        Tera is your AI Learning Companion — designed to help you learn anything as simply as possible. The services are provided "as is" and may change over time.
                     </p>
                 </section>
 

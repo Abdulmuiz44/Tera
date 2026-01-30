@@ -9,6 +9,7 @@ import {
   SafeAreaView,
   RefreshControl,
 } from 'react-native';
+import { router } from 'expo-router';
 import { teraAPI } from '@/lib/api';
 
 interface Tool {
@@ -49,9 +50,7 @@ export default function ToolsScreen() {
   };
 
   const handleToolPress = (toolId: string) => {
-    // Navigate to tool detail screen or open modal
-    console.log('Tool pressed:', toolId);
-    // TODO: Implement navigation to tool detail
+    router.push(`/(app)/tool/${toolId}`);
   };
 
   if (loading) {

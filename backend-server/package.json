@@ -1,7 +1,7 @@
 {
   "name": "tera-api",
   "version": "1.0.0",
-  "description": "Tera AI Backend API",
+  "description": "Tera AI Learning Companion - Backend API",
   "main": "dist/server.js",
   "type": "module",
   "scripts": {
