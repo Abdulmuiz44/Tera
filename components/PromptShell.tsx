@@ -4,7 +4,13 @@ import React, { ChangeEvent, useCallback, useEffect, useRef, useState, useTransi
 import Image from 'next/image'
 import { generateAnswer } from '@/app/actions/generate'
 import type { TeacherTool } from './ToolCard'
-import type { User } from '@supabase/supabase-js'
+// Replaced Supabase User with compatible NextAuth interface
+type User = {
+    id: string
+    email?: string | null
+    name?: string | null
+    image?: string | null
+}
 import type { AttachmentReference, AttachmentType } from '@/lib/attachment'
 import { fetchChatHistory } from '@/app/actions/user'
 import { compressImage } from '@/lib/image-compression'
