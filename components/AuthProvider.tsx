@@ -1,12 +1,15 @@
 'use client'
 
-import { createContext, useContext, useEffect, useState } from 'react'
-import { User, Session, AuthChangeEvent } from '@supabase/supabase-js'
-import { supabase } from '@/lib/supabase'
+import { createContext, useContext } from 'react'
+import { SessionProvider, useSession, signOut as nextAuthSignOut } from 'next-auth/react'
 
 type AuthContextType = {
-  user: User | null
-  session: Session | null
+  user: {
+    id: string
+    email: string
+    name?: string | null
+    image?: string | null
+  } | null
   loading: boolean
   signOut: () => Promise<void>
   userReady: boolean
@@ -14,47 +17,36 @@ type AuthContextType = {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
 
-export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [user, setUser] = useState<User | null>(null)
-  const [session, setSession] = useState<Session | null>(null)
-  const [loading, setLoading] = useState(true)
-  const [userReady, setUserReady] = useState(false)
+function AuthContextProvider({ children }: { children: React.ReactNode }) {
+  const { data: session, status } = useSession()
+  const loading = status === 'loading'
+  const userReady = status === 'authenticated' && !!session?.user
 
-  useEffect(() => {
-    const ensureUserRow = async (user?: User | null) => {
-      // The user row in the public.users table is now expected to be created
-      // by a server-side trigger when a new user signs up.
-      // This client-side logic just checks for an authenticated user.
-      setUserReady(!!user)
-    }
-
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session)
-      setUser(session?.user ?? null)
-      void ensureUserRow(session?.user ?? null)
-      setLoading(false)
-    })
-
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event: AuthChangeEvent, session: Session | null) => {
-        setSession(session)
-        setUser(session?.user ?? null)
-        void ensureUserRow(session?.user ?? null)
-        setLoading(false)
-      }
-    )
-
-    return () => subscription.unsubscribe()
-  }, [])
+  const user = session?.user ? {
+    id: session.user.id as string,
+    email: session.user.email as string,
+    name: session.user.name,
+    image: session.user.image,
+  } : null
 
   const signOut = async () => {
-    await supabase.auth.signOut()
+    await nextAuthSignOut({ callbackUrl: '/' })
   }
 
   return (
-    <AuthContext.Provider value={{ user, session, loading, signOut, userReady }}>
+    <AuthContext.Provider value={{ user, loading, signOut, userReady }}>
       {children}
     </AuthContext.Provider>
+  )
+}
+
+export function AuthProvider({ children }: { children: React.ReactNode }) {
+  return (
+    <SessionProvider>
+      <AuthContextProvider>
+        {children}
+      </AuthContextProvider>
+    </SessionProvider>
   )
 }
 

@@ -149,6 +149,8 @@ export async function getUserProfileServer(userId: string) {
         fullName: data.full_name,
         school: data.school,
         gradeLevels: data.grade_levels,
+        limitHitChatAt: data.limit_hit_chat_at ? new Date(data.limit_hit_chat_at) : null,
+        limitHitUploadAt: data.limit_hit_upload_at ? new Date(data.limit_hit_upload_at) : null,
         createdAt: new Date(data.created_at)
     }
 }

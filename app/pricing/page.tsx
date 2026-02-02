@@ -3,20 +3,19 @@
 import { useState, useEffect } from 'react'
 import { useAuth } from '@/components/AuthProvider'
 import { useRouter } from 'next/navigation'
-import { supabase } from '@/lib/supabase'
 
 const PLAN_CONFIGS = {
   free: {
     name: 'free',
     displayName: 'Free',
     price: 0,
-    period: '/month',
-    description: 'Perfect for getting started',
+    period: '/forever',
+    description: 'Unlimited AI conversations, free forever',
     features: [
-      '10 messages per day',
-      '5 file uploads per day',
+      'Unlimited AI conversations',
+      '3 file uploads per day (10MB)',
       '5 web searches per month',
-      'Basic tools & features',
+      'Basic AI tools & features',
       'Mobile & desktop access'
     ]
   },
@@ -25,14 +24,14 @@ const PLAN_CONFIGS = {
     displayName: 'Pro',
     price: 5,
     period: '/month',
-    description: 'For serious learners',
+    description: 'Unlock research & productivity tools',
     features: [
-      '30 web searches per month',
-      'Unlimited AI conversations',
+      'Everything in Free, plus:',
+      '25 file uploads per day (500MB)',
+      '100 web searches per month',
       'Deep Research Mode',
-      'All tools & features',
-      'Priority support',
-      'Export to PDF/Word'
+      'Export to PDF/Word',
+      'Priority support'
     ]
   },
   plus: {
@@ -40,12 +39,11 @@ const PLAN_CONFIGS = {
     displayName: 'Plus',
     price: 15,
     period: '/month',
-    description: 'For professionals',
+    description: 'Unlimited everything for power users',
     features: [
-      'Everything in Pro',
-      'Unlimited file uploads',
+      'Everything in Pro, plus:',
+      'Unlimited file uploads (2GB)',
       'Unlimited web searches',
-      'Deep Research Mode',
       'Advanced analytics',
       'Team collaboration',
       '24/7 priority support',
@@ -137,14 +135,11 @@ export default function PricingPage() {
       }
 
       try {
-        // Get authenticated user
-        const { data: { user: authUser } } = await supabase.auth.getUser()
-
-        if (authUser) {
+        if (user) {
           const response = await fetch('/api/billing/status', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ userId: authUser.id })
+            body: JSON.stringify({ userId: user.id })
           })
           const data = await response.json()
           if (data.success) {
@@ -156,7 +151,7 @@ export default function PricingPage() {
       }
     }
     loadUserAndCurrency()
-  }, [supabase])
+  }, [user])
 
   const handleCheckout = async (plan: 'pro' | 'plus') => {
     if (!user) {
@@ -338,12 +333,12 @@ export default function PricingPage() {
                     </thead>
                     <tbody>
                       {[
-                        { feature: 'Daily AI Conversations', free: '10', pro: 'Unlimited', plus: 'Unlimited' },
-                        { feature: 'Monthly Web Searches', free: '5', pro: '50', plus: '80' },
+                        { feature: 'AI Conversations', free: 'Unlimited ✓', pro: 'Unlimited ✓', plus: 'Unlimited ✓' },
+                        { feature: 'File Uploads (per day)', free: '3', pro: '25', plus: 'Unlimited' },
+                        { feature: 'Max File Size', free: '10 MB', pro: '500 MB', plus: '2 GB' },
+                        { feature: 'Monthly Web Searches', free: '5', pro: '100', plus: 'Unlimited' },
                         { feature: 'Deep Research Mode', free: '—', pro: '✓', plus: '✓' },
-                        { feature: 'File Uploads (per day)', free: '5', pro: '20', plus: 'Unlimited' },
-                        { feature: 'Max File Size', free: '25 MB', pro: '500 MB', plus: '2 GB' },
-                        { feature: 'All Tools & Features', free: '✓ Basic', pro: '✓ All', plus: '✓ All' },
+                        { feature: 'All AI Tools & Features', free: 'Basic', pro: '✓ All', plus: '✓ All' },
                         { feature: 'Export to PDF/Word', free: '—', pro: '✓', plus: '✓' },
                         { feature: 'Priority Support', free: '—', pro: '✓', plus: '✓ 24/7' },
                         { feature: 'Analytics Dashboard', free: '—', pro: '—', plus: '✓ Advanced' },

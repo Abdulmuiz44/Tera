@@ -34,15 +34,15 @@ export default function AboutPage() {
               <ul className="space-y-4 text-tera-secondary">
                 <li className="flex items-start gap-3">
                   <span className="mt-1">✓</span>
+                  <span><strong>Free Unlimited Conversations:</strong> Chat with Tera as much as you want, forever free.</span>
+                </li>
+                <li className="flex items-start gap-3">
+                  <span className="mt-1">✓</span>
                   <span><strong>Conversational AI:</strong> Chat naturally, like you're texting a friend.</span>
                 </li>
                 <li className="flex items-start gap-3">
                   <span className="mt-1">✓</span>
-                  <span><strong>Adaptive Intelligence:</strong> Tera automatically adjusts to your needs.</span>
-                </li>
-                <li className="flex items-start gap-3">
-                  <span className="mt-1">✓</span>
-                  <span><strong>Real-Time Web Search:</strong> Get current information, not just training data.</span>
+                  <span><strong>Adaptive Intelligence:</strong> Tera automatically adjusts to your learning style.</span>
                 </li>
                 <li className="flex items-start gap-3">
                   <span className="mt-1">✓</span>
@@ -126,48 +126,49 @@ export default function AboutPage() {
           </div>
 
           <div className="mb-16 rounded-3xl border border-tera-border bg-tera-muted p-8">
-            <h2 className="mb-6 text-3xl font-bold text-tera-primary">Premium Features</h2>
+            <h2 className="mb-2 text-3xl font-bold text-tera-primary">Upgrade for More Power</h2>
+            <p className="mb-6 text-tera-secondary">Conversations are always free. Upgrade to Pro or Plus for these powerful features:</p>
             <div className="space-y-4">
               <div className="flex items-start gap-3">
-                <span className="text-2xl">📝</span>
+                <span className="text-2xl">🔍</span>
                 <div>
-                  <p className="font-semibold text-tera-primary">Smart Spreadsheet Editor</p>
-                  <p className="text-tera-secondary">Create, edit, and sync spreadsheets to Google Sheets in real-time</p>
+                  <p className="font-semibold text-tera-primary">Deep Research Mode</p>
+                  <p className="text-tera-secondary">Comprehensive multi-source research with sub-queries for thorough answers</p>
                 </div>
               </div>
               <div className="flex items-start gap-3">
-                <span className="text-2xl">📊</span>
+                <span className="text-2xl">🌐</span>
                 <div>
-                  <p className="font-semibold text-tera-primary">Interactive Charts & Visuals</p>
-                  <p className="text-tera-secondary">Generate charts, diagrams, and flowcharts for visual learning</p>
-                </div>
-              </div>
-              <div className="flex items-start gap-3">
-                <span className="text-2xl">🎤</span>
-                <div>
-                  <p className="font-semibold text-tera-primary">Voice Input & Output</p>
-                  <p className="text-tera-secondary">Chat with Tera using your voice, get responses read aloud</p>
+                  <p className="font-semibold text-tera-primary">More Web Searches</p>
+                  <p className="text-tera-secondary">Up to 100/month (Pro) or unlimited (Plus) real-time web searches with citations</p>
                 </div>
               </div>
               <div className="flex items-start gap-3">
                 <span className="text-2xl">📁</span>
                 <div>
-                  <p className="font-semibold text-tera-primary">File Upload & Analysis</p>
-                  <p className="text-tera-secondary">Upload PDFs, Word docs, and images for Tera to analyze</p>
+                  <p className="font-semibold text-tera-primary">More File Uploads</p>
+                  <p className="text-tera-secondary">Upload more PDFs, Word docs, and images (up to 500MB per file)</p>
                 </div>
               </div>
               <div className="flex items-start gap-3">
-                <span className="text-2xl">🧠</span>
+                <span className="text-2xl">📤</span>
                 <div>
-                  <p className="font-semibold text-tera-primary">Persistent Memory</p>
-                  <p className="text-tera-secondary">Tera learns your preferences and adapts over time</p>
+                  <p className="font-semibold text-tera-primary">Export to PDF & Word</p>
+                  <p className="text-tera-secondary">Download your conversations and generated content as documents</p>
                 </div>
               </div>
               <div className="flex items-start gap-3">
-                <span className="text-2xl">🔐</span>
+                <span className="text-2xl">📊</span>
                 <div>
-                  <p className="font-semibold text-tera-primary">Secure & Private</p>
-                  <p className="text-tera-secondary">Enterprise-grade encryption protects your data</p>
+                  <p className="font-semibold text-tera-primary">Advanced Analytics</p>
+                  <p className="text-tera-secondary">Track your learning progress with detailed insights (Plus)</p>
+                </div>
+              </div>
+              <div className="flex items-start gap-3">
+                <span className="text-2xl">⚡</span>
+                <div>
+                  <p className="font-semibold text-tera-primary">Priority Support</p>
+                  <p className="text-tera-secondary">Get faster responses and dedicated help when you need it</p>
                 </div>
               </div>
             </div>

@@ -6,7 +6,7 @@ import { generateAnswer } from '@/app/actions/generate'
 import type { TeacherTool } from './ToolCard'
 import type { User } from '@supabase/supabase-js'
 import type { AttachmentReference, AttachmentType } from '@/lib/attachment'
-import { supabase } from '@/lib/supabase'
+import { fetchChatHistory } from '@/app/actions/user'
 import { compressImage } from '@/lib/image-compression'
 import UpgradePrompt from './UpgradePrompt'
 import VoiceControls from './VoiceControls'
@@ -676,15 +676,9 @@ export default function PromptShell({
 
             setHistoryLoading(true)
             try {
-                const { data, error } = await supabase
-                    .from('chat_sessions')
-                    .select('id, prompt, response, attachments, created_at')
-                    .eq('user_id', userId)
-                    .eq('session_id', sessionId) // Filter by session ID
-                    .order('created_at', { ascending: true })
-                    .limit(50)
+                const data = await fetchChatHistory(userId, sessionId)
 
-                if (isMounted && !error && data) {
+                if (isMounted && data) {
                     const loadedConversations: ConversationEntry[] = data.map((session) => ({
                         id: session.id,
                         sessionId: session.id, // This is actually the row ID, but we use it as entry ID. The real session ID is passed in prop.

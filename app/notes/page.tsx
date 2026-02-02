@@ -1,15 +1,8 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { supabase } from '@/lib/supabase'
 import { useAuth } from '@/components/AuthProvider'
-
-type Note = {
-  id: string
-  content: string
-  created_at: string
-  updated_at: string
-}
+import { fetchNotes, addNote, updateNote, deleteNote, type Note } from '@/app/actions/notes'
 
 export default function NotesPage() {
   const { user } = useAuth()
@@ -21,65 +14,46 @@ export default function NotesPage() {
 
   useEffect(() => {
     if (user) {
-      fetchNotes()
+      loadNotes()
     }
   }, [user])
 
-  const fetchNotes = async () => {
+  const loadNotes = async () => {
+    if (!user) return
     setLoading(true)
-    const { data, error } = await supabase
-      .from('notes')
-      .select('*')
-      .eq('user_id', user?.id)
-      .order('updated_at', { ascending: false })
-
-    if (error) {
-      console.error('Error fetching notes:', error)
-    } else {
-      setNotes(data || [])
-    }
+    const data = await fetchNotes(user.id)
+    setNotes(data)
     setLoading(false)
   }
 
   const handleAddNote = async () => {
     if (!newNote.trim() || !user) return
 
-    const { data, error } = await supabase
-      .from('notes')
-      .insert([{ user_id: user.id, content: newNote }])
-      .select()
+    const createdNote = await addNote(user.id, newNote)
 
-    if (error) {
-      console.error('Error adding note:', error)
-    } else if (data) {
-      setNotes([data[0], ...notes])
+    if (createdNote) {
+      setNotes([createdNote, ...notes])
       setNewNote('')
       setIsAdding(false)
     }
   }
 
   const handleUpdateNote = async () => {
-    if (!editingNote || !editingNote.content.trim()) return
+    if (!editingNote || !editingNote.content.trim() || !user) return
 
-    const { error } = await supabase
-      .from('notes')
-      .update({ content: editingNote.content, updated_at: new Date().toISOString() })
-      .eq('id', editingNote.id)
+    const success = await updateNote(user.id, editingNote.id, editingNote.content)
 
-    if (error) {
-      console.error('Error updating note:', error)
-    } else {
+    if (success) {
       setNotes(notes.map((n) => (n.id === editingNote.id ? editingNote : n)))
       setEditingNote(null)
     }
   }
 
   const handleDeleteNote = async (id: string) => {
-    const { error } = await supabase.from('notes').delete().eq('id', id)
+    if (!user) return
+    const success = await deleteNote(user.id, id)
 
-    if (error) {
-      console.error('Error deleting note:', error)
-    } else {
+    if (success) {
       setNotes(notes.filter((n) => n.id !== id))
     }
   }

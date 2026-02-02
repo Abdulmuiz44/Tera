@@ -80,29 +80,29 @@ You can reactivate your subscription at any time by visiting the Pricing page.`
       {
         title: 'What\'s included in the Free plan?',
         content: `The Free plan includes:
-• 10 messages per day with our AI
-• 5 file uploads per day
+• Unlimited AI conversations — chat as much as you want!
+• 3 file uploads per day (10MB each)
 • 5 web searches per month
 • Access to basic tools and features
 • Mobile & desktop access
 • No credit card required
 
-Perfect for trying out Tera and learning the basics!`
+Perfect for anyone who wants to learn with Tera!`
       },
       {
         title: 'What\'s the difference between Pro and Plus?',
         content: `Pro plan ($5/month):
-• Unlimited AI conversations
-• 20 file uploads per day
-• 50 web searches per month
-• All core tools & features
-• Priority support
+• Everything in Free, plus:
+• 25 file uploads per day (500MB each)
+• 100 web searches per month
+• Deep Research Mode
 • Export to PDF/Word
-• Perfect for serious learners
+• Priority email support
+• Perfect for serious learners who need more power
 
 Plus plan ($15/month):
 • Everything in Pro, plus:
-• Unlimited file uploads
+• Unlimited file uploads (2GB each)
 • Unlimited web searches
 • Advanced analytics dashboard
 • Team collaboration features

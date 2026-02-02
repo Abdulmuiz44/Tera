@@ -2,8 +2,8 @@
 
 import { useEffect, useState } from 'react'
 import { useAuth } from '@/components/AuthProvider'
-import { supabase } from '@/lib/supabase'
-import { getUserProfile, updateUserProfile, checkAndResetUsage, type UserProfile } from '@/lib/usage-tracking'
+import { checkLimitReset, fetchUserProfile, fetchUserSessions, updateUserProfile } from '@/app/actions/user'
+import { type UserProfile } from '@/lib/usage-tracking'
 import { getPlanConfig, getRemainingChats, getRemainingFileUploads, getUsagePercentage, type PlanType } from '@/lib/plan-config'
 import Link from 'next/link'
 import Image from 'next/image'
@@ -96,15 +96,8 @@ export default function ProfilePage() {
         if (!user) return
         setSessionsLoading(true)
         try {
-            const { data, error } = await supabase
-                .from('chat_sessions')
-                .select('id, session_id, title, created_at, tool')
-                .eq('user_id', user.id)
-                .order('created_at', { ascending: false })
-                .limit(3)
-
-            if (error) throw error
-            setRecentSessions(data || [])
+            const sessions = await fetchUserSessions(user.id)
+            setRecentSessions(sessions)
         } catch (error) {
             console.error('Error loading sessions:', error)
         } finally {
@@ -117,14 +110,16 @@ export default function ProfilePage() {
         setLoading(true)
         // Trigger usage reset check before loading profile
         // This ensures limits are cleared after 24h has passed
-        await checkAndResetUsage(user.id)
-        const data = await getUserProfile(user.id)
-        setProfile(data)
-        setFormData({
-            fullName: data?.fullName || '',
-            school: data?.school || '',
-            gradeLevels: data?.gradeLevels || [],
-        })
+        await checkLimitReset(user.id)
+        const data = await fetchUserProfile(user.id)
+        if (data) {
+            setProfile(data as UserProfile)
+            setFormData({
+                fullName: data.fullName || '',
+                school: data.school || '',
+                gradeLevels: data.gradeLevels || [],
+            })
+        }
         setLoading(false)
     }
 
@@ -372,66 +367,28 @@ export default function ProfilePage() {
                                 <div className="flex items-baseline gap-2 mb-2">
                                     <span className="text-3xl font-bold text-tera-primary">{profile.dailyChats}</span>
                                     <span className="text-tera-secondary">
-                                        / {chatLimit === 'unlimited' ? '∞' : chatLimit} messages today
+                                        messages today
                                     </span>
                                 </div>
 
-                                {chatLimit !== 'unlimited' && (
-                                    <>
-                                        <div className="w-full bg-tera-muted rounded-full h-2 overflow-hidden">
-                                            <div
-                                                className={`h-full rounded-full transition-all ${chatPercentage >= 90
-                                                    ? 'bg-red-500'
-                                                    : chatPercentage >= 70
-                                                        ? 'bg-yellow-500'
-                                                        : 'bg-blue-500'
-                                                    }`}
-                                                style={{ width: `${chatPercentage}%` }}
-                                            />
-                                        </div>
-
-                                        <p className="text-sm text-tera-secondary mt-2">
-                                            {remainingChats} remaining
-                                        </p>
-                                    </>
-                                )}
-
-                                {chatLimit === 'unlimited' && (
-                                    <div className="flex items-center gap-2 text-sm text-blue-400">
-                                        Unlimited usage
-                                        <div className="relative inline-block w-4 h-4 ml-1 align-sub">
-                                            <Image
-                                                src="/images/TERA_LOGO_ONLY1.png"
-                                                alt="Tera"
-                                                fill
-                                                className="object-contain block dark:hidden"
-                                            />
-                                            <Image
-                                                src="/images/TERA_LOGO_ONLY.png"
-                                                alt="Tera"
-                                                fill
-                                                className="object-contain hidden dark:block"
-                                            />
-                                        </div>
+                                <div className="flex items-center gap-2 text-sm text-blue-400">
+                                    ✓ Unlimited conversations — chat as much as you want
+                                    <div className="relative inline-block w-4 h-4 ml-1 align-sub">
+                                        <Image
+                                            src="/images/TERA_LOGO_ONLY1.png"
+                                            alt="Tera"
+                                            fill
+                                            className="object-contain block dark:hidden"
+                                        />
+                                        <Image
+                                            src="/images/TERA_LOGO_ONLY.png"
+                                            alt="Tera"
+                                            fill
+                                            className="object-contain hidden dark:block"
+                                        />
                                     </div>
-                                )}
+                                </div>
                             </div>
-
-                            {profile.subscriptionPlan === 'free' && chatPercentage >= 80 && !chatUnlockTime && (
-                                <div className="rounded-lg bg-blue-500/10 border border-blue-500/30 p-3">
-                                    <p className="text-sm text-blue-400">
-                                        ⚠️ You're approaching your daily limit. <Link href="/pricing" className="underline font-medium">Upgrade to Pro</Link> for unlimited chats.
-                                    </p>
-                                </div>
-                            )}
-
-                            {chatUnlockTime && (
-                                <div className="rounded-lg bg-orange-500/10 border border-orange-500/30 p-3">
-                                    <p className="text-sm text-orange-400">
-                                        🔒 Chat limit reached. Access unlocks in: <span className="font-semibold text-tera-neon">{chatUnlockTime}</span>
-                                    </p>
-                                </div>
-                            )}
 
                             {/* Recent Sessions List */}
                             <div className="mt-6 pt-6 border-t border-tera-border">
@@ -565,10 +522,10 @@ export default function ProfilePage() {
                             <div className="flex items-center justify-between">
                                 <div>
                                     <h4 className="text-lg font-medium text-tera-primary">
-                                        Want more features?
+                                        Want more power?
                                     </h4>
                                     <p className="text-sm text-tera-secondary mt-1">
-                                        Upgrade to unlock unlimited access and advanced features
+                                        Upgrade for more file uploads, web searches, and Deep Research Mode
                                     </p>
                                 </div>
                                 <Link

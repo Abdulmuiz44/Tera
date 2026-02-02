@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getCheckoutUrlForPlan, getCustomerPortalUrl } from '@/lib/lemon-squeezy'
 import { supabaseServer } from '@/lib/supabase-server'
+import { auth } from '@/lib/auth'
 
 export async function POST(request: NextRequest, { params }: { params: Promise<{ slug: string[] }> }) {
     const { slug } = await params
@@ -13,8 +14,13 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
         console.log(`[Billing API] Request body:`, { action, plan: body.plan, email: body.email, userId: body.userId })
 
         if (action === 'create-session') {
-            const { plan, email, userId, returnUrl, currencyCode } = body
-            if (!plan || !['pro', 'plus'].includes(plan) || !email || !userId) {
+            const { plan, email, returnUrl, currencyCode } = body
+
+            const session = await auth()
+            if (!session?.user?.id) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+            const userId = session.user.id
+
+            if (!plan || !['pro', 'plus'].includes(plan) || !email) {
                 console.log(`[Billing API] Missing required fields`, { plan, email, userId })
                 return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
             }
@@ -25,8 +31,9 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
         }
 
         if (action === 'create-portal-session') {
-            const { userId } = body
-            if (!userId) return NextResponse.json({ error: 'User ID is required' }, { status: 400 })
+            const session = await auth()
+            if (!session?.user?.id) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+            const userId = session.user.id
 
             // Get customer ID from database
             const { data: user, error } = await supabaseServer
@@ -44,8 +51,9 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
         }
 
         if (action === 'status') {
-            const { userId } = body
-            if (!userId) return NextResponse.json({ error: 'User ID is required' }, { status: 400 })
+            const session = await auth()
+            if (!session?.user?.id) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+            const userId = session.user.id
             const { data, error } = await supabaseServer
                 .from('users')
                 .select('subscription_plan, subscription_status, subscription_renewal_date, subscription_cancelled_at')
@@ -67,7 +75,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
         const errorStack = error instanceof Error ? error.stack : ''
         console.error(`[Billing API] Error (${action}):`, errorMessage)
         console.error(`[Billing API] Stack:`, errorStack)
-        return NextResponse.json({ 
+        return NextResponse.json({
             error: 'Failed',
             details: errorMessage,
             action: action

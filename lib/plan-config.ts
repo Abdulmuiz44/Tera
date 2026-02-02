@@ -27,18 +27,18 @@ export const PLAN_CONFIGS: Record<PlanType, PlanConfig> = {
         name: 'free',
         displayName: 'Free',
         price: 0,
-        period: '/month',
-        description: 'Start exploring AI-powered learning for free.',
+        period: '/forever',
+        description: 'Unlimited AI conversations, free forever.',
         limits: {
-            messagesPerDay: 10,
-            fileUploadsPerDay: 5,
+            messagesPerDay: 'unlimited',
+            fileUploadsPerDay: 3,
             webSearchesPerMonth: 5,
-            maxFileSize: 25,
-            features: ['basic-chat', 'basic-tools', 'file-uploads', 'web-search']
+            maxFileSize: 10,
+            features: ['basic-chat', 'basic-tools']
         },
         features: [
-            '10 messages per day',
-            '5 file uploads per day (25MB each)',
+            'Unlimited AI conversations',
+            '3 file uploads per day (10MB each)',
             '5 web searches per month',
             'Basic AI tools & features',
             'Mobile & desktop access',
@@ -50,23 +50,23 @@ export const PLAN_CONFIGS: Record<PlanType, PlanConfig> = {
         displayName: 'Pro',
         price: 5,
         period: '/month',
-        description: 'Unlimited knowledge, unlimited possibilities.',
+        description: 'Unlock powerful research & productivity tools.',
         limits: {
             messagesPerDay: 'unlimited',
-            fileUploadsPerDay: 20,
-            webSearchesPerMonth: 50,
+            fileUploadsPerDay: 25,
+            webSearchesPerMonth: 100,
             maxFileSize: 500,
-            features: ['advanced-chat', 'all-tools', 'file-uploads', 'export', 'web-search', 'priority-support']
+            features: ['advanced-chat', 'all-tools', 'file-uploads', 'export', 'web-search', 'deep-research', 'priority-support']
         },
         features: [
-            'Unlimited AI conversations',
-            '20 file uploads per day (500MB each)',
-            '50 web searches per month',
-            'Access to all tools & features',
+            'Everything in Free, plus:',
+            '25 file uploads per day (500MB each)',
+            '100 web searches per month',
+            'Deep Research Mode',
             'Export to PDF & Word',
             'Priority email support',
-            'Advanced customization',
-            'No ads, no limits on creativity'
+            'All AI tools & features',
+            'Advanced customization'
         ]
     },
     plus: {
@@ -74,26 +74,24 @@ export const PLAN_CONFIGS: Record<PlanType, PlanConfig> = {
         displayName: 'Plus',
         price: 15,
         period: '/month',
-        description: 'For power users who need everything.',
+        description: 'Unlimited everything for power users.',
         limits: {
             messagesPerDay: 'unlimited',
             fileUploadsPerDay: 'unlimited',
             webSearchesPerMonth: 'unlimited',
             maxFileSize: 2000,
-            features: ['advanced-chat', 'all-tools', 'file-uploads', 'export', 'admin', 'analytics', 'sso', 'web-search', 'priority-support', 'custom-ai']
+            features: ['advanced-chat', 'all-tools', 'file-uploads', 'export', 'admin', 'analytics', 'sso', 'web-search', 'deep-research', 'priority-support', 'custom-ai']
         },
         features: [
             'Everything in Pro, plus:',
-            'Unlimited web searches',
             'Unlimited file uploads (2GB each)',
+            'Unlimited web searches',
             'Advanced analytics dashboard',
             'Team collaboration features',
             'API access',
-            'Dedicated account manager',
             '24/7 priority support',
             'Custom AI model training',
-            'Batch file processing',
-            'Advanced data export options'
+            'Batch file processing'
         ]
     }
 }

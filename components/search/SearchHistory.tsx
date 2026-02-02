@@ -8,7 +8,7 @@ import {
     deleteBookmark,
     type SearchHistoryEntry,
     type SearchBookmark
-} from '@/lib/search-history'
+} from '@/app/actions/search'
 
 interface SearchHistoryProps {
     userId: string
@@ -63,8 +63,8 @@ export default function SearchHistory({ userId, onSelectQuery, onSelectBookmark 
                 <button
                     onClick={() => setActiveTab('history')}
                     className={`flex-1 py-3 text-sm font-medium transition-colors ${activeTab === 'history'
-                            ? 'bg-tera-muted text-tera-primary border-b-2 border-tera-neon'
-                            : 'text-tera-secondary hover:text-tera-primary hover:bg-tera-muted/50'
+                        ? 'bg-tera-muted text-tera-primary border-b-2 border-tera-neon'
+                        : 'text-tera-secondary hover:text-tera-primary hover:bg-tera-muted/50'
                         }`}
                 >
                     🕒 History
@@ -72,8 +72,8 @@ export default function SearchHistory({ userId, onSelectQuery, onSelectBookmark 
                 <button
                     onClick={() => setActiveTab('bookmarks')}
                     className={`flex-1 py-3 text-sm font-medium transition-colors ${activeTab === 'bookmarks'
-                            ? 'bg-tera-muted text-tera-primary border-b-2 border-tera-neon'
-                            : 'text-tera-secondary hover:text-tera-primary hover:bg-tera-muted/50'
+                        ? 'bg-tera-muted text-tera-primary border-b-2 border-tera-neon'
+                        : 'text-tera-secondary hover:text-tera-primary hover:bg-tera-muted/50'
                         }`}
                 >
                     🔖 Bookmarks

@@ -1,28 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@supabase/supabase-js'
+import { auth } from '@/lib/auth'
+import { supabaseServer as supabase } from '@/lib/supabase-server'
 import { isAdminUser } from '@/lib/admin'
-
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-)
 
 export async function POST(req: NextRequest) {
   try {
-    // Get user ID from header
-    const userId = req.headers.get('x-user-id')
-    if (!userId) {
+    const session = await auth()
+    if (!session?.user?.email) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    // Verify admin access by checking user's email from database
-    const { data: user, error: userError } = await supabase
-      .from('users')
-      .select('email')
-      .eq('id', userId)
-      .single()
-    
-    if (userError || !user || !isAdminUser(user.email)) {
+    // Verify admin access
+    if (!isAdminUser(session.user.email)) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 

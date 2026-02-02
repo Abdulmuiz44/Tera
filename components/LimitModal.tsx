@@ -47,26 +47,26 @@ export default function LimitModal({ isOpen, limitType, currentPlan, onClose, un
 
     const limitInfo: Record<string, { title: string; message: string; current: number; upgrade: string }> = {
         'chats': {
-            title: 'Daily Message Limit Reached',
-            message: 'You\'ve reached your daily limit of 10 messages. Access unlocks in 24 hours.',
-            current: 10,
-            upgrade: 'Pro or Plus',
+            title: 'Something Went Wrong',
+            message: 'There was an issue processing your message. Please try again.',
+            current: 0,
+            upgrade: 'Contact support if this persists',
         },
         'file-uploads': {
             title: 'File Upload Limit Reached',
             message: 'You\'ve reached your daily file upload limit.',
-            current: 5,
-            upgrade: 'Pro for 20 uploads, Plus for unlimited',
+            current: 3,
+            upgrade: 'Pro for 25 uploads, Plus for unlimited',
         },
         'web-search': {
             title: 'Monthly Web Search Limit Reached',
             message: 'You\'ve reached your monthly web search limit.',
             current: 5,
-            upgrade: 'Pro for 50 searches, Plus for 80',
+            upgrade: 'Pro for 100 searches, Plus for unlimited',
         },
         'research-mode': {
-            title: 'Research Mode Limit',
-            message: 'Research Mode is a Pro/Plus feature.',
+            title: 'Deep Research Mode',
+            message: 'Deep Research is a Pro/Plus feature for comprehensive multi-source research.',
             current: 0,
             upgrade: 'Pro or Plus',
         },
@@ -163,16 +163,8 @@ export default function LimitModal({ isOpen, limitType, currentPlan, onClose, un
                     {limitType === 'chats' && (
                         <>
                             <div className="flex justify-between dark:text-white/80 text-black/70">
-                                <span>Free:</span>
-                                <span className="font-medium">10 messages/day</span>
-                            </div>
-                            <div className="flex justify-between dark:text-white/80 text-black/70">
-                                <span>Pro:</span>
-                                <span className="font-medium text-tera-neon">Unlimited messages/day</span>
-                            </div>
-                            <div className="flex justify-between dark:text-white/80 text-black/70">
-                                <span>Plus:</span>
-                                <span className="font-medium text-tera-neon">Unlimited messages/day</span>
+                                <span>All Plans:</span>
+                                <span className="font-medium text-tera-neon">Unlimited conversations</span>
                             </div>
                         </>
                     )}
@@ -180,11 +172,11 @@ export default function LimitModal({ isOpen, limitType, currentPlan, onClose, un
                         <>
                             <div className="flex justify-between dark:text-white/80 text-black/70">
                                 <span>Free:</span>
-                                <span className="font-medium">5 uploads/day (25MB)</span>
+                                <span className="font-medium">3 uploads/day (10MB)</span>
                             </div>
                             <div className="flex justify-between dark:text-white/80 text-black/70">
                                 <span>Pro:</span>
-                                <span className="font-medium text-tera-neon">20 uploads/day (500MB)</span>
+                                <span className="font-medium text-tera-neon">25 uploads/day (500MB)</span>
                             </div>
                             <div className="flex justify-between dark:text-white/80 text-black/70">
                                 <span>Plus:</span>
@@ -200,11 +192,27 @@ export default function LimitModal({ isOpen, limitType, currentPlan, onClose, un
                             </div>
                             <div className="flex justify-between dark:text-white/80 text-black/70">
                                 <span>Pro:</span>
-                                <span className="font-medium text-tera-neon">50 searches/month</span>
+                                <span className="font-medium text-tera-neon">100 searches/month</span>
                             </div>
                             <div className="flex justify-between dark:text-white/80 text-black/70">
                                 <span>Plus:</span>
-                                <span className="font-medium text-tera-neon">80 searches/month</span>
+                                <span className="font-medium text-tera-neon">Unlimited searches</span>
+                            </div>
+                        </>
+                    )}
+                    {limitType === 'research-mode' && (
+                        <>
+                            <div className="flex justify-between dark:text-white/80 text-black/70">
+                                <span>Free:</span>
+                                <span className="font-medium">Not available</span>
+                            </div>
+                            <div className="flex justify-between dark:text-white/80 text-black/70">
+                                <span>Pro:</span>
+                                <span className="font-medium text-tera-neon">✓ Deep Research Mode</span>
+                            </div>
+                            <div className="flex justify-between dark:text-white/80 text-black/70">
+                                <span>Plus:</span>
+                                <span className="font-medium text-tera-neon">✓ Deep Research Mode</span>
                             </div>
                         </>
                     )}

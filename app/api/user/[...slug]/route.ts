@@ -4,6 +4,7 @@ import { getCurrencyForCountry, EXCHANGE_RATES } from '@/lib/currency-converter'
 import { getWebSearchRemaining } from '@/lib/web-search-usage'
 import { getUserProfileServer, incrementFileUploadsServer } from '@/lib/usage-tracking-server'
 import { canUploadFile, getPlanConfig } from '@/lib/plan-config'
+import { auth } from '@/lib/auth'
 
 const supabase = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -45,8 +46,9 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
     }
 
     if (action === 'settings') {
-        const userId = request.headers.get('x-user-id')
-        if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+        const session = await auth()
+        if (!session?.user?.id) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+        const userId = session.user.id
         try {
             const { data, error } = await supabase.from('user_settings').select('*').eq('user_id', userId).single()
             if (error && (error.code === 'PGRST116' || error.message?.includes('relation'))) return NextResponse.json(DEFAULT_SETTINGS(userId))
@@ -78,8 +80,9 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     }
 
     if (action === 'settings') {
-        const userId = request.headers.get('x-user-id')
-        if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+        const session = await auth()
+        if (!session?.user?.id) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+        const userId = session.user.id
         try {
             const settings = await request.json()
             const { data, error } = await supabase.from('user_settings').upsert({ user_id: userId, ...settings, updated_at: new Date().toISOString() }, { onConflict: 'user_id' }).select().single()
@@ -94,7 +97,9 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
             const formData = await request.formData()
             const file = formData.get('file') as File
             const type = formData.get('type') as string
-            const userId = formData.get('userId') as string
+            const session = await auth()
+            if (!session?.user?.id) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+            const userId = session.user.id
             if (!file) return NextResponse.json({ error: 'No file provided' }, { status: 400 })
 
             if (userId) {

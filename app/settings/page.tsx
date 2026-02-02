@@ -2,10 +2,10 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
-import { supabase } from '@/lib/supabase'
 import { useAuth } from '@/components/AuthProvider'
 import { useTheme } from '@/components/ThemeProvider'
-import { type UserProfile, getUserProfile } from '@/lib/usage-tracking'
+import { type UserProfile } from '@/lib/usage-tracking'
+import { fetchUserProfile } from '@/app/actions/user'
 
 type UserSettings = {
   notifications_enabled: boolean
@@ -16,7 +16,7 @@ type UserSettings = {
 }
 
 export default function SettingsPage() {
-  const { user } = useAuth()
+  const { user, signOut } = useAuth()
   const { setTheme } = useTheme()
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
@@ -53,7 +53,7 @@ export default function SettingsPage() {
 
       // Fetch user profile for subscription status
       if (user) {
-        const profile = await getUserProfile(user.id)
+        const profile = await fetchUserProfile(user.id)
         setUserProfile(profile)
       }
 
@@ -114,7 +114,7 @@ export default function SettingsPage() {
   }
 
   const handleLogout = async () => {
-    await supabase.auth.signOut()
+    await signOut()
   }
 
   const handleDeleteAccount = async () => {
@@ -442,7 +442,7 @@ export default function SettingsPage() {
                           <div>
                             <p className="text-xs uppercase tracking-wider text-tera-secondary mb-2">Account Created</p>
                             <p className="text-tera-primary font-medium">
-                              {user?.created_at ? new Date(user.created_at).toLocaleDateString() : 'N/A'}
+                              {userProfile?.createdAt ? new Date(userProfile.createdAt).toLocaleDateString() : 'N/A'}
                             </p>
                           </div>
                         </div>

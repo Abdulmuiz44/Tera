@@ -7,7 +7,7 @@ import Sidebar, { navigation } from './Sidebar'
 import PromptShell from './PromptShell'
 import type { TeacherTool } from './ToolCard'
 import { teacherTools, studentTools, learnerTools, UniversalTool, slugify } from '@/lib/tools-data'
-import { supabase } from '@/lib/supabase'
+import { signIn } from 'next-auth/react'
 import { useAuth } from './AuthProvider'
 import { useSearchParams, usePathname } from 'next/navigation'
 
@@ -17,7 +17,7 @@ function MainShellContent() {
   const [menuOpen, setMenuOpen] = useState(false)
   const [sidebarExpanded, setSidebarExpanded] = useState(false)
   const [authDialog, setAuthDialog] = useState<'signIn' | 'signUp' | null>(null)
-  const [email, setEmail] = useState('')
+
   const [authMessage, setAuthMessage] = useState<string | null>(null)
   const [authLoading, setAuthLoading] = useState(false)
   const pathname = usePathname()
@@ -61,81 +61,12 @@ function MainShellContent() {
     }
   }
 
-  const handleSignIn = async () => {
-    if (!email.trim()) {
-      setAuthMessage('Enter your email to continue')
-      return
-    }
-    const origin = typeof window !== 'undefined' && window.location.origin ? window.location.origin : ''
-    const isLocal = origin.includes('localhost')
-    const redirectTarget = isLocal ? `${origin}/new` : 'https://teraai.chat/new'
-    setAuthLoading(true)
-    try {
-      const { error } = await supabase.auth.signInWithOtp({
-        email,
-        options: { emailRedirectTo: redirectTarget }
-      })
-      if (error) throw error
-      setAuthMessage(`A confirmation link has been sent to ${email}, pls check`)
-    } catch (error) {
-      const message = error instanceof Error ? error.message : 'Unable to send sign-in link'
-      setAuthMessage(message)
-    } finally {
-      setAuthLoading(false)
-    }
-  }
-
-  const handleSignUp = async () => {
-    if (!email.trim()) {
-      setAuthMessage('Enter your email to continue')
-      return
-    }
-    const origin = typeof window !== 'undefined' && window.location.origin ? window.location.origin : ''
-    const isLocal = origin.includes('localhost')
-    const redirectTarget = isLocal ? `${origin}/new` : 'https://teraai.chat/new'
-    setAuthLoading(true)
-    const fallbackPassword = `${Date.now()}-${Math.random()}`
-    const securePassword = typeof crypto !== 'undefined' && 'randomUUID' in crypto ? crypto.randomUUID() : fallbackPassword
-    try {
-      const { data, error } = await supabase.auth.signUp({
-        email,
-        password: securePassword,
-        options: { emailRedirectTo: redirectTarget }
-      })
-      if (error) throw error
-      if (data.user?.id && data.user.email) {
-        const { error: syncError } = await supabase.from('users').upsert({
-          id: data.user.id,
-          email: data.user.email
-        })
-        if (syncError) {
-          setAuthMessage(syncError.message)
-          return
-        }
-      }
-      setAuthMessage('Account created. Check your email for confirmation link.')
-    } catch (error) {
-      const message = error instanceof Error ? error.message : 'Unable to create account'
-      setAuthMessage(message)
-    } finally {
-      setAuthLoading(false)
-    }
-  }
-
   const handleGoogleSignIn = async () => {
     setAuthLoading(true)
     try {
-      const origin = typeof window !== 'undefined' && window.location.origin ? window.location.origin : ''
-      const isLocal = origin.includes('localhost')
-      const redirectTo = isLocal ? `${origin}/new` : 'https://teraai.chat/new'
-      const { error } = await supabase.auth.signInWithOAuth({
-        provider: 'google',
-        options: redirectTo ? { redirectTo } : undefined
-      })
-      if (error) throw error
-      setAuthMessage('Redirecting to Google…')
+      await signIn('google', { callbackUrl: '/new' })
     } catch (error) {
-      const message = error instanceof Error ? error.message : 'Unable to redirect to Google'
+      const message = error instanceof Error ? error.message : 'Unable to sign in with Google'
       setAuthMessage(message)
     } finally {
       setAuthLoading(false)
@@ -220,33 +151,7 @@ function MainShellContent() {
                     ? 'Enter your email, you will receive an authentication link in your email'
                     : 'Enter your email to get started...'}
               </p>
-              {!user && (
-                <input
-                  className="mt-4 w-full rounded-2xl border border-tera-border bg-tera-muted px-4 py-3 text-sm text-tera-primary outline-none placeholder:text-tera-secondary"
-                  placeholder="Email"
-                  value={email}
-                  onChange={(event) => setEmail(event.target.value)}
-                  type="email"
-                />
-              )}
               <div className="mt-6 flex flex-col gap-3">
-                <button
-                  type="button"
-                  className="w-full rounded-full border border-tera-border px-4 py-2 text-[0.6rem] font-semibold uppercase tracking-[0.3em] text-tera-secondary transition hover:border-tera-primary hover:text-tera-primary"
-                  onClick={() => setAuthDialog(null)}
-                >
-                  Cancel
-                </button>
-                {!user && (
-                  <button
-                    type="button"
-                    className="w-full rounded-full bg-tera-primary px-4 py-2 text-[0.6rem] font-semibold uppercase tracking-[0.3em] text-tera-bg transition hover:opacity-90"
-                    onClick={authDialog === 'signIn' ? handleSignIn : handleSignUp}
-                    disabled={authLoading}
-                  >
-                    {authDialog === 'signIn' ? 'Send link' : 'Create account'}
-                  </button>
-                )}
                 <button
                   type="button"
                   className="w-full rounded-full border border-tera-border bg-tera-muted px-4 py-2 text-[0.6rem] font-semibold uppercase tracking-[0.3em] text-tera-primary transition hover:border-tera-primary"
@@ -254,6 +159,13 @@ function MainShellContent() {
                   disabled={authLoading}
                 >
                   Continue with Google
+                </button>
+                <button
+                  type="button"
+                  className="w-full rounded-full border border-tera-border px-4 py-2 text-[0.6rem] font-semibold uppercase tracking-[0.3em] text-tera-secondary transition hover:border-tera-primary hover:text-tera-primary"
+                  onClick={() => setAuthDialog(null)}
+                >
+                  Cancel
                 </button>
               </div>
               <p className="mt-4 text-center text-[0.6rem] text-tera-secondary">

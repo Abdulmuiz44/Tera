@@ -5,7 +5,7 @@ import { supabase } from '@/lib/supabase'
 import { supabaseServer } from '@/lib/supabase-server'
 import { generateTeacherResponse } from '@/lib/mistral'
 import type { AttachmentReference } from '@/lib/attachment'
-import { getUserProfile } from '@/lib/usage-tracking'
+import { getUserProfileServer } from '@/lib/usage-tracking-server'
 import { incrementChatsServer, incrementFileUploadsServer } from '@/lib/usage-tracking-server'
 import { canStartChat, canUploadFile, canPerformWebSearch, getPlanConfig } from '@/lib/plan-config'
 import { getWebSearchRemaining, incrementWebSearchCount } from '@/lib/web-search-usage'
@@ -24,7 +24,7 @@ type GenerateProps = {
 
 export async function generateAnswer({ prompt, tool, authorId, authorEmail, attachments = [], sessionId, chatId, enableWebSearch = false, researchMode = false }: GenerateProps) {
   // Get user profile and check limits
-  let userProfile = await getUserProfile(authorId)
+  let userProfile = await getUserProfileServer(authorId)
 
   // If profile still doesn't exist, create a default one
   if (!userProfile) {

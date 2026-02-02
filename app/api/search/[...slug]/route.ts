@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getWebSearchRemaining, incrementWebSearchCount } from '@/lib/web-search-usage'
+import { auth } from '@/lib/auth'
 
 export interface SearchResult {
   title: string
@@ -24,13 +25,15 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
   if (action === 'web') {
     try {
       const body = await request.json()
-      const { query, limit = 10, userId, filters = {}, deepSearch = false } = body as {
+      const { query, limit = 10, filters = {}, deepSearch = false } = body as {
         query: string
         limit?: number
-        userId?: string
         filters?: SearchFilters
         deepSearch?: boolean
       }
+
+      const session = await auth()
+      const userId = session?.user?.id
 
       // Validate input
       if (!query || typeof query !== 'string') {

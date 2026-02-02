@@ -17,26 +17,26 @@ export default function UpgradePrompt({ type, onClose, inline = false }: Upgrade
             icon: '📚'
         },
         'chats': {
-            title: 'Chat Limit Reached',
-            description: "You've reached your daily limit of 10 chats on the Free plan.",
-            benefit: 'Upgrade to Pro for unlimited chats and priority support.',
+            title: 'Something Went Wrong',
+            description: "There was an issue processing your message. All plans include unlimited conversations.",
+            benefit: 'Please try again or contact support if this persists.',
             icon: '💬'
         },
         'file-uploads': {
             title: 'File Upload Limit Reached',
-            description: "You've reached your daily limit of 5 file uploads on the Free plan.",
-            benefit: 'Upgrade to Pro for unlimited file uploads.',
+            description: "You've reached your daily limit of 3 file uploads on the Free plan.",
+            benefit: 'Upgrade to Pro for 25 uploads/day or Plus for unlimited.',
             icon: '📎'
         },
         'web-search': {
             title: 'Web Search Limit Reached',
             description: "You've reached your monthly limit of 5 web searches on the Free plan.",
-            benefit: 'Upgrade to Pro (50/month) or Plus (80/month) to unlock more searches.',
+            benefit: 'Upgrade to Pro (100/month) or Plus (unlimited) to unlock more searches.',
             icon: '🔍'
         },
         'research-mode': {
-            title: 'Research Mode is for Pro/Plus',
-            description: "Deep Research mode (multi-query parallel search) is only available on Pro and Plus plans.",
+            title: 'Deep Research Mode',
+            description: "Deep Research mode (comprehensive multi-source research) is only available on Pro and Plus plans.",
             benefit: 'Upgrade to access Deep Research and other advanced features.',
             icon: '🔭'
         }
