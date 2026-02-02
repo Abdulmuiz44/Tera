@@ -5,7 +5,19 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { usePathname } from 'next/navigation'
 import UserMenu from './UserMenu'
-import type { User } from '@supabase/supabase-js'
+// Replaced Supabase User with compatible NextAuth interface
+type User = {
+  id: string
+  email?: string | null
+  user_metadata?: {
+    full_name?: string
+    plan?: string
+    subscription_plan?: string
+    [key: string]: any
+  } | null
+  name?: string | null
+  image?: string | null
+}
 
 export const navigation = [
   { label: 'Chat', icon: 'chat', href: '/new' },
@@ -113,9 +125,8 @@ export default function Sidebar({ expanded, onToggle, onNewChat, user, onSignOut
       <div className="flex items-center justify-between h-16 px-3 md:px-2 border-b border-tera-border flex-shrink-0">
         {/* Logo - Only visible when expanded */}
         <div
-          className={`relative flex items-center justify-center transition-all duration-300 ${
-            expanded ? 'opacity-100 scale-100 w-12 h-5' : 'opacity-0 scale-0 w-0 h-0 overflow-hidden'
-          }`}
+          className={`relative flex items-center justify-center transition-all duration-300 ${expanded ? 'opacity-100 scale-100 w-12 h-5' : 'opacity-0 scale-0 w-0 h-0 overflow-hidden'
+            }`}
         >
           <Image
             src="/images/TERA_LOGO_ONLY1.png"
@@ -168,11 +179,10 @@ export default function Sidebar({ expanded, onToggle, onNewChat, user, onSignOut
                   onNewChat()
                 }
               }}
-              className={`group relative flex items-center gap-3 px-3 py-2 rounded-lg transition-all duration-200 min-h-10 ${
-                isActive
+              className={`group relative flex items-center gap-3 px-3 py-2 rounded-lg transition-all duration-200 min-h-10 ${isActive
                   ? 'bg-tera-neon/10 text-tera-neon'
                   : 'text-tera-secondary hover:text-tera-primary hover:bg-tera-muted'
-              }`}
+                }`}
             >
               {/* Icon */}
               <div className="flex-shrink-0 flex items-center justify-center w-5 h-5">
@@ -181,9 +191,8 @@ export default function Sidebar({ expanded, onToggle, onNewChat, user, onSignOut
 
               {/* Label */}
               <span
-                className={`text-sm font-medium whitespace-nowrap transition-all duration-300 ${
-                  expanded ? 'opacity-100 translate-x-0 flex-1' : 'opacity-0 -translate-x-4 absolute left-full w-0 overflow-hidden'
-                }`}
+                className={`text-sm font-medium whitespace-nowrap transition-all duration-300 ${expanded ? 'opacity-100 translate-x-0 flex-1' : 'opacity-0 -translate-x-4 absolute left-full w-0 overflow-hidden'
+                  }`}
               >
                 {item.label}
               </span>

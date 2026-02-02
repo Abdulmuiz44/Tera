@@ -3,7 +3,19 @@
 import { useState, useRef, useEffect } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
-import type { User } from '@supabase/supabase-js'
+// Replaced Supabase User with compatible NextAuth interface
+type User = {
+    id: string
+    email?: string | null
+    user_metadata?: {
+        full_name?: string
+        plan?: string
+        subscription_plan?: string
+        [key: string]: any
+    } | null
+    name?: string | null
+    image?: string | null
+}
 
 interface UserMenuProps {
     user: User | null
@@ -71,26 +83,26 @@ export default function UserMenu({ user, expanded, onSignOut }: UserMenuProps) {
             ),
             href: '/pricing'
         },
-        { 
-            label: 'Settings', 
+        {
+            label: 'Settings',
             icon: (
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <circle cx="12" cy="12" r="3" />
                     <path d="M12 1v6m0 6v6M4.22 4.22l4.24 4.24m2.12 2.12l4.24 4.24M1 12h6m6 0h6m-17.78 7.78l4.24-4.24m2.12-2.12l4.24-4.24" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" />
                 </svg>
             ),
-            href: '/settings' 
+            href: '/settings'
         },
-        { 
-            label: 'About', 
+        {
+            label: 'About',
             icon: (
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <circle cx="12" cy="12" r="10" />
                     <path d="M12 16v-4M12 8h.01" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" />
                 </svg>
             ),
-            href: '/about', 
-            hasChevron: false 
+            href: '/about',
+            hasChevron: false
         },
     ]
 
