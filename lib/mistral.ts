@@ -68,6 +68,7 @@ VISUAL & VISION CAPABILITIES:
     - For comparisons, use "bar" chart.
     - For processes or relationships, use "mermaid".
     - NEVER say "I can't draw". Instead say "Here's a visual for you:" and generate the code block.
+    - DO NOT generate Python (matplotlib/seaborn) for visuals. Use json:chart, mermaid, or html/javascript (Canvas/D3).
 
 🔍 WEB SEARCH INTEGRATION - ABSOLUTE MANDATORY RULES:
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -519,8 +520,23 @@ INSTRUCTION:
     userContent = `Context: ${toolContext}. User Prompt: ${enhancedPrompt} `
   }
 
+  // Helper for retrying fetches
+  async function retryFetch(url: string, options: RequestInit, retries = 3, delay = 1000): Promise<Response> {
+    try {
+      const response = await fetch(url, options)
+      if (response.status === 503 || response.status === 502 || response.status === 504 || response.status === 429) {
+        throw new Error(`Service Unavailable: ${response.status} `)
+      }
+      return response
+    } catch (error) {
+      if (retries <= 0) throw error
+      await new Promise(r => setTimeout(r, delay))
+      return retryFetch(url, options, retries - 1, delay * 2)
+    }
+  }
+
   try {
-    const response = await fetch('https://api.mistral.ai/v1/chat/completions', {
+    const response = await retryFetch('https://api.mistral.ai/v1/chat/completions', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -535,9 +551,9 @@ INSTRUCTION:
         ],
         temperature: 0.7,
         top_p: 0.9,
-        max_tokens: 1000
+        max_tokens: 4000
       })
-    })
+    }, 2, 2000) // Retry twice, starting with 2s delay
 
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}))
@@ -552,6 +568,7 @@ INSTRUCTION:
       text = rawContent
     } else if (Array.isArray(rawContent)) {
       text = rawContent
+        // @ts-ignore
         .map((chunk: any) => {
           if (chunk && typeof chunk === 'object' && chunk.type === 'text') {
             return chunk.text || ''
@@ -576,6 +593,7 @@ INSTRUCTION:
       const sourcesSection = '\n\n--- SOURCES FROM WEB ---\n' +
         webSearchContext.split('═'.repeat(80))[1]?.trim()
           .split('\n\n')
+          // @ts-ignore
           .map((result, idx) => {
             // Reformat to match PromptShell regex: (\d+)\.\s+(.+?)\nSource:\s+(.+?)\n(.+?)
             const lines = result.split('\n')
@@ -598,12 +616,14 @@ INSTRUCTION:
     return finalText || `TERA couldn't build a response for ${tool}.`
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error)
-    if (/429/.test(message)) {
-      return 'Tera is currently rate limited by Mistral. Please wait a moment and try again.'
+    console.error('Core AI Generation Error:', message)
+
+    if (/429|Service Unavailable|503|502/.test(message)) {
+      return `System: The AI service is currently experiencing high traffic (Error ${message}). I've tried to reconnect but failed. Please give me a moment and try again.`
     }
     if (/Connect Timeout|fetch failed|connect timed out|UND_ERR_CONNECT_TIMEOUT/i.test(message)) {
-      return 'Tera cannot reach Mistral right now due to a network timeout. Please check your connection or try again shortly.'
+      return 'System: Use a clearer internet connection. I cannot reach the AI service right now.'
     }
-    throw error
+    return `System: An unexpected error occurred: ${message}`
   }
 }

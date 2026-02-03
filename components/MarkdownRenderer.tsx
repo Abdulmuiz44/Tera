@@ -85,6 +85,12 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({ content }) => {
                             {children}
                         </blockquote>
                     ),
+                    // Custom code block wrapper
+                    pre: ({ node, children }) => (
+                        <pre className="my-4 w-full max-w-full overflow-x-auto rounded-lg bg-black/50 p-4 font-mono text-sm border border-tera-border text-tera-primary">
+                            {children}
+                        </pre>
+                    ),
                     // Code handling
                     code({ node, inline, className, children, ...props }: any) {
                         const match = /language-(\w+)/.exec(className || '')

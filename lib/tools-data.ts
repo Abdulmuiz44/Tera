@@ -187,6 +187,12 @@ export const studentTools: TeacherTool[] = [
         description: 'I conduct deep web searches to build comprehensive reports with citations.',
         icon: '🕵️',
         tags: ['Research', 'Web', 'Deep Dive']
+    },
+    {
+        name: 'Mind Map Maker',
+        description: 'Visualize complex topics with auto-generated mind maps.',
+        icon: '🧠',
+        tags: ['Visual Learning', 'Organization', 'Diagrams']
     }
 ]
 

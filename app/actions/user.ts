@@ -4,6 +4,16 @@ import { getUserProfileServer, checkAndResetUsageServer } from '@/lib/usage-trac
 import { supabaseServer } from '@/lib/supabase-server'
 import { auth } from '@/lib/auth'
 import { revalidatePath } from 'next/cache'
+import dns from 'node:dns'
+
+// Force IPv4 to avoid SSL/TLS handshake issues with Supabase on some networks
+try {
+    if (dns.setDefaultResultOrder) {
+        dns.setDefaultResultOrder('ipv4first')
+    }
+} catch (e) {
+    // Ignore if not supported
+}
 
 export async function fetchUserProfile(userId: string) {
     try {
@@ -92,3 +102,59 @@ export async function fetchChatHistory(userId: string, sessionId: string) {
         return []
     }
 }
+
+// Enhanced history fetching with search and pagination support
+export async function fetchHistoryPageData(userId: string, page: number = 1, pageSize: number = 20, searchQuery: string = '') {
+    try {
+        const session = await auth()
+        if (!session?.user?.id || session.user.id !== userId) return { sessions: [], hasMore: false }
+
+        let query = supabaseServer
+            .from('chat_sessions')
+            .select('session_id, title, created_at, prompt, tool, id')
+            .eq('user_id', userId)
+            .order('created_at', { ascending: false })
+
+        if (searchQuery) {
+            query = query.or(`title.ilike.%${searchQuery}%,prompt.ilike.%${searchQuery}%`)
+        }
+
+        // Strategy: Fetch a large batch to ensure we get enough UNIQUE sessions after deduplication
+        // Message-based storage means many rows = 1 session.
+        const fetchSize = pageSize * 10 // Fetch 10x to handle conversation depth
+        const from = (page - 1) * fetchSize
+        const to = from + fetchSize - 1
+
+        const { data, error, count } = await query.range(from, to)
+
+        if (error) throw error
+
+        // Deduplicate by session_id
+        const uniqueMap = new Map()
+        data?.forEach((item: any) => {
+            // Keep the LATEST entry for each session (already sorted desc)
+            if (!uniqueMap.has(item.session_id)) {
+                uniqueMap.set(item.session_id, {
+                    id: item.id,
+                    session_id: item.session_id,
+                    title: item.title,
+                    last_message: item.prompt,
+                    created_at: item.created_at,
+                    tool: item.tool
+                })
+            }
+        })
+
+        const uniqueSessions = Array.from(uniqueMap.values())
+
+        return {
+            sessions: uniqueSessions.slice(0, pageSize),
+            hasMore: uniqueSessions.length > pageSize
+        }
+
+    } catch (error) {
+        console.error('Error fetching history:', error)
+        return { sessions: [], hasMore: false }
+    }
+}
+

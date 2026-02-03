@@ -57,17 +57,63 @@ export default function ChartRenderer({ config }: ChartRendererProps) {
     const firstSeries = config?.series?.[0] as any
     const hasNestedData = hasSeries && Array.isArray(firstSeries?.data)
 
+    // Auto-generate series from data keys if series is missing but data is present
+    let effectiveSeries = config?.series
+    let effectiveData = config?.data
+
+    if (hasRootData && !hasSeries) {
+        // Infer series from data keys (exclude common axis keys)
+        const axisKeys = ['name', 'label', 'category', 'date', 'year', 'month', 'x', 'axis', config?.xAxisKey].filter(Boolean) as string[]
+        const firstDataItem = effectiveData?.[0] || {}
+        const inferredSeriesKeys = Object.keys(firstDataItem).filter(k => {
+            const val = firstDataItem[k]
+            const keyLower = k.toLowerCase()
+            if (axisKeys.includes(keyLower)) return false
+            // Accept numbers OR numeric strings
+            return typeof val === 'number' || (typeof val === 'string' && !isNaN(parseFloat(val)) && val.trim() !== '')
+        })
+
+        if (inferredSeriesKeys.length > 0) {
+            effectiveSeries = inferredSeriesKeys.map((key, i) => ({
+                key,
+                color: COLORS[i % COLORS.length],
+                name: key.charAt(0).toUpperCase() + key.slice(1)
+            }))
+        }
+    }
+
+    const hasEffectiveSeries = Array.isArray(effectiveSeries) && effectiveSeries.length > 0
+
     // Validate config - require either root data or nested series data
-    if (!config || (!hasRootData && !hasNestedData) || !hasSeries) {
+    if (!config || (!hasRootData && !hasNestedData) || !hasEffectiveSeries) {
         return (
             <div className="w-full my-4 rounded-xl border border-white/10 bg-[#0A0A0A] p-4 text-white/50 text-sm">
-                Invalid chart configuration. Missing required data source (either 'data' array or nested 'series.data').
+                <p className="font-semibold text-red-400">Chart Configuration Error</p>
+                <p className="mt-1">Missing: {!hasRootData && !hasNestedData ? 'data array' : ''} {!hasEffectiveSeries ? 'series (could not infer from data)' : ''}</p>
+                <pre className="mt-2 text-xs bg-black/30 p-2 rounded overflow-x-auto">{JSON.stringify(config, null, 2)}</pre>
             </div>
         )
     }
 
-    // Initialize variables with defaults
-    let { type, data, series, xAxisKey = 'name', yAxisKey, zAxisKey, title } = config
+    // Initialize variables with defaults, using the potentially auto-generated series
+    let { type, xAxisKey = 'name', yAxisKey, zAxisKey, title } = config
+    let data = effectiveData
+    let series = effectiveSeries
+
+    // Normalize data: convert string numbers to actual numbers for Recharts
+    if (Array.isArray(data)) {
+        data = data.map(item => {
+            const normalized: any = {}
+            for (const [key, val] of Object.entries(item)) {
+                if (typeof val === 'string' && !isNaN(parseFloat(val)) && val.trim() !== '' && key !== xAxisKey) {
+                    normalized[key] = parseFloat(val)
+                } else {
+                    normalized[key] = val
+                }
+            }
+            return normalized
+        })
+    }
 
     // Auto-transform nested series data to flat data (Recharts format) if root data is missing
     if (!hasRootData && hasNestedData) {

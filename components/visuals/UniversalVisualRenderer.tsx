@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useEffect, useState } from 'react'
+import React, { useMemo, useState } from 'react'
 
 interface UniversalVisualRendererProps {
   code: string
@@ -13,81 +13,84 @@ export default function UniversalVisualRenderer({
   language = 'html',
   title = 'Generated Visual'
 }: UniversalVisualRendererProps) {
-  const [srcDoc, setSrcDoc] = useState('')
-  const [error, setError] = useState<string | null>(null)
+  const [showCode, setShowCode] = useState(false)
 
-  useEffect(() => {
+  // Use useMemo instead of useEffect to prevent re-render loops
+  const srcDoc = useMemo(() => {
     try {
-      setError(null)
-
-      // Determine if we need to wrap code for canvas/script execution
-      // or if it's full HTML
       const isFullHtml = code.includes('<!DOCTYPE html>') || code.includes('<html')
 
-      let finalHtml = ''
-
       if (isFullHtml) {
-        finalHtml = code
-      } else {
-        // Construct a robust environment with common libraries
-        const htmlStart = `
-          <!DOCTYPE html>
-          <html>
-          <head>
-            <meta charset="UTF-8">
-            <meta name="viewport" content="width=device-width, initial-scale=1.0">
-            <!-- Libraries -->
-            <script src="https://cdn.tailwindcss.com"></script>
-            <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
-            <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
-            <script src="https://d3js.org/d3.v7.min.js"></script>
-            <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-            <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
-            <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-            
-            <style>
-              html, body { 
-                width: 100%; height: 100%; margin: 0; padding: 0;
-                background: #0a0a0a; color: #ffffff;
-                font-family: -apple-system, system-ui, sans-serif;
-                overflow: auto;
-              }
-              body { padding: 1rem; box-sizing: border-box; }
-              #root { 
-                width: 100%; min-height: 100%; 
-                display: flex; flex-direction: column; align-items: center; justify-content: center;
-              }
-              canvas { max-width: 100%; height: auto; }
-            </style>
-          </head>
-          <body>
-            <div id="root">
-              <!-- Default Canvas for script usage -->
-              <canvas id="canvas"></canvas>
-            </div>
-            <script>
-              // Error Handling
-              window.onerror = function(msg, url, line, col, error) {
-                document.body.innerHTML = '<div style="color:#ff6b6b;padding:20px;font-family:monospace;white-space:pre-wrap;">' + 
-                  'Runtime Error: ' + msg + '</div>';
-              };
-            </script>
-        `
-
-        let scriptContent = code
-        // Simple heuristic: if code looks like just JS (no tags), wrap in <script>
-        if (!code.trim().startsWith('<')) {
-          scriptContent = `<script>\n(function(){\ntry{\n${code}\n}catch(e){console.error(e);throw e;}\n})()\n</script>`
-        }
-
-        finalHtml = htmlStart + `\n` + scriptContent + `\n</body></html>`
+        return code
       }
 
-      setSrcDoc(finalHtml)
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to prepare visual')
+      // Construct a robust environment with common libraries
+      const htmlStart = `
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <meta charset="UTF-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          <script src="https://cdn.tailwindcss.com"></script>
+          <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+          <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+          <script src="https://d3js.org/d3.v7.min.js"></script>
+          <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+          <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
+          <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+          
+          <style>
+            html, body { 
+              width: 100%; height: 100%; margin: 0; padding: 0;
+              background: #0a0a0a; color: #ffffff;
+              font-family: -apple-system, system-ui, sans-serif;
+              overflow: auto;
+            }
+            body { padding: 1rem; box-sizing: border-box; }
+            #root { 
+              width: 100%; min-height: 100%; 
+              display: flex; flex-direction: column; align-items: center; justify-content: center;
+            }
+            canvas { max-width: 100%; height: auto; }
+          </style>
+        </head>
+        <body>
+          <div id="root">
+            <canvas id="canvas"></canvas>
+          </div>
+          <script>
+            window.onerror = function(msg, url, line, col, error) {
+              document.body.innerHTML = '<div style="color:#ff6b6b;padding:20px;font-family:monospace;white-space:pre-wrap;">Runtime Error: ' + msg + '</div>';
+              return true;
+            };
+            window.onunhandledrejection = function(e) {
+              e.preventDefault();
+              document.body.innerHTML = '<div style="color:#ff6b6b;padding:20px;font-family:monospace;">Promise rejected: ' + e.reason + '</div>';
+            };
+          </script>
+      `
+
+      let scriptContent = code
+      if (!code.trim().startsWith('<')) {
+        scriptContent = `<script>(function(){try{${code}}catch(e){document.body.innerHTML='<div style="color:#ff6b6b;padding:20px;">Error: '+e.message+'</div>';}})();</script>`
+      }
+
+      return htmlStart + scriptContent + '</body></html>'
+    } catch {
+      return '<html><body style="color:#ff6b6b;padding:20px;">Failed to prepare visual</body></html>'
     }
-  }, [code, language])
+  }, [code])
+
+  // Generate a stable key based on code hash
+  const iframeKey = useMemo(() => {
+    let hash = 0
+    for (let i = 0; i < code.length; i++) {
+      const char = code.charCodeAt(i)
+      hash = ((hash << 5) - hash) + char
+      hash = hash & hash
+    }
+    return `visual-${hash}`
+  }, [code])
 
   const handleCopyCode = () => {
     navigator.clipboard.writeText(code)
@@ -100,31 +103,41 @@ export default function UniversalVisualRenderer({
         <h3 className="text-xs font-semibold text-white/60 uppercase tracking-wider">
           📝 {title}
         </h3>
-        <button
-          onClick={handleCopyCode}
-          className="p-1.5 text-white/40 hover:text-tera-neon transition-colors"
-          title="Copy code"
-        >
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
-          </svg>
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => setShowCode(!showCode)}
+            className="text-xs text-white/40 hover:text-tera-neon transition-colors"
+          >
+            {showCode ? 'Hide Code' : 'View Code'}
+          </button>
+          <button
+            onClick={handleCopyCode}
+            className="p-1.5 text-white/40 hover:text-tera-neon transition-colors"
+            title="Copy code"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+            </svg>
+          </button>
+        </div>
       </div>
+
+      {/* Code Preview (collapsible) */}
+      {showCode && (
+        <pre className="p-4 text-xs text-white/70 bg-black/50 rounded-lg overflow-x-auto max-h-[200px] border border-white/10">
+          <code>{code}</code>
+        </pre>
+      )}
 
       {/* Main Container */}
       <div className="rounded-b-xl border border-white/10 bg-[#0A0A0A] overflow-hidden shadow-lg h-[500px] relative">
-        {error ? (
-          <div className="absolute inset-0 flex items-center justify-center p-6 text-red-400 bg-red-500/10">
-            <p>Renderer Error: {error}</p>
-          </div>
-        ) : (
-          <iframe
-            srcDoc={srcDoc}
-            title="Generated Visual"
-            className="w-full h-full border-0"
-            sandbox="allow-scripts allow-forms allow-popups allow-modals allow-downloads allow-presentation"
-          />
-        )}
+        <iframe
+          key={iframeKey}
+          srcDoc={srcDoc}
+          title="Generated Visual"
+          className="w-full h-full border-0"
+          sandbox="allow-scripts"
+        />
       </div>
     </div>
   )

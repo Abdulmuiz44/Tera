@@ -128,7 +128,7 @@ const parseContent = (content: string): ContentBlock[] => {
                 // PRIORITY ORDER: HTML/Visuals > Mermaid > JSON Charts/Spreadsheets > Code
 
                 // Check for HTML/Three.js/Canvas visualizations FIRST
-                if (type === 'visual' || isHTML(cleanCode) || isVisualization(cleanCode) || ['html', 'svg', 'canvas', 'jsx', 'javascript'].includes(lang || '')) {
+                if (type === 'visual' || isHTML(cleanCode) || isVisualization(cleanCode) || ['html', 'svg', 'canvas', 'jsx', 'javascript', 'js'].includes(lang || '')) {
                     // Universal visual rendering for HTML, SVG, Canvas, Three.js, etc.
                     blocks.push({
                         type: 'universal-visual',
@@ -998,7 +998,12 @@ export default function PromptShell({
                                         <span className="w-2 h-2 bg-tera-neon/60 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></span>
                                         <span className="w-2 h-2 bg-tera-neon/60 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></span>
                                     </div>
-                                    <span className="font-medium">Tera is Thinking...</span>
+                                    <div className="flex items-center gap-2.5">
+                                        <div className="relative">
+                                            <div className="h-4 w-4 animate-spin rounded-full border-[2px] border-tera-secondary border-t-transparent"></div>
+                                        </div>
+                                        <span className="font-medium animate-pulse">Tera is Thinking...</span>
+                                    </div>
                                 </div>
                             </div>
                         </div>

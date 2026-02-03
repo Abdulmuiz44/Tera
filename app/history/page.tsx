@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import Link from 'next/link'
 import { useAuth } from '@/components/AuthProvider'
-import { supabase } from '@/lib/supabase'
+import { fetchHistoryPageData } from '@/app/actions/user'
 
 interface ChatSession {
   id?: string
@@ -33,36 +33,10 @@ export default function HistoryPage() {
     setLoading(true)
 
     try {
-      let query = supabase
-        .from('chat_sessions')
-        .select('id,session_id,title,prompt,created_at,tool', { count: 'exact' })
-        .eq('user_id', user.id)
-        .order('created_at', { ascending: false })
+      const { sessions, hasMore } = await fetchHistoryPageData(user.id, page, pageSize, searchQuery)
+      setConversations(sessions)
+      setHasMore(hasMore)
 
-      if (searchQuery) {
-        query = query.or(`title.ilike.%${searchQuery}%,prompt.ilike.%${searchQuery}%`)
-      }
-
-      const from = (page - 1) * pageSize
-      const to = from + pageSize - 1
-
-      const { data, error, count } = await query.range(from, to)
-
-      if (error) {
-        console.error('Failed to load chat history', error)
-        setConversations([])
-      } else if (data) {
-        const transformed = data.map(item => ({
-          session_id: item.session_id || item.id,
-          title: item.title || null,
-          last_message: item.prompt,
-          created_at: item.created_at,
-          tool: item.tool,
-          id: item.id
-        }))
-        setConversations(transformed as ChatSession[])
-        setHasMore(count ? from + data.length < count : false)
-      }
     } catch (err) {
       console.error('Unexpected error loading history:', err)
       setConversations([])
