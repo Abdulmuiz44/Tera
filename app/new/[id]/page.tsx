@@ -7,6 +7,8 @@ import PromptShell from '@/components/PromptShell'
 import type { TeacherTool } from '@/components/ToolCard'
 import { UniversalTool } from '@/lib/tools-data'
 
+// ... imports ...
+
 export default function ChatSessionPage() {
     const params = useParams()
     const router = useRouter()
@@ -19,7 +21,7 @@ export default function ChatSessionPage() {
     }
 
     return (
-        <div className="w-full h-screen bg-tera-bg overflow-hidden text-tera-primary">
+        <div className="w-full h-[100dvh] bg-tera-bg overflow-hidden text-tera-primary">
             <PromptShell
                 tool={selectedTool}
                 onToolChange={setSelectedTool}

@@ -104,8 +104,8 @@ export default function AdminPage() {
     const maxChats = Math.max(...(analytics?.dailyActivity?.map(d => d.chats) || [1]))
 
     return (
-        <div className="w-full min-h-screen bg-tera-bg text-tera-primary">
-            <div className="px-4 py-6 md:px-8 md:py-10">
+        <div className="w-full min-h-[100dvh] bg-tera-bg text-tera-primary">
+            <div className="px-3 py-4 md:px-8 md:py-10">
                 <div className="max-w-7xl mx-auto">
                     {/* Header */}
                     <div className="mb-8">
@@ -141,7 +141,7 @@ export default function AdminPage() {
                     ) : analytics ? (
                         <>
                             {/* Key Metrics - Top Row */}
-                            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+                            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4 mb-6 md:mb-8">
                                 <MetricCard
                                     title="Total Users"
                                     value={analytics.summary.totalUsers}
@@ -461,13 +461,13 @@ function MetricCard({ title, value, icon, subtext, color = 'blue' }: {
     }
 
     return (
-        <div className={`rounded-2xl md:rounded-[28px] border p-4 md:p-6 shadow-glow-md ${colorClasses[color]}`}>
+        <div className={`rounded-xl md:rounded-[28px] border p-3 md:p-6 shadow-glow-md ${colorClasses[color]}`}>
             <div className="flex items-start justify-between mb-2">
-                <h3 className="text-xs md:text-sm font-medium text-tera-secondary">{title}</h3>
-                <span className="text-xl md:text-2xl">{icon}</span>
+                <h3 className="text-[10px] md:text-sm font-medium text-tera-secondary uppercase tracking-wider">{title}</h3>
+                <span className="text-lg md:text-2xl">{icon}</span>
             </div>
-            <p className="text-2xl md:text-4xl font-bold text-tera-primary">{value.toLocaleString()}</p>
-            {subtext && <p className="text-xs text-tera-secondary mt-1">{subtext}</p>}
+            <p className="text-xl md:text-4xl font-bold text-tera-primary truncate">{value.toLocaleString()}</p>
+            {subtext && <p className="text-[10px] md:text-xs text-tera-secondary mt-1 truncate">{subtext}</p>}
         </div>
     )
 }
@@ -489,8 +489,8 @@ function SmallMetricCard({ title, value, color = 'default' }: {
 
     return (
         <div className="rounded-xl bg-tera-muted border border-tera-border/50 p-3 md:p-4">
-            <p className="text-xs text-tera-secondary mb-1">{title}</p>
-            <p className={`text-lg md:text-xl font-bold ${textColors[color]}`}>{value.toLocaleString()}</p>
+            <p className="text-[10px] md:text-xs text-tera-secondary mb-1 truncate">{title}</p>
+            <p className={`text-base md:text-xl font-bold ${textColors[color]} truncate`}>{value.toLocaleString()}</p>
         </div>
     )
 }

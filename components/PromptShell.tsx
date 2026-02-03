@@ -827,10 +827,10 @@ export default function PromptShell({
 
     return (
         <div className="flex h-full w-full flex-col relative bg-tera-bg text-tera-primary">
-            <div className="flex-1 overflow-y-auto px-4 py-6 md:px-8 pb-28 md:pb-6" ref={conversationRef}>
-                <div className="mx-auto max-w-3xl space-y-8">
+            <div className="flex-1 overflow-y-auto px-4 py-6 md:px-8 pb-6 relative" ref={conversationRef}>
+                <div className="mx-auto max-w-3xl space-y-8 min-h-full">
                     {showInitialPrompt ? (
-                        <div className="fixed inset-0 flex items-center justify-center text-center pointer-events-none -mt-20">
+                        <div className="absolute inset-x-0 top-0 bottom-0 flex items-center justify-center text-center pointer-events-none -mt-20">
                             <div className="pointer-events-auto flex flex-col items-center">
                                 <div className="mb-8 rounded-full bg-gradient-to-br from-tera-neon/20 to-transparent p-6 mx-auto w-fit">
                                     <span className="flex items-center justify-center w-32 h-32">
@@ -902,7 +902,7 @@ export default function PromptShell({
                                 {entry.assistantMessage && (
                                     <div className="flex justify-start w-full">
                                         <div className="w-full">
-                                            <div className="rounded-xl md:rounded-2xl bg-tera-panel border border-tera-border px-3 md:px-6 py-3 md:py-4 text-tera-primary shadow-lg">
+                                            <div className="rounded-xl md:rounded-2xl bg-tera-panel border border-tera-border px-3 md:px-6 py-3 md:py-4 text-tera-primary shadow-lg overflow-hidden">
                                                 <div className="space-y-4 w-full">
                                                     {parseContent(entry.assistantMessage.content).map((block, idx) => {
                                                         if (block.type === 'universal-visual') {
@@ -1013,7 +1013,7 @@ export default function PromptShell({
             </div>
 
             {/* Input Area */}
-            <div className="fixed bottom-0 left-0 right-0 z-50 border-t border-tera-border bg-tera-bg px-2 py-3 backdrop-blur-xl md:sticky md:py-4 md:px-8">
+            <div className="w-full z-50 border-t border-tera-border bg-tera-bg px-2 py-3 backdrop-blur-xl md:py-4 md:px-8">
                 <div className="mx-auto max-w-3xl relative">
                     <div className={`relative flex flex-col gap-2 rounded-xl md:rounded-[24px] border border-tera-border bg-tera-panel p-2 shadow-2xl ring-1 ring-tera-border/50 transition-all ${conversationActive ? 'focus-within:ring-tera-neon/30 focus-within:border-tera-neon/30' : 'focus-within:ring-tera-primary/10'}`}>
 
@@ -1026,8 +1026,6 @@ export default function PromptShell({
                                     <span>Web Search ON ({webSearchRemaining})</span>
                                 </div>
                             )}
-
-                            {/* Research Mode Toggle - Moved to Dropdown */}
 
                             {/* Attachments Preview */}
                             {pendingAttachments.length > 0 && (
@@ -1304,6 +1302,6 @@ export default function PromptShell({
                     setLimitUnlocksAt(undefined)
                 }}
             />
-        </div >
+        </div>
     )
 }
