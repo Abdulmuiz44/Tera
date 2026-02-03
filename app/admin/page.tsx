@@ -117,7 +117,7 @@ export default function AdminPage() {
                             <button
                                 onClick={fetchAnalytics}
                                 disabled={loading}
-                                className="px-4 py-2 bg-tera-neon text-black font-medium rounded-lg hover:bg-tera-neon/90 transition disabled:opacity-50"
+                                className="px-4 py-2 bg-tera-neon text-white font-medium rounded-lg hover:bg-tera-neon/90 transition disabled:opacity-50"
                             >
                                 {loading ? 'Refreshing...' : 'Refresh'}
                             </button>
@@ -284,8 +284,8 @@ export default function AdminPage() {
                                             key={tab}
                                             onClick={() => setActiveTab(tab)}
                                             className={`px-4 py-2 font-medium rounded-t-lg transition-colors whitespace-nowrap ${activeTab === tab
-                                                    ? 'text-tera-neon bg-tera-neon/10 border-b-2 border-tera-neon'
-                                                    : 'text-tera-secondary hover:text-tera-primary'
+                                                ? 'text-tera-neon bg-tera-neon/10 border-b-2 border-tera-neon'
+                                                : 'text-tera-secondary hover:text-tera-primary'
                                                 }`}
                                         >
                                             {tab === 'overview' && '📈 Overview'}
@@ -341,8 +341,8 @@ export default function AdminPage() {
                                                             </p>
                                                         </div>
                                                         <span className={`text-xs px-2 py-1 rounded ${user.subscription_plan === 'free' ? 'bg-blue-500/20 text-blue-300' :
-                                                                user.subscription_plan === 'pro' ? 'bg-purple-500/20 text-purple-300' :
-                                                                    'bg-tera-neon/20 text-tera-neon'
+                                                            user.subscription_plan === 'pro' ? 'bg-purple-500/20 text-purple-300' :
+                                                                'bg-tera-neon/20 text-tera-neon'
                                                             }`}>
                                                             {user.subscription_plan || 'free'}
                                                         </span>
@@ -368,8 +368,8 @@ export default function AdminPage() {
                                                             <div>
                                                                 <p className="font-medium text-tera-primary truncate">{user.email}</p>
                                                                 <span className={`text-xs px-2 py-0.5 rounded ${user.subscription_plan === 'free' ? 'bg-blue-500/20 text-blue-300' :
-                                                                        user.subscription_plan === 'pro' ? 'bg-purple-500/20 text-purple-300' :
-                                                                            'bg-tera-neon/20 text-tera-neon'
+                                                                    user.subscription_plan === 'pro' ? 'bg-purple-500/20 text-purple-300' :
+                                                                        'bg-tera-neon/20 text-tera-neon'
                                                                     }`}>
                                                                     {user.subscription_plan || 'free'}
                                                                 </span>
