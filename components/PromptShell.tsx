@@ -136,8 +136,8 @@ const parseContent = (content: string): ContentBlock[] => {
                         language: lang || 'html',
                         title: `${lang?.toUpperCase() || 'Visual'} Visualization`
                     })
-                } else if (lang === 'mermaid') {
-                    // Only treat as Mermaid if explicitly marked as mermaid language
+                } else if (lang === 'mermaid' || /^(graph|flowchart|sequenceDiagram|classDiagram|stateDiagram|erDiagram|gantt|journey|gitGraph|pie|mindmap|timeline)/.test(cleanCode.trim())) {
+                    // Only treat as Mermaid if explicitly marked as mermaid language OR content looks like mermaid
                     blocks.push({ type: 'mermaid', chart: cleanCode })
                 } else if ((lang === 'json' && type === 'quiz') || isQuiz(cleanCode)) {
                     try {
@@ -177,11 +177,12 @@ const parseContent = (content: string): ContentBlock[] => {
                         const config = JSON.parse(jsonStr)
 
                         // Validate chart config
-                        if (!config.data || !Array.isArray(config.data) || config.data.length === 0) {
-                            console.warn('Invalid chart: missing data array', config)
-                            blocks.push({ type: 'code', language: 'json', code: cleanCode })
-                        } else if (!config.series || !Array.isArray(config.series) || config.series.length === 0) {
-                            console.warn('Invalid chart: missing series array', config)
+                        // Validate chart config - allow either data OR series
+                        const hasData = config.data && Array.isArray(config.data) && config.data.length > 0
+                        const hasSeries = config.series && Array.isArray(config.series) && config.series.length > 0
+
+                        if (!hasData && !hasSeries) {
+                            console.warn('Invalid chart: missing data or series array', config)
                             blocks.push({ type: 'code', language: 'json', code: cleanCode })
                         } else {
                             blocks.push({ type: 'chart', config })
@@ -797,7 +798,10 @@ export default function PromptShell({
             }
 
             recognitionRef.current.onerror = (event: any) => {
-                console.error('Speech recognition error', event.error)
+                // Ignore expected errors like permission denied or no speech
+                if (event.error !== 'not-allowed' && event.error !== 'no-speech' && event.error !== 'aborted') {
+                    console.error('Speech recognition error', event.error)
+                }
                 setIsListening(false)
             }
 

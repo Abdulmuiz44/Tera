@@ -40,6 +40,7 @@ interface ChartData {
         color: string
         name?: string
         type?: 'line' | 'bar' | 'area' | 'scatter' // For composed charts
+        data?: any[]
     }>
 }
 
@@ -50,16 +51,65 @@ interface ChartRendererProps {
 const COLORS = ['#00FFA3', '#00B8D9', '#FF5630', '#FFAB00', '#36B37E', '#6554C0', '#FF00E6', '#2979FF']
 
 export default function ChartRenderer({ config }: ChartRendererProps) {
-    // Validate config
-    if (!config || !Array.isArray(config.data) || !Array.isArray(config.series) || config.series.length === 0) {
+    // Helper to check data availability
+    const hasRootData = Array.isArray(config?.data) && config.data.length > 0
+    const hasSeries = Array.isArray(config?.series) && config.series.length > 0
+    const firstSeries = config?.series?.[0] as any
+    const hasNestedData = hasSeries && Array.isArray(firstSeries?.data)
+
+    // Validate config - require either root data or nested series data
+    if (!config || (!hasRootData && !hasNestedData) || !hasSeries) {
         return (
             <div className="w-full my-4 rounded-xl border border-white/10 bg-[#0A0A0A] p-4 text-white/50 text-sm">
-                Invalid chart configuration. Missing required: data (array), series (array with items).
+                Invalid chart configuration. Missing required data source (either 'data' array or nested 'series.data').
             </div>
         )
     }
 
-    const { type, data, series, xAxisKey = 'name', yAxisKey, zAxisKey, title } = config
+    // Initialize variables with defaults
+    let { type, data, series, xAxisKey = 'name', yAxisKey, zAxisKey, title } = config
+
+    // Auto-transform nested series data to flat data (Recharts format) if root data is missing
+    if (!hasRootData && hasNestedData) {
+        const dataMap = new Map<string, any>()
+        let detectedAxisKey = xAxisKey
+
+        // First pass: Detect axis key from first item if default 'name' isn't found
+        if (xAxisKey === 'name') {
+            const firstItem = firstSeries.data[0] || {}
+            // Find a key that is likely the axis (e.g. 'axis', 'category', 'year', 'date')
+            // or just the first key that isn't 'value'
+            const candidate = Object.keys(firstItem).find(k => k !== 'value')
+            if (candidate) detectedAxisKey = candidate
+            xAxisKey = detectedAxisKey
+        }
+
+        series.forEach((s: any) => {
+            if (Array.isArray(s.data)) {
+                s.data.forEach((item: any) => {
+                    const axisValue = item[detectedAxisKey]
+                    if (axisValue !== undefined) {
+                        if (!dataMap.has(axisValue)) {
+                            dataMap.set(axisValue, { [detectedAxisKey]: axisValue })
+                        }
+                        // Use the series key as the value key in the flat object
+                        // If item has 'value', use it. Otherwise assume item is number/value?
+                        let val = item.value !== undefined ? item.value : item
+
+                        // Fix for "Objects are not valid as a React child":
+                        // If val is still an object (e.g. {x, y} from scatter data), extract a primitive.
+                        if (typeof val === 'object' && val !== null) {
+                            if (Array.isArray(val)) val = val[1] // Handle [x, y] format
+                            else val = val.y ?? val.value ?? val.count ?? val.score ?? val.amount ?? 0
+                        }
+
+                        dataMap.get(axisValue)[s.key] = val
+                    }
+                })
+            }
+        })
+        data = Array.from(dataMap.values())
+    }
     const chartRef = useRef<HTMLDivElement>(null)
 
     const handleDownload = () => {
@@ -194,8 +244,8 @@ export default function ChartRenderer({ config }: ChartRendererProps) {
                 return (
                     <ScatterChart>
                         <CartesianGrid strokeDasharray="3 3" stroke="#333" />
-                        <XAxis type="number" dataKey={xAxisKey} name={xAxisKey} stroke="#888" />
-                        <YAxis type="number" dataKey={yAxisKey || series[0]?.key} name={series[0]?.name || 'Y'} stroke="#888" />
+                        <XAxis type="number" dataKey={xAxisKey || 'x'} name={xAxisKey} stroke="#888" />
+                        <YAxis type="number" dataKey={yAxisKey || 'y'} name="Y" stroke="#888" />
                         {zAxisKey && <ZAxis type="number" dataKey={zAxisKey} range={[60, 400]} name={zAxisKey} />}
                         <Tooltip cursor={{ strokeDasharray: '3 3' }} contentStyle={{ backgroundColor: '#111', border: '1px solid #333' }} itemStyle={{ color: '#fff' }} />
                         <Legend wrapperStyle={{ paddingTop: '10px' }} />
@@ -203,7 +253,7 @@ export default function ChartRenderer({ config }: ChartRendererProps) {
                             <Scatter
                                 key={s.key}
                                 name={s.name || s.key}
-                                data={data}
+                                data={s.data || data}
                                 fill={s.color || COLORS[i % COLORS.length]}
                             />
                         ))}

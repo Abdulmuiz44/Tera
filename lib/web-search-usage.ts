@@ -36,8 +36,9 @@ export async function getWebSearchRemaining(userId: string): Promise<{ remaining
         return { remaining: 5, total: 5, resetDate: null, plan: 'free' }
       }
 
-      console.error('Failed to get web search usage:', error)
-      return { remaining: 5, total: 5, resetDate: null, plan: 'free' }
+      console.warn('Network issue getting web search usage (using fallback):', error instanceof Error ? error.message : String(error))
+      // Fail open during network issues - allow 10 searches so user isn't blocked
+      return { remaining: 10, total: 10, resetDate: null, plan: 'free' }
     }
 
     if (!data) {
@@ -64,8 +65,8 @@ export async function getWebSearchRemaining(userId: string): Promise<{ remaining
     const remaining = Math.max(0, limit - (data.monthly_web_searches || 0))
     return { remaining, total: limit, resetDate: resetDate?.toISOString() || null, plan }
   } catch (error) {
-    console.error('Error getting web search usage:', error)
-    return { remaining: 3, total: 3, resetDate: null, plan: 'free' }
+    console.warn('Error getting web search usage (using fallback):', error)
+    return { remaining: 10, total: 10, resetDate: null, plan: 'free' }
   }
 }
 

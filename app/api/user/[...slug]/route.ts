@@ -1,15 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@supabase/supabase-js'
+import { supabaseServer } from '@/lib/supabase-server'
 import { getCurrencyForCountry, EXCHANGE_RATES } from '@/lib/currency-converter'
 import { getWebSearchRemaining } from '@/lib/web-search-usage'
 import { getUserProfileServer, incrementFileUploadsServer } from '@/lib/usage-tracking-server'
 import { canUploadFile, getPlanConfig } from '@/lib/plan-config'
 import { auth } from '@/lib/auth'
-
-const supabase = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-)
 
 const DEFAULT_SETTINGS = (userId: string) => ({
     user_id: userId,
@@ -50,7 +45,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
         if (!session?.user?.id) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
         const userId = session.user.id
         try {
-            const { data, error } = await supabase.from('user_settings').select('*').eq('user_id', userId).single()
+            const { data, error } = await supabaseServer.from('user_settings').select('*').eq('user_id', userId).single()
             if (error && (error.code === 'PGRST116' || error.message?.includes('relation'))) return NextResponse.json(DEFAULT_SETTINGS(userId))
             if (error) throw error
             return NextResponse.json(data)
@@ -85,7 +80,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
         const userId = session.user.id
         try {
             const settings = await request.json()
-            const { data, error } = await supabase.from('user_settings').upsert({ user_id: userId, ...settings, updated_at: new Date().toISOString() }, { onConflict: 'user_id' }).select().single()
+            const { data, error } = await supabaseServer.from('user_settings').upsert({ user_id: userId, ...settings, updated_at: new Date().toISOString() }, { onConflict: 'user_id' }).select().single()
             if (error && error.message?.includes('relation')) return NextResponse.json({ user_id: userId, ...settings, updated_at: new Date().toISOString() })
             if (error) throw error
             return NextResponse.json(data)
@@ -112,12 +107,22 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
 
             const fileExt = file.name.split('.').pop()
             const filePath = `${type}s/${Math.random().toString(36).substring(2)}.${fileExt}`
-            const { error } = await supabase.storage.from('attachments').upload(filePath, file)
-            if (error) throw error
+            const { error: uploadError } = await supabaseServer.storage.from('attachments').upload(filePath, file)
+
+            if (uploadError) {
+                console.error('Supabase Storage Error:', uploadError)
+                throw new Error(uploadError.message)
+            }
+
             if (userId) await incrementFileUploadsServer(userId)
-            const { data: { publicUrl } } = supabase.storage.from('attachments').getPublicUrl(filePath)
+
+            const { data: { publicUrl } } = supabaseServer.storage.from('attachments').getPublicUrl(filePath)
             return NextResponse.json({ name: file.name, url: publicUrl, type })
-        } catch (error) { return NextResponse.json({ error: 'Internal server error' }, { status: 500 }) }
+        } catch (error) {
+            console.error('Attachment API Error:', error)
+            const message = error instanceof Error ? error.message : 'Unknown upload error'
+            return NextResponse.json({ error: `Upload failed: ${message}` }, { status: 500 })
+        }
     }
 
     return NextResponse.json({ error: 'Invalid action' }, { status: 400 })

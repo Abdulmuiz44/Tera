@@ -403,7 +403,7 @@ export default function ProfilePage() {
                                     <div className="grid grid-cols-1 gap-2">
                                         {recentSessions.map((session) => (
                                             <Link
-                                                key={session.id}
+                                                key={session.session_id}
                                                 href={`/new/${session.session_id}`}
                                                 className="flex items-center justify-between p-3 rounded-xl bg-tera-muted/50 border border-tera-border hover:border-tera-neon/50 transition group"
                                             >
@@ -530,7 +530,7 @@ export default function ProfilePage() {
                                 </div>
                                 <Link
                                     href="/pricing"
-                                    className="px-6 py-3 rounded-lg bg-tera-neon text-black font-medium hover:bg-tera-neon/90 transition"
+                                    className="px-6 py-3 rounded-lg bg-black text-white dark:bg-tera-neon dark:text-black font-medium hover:opacity-90 transition"
                                 >
                                     View Plans
                                 </Link>

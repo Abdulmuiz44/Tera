@@ -115,8 +115,22 @@ export async function generateAnswer({ prompt, tool, authorId, authorEmail, atta
   const answer = await generateTeacherResponse({ prompt, tool, attachments, history, userId: authorId, enableWebSearch, researchMode })
 
   const currentSessionId = sessionId || crypto.randomUUID()
-  // Simple title generation: first 50 chars of prompt
-  const title = sessionId ? undefined : prompt.slice(0, 50) + (prompt.length > 50 ? '...' : '')
+
+  // Try to find existing title if continuing a session to ensure persistence
+  let existingTitle: string | null = null
+  if (sessionId) {
+    const { data: titleData } = await supabaseServer
+      .from('chat_sessions')
+      .select('title')
+      .eq('session_id', sessionId)
+      .not('title', 'is', null)
+      .limit(1)
+      .maybeSingle()
+    existingTitle = titleData?.title || null
+  }
+
+  // Use existing title if found, otherwise generate from prompt (ensures even legacy chats get titled on new msg)
+  const title = existingTitle || (prompt.slice(0, 50) + (prompt.length > 50 ? '...' : ''))
 
   let savedChatId = chatId
 

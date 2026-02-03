@@ -366,7 +366,7 @@ export default function PricingPage() {
                   </p>
                   <a
                     href="/help"
-                    className="inline-block px-6 py-2 bg-tera-neon text-black font-semibold rounded-lg hover:opacity-90 transition"
+                    className="inline-block px-6 py-2 rounded-lg font-semibold transition hover:opacity-90 bg-black text-white dark:bg-tera-neon dark:text-black"
                   >
                     Visit Our Help Center
                   </a>

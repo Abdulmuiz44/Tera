@@ -11,7 +11,12 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
 
     try {
         const body = await request.json()
-        console.log(`[Billing API] Request body:`, { action, plan: body.plan, email: body.email, userId: body.userId })
+
+        if (action === 'create-session') {
+            console.log(`[Billing API] Request body:`, { action, plan: body.plan, email: body.email })
+        } else {
+            console.log(`[Billing API] Processing action: ${action}`)
+        }
 
         if (action === 'create-session') {
             const { plan, email, returnUrl, currencyCode } = body

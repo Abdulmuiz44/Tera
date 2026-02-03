@@ -112,6 +112,24 @@ export const teacherTools: TeacherTool[] = [
         description: 'Plan logistics, permissions, and educational objectives for trips.',
         icon: '🚌',
         tags: ['Logistics', 'Events', 'Safety']
+    },
+    {
+        name: 'Report Card Generator',
+        description: 'Generate professional, personalized report card comments in bulk.',
+        icon: '📝',
+        tags: ['Grading', 'Admin', 'Writing']
+    },
+    {
+        name: 'Newsletter Creator',
+        description: 'Design engaging weekly newsletters for parents and staff.',
+        icon: '📰',
+        tags: ['Communication', 'Updates', 'Design']
+    },
+    {
+        name: 'Paper Grader Agent',
+        description: 'Upload student essays or assignments. I\'ll grade them and provide feedback.',
+        icon: '📝',
+        tags: ['Grading', 'Analysis', 'Time-Saver']
     }
 ]
 
@@ -145,6 +163,30 @@ export const studentTools: TeacherTool[] = [
         description: 'Break down big school projects into manageble steps and timelines.',
         icon: '📅',
         tags: ['Organization', 'Tasks', 'Planning']
+    },
+    {
+        name: 'Presentation Outliner',
+        description: 'Create structured outlines and talking points for slide decks.',
+        icon: '📽️',
+        tags: ['Slides', 'Speaking', 'Planning']
+    },
+    {
+        name: 'Citation Helper',
+        description: 'Format citations (APA, MLA, Chicago) for your bibliography.',
+        icon: '📖',
+        tags: ['Research', 'Writing', 'Format']
+    },
+    {
+        name: 'Math Solver',
+        description: 'Get step-by-step explanations for complex math problems.',
+        icon: '➗',
+        tags: ['Math', 'Problem Solving', 'Logic']
+    },
+    {
+        name: 'Research Agent',
+        description: 'I conduct deep web searches to build comprehensive reports with citations.',
+        icon: '🕵️',
+        tags: ['Research', 'Web', 'Deep Dive']
     }
 ]
 
@@ -178,6 +220,30 @@ export const learnerTools: TeacherTool[] = [
         description: 'Practice conversation and grammar in a new language.',
         icon: '🗣️',
         tags: ['Language', 'Conversation', 'Practice']
+    },
+    {
+        name: 'Resume Builder',
+        description: 'Draft and polish professional resumes and cover letters.',
+        icon: '💼',
+        tags: ['Career', 'Jobs', 'Writing']
+    },
+    {
+        name: 'Interview Coach',
+        description: 'Practice answering common interview questions with feedback.',
+        icon: '🤝',
+        tags: ['Career', 'Speaking', 'Prep']
+    },
+    {
+        name: 'Debate Partner',
+        description: 'Challenge your views and strengthen your arguments on any topic.',
+        icon: '⚖️',
+        tags: ['Critical Thinking', 'Logic', 'Discussion']
+    },
+    {
+        name: 'Data Analyst',
+        description: 'Upload data files. I\'ll analyze trends, visualize patterns, and generating insights.',
+        icon: '📈',
+        tags: ['Data', 'Analysis', 'Visuals']
     }
 ]
 
