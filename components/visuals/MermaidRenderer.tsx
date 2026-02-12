@@ -83,7 +83,7 @@ export default function MermaidRenderer({ chart }: MermaidRendererProps) {
 
     useEffect(() => {
         const renderChart = async () => {
-            if (!chart) return
+            if (!chart || !containerRef.current) return
 
             const sanitized = sanitizeChart(chart)
             setRawChart(sanitized)
@@ -91,34 +91,27 @@ export default function MermaidRenderer({ chart }: MermaidRendererProps) {
 
             try {
                 // Validate syntax first
-                const parseResult = await mermaid.parse(sanitized)
-                console.log('[MermaidRenderer] Parse result:', parseResult)
+                await mermaid.parse(sanitized)
 
                 // Generate a unique ID for this render
                 const id = `mermaid-${Date.now()}-${Math.random().toString(36).substring(2, 8)}`
 
-                // Create a temporary off-screen container for rendering
-                const tempContainer = document.createElement('div')
-                tempContainer.id = id
-                tempContainer.style.position = 'absolute'
-                tempContainer.style.left = '-9999px'
-                tempContainer.style.top = '-9999px'
-                document.body.appendChild(tempContainer)
+                // Render directly — mermaid will create a temp element in the body
+                // Don't pass a custom container — let mermaid handle DOM placement
+                // so that getBBox works correctly on the SVG
+                const { svg: renderedSvg } = await mermaid.render(id, sanitized)
+                setSvg(renderedSvg)
+                setError(null)
+                console.log('[MermaidRenderer] Successfully rendered diagram')
 
-                try {
-                    const { svg: renderedSvg } = await mermaid.render(id, sanitized, tempContainer)
-                    setSvg(renderedSvg)
-                    setError(null)
-                    console.log('[MermaidRenderer] Successfully rendered diagram')
-                } finally {
-                    // Clean up the temp container
-                    if (tempContainer.parentNode) {
-                        tempContainer.parentNode.removeChild(tempContainer)
-                    }
-                }
+                // Clean up any leftover temp elements mermaid may have created
+                const tempEl = document.getElementById(id)
+                if (tempEl) tempEl.remove()
+                // Also clean up the d prefix container mermaid sometimes creates
+                const dEl = document.getElementById('d' + id)
+                if (dEl) dEl.remove()
             } catch (err: any) {
                 console.error('[MermaidRenderer] Render error:', err?.message || err)
-                // Show the actual error message for debugging
                 const errorMsg = err?.message || 'Unknown error'
                 setError(`Could not render this diagram: ${errorMsg.substring(0, 150)}`)
                 setSvg('')
