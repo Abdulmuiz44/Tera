@@ -202,11 +202,19 @@ const parseContent = (content: string): ContentBlock[] => {
         // We no longer split by paragraphs here, we return the full text block 
         // to let the MarkdownRenderer handle tables, lists, and math properly.
         if (part.trim()) {
-            blocks.push({
-                type: 'text',
-                content: part,
-                isHeader: false // Deprecated but kept for type compatibility
-            })
+            // Fallback: detect unfenced mermaid content in regular text
+            const mermaidKeywords = /^(graph\s+(TD|TB|BT|RL|LR)|flowchart\s+(TD|TB|BT|RL|LR)|sequenceDiagram|classDiagram|stateDiagram|erDiagram|gantt|journey|gitGraph|pie|mindmap|timeline)/m
+            const trimmedPart = part.trim()
+            if (mermaidKeywords.test(trimmedPart)) {
+                console.log('[parseContent] Detected unfenced mermaid content, routing to MermaidRenderer')
+                blocks.push({ type: 'mermaid', chart: trimmedPart })
+            } else {
+                blocks.push({
+                    type: 'text',
+                    content: part,
+                    isHeader: false // Deprecated but kept for type compatibility
+                })
+            }
         }
     })
 

@@ -55,13 +55,23 @@ VISUAL & VISION CAPABILITIES:
    - "composed": Combine "bar" and "line" (e.g., Temperature (line) vs Rainfall (bar)). Provide "type" in series.
 
 2. DIAGRAMS & FLOWCHARTS:
-   Use a mermaid block.
+   Use a \`\`\`mermaid code block (triple backtick with "mermaid" language tag).
+   IMPORTANT: Always wrap mermaid diagrams inside triple backtick code fences with "mermaid" as the language.
    Example:
-   mermaid
+   \`\`\`mermaid
    graph TD
      A[Start] --> B{Is it working?}
      B -- Yes --> C[Great!]
      B -- No --> D[Debug]
+   \`\`\`
+   
+   MERMAID SYNTAX RULES:
+   - Always use simple text labels without special characters like parentheses, quotes, or colons inside node labels.
+   - Use square brackets [Label] for rectangles, curly braces {Label} for diamonds, round parens (Label) for rounded boxes.
+   - Keep node IDs simple (A, B, C or short words like Start, End).
+   - Do NOT put colons inside node labels.
+   - Do NOT use semicolons at end of lines.
+   - Each arrow/connection should be on its own line.
 
 3. RULES:
     - For velocity-time graphs, use "line" chart.
