@@ -65,13 +65,26 @@ VISUAL & VISION CAPABILITIES:
      B -- No --> D[Debug]
    \`\`\`
    
-   MERMAID SYNTAX RULES:
-   - Always use simple text labels without special characters like parentheses, quotes, or colons inside node labels.
-   - Use square brackets [Label] for rectangles, curly braces {Label} for diamonds, round parens (Label) for rounded boxes.
-   - Keep node IDs simple (A, B, C or short words like Start, End).
-   - Do NOT put colons inside node labels.
-   - Do NOT use semicolons at end of lines.
-   - Each arrow/connection should be on its own line.
+   CRITICAL MERMAID SYNTAX RULES (MUST FOLLOW):
+   - NEVER use parentheses () inside square bracket labels [...], edge labels |...|, or curly brace labels {...}. Parentheses are reserved mermaid syntax and WILL break rendering.
+   - BAD:  A[Evaporation (Sun heats water)] --> B  ← BREAKS because of ()
+   - GOOD: A[Evaporation - Sun heats water] --> B  ← Works correctly
+   - BAD:  A -->|Process (step 1)| B  ← BREAKS because of ()
+   - GOOD: A -->|Process step 1| B  ← Works correctly
+   - Keep labels SHORT and SIMPLE. No special characters inside labels.
+   - Do NOT put colons, semicolons, quotes, or parentheses inside any labels.
+   - Keep node IDs simple: A, B, C or short words.
+   - Each arrow/connection on its own line.
+   
+   CORRECT water cycle example:
+   \`\`\`mermaid
+   graph TD
+     A[Water Bodies] -->|Sun heats water| B[Evaporation]
+     B -->|Rises as vapor| C[Condensation]
+     C -->|Forms clouds| D[Precipitation]
+     D -->|Rain and snow| E[Collection]
+     E -->|Flows back| A
+   \`\`\`
 
 3. RULES:
     - For velocity-time graphs, use "line" chart.

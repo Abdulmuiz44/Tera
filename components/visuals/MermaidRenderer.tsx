@@ -24,6 +24,30 @@ function sanitizeChart(raw: string): string {
     // Remove trailing semicolons on lines (common AI mistake)
     chart = chart.replace(/;\s*$/gm, '')
 
+    // Fix parentheses inside square bracket labels [Label (with parens)] -> [Label - with parens]
+    chart = chart.replace(/\[([^\]]*)\]/g, (match, content) => {
+        if (/\(/.test(content)) {
+            return '[' + content.replace(/\(/g, '- ').replace(/\)/g, '') + ']'
+        }
+        return match
+    })
+
+    // Fix parentheses inside edge labels |Label (with parens)| -> |Label - with parens|
+    chart = chart.replace(/\|([^|]*)\|/g, (match, content) => {
+        if (/\(/.test(content)) {
+            return '|' + content.replace(/\(/g, '- ').replace(/\)/g, '') + '|'
+        }
+        return match
+    })
+
+    // Fix parentheses inside curly brace labels {Label (with parens)} -> {Label - with parens}
+    chart = chart.replace(/\{([^}]*)\}/g, (match, content) => {
+        if (/\(/.test(content)) {
+            return '{' + content.replace(/\(/g, '- ').replace(/\)/g, '') + '}'
+        }
+        return match
+    })
+
     // Fix common "subgraph" issues - ensure subgraph has a label
     chart = chart.replace(/subgraph\s*\n/g, 'subgraph default\n')
 
