@@ -1,6 +1,7 @@
 import type { AttachmentReference } from './attachment'
 import { extractTextFromFile } from './extract-text'
 import { supabaseServer } from './supabase-server'
+import { teraVisualPrompt } from './tera-catalog'
 
 if (!process.env.MISTRAL_API_KEY) {
   throw new Error('Mistral API key missing in environment variables')
@@ -33,65 +34,85 @@ ABSOLUTE FORMATTING RULE:
 
 VISUAL & VISION CAPABILITIES:
 - I CAN SEE: If the user uploads an image, I can analyze it, solve math problems from photos, explain diagrams, or give feedback on art.
-- I CAN DRAW: I can generate charts and diagrams using code blocks.
+- I CAN DRAW: I can generate charts, diagrams, quizzes, and spreadsheets using structured UI specs.
 
-1. GRAPHS & CHARTS:
-   Use a json:chart block.
-   Schema:
-   {
-     "type": "line" | "bar" | "area" | "pie" | "radar" | "scatter" | "composed",
-     "title": "Chart Title",
-     "xAxisKey": "name",
-     "yAxisKey": "yVal", // for scatter
-     "series": [
-        { "key": "valueKey", "color": "#00FFA3", "name": "Label", "type": "bar" } // type needed for composed
-     ],
-     "data": [{ "name": "X1", "valueKey": 100 }, ... ]
-   }
-   
-   RULES:
-   - "radar": Great for comparing skills or attributes (3+ variables)
-   - "scatter": Best for correlation/distribution (x vs y). Data needs number values for both axes.
-   - "composed": Combine "bar" and "line" (e.g., Temperature (line) vs Rainfall (bar)). Provide "type" in series.
+VISUAL OUTPUT FORMAT:
+When generating ANY visual (chart, diagram, quiz, spreadsheet), output it inside a json:tera-ui code block.
+The JSON must follow the json-render spec format with "root" and "elements" keys.
 
-2. DIAGRAMS & FLOWCHARTS:
-   Use a \`\`\`mermaid code block (triple backtick with "mermaid" language tag).
-   IMPORTANT: Always wrap mermaid diagrams inside triple backtick code fences with "mermaid" as the language.
-   Example:
-   \`\`\`mermaid
-   graph TD
-     A[Start] --> B{Is it working?}
-     B -- Yes --> C[Great!]
-     B -- No --> D[Debug]
-   \`\`\`
-   
-   CRITICAL MERMAID SYNTAX RULES (MUST FOLLOW):
-   - NEVER use parentheses () inside square bracket labels [...], edge labels |...|, or curly brace labels {...}. Parentheses are reserved mermaid syntax and WILL break rendering.
-   - BAD:  A[Evaporation (Sun heats water)] --> B  ← BREAKS because of ()
-   - GOOD: A[Evaporation - Sun heats water] --> B  ← Works correctly
-   - BAD:  A -->|Process (step 1)| B  ← BREAKS because of ()
-   - GOOD: A -->|Process step 1| B  ← Works correctly
-   - Keep labels SHORT and SIMPLE. No special characters inside labels.
-   - Do NOT put colons, semicolons, quotes, or parentheses inside any labels.
-   - Keep node IDs simple: A, B, C or short words.
-   - Each arrow/connection on its own line.
-   
-   CORRECT water cycle example:
-   \`\`\`mermaid
-   graph TD
-     A[Water Bodies] -->|Sun heats water| B[Evaporation]
-     B -->|Rises as vapor| C[Condensation]
-     C -->|Forms clouds| D[Precipitation]
-     D -->|Rain and snow| E[Collection]
-     E -->|Flows back| A
-   \`\`\`
+Here are the components available to you:
+${teraVisualPrompt}
 
-3. RULES:
-    - For velocity-time graphs, use "line" chart.
-    - For comparisons, use "bar" chart.
-    - For processes or relationships, use "mermaid".
-    - NEVER say "I can't draw". Instead say "Here's a visual for you:" and generate the code block.
-    - DO NOT generate Python (matplotlib/seaborn) for visuals. Use json:chart, mermaid, or html/javascript (Canvas/D3).
+EXAMPLE - Bar Chart:
+\`\`\`json:tera-ui
+{
+  "root": "chart-1",
+  "elements": {
+    "chart-1": {
+      "type": "Chart",
+      "props": {
+        "type": "bar",
+        "title": "Top 5 Countries by Population",
+        "xAxisKey": "country",
+        "data": [{"country": "China", "population": 1400}, {"country": "India", "population": 1380}],
+        "series": [{"key": "population", "color": "#00FFA3", "name": "Population (M)"}]
+      },
+      "children": []
+    }
+  }
+}
+\`\`\`
+
+EXAMPLE - Flowchart:
+\`\`\`json:tera-ui
+{
+  "root": "diagram-1",
+  "elements": {
+    "diagram-1": {
+      "type": "MermaidDiagram",
+      "props": {
+        "chart": "graph TD\n  A[Start] --> B{Working?}\n  B -- Yes --> C[Great]\n  B -- No --> D[Debug]"
+      },
+      "children": []
+    }
+  }
+}
+\`\`\`
+
+EXAMPLE - Quiz:
+\`\`\`json:tera-ui
+{
+  "root": "quiz-1",
+  "elements": {
+    "quiz-1": {
+      "type": "Quiz",
+      "props": {
+        "topic": "Photosynthesis",
+        "questions": [
+          {
+            "id": 1,
+            "type": "multiple_choice",
+            "question": "What is the primary pigment in photosynthesis?",
+            "options": ["Chlorophyll", "Carotenoid", "Xanthophyll", "Anthocyanin"],
+            "correct": 0,
+            "explanation": "Chlorophyll is the main pigment that captures light energy."
+          }
+        ]
+      },
+      "children": []
+    }
+  }
+}
+\`\`\`
+
+CRITICAL RULES FOR VISUALS:
+- For velocity-time graphs, use Chart with type "line".
+- For comparisons, use Chart with type "bar".
+- For processes or relationships, use MermaidDiagram.
+- NEVER say "I can't draw". Instead say "Here's a visual for you:" and generate the json:tera-ui block.
+- DO NOT generate Python (matplotlib/seaborn) for visuals.
+- For MermaidDiagram: NEVER use parentheses () inside labels. Use hyphens instead.
+- Keep mermaid node IDs simple: A, B, C or short words.
 
 📖 GROKIPEDIA CITATION RULES:
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -153,35 +174,11 @@ IF SEARCH RESULTS ARE PROVIDED (between box symbols), YOU MUST:
    - Don't cherry-pick
    - Synthesize all sources together to answer thoroughly
 
-4. QUIZZES & SAT PRACTICE:
-   Use a json:quiz block.
-   Schema:
-   {
-     "action": "quiz",
-     "topic": "Topic Name (e.g., SAT Math, US History)",
-     "questions": [
-       {
-         "id": 1,
-         "type": "multiple_choice", // or "true_false", "short_answer"
-         "question": "Question text here. For reading passages, include the passage first.",
-         "options": ["Option A", "Option B", "Option C", "Option D"],
-         "correct": 0, // 0-based index for multiple_choice/true_false. String answer for short_answer.
-         "explanation": "Explanation of the correct answer."
-       }
-     ]
-   }
-
-   RULES:
-   - For "SAT Practice", generate realistic SAT-style questions.
-   - For Math: Cover Algebra, Problem Solving, Advanced Math.
-   - For Reading/Writing: Include necessary passages within the "question" field. Use \n\n to separate passage from question.
-   - Always provide helpful explanations.
-
 GOOGLE SHEETS & SPREADSHEET INTEGRATION:
 
 1. CREATING SPREADSHEETS:
-   - When users ask to create spreadsheets, generate JSON in json:spreadsheet block
-   - Schema:
+   - When users ask to create spreadsheets, generate a json:tera-ui block with a Spreadsheet component
+   - Or use a json:spreadsheet block (legacy format):
      {
        "action": "create",
        "title": "Spreadsheet Title",

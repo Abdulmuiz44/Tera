@@ -50,6 +50,10 @@ const ChartRenderer = dynamic(() => import('./visuals/ChartRenderer'), { ssr: fa
 const MermaidRenderer = dynamic(() => import('./visuals/MermaidRenderer'), { ssr: false })
 const SpreadsheetRenderer = dynamic(() => import('./visuals/SpreadsheetRenderer'), { ssr: false })
 const UniversalVisualRenderer = dynamic(() => import('./visuals/UniversalVisualRenderer'), { ssr: false })
+
+import { Renderer } from '@json-render/react'
+import { teraRegistry } from '@/lib/tera-registry'
+
 const SourcesPanelRenderer = dynamic(() => import('./search/SourcesPanel'), { ssr: false })
 const ResearchModeToggle = dynamic(() => import('./search/ResearchModeToggle'), { ssr: false })
 const SearchHistoryRenderer = dynamic(() => import('./search/SearchHistory'), { ssr: false })
@@ -65,6 +69,7 @@ type ContentBlock =
     | { type: 'universal-visual', code: string, language: string, title: string }
     | { type: 'web-sources', sources: Array<{ title: string; url: string; snippet: string; source: string; favicon?: string }> }
     | { type: 'quiz', config: { action: 'quiz'; topic: string; questions: any[] } }
+    | { type: 'tera-ui', spec: any }
 
 
 
@@ -117,6 +122,19 @@ const parseContent = (content: string): ContentBlock[] => {
             if (match) {
                 const [, lang, type, code] = match
                 const cleanCode = code ? code.trim() : ''
+
+                // === NEW: json-render tera-ui spec detection (highest priority) ===
+                if (type === 'tera-ui' || (lang === 'json' && type === 'tera-ui')) {
+                    try {
+                        const spec = JSON.parse(cleanCode)
+                        if (spec.root && spec.elements) {
+                            blocks.push({ type: 'tera-ui', spec })
+                            return
+                        }
+                    } catch (e) {
+                        console.warn('[parseContent] Failed to parse tera-ui spec', e)
+                    }
+                }
 
                 // Check if code contains chart keys (relaxed check)
                 const isChart = (c: string) => (c.includes('"data"') && c.includes('"type"')) || (c.includes('"series"'))
@@ -913,6 +931,13 @@ export default function PromptShell({
                                             <div className="rounded-xl md:rounded-2xl bg-tera-panel border border-tera-border px-3 md:px-6 py-3 md:py-4 text-tera-primary shadow-lg overflow-hidden">
                                                 <div className="space-y-4 w-full">
                                                     {parseContent(entry.assistantMessage.content).map((block, idx) => {
+                                                        if (block.type === 'tera-ui') {
+                                                            return (
+                                                                <div key={idx} className="w-full my-4 animate-in fade-in slide-in-from-bottom-2 duration-300">
+                                                                    <Renderer spec={block.spec} registry={teraRegistry} />
+                                                                </div>
+                                                            )
+                                                        }
                                                         if (block.type === 'universal-visual') {
                                                             return <UniversalVisualRenderer key={idx} code={block.code} language={block.language} title={block.title} />
                                                         }

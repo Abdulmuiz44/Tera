@@ -8,6 +8,12 @@ importers:
 
   .:
     dependencies:
+      '@json-render/core':
+        specifier: ^0.6.0
+        version: 0.6.0(zod@4.3.6)
+      '@json-render/react':
+        specifier: ^0.6.0
+        version: 0.6.0(react@19.2.0)(zod@4.3.6)
       '@mistralai/mistralai':
         specifier: ^1.10.0
         version: 1.10.0
@@ -59,6 +65,9 @@ importers:
       remark-math:
         specifier: ^6.0.0
         version: 6.0.0
+      zod:
+        specifier: ^4.3.6
+        version: 4.3.6
     devDependencies:
       '@types/react':
         specifier: ^19.2.7
@@ -282,6 +291,16 @@ packages:
 
   '@jridgewell/trace-mapping@0.3.31':
     resolution: {integrity: sha512-zzNR+SdQSDJzc8joaeP8QQoCQr8NuYx2dIIytl1QeBEZHJ9uW6hebsrYgbz8hJwUQao3TWCMtmfV8Nu1twOLAw==}
+
+  '@json-render/core@0.6.0':
+    resolution: {integrity: sha512-ZHpbSFHcINyNkuyrK4eOS8euEcAXqDHxILO/8VYeg9jWoaj8OIi70+eCqiKMmkvt1JF6HHZU5MZAzdH5igD3tw==}
+    peerDependencies:
+      zod: ^4.0.0
+
+  '@json-render/react@0.6.0':
+    resolution: {integrity: sha512-lStrFqpI14MVKLxa75cUK23o/TdDin6TKGCXebqYOH3UEUZIdPQR3PQ+CPO54yO2sIW+sVwrc6Q4BUsTeKa4cQ==}
+    peerDependencies:
+      react: ^19.2.3
 
   '@mermaid-js/parser@0.6.3':
     resolution: {integrity: sha512-lnjOhe7zyHjc+If7yT4zoedx2vo4sHaTmtkl1+or8BRTnCtDmcTpAjpzDSfCZrshM5bCoz0GyidzadJAH1xobA==}
@@ -2163,6 +2182,9 @@ packages:
   zod@3.25.76:
     resolution: {integrity: sha512-gzUt/qt81nXsFGKIFcC3YnfEAx5NkunCfnDlvuBSSFS02bcXu4Lmea0AFIUwbLWxWPx3d9p8S5QoaujKcNQxcQ==}
 
+  zod@4.3.6:
+    resolution: {integrity: sha512-rftlrkhHZOcjDwkGlnUtZZkvaPHCsDATp4pGpuOOMDaTdDDXF91wuVDJoWoPsKX/3YPQ5fHuF3STjcYyKr+Qhg==}
+
   zwitch@2.0.4:
     resolution: {integrity: sha512-bXE4cR/kVZhKZX/RjPEflHaKVhUVl85noU3v6b8apfQEc1x4A+zBxjZ4lN8LqGd6WZ3dl98pY4o717VFmoPp+A==}
 
@@ -2334,6 +2356,17 @@ snapshots:
     dependencies:
       '@jridgewell/resolve-uri': 3.1.2
       '@jridgewell/sourcemap-codec': 1.5.5
+
+  '@json-render/core@0.6.0(zod@4.3.6)':
+    dependencies:
+      zod: 4.3.6
+
+  '@json-render/react@0.6.0(react@19.2.0)(zod@4.3.6)':
+    dependencies:
+      '@json-render/core': 0.6.0(zod@4.3.6)
+      react: 19.2.0
+    transitivePeerDependencies:
+      - zod
 
   '@mermaid-js/parser@0.6.3':
     dependencies:
@@ -4568,5 +4601,7 @@ snapshots:
       zod: 3.25.76
 
   zod@3.25.76: {}
+
+  zod@4.3.6: {}
 
   zwitch@2.0.4: {}
