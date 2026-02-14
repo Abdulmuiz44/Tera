@@ -84,7 +84,14 @@ export default function SpreadsheetRenderer({ config, userId }: { config: Spread
       if (!response.ok) {
         const result = await response.json()
         // Check if it's an auth error
-        if (result.error?.includes('not authenticated') || result.error?.includes('authorize')) {
+        const errorMsg = result.error || ''
+        if (
+          errorMsg.includes('not authenticated') ||
+          errorMsg.includes('authorize') ||
+          errorMsg.includes('authorized') ||
+          errorMsg.includes('invalid_grant') ||
+          errorMsg.includes('expired')
+        ) {
           setNeedsAuth(true)
           setStatus({ state: 'error', message: 'Please authorize Google Sheets access first' })
           return

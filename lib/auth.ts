@@ -1,12 +1,20 @@
 import NextAuth from "next-auth"
 import Google from "next-auth/providers/google"
 import { supabaseServer } from "@/lib/supabase-server"
+import { saveGoogleTokens } from "@/lib/google-sheets"
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
     providers: [
         Google({
             clientId: process.env.GOOGLE_CLIENT_ID!,
             clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
+            authorization: {
+                params: {
+                    scope: 'openid email profile https://www.googleapis.com/auth/spreadsheets https://www.googleapis.com/auth/drive.file',
+                    access_type: 'offline',
+                    prompt: 'consent',
+                },
+            },
         }),
     ],
     pages: {
@@ -59,6 +67,21 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
                 } else {
                     // Use existing user ID
                     user.id = existingUser.id
+                }
+
+                // Save Google OAuth tokens for Sheets API access
+                if (account?.access_token) {
+                    const userId = user.id as string
+                    try {
+                        await saveGoogleTokens(
+                            userId,
+                            account.access_token,
+                            account.refresh_token || ''
+                        )
+                        console.log('✅ Google tokens saved for Sheets API access')
+                    } catch (tokenErr) {
+                        console.error('⚠️ Failed to save Google tokens (non-fatal):', tokenErr)
+                    }
                 }
 
                 return true

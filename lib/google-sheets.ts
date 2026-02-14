@@ -9,7 +9,7 @@ function getOAuth2Client(userId?: string) {
   const client = new google.auth.OAuth2(
     process.env.GOOGLE_CLIENT_ID,
     process.env.GOOGLE_CLIENT_SECRET,
-    process.env.GOOGLE_REDIRECT_URI || 'http://localhost:3000/api/auth/google/callback'
+    `${process.env.NEXTAUTH_URL || 'http://localhost:3000'}/api/auth/google/callback`
   )
 
   // If userId is provided, listen for token updates and save them
@@ -68,7 +68,7 @@ export async function saveGoogleTokens(userId: string, accessToken: string, refr
 async function getAuthenticatedSheetsClient(userId: string) {
   const tokens = await getUserGoogleToken(userId)
   if (!tokens?.google_access_token) {
-    throw new Error('User has not authorized Google Sheets access')
+    throw new Error('User has not authorized Google Sheets access. Please authorize first.')
   }
 
   // Pass userId so we can listen for refreshes
@@ -78,6 +78,23 @@ async function getAuthenticatedSheetsClient(userId: string) {
     access_token: tokens.google_access_token,
     refresh_token: tokens.google_refresh_token
   })
+
+  // Verify the token works by attempting a token info check
+  try {
+    await oauth2Client.getAccessToken()
+  } catch (err: any) {
+    const message = err?.message || ''
+    if (message.includes('invalid_grant') || message.includes('Token has been expired or revoked')) {
+      // Clear stale tokens from DB
+      await supabaseServer
+        .from('user_integrations')
+        .delete()
+        .eq('user_id', userId)
+
+      throw new Error('Google authorization expired. Please authorize Google Sheets access again.')
+    }
+    // For other errors, let them propagate
+  }
 
   return google.sheets({ version: 'v4', auth: oauth2Client })
 }

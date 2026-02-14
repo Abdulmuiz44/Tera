@@ -28,17 +28,26 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({ content }) => {
                     p: ({ node, children }) => (
                         <p className="mb-4 last:mb-0 leading-relaxed whitespace-pre-wrap">{children}</p>
                     ),
-                    // Custom link renderer
-                    a: ({ node, href, children }) => (
-                        <a
-                            href={href}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-tera-neon hover:underline break-all"
-                        >
-                            {children}
-                        </a>
-                    ),
+                    // Custom link renderer — Grokipedia links get special styling
+                    a: ({ node, href, children }) => {
+                        const isGrokipedia = href?.includes('grokipedia.com')
+                        return (
+                            <a
+                                href={href}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className={
+                                    isGrokipedia
+                                        ? 'text-violet-400 hover:text-violet-300 hover:underline decoration-dotted underline-offset-2 inline-flex items-center gap-0.5 font-medium transition-colors'
+                                        : 'text-tera-neon hover:underline break-all'
+                                }
+                                title={isGrokipedia ? 'Read more on Grokipedia' : undefined}
+                            >
+                                {isGrokipedia && <span className="text-[11px] mr-0.5">📖</span>}
+                                {children}
+                            </a>
+                        )
+                    },
                     // Custom list renderers
                     ul: ({ node, children }) => (
                         <ul className="list-disc pl-5 mb-4 space-y-1 marker:text-tera-secondary">{children}</ul>
