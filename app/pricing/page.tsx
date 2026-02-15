@@ -403,7 +403,7 @@ export default function PricingPage() {
               <div className="border-t border-tera-border pt-12 mt-12 text-center">
                 <h2 className="text-2xl font-bold text-tera-primary mb-4">Ready to Get Started?</h2>
                 <p className="text-tera-secondary mb-8 max-w-2xl mx-auto">
-                  Join thousands of learners using Tera — your AI Learning Companion — to unlock their potential. Start free, upgrade anytime.
+                  Join thousands of people using Tera — your AI Learning Companion for anyone — to unlock their potential. Start free, upgrade anytime.
                 </p>
                 <div className="flex flex-col sm:flex-row gap-4 justify-center">
                   {!user ? (

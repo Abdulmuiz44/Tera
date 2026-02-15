@@ -15,10 +15,10 @@ export default function AboutPage() {
         <div className="mx-auto max-w-4xl px-6 py-12 md:py-20 text-tera-primary">
           <div className="mb-16 text-center">
             <h1 className="mb-6 text-5xl font-bold tracking-tight text-tera-primary md:text-6xl">
-              Your AI Learning Companion
+              Your AI Learning Companion for Anyone
             </h1>
             <p className="mx-auto max-w-2xl text-xl text-tera-secondary">
-              Tera is your AI Learning Companion — making learning simple, personal, and powerful. Get homework help, explore new skills, master any concept, and achieve your learning goals.
+              Tera is your AI Learning Companion for anyone — making learning simple, personal, and powerful. Whether you're a student, teacher, professional, or curious mind, Tera helps you master any concept and achieve your goals.
             </p>
           </div>
 
@@ -26,7 +26,7 @@ export default function AboutPage() {
             <div className="space-y-6">
               <h2 className="text-3xl font-bold text-tera-primary">Our Mission</h2>
               <p className="text-lg leading-relaxed text-tera-secondary">
-                Learning should feel like a conversation with a friend, not a lecture from a robot. Teaching should be supported by tools that understand the real challenges you face. Tera bridges both worlds - helping anyone learn anything while giving educators powerful tools to inspire their students.
+                Learning should feel like a conversation with a friend, not a lecture from a robot. Tera is built for anyone with curiosity — students tackling homework, teachers creating lessons, professionals upskilling, hobbyists exploring new passions, or anyone who simply wants to understand the world better.
               </p>
             </div>
             <div className="rounded-3xl border border-tera-border bg-tera-muted p-8">
@@ -77,12 +77,12 @@ export default function AboutPage() {
             </div>
             <div className="rounded-2xl border border-tera-border bg-tera-muted p-6">
               <div className="mb-4 text-4xl">💡</div>
-              <h3 className="mb-3 text-xl font-bold text-tera-primary">For Lifelong Learners</h3>
+              <h3 className="mb-3 text-xl font-bold text-tera-primary">For Everyone</h3>
               <ul className="space-y-2 text-sm text-tera-secondary">
                 <li>• Pick up any new skill</li>
                 <li>• Get personalized roadmaps</li>
                 <li>• Access real-time web info</li>
-                <li>• Understand complex topics</li>
+                <li>• Upskill for your career</li>
                 <li>• Never stop growing</li>
               </ul>
             </div>
@@ -249,7 +249,7 @@ export default function AboutPage() {
           <div className="mb-16 text-center">
             <h2 className="mb-8 text-3xl font-bold text-tera-primary">Ready to Get Started?</h2>
             <p className="mb-8 text-lg text-tera-secondary">
-              Join thousands of learners using Tera — your AI Learning Companion — to unlock their potential.
+              Join thousands of people using Tera — your AI Learning Companion for anyone — to unlock their potential.
             </p>
             <Link
               href="/new"
@@ -276,7 +276,7 @@ export default function AboutPage() {
               </Link>
             </div>
             <p className="mt-8 text-center text-sm text-tera-secondary/70">
-              © 2024 Tera. All rights reserved. Built with care for learners and teachers everywhere.
+              © 2024 Tera. All rights reserved. Built with care for curious minds everywhere.
             </p>
           </div>
         </div>

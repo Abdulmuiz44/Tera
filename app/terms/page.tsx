@@ -19,7 +19,7 @@ export default function TermsPage() {
                 <section>
                     <h2 className="mb-4 text-2xl font-semibold text-tera-primary">2. Description of Service</h2>
                     <p>
-                        Tera is your AI Learning Companion — designed to help you learn anything as simply as possible. The services are provided "as is" and may change over time.
+                        Tera is your AI Learning Companion for anyone — designed to help you learn anything as simply as possible. The services are provided "as is" and may change over time.
                     </p>
                 </section>
 

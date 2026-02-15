@@ -13,8 +13,8 @@ export const viewport = {
 }
 
 export const metadata = {
-  title: 'Tera - Your AI Learning Companion',
-  description: 'Tera is your AI Learning Companion with unlimited free conversations. Get homework help, explore new skills, and master any concept — no daily limits.',
+  title: 'Tera - Your AI Learning Companion for Anyone',
+  description: 'Tera is your AI Learning Companion for anyone — students, teachers, professionals, and curious minds. Unlimited free conversations, homework help, skill building, and concept mastery.',
   icons: {
     icon: [
       { url: '/favicon.ico', sizes: 'any' },

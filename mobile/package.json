@@ -1,7 +1,7 @@
 {
   "name": "tera-mobile",
   "version": "1.0.0",
-  "description": "Tera - Your AI Learning Companion (Mobile App)",
+  "description": "Tera - Your AI Learning Companion for Anyone (Mobile App)",
   "main": "expo-router/entry",
   "scripts": {
     "start": "expo start",

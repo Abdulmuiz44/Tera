@@ -56,7 +56,7 @@ export default function SignInPage() {
                     {/* Header */}
                     <div className="mb-8 text-center">
                         <h1 className="text-3xl font-bold text-tera-primary mb-2">Welcome to Tera</h1>
-                        <p className="text-tera-secondary text-sm">Your AI Learning Companion with unlimited free conversations</p>
+                        <p className="text-tera-secondary text-sm">Your AI Learning Companion for anyone — unlimited free conversations</p>
                     </div>
 
                     {/* Error Message */}

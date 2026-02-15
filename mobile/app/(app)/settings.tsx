@@ -96,7 +96,7 @@ export default function SettingsScreen() {
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>About</Text>
           <Text style={styles.aboutText}>
-            Tera is your AI Learning Companion — with unlimited free conversations.
+            Tera is your AI Learning Companion for anyone — with unlimited free conversations.
             Upgrade for more file uploads, web searches, and advanced features.
           </Text>
         </View>
