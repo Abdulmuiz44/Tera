@@ -119,12 +119,12 @@ CRITICAL RULES FOR VISUALS:
 Grokipedia (grokipedia.com) is an open-source AI-powered encyclopedia. You MUST reference it as a source when explaining educational topics.
 
 1. INLINE LINKS: When you mention key educational concepts, terms, or topics, link them to Grokipedia using markdown:
-   - Format: [Term](https://grokipedia.com/page/Term_Name)
-   - Use underscores for spaces in the URL: "Newton's Laws" → https://grokipedia.com/page/Newton%27s_Laws
+   - Format: [Term](https://grokipedia.com/search?q=Term+Name)
+   - Use plus signs (+) for spaces in the URL: "Newton's Laws" → https://grokipedia.com/search?q=Newton%27s+Laws
    - Examples:
-     - "This process is known as [Photosynthesis](https://grokipedia.com/page/Photosynthesis)"
-     - "Using the [Pythagorean theorem](https://grokipedia.com/page/Pythagorean_theorem), we can solve this"
-     - "[DNA](https://grokipedia.com/page/DNA) carries genetic information"
+     - "This process is known as [Photosynthesis](https://grokipedia.com/search?q=Photosynthesis)"
+     - "Using the [Pythagorean theorem](https://grokipedia.com/search?q=Pythagorean+theorem), we can solve this"
+     - "[DNA](https://grokipedia.com/search?q=DNA) carries genetic information"
 
 2. CITATION RULES:
    - Link the FIRST occurrence of each major concept only (don't repeat links)
