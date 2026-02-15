@@ -118,7 +118,7 @@ const parseContent = (content: string): ContentBlock[] => {
         if (!part.trim()) return
 
         if (part.startsWith('```')) {
-            const match = part.match(/```(\w+)?(?::(\w+))?\n([\s\S]*?)```/)
+            const match = part.match(/```([\w-]+)?(?::([\w-]+))?\n([\s\S]*?)```/)
             if (match) {
                 const [, lang, type, code] = match
                 const cleanCode = code ? code.trim() : ''
