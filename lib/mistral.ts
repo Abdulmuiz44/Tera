@@ -1,7 +1,7 @@
 import type { AttachmentReference } from './attachment'
 import { extractTextFromFile } from './extract-text'
 import { supabaseServer } from './supabase-server'
-import { teraVisualPrompt } from './tera-catalog'
+import { teraVisualPrompt } from './tera-visual-prompt'
 
 if (!process.env.MISTRAL_API_KEY) {
   throw new Error('Mistral API key missing in environment variables')

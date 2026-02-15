@@ -1,3 +1,5 @@
+'use client'
+
 import { defineCatalog } from '@json-render/core'
 import { schema } from '@json-render/react'
 import { z } from 'zod'
@@ -7,9 +9,11 @@ import { z } from 'zod'
  *
  * Defines what visual components the AI can generate.
  * json-render uses this catalog to:
- * 1. Auto-generate a system prompt (so the AI knows what's available)
- * 2. Validate AI-generated specs at runtime
- * 3. Provide type-safe rendering via the registry
+ * 1. Validate AI-generated specs at runtime
+ * 2. Provide type-safe rendering via the registry
+ * 
+ * NOTE: The system prompt is generated separately in tera-visual-prompt.ts
+ * to avoid pulling @json-render/react into server bundles.
  */
 export const teraCatalog = defineCatalog(schema, {
     components: {
@@ -78,8 +82,3 @@ export const teraCatalog = defineCatalog(schema, {
     },
 })
 
-/**
- * Auto-generated system prompt fragment.
- * This tells the AI exactly what components, props, and actions are available.
- */
-export const teraVisualPrompt = teraCatalog.prompt()
