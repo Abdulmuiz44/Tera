@@ -288,7 +288,26 @@ export default function PromptShell({
     const [webSearchStatus, setWebSearchStatus] = useState<'idle' | 'searching' | 'processing' | 'complete'>('idle')
     const [webSearchResultCount, setWebSearchResultCount] = useState(0)
     const [searchHistoryOpen, setSearchHistoryOpen] = useState(false)
+    const [thinkingMessage, setThinkingMessage] = useState('Tera is Thinking...')
     const requestIdRef = useRef(0)
+
+    const getThinkingMessage = (prompt: string, isWebSearch: boolean) => {
+        const p = prompt.toLowerCase()
+        if (isWebSearch) return 'Tera is Searching the Web...'
+        // Visuals / Creation
+        if (p.includes('draw') || p.includes('visual') || p.includes('chart') || p.includes('diagram') || p.includes('image')) return 'Tera is Creating Visuals...'
+        // Coding
+        if (p.includes('code') || p.includes('function') || p.includes('script') || p.includes('debug') || p.includes('api')) return 'Tera is Coding...'
+        // Analysis / Math
+        if (p.includes('analyze') || p.includes('data') || p.includes('trend')) return 'Tera is Analyzing Data...'
+        if (p.includes('solve') || p.includes('calculate') || p.includes('math') || p.includes('equation')) return 'Tera is Solving...'
+        // Writing / Creativity
+        if (p.includes('write') || p.includes('essay') || p.includes('story') || p.includes('poem') || p.includes('draft')) return 'Tera is Writing...'
+        // Learning / Explaining
+        if (p.includes('explain') || p.includes('teach') || p.includes('how to') || p.includes('learn')) return 'Tera is Preparing Lesson...'
+
+        return 'Tera is Thinking...'
+    }
 
 
     // Update currentSessionId if prop changes (e.g. new chat from parent)
@@ -451,6 +470,9 @@ export default function PromptShell({
                     useWebSearch = true
                     console.log('🤖 Auto-enabled web search for:', messageToSend)
                 }
+
+                // Set dynamic thinking message
+                setThinkingMessage(getThinkingMessage(messageToSend, useWebSearch))
 
                 // Set up web search tracking
                 if (useWebSearch) {
@@ -1035,7 +1057,7 @@ export default function PromptShell({
                                         <div className="relative">
                                             <div className="h-4 w-4 animate-spin rounded-full border-[2px] border-tera-secondary border-t-transparent"></div>
                                         </div>
-                                        <span className="font-medium animate-pulse">Tera is Thinking...</span>
+                                        <span className="font-medium animate-pulse">{thinkingMessage}</span>
                                     </div>
                                 </div>
                             </div>
