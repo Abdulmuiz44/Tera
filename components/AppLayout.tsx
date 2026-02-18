@@ -19,7 +19,7 @@ export default function AppLayout({ children }: AppLayoutProps) {
     }
 
     return (
-        <div className="flex min-h-screen w-full bg-tera-bg text-tera-primary">
+        <div className="flex h-[100dvh] w-full overflow-hidden bg-tera-bg text-tera-primary">
             {/* Overlay for mobile when sidebar is open */}
             {sidebarExpanded && (
                 <div
@@ -36,7 +36,7 @@ export default function AppLayout({ children }: AppLayoutProps) {
                 onSignOut={signOut}
             />
 
-            <main className={`relative flex flex-1 flex-col min-h-screen transition-all duration-300 ease-in-out ml-0 ${sidebarExpanded ? 'md:ml-[280px] pb-32' : 'md:ml-[72px]'}`}>
+            <main className={`relative flex flex-1 flex-col h-full overflow-hidden transition-all duration-300 ease-in-out ml-0 ${sidebarExpanded ? 'md:ml-[280px]' : 'md:ml-[72px]'}`}>
                 {/* Mobile Menu Button - Left */}
                 <button
                     className="fixed left-4 top-4 z-40 rounded-full border border-tera-border bg-tera-panel p-2 text-tera-primary md:hidden"

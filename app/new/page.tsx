@@ -30,7 +30,7 @@ export default function ChatPage() {
   if (!sessionId) return null
 
   return (
-    <div className="w-full h-[100dvh] bg-tera-bg">
+    <div className="w-full h-[100dvh] bg-tera-bg overflow-hidden">
       <PromptShell
         tool={selectedTool}
         onToolChange={setSelectedTool}

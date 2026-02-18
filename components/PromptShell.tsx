@@ -874,8 +874,8 @@ export default function PromptShell({
     const showMicButton = !showSendButton && !showStopButton
 
     return (
-        <div className="flex h-full w-full flex-col relative bg-tera-bg text-tera-primary">
-            <div className="flex-1 overflow-y-auto px-4 py-6 md:px-8 pb-6 relative" ref={conversationRef}>
+        <div className="flex h-full w-full flex-col overflow-hidden relative bg-tera-bg text-tera-primary">
+            <div className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden px-4 py-6 md:px-8 pb-6 relative" ref={conversationRef}>
                 <div className="mx-auto max-w-3xl space-y-8 min-h-full">
                     {showInitialPrompt ? (
                         <div className="absolute inset-x-0 top-0 bottom-0 flex items-center justify-center text-center pointer-events-none -mt-20">
@@ -950,8 +950,8 @@ export default function PromptShell({
                                 {entry.assistantMessage && (
                                     <div className="flex justify-start w-full">
                                         <div className="w-full">
-                                            <div className="rounded-xl md:rounded-2xl bg-tera-panel border border-tera-border px-3 md:px-6 py-3 md:py-4 text-tera-primary shadow-lg overflow-hidden">
-                                                <div className="space-y-4 w-full">
+                                            <div className="rounded-xl md:rounded-2xl bg-tera-panel border border-tera-border px-3 md:px-6 py-3 md:py-4 text-tera-primary shadow-lg overflow-x-auto overflow-y-hidden">
+                                                <div className="space-y-4 w-full break-words overflow-hidden">
                                                     {parseContent(entry.assistantMessage.content).map((block, idx) => {
                                                         if (block.type === 'tera-ui') {
                                                             return (
@@ -1068,7 +1068,7 @@ export default function PromptShell({
             </div>
 
             {/* Input Area */}
-            <div className="w-full z-50 border-t border-tera-border bg-tera-bg px-2 py-3 backdrop-blur-xl md:py-4 md:px-8">
+            <div className="w-full z-50 shrink-0 sticky bottom-0 border-t border-tera-border bg-tera-bg px-2 py-3 backdrop-blur-xl md:py-4 md:px-8">
                 <div className="mx-auto max-w-3xl relative">
                     <div className={`relative flex flex-col gap-2 rounded-xl md:rounded-[24px] border border-tera-border bg-tera-panel p-2 shadow-2xl ring-1 ring-tera-border/50 transition-all ${conversationActive ? 'focus-within:ring-tera-neon/30 focus-within:border-tera-neon/30' : 'focus-within:ring-tera-primary/10'}`}>
 
