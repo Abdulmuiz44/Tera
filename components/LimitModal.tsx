@@ -146,7 +146,12 @@ export default function LimitModal({ isOpen, limitType, currentPlan, onClose, un
                 <div className="dark:bg-white/10 dark:border-white/20 bg-black/5 border border-black/10 rounded-lg p-3 mb-4">
                     <div className="flex items-center justify-between">
                         <span className="dark:text-white/60 text-black/60 text-xs md:text-sm">Your Free Plan:</span>
-                        <span className="text-tera-neon font-semibold text-xs md:text-sm">{info.current} messages/day</span>
+                        <span className="text-tera-neon font-semibold text-xs md:text-sm">
+                            {limitType === 'chats' && 'Unlimited conversations'}
+                            {limitType === 'file-uploads' && `${info.current} uploads/day`}
+                            {limitType === 'web-search' && `${info.current} searches/month`}
+                            {limitType === 'research-mode' && 'Not available'}
+                        </span>
                     </div>
                 </div>
 
