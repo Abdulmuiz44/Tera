@@ -113,50 +113,6 @@ export default function SpreadsheetRenderer({ config, userId }: { config: Spread
     }
   }
 
-  // Show editor if spreadsheet is created
-  if (status.state === 'success' && status.spreadsheetId) {
-    return (
-      <div className="w-full rounded-2xl bg-tera-panel border border-white/10 p-6 my-4 space-y-6">
-        {/* Editor */}
-        <SpreadsheetEditor
-          spreadsheetId={status.spreadsheetId}
-          title={config.title}
-          data={spreadsheetData}
-          userId={userId}
-          onDataChange={setSpreadsheetData}
-        />
-
-        {/* Toggle History */}
-        <button
-          onClick={() => setShowHistory(!showHistory)}
-          className="text-sm text-blue-400 hover:text-blue-300 transition"
-        >
-          {showHistory ? 'Hide' : 'Show'} Edit History
-        </button>
-
-        {/* Edit History */}
-        {showHistory && (
-          <SpreadsheetEditHistory
-            spreadsheetId={status.spreadsheetId}
-            limit={20}
-          />
-        )}
-
-        {/* Link to Google Sheets */}
-        {status.spreadsheetUrl && (
-          <a
-            href={status.spreadsheetUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="block w-full rounded-full bg-tera-primary px-4 py-2 text-center text-xs font-bold uppercase tracking-[0.2em] text-tera-bg transition hover:opacity-90"
-          >
-            Open in Google Sheets →
-          </a>
-        )}
-      </div>
-    )
-  }
-
   return (
     <div className="w-full rounded-2xl bg-tera-panel border border-tera-border p-6 my-4">
       <div className="space-y-4">
@@ -168,12 +124,12 @@ export default function SpreadsheetRenderer({ config, userId }: { config: Spread
           )}
         </div>
 
-        {/* Data Preview */}
-        <div className="overflow-x-auto rounded-lg border border-tera-border">
+        {/* Data Table (Read-only) */}
+        <div className="overflow-x-auto rounded-lg border border-tera-border bg-tera-panel/50">
           <table className="w-full text-sm">
             <tbody>
-              {(config.data || []).slice(0, 6).map((row, rowIdx) => (
-                <tr key={rowIdx} className={rowIdx === 0 ? 'bg-tera-muted' : 'border-t border-tera-border'}>
+              {(config.data || []).map((row, rowIdx) => (
+                <tr key={rowIdx} className={rowIdx === 0 ? 'bg-tera-muted border-b border-tera-border' : 'border-b border-tera-border last:border-0'}>
                   {row.map((cell, colIdx) => (
                     <td
                       key={colIdx}
@@ -186,46 +142,11 @@ export default function SpreadsheetRenderer({ config, userId }: { config: Spread
               ))}
             </tbody>
           </table>
-          {config.data.length > 6 && (
-            <p className="text-xs text-tera-secondary mt-2">... and {config.data.length - 6} more rows</p>
-          )}
         </div>
 
-        {/* Status Message */}
-        {status.state !== 'idle' && (
-          <div
-            className={`rounded-lg p-3 text-sm border ${status.state === 'error'
-              ? 'bg-red-500/10 text-red-500 border-red-500/20'
-              : 'bg-tera-primary text-tera-bg border-tera-primary'
-              }`}
-          >
-            {status.message}
-          </div>
-        )}
-
-        {/* Action Buttons */}
-        {needsAuth || (status.state === 'error' && status.message?.includes('authorize')) ? (
-          <button
-            onClick={handleAuthorizeGoogle}
-            className="w-full rounded-full border border-tera-border px-4 py-2 text-sm font-semibold text-tera-primary transition hover:bg-tera-muted"
-          >
-            Authorize Google Sheets
-          </button>
-        ) : status.state === 'creating' ? (
-          <button
-            disabled
-            className="w-full rounded-full bg-tera-primary px-4 py-2 text-xs font-bold uppercase tracking-[0.2em] text-tera-bg transition opacity-50 cursor-not-allowed"
-          >
-            Creating...
-          </button>
-        ) : status.state === 'idle' || status.state === 'error' ? (
-          <button
-            onClick={handleCreateSpreadsheet}
-            className="w-full rounded-full bg-tera-primary px-4 py-2 text-xs font-bold uppercase tracking-[0.2em] text-tera-bg transition hover:opacity-90"
-          >
-            Create Spreadsheet
-          </button>
-        ) : null}
+        <p className="text-xs text-tera-secondary italic">
+          * Google Sheets integration is currently disabled.
+        </p>
       </div>
     </div>
   )
