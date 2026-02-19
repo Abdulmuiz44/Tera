@@ -52,6 +52,14 @@ export default function WebSearchStatus({
   }
 
   if (isSearching) {
+    const statusTextMap: Record<string, string> = {
+      searching: 'Searching the web',
+      processing: 'Processing queries',
+      complete: 'Synthesis complete',
+      idle: 'Preparing search'
+    }
+    const statusText = statusTextMap[status] || 'Searching the web'
+
     return (
       <div className="flex justify-start">
         <div className="max-w-[85%]">
@@ -60,10 +68,12 @@ export default function WebSearchStatus({
               <span className="text-xl">🔍</span>
             </div>
             <div className="flex-1">
-              <div className="font-medium">Searching the web{dotDisplay}</div>
+              <div className="font-medium flex items-center gap-2">
+                {statusText}{dotDisplay}
+              </div>
               {query && (
                 <div className="text-sm text-tera-secondary mt-1">
-                  Looking for: <span className="text-tera-primary">{query}</span>
+                  Query: <span className="text-tera-primary">{query}</span>
                 </div>
               )}
               <div className="mt-2 flex gap-1">

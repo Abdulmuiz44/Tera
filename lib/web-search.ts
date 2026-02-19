@@ -11,6 +11,13 @@ export interface SearchResult {
   source: string
   date?: string | null
   favicon?: string | null
+  type?: 'web' | 'news' | 'academic' | 'video' | 'image'
+}
+
+export interface SearchFilters {
+  type?: 'all' | 'news' | 'academic' | 'videos' | 'images'
+  dateRange?: 'day' | 'week' | 'month' | 'year' | 'all'
+  domains?: string[]
 }
 
 export interface SearchResponse {
@@ -31,8 +38,8 @@ export interface SearchResponse {
  * @returns Search results with metadata
  */
 export async function searchWeb(
-  query: string, 
-  limit: number = 10, 
+  query: string,
+  limit: number = 10,
   userId?: string
 ): Promise<SearchResponse> {
   try {
@@ -50,19 +57,35 @@ export async function searchWeb(
     const trimmedQuery = query.trim()
     const clampedLimit = Math.max(1, Math.min(limit, 20))
 
-    console.log(`🔍 Initiating web search via SerpScrap`)
-    console.log(`   Query: "${trimmedQuery}"`)
-    console.log(`   Limit: ${clampedLimit}`)
-    if (userId) console.log(`   User: ${userId.slice(0, 8)}...`)
+    console.log(`🔍 Initiating web search: "${trimmedQuery}"`)
 
-    // Call our API endpoint
+    // SERVER-SIDE EXECUTION (Direct)
+    if (typeof window === 'undefined') {
+      try {
+        console.log('🖥️ Server-side search detected, calling internal service...')
+        const { performWebSearchInternal } = await import('./web-search-service')
+        const data = await performWebSearchInternal(trimmedQuery, clampedLimit)
+
+        return {
+          success: data.success,
+          results: data.results,
+          query: trimmedQuery,
+          message: data.message
+        }
+      } catch (serverError) {
+        console.error('❌ Server-side search failed:', serverError)
+        // Fallback to fetch if direct call fails (though usually fetch will fail too if it's a relative URL)
+      }
+    }
+
+    // CLIENT-SIDE EXECUTION (API Fetch)
     const response = await fetch('/api/search/web', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ 
-        query: trimmedQuery, 
-        limit: clampedLimit, 
-        userId 
+      body: JSON.stringify({
+        query: trimmedQuery,
+        limit: clampedLimit,
+        userId
       })
     })
 
@@ -109,7 +132,7 @@ export async function searchWeb(
 
     // Parse successful response
     const data: SearchResponse = await response.json()
-    
+
     if (!data.success) {
       console.warn('⚠️ Search returned success=false:', data.message)
       return {
@@ -131,7 +154,7 @@ export async function searchWeb(
     }
 
     // Validate results
-    const validResults = data.results.filter(r => 
+    const validResults = data.results.filter(r =>
       r.title && r.url && r.snippet && r.source
     )
 
@@ -155,7 +178,7 @@ export async function searchWeb(
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error)
     console.error('❌ Web search error:', message)
-    
+
     // Provide specific error messages
     if (message.includes('fetch failed') || message.includes('Failed to fetch')) {
       return {
@@ -223,7 +246,7 @@ export function formatSearchResults(results: SearchResult[]): string {
  * Check if search results are valid
  */
 export function hasValidResults(results: SearchResult[]): boolean {
-  return results.length > 0 && results.every(r => 
+  return results.length > 0 && results.every(r =>
     r.title && r.url && r.snippet && r.source
   )
 }

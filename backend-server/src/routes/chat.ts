@@ -97,7 +97,7 @@ router.get('/sessions/:sessionId', authMiddleware, async (req: AuthRequest, res:
 // Send message and get response
 router.post('/messages', authMiddleware, async (req: AuthRequest, res: express.Response) => {
   try {
-    const { sessionId, message, chatHistory } = req.body;
+    const { sessionId, message, chatHistory, webSearchEnabled = false } = req.body;
     const userId = req.user?.sub;
 
     if (!userId) {
@@ -116,8 +116,10 @@ router.post('/messages', authMiddleware, async (req: AuthRequest, res: express.R
 
     // Convert chat history to proper format
     const formattedHistory: Message[] = (chatHistory || []).map((msg: any) => ({
-      role: msg.role as 'user' | 'assistant',
+      role: msg.role as 'user' | 'assistant' | 'tool',
       content: msg.content,
+      ...(msg.tool_call_id && { tool_call_id: msg.tool_call_id }),
+      ...(msg.name && { name: msg.name }),
     }));
 
     // Add current user message
@@ -127,7 +129,7 @@ router.post('/messages', authMiddleware, async (req: AuthRequest, res: express.R
     });
 
     // Generate response from Mistral
-    const aiResponse = await generateResponse(formattedHistory);
+    const aiResponse = await generateResponse(formattedHistory, undefined, { webSearchEnabled });
 
     // Save both messages to database
     await saveChatMessage(userId, sessionId, {

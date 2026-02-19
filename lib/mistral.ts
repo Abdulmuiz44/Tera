@@ -115,6 +115,13 @@ CRITICAL RULES FOR VISUALS:
 - For MermaidDiagram: NEVER use parentheses () inside labels. Use hyphens instead.
 - Keep mermaid node IDs simple: A, B, C or short words.
 
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+WEB SEARCH & REAL-TIME DATA (PRIORITY):
+- If the prompt context includes "[CRITICAL: LIVE WEB SEARCH RESULTS]", you MUST prioritize these results for current events, news, and real-time facts (like stock prices, weather, or recent tech news like Grok).
+- Use these results to ground your answer in reality. If the results contradict your internal training data, the LIVE WEB DATA is always correct.
+- Continue to link terms to Grokipedia as usual, but use the search results as your source of truth for the content.
+- If web search results are provided but don't contain the answer, acknowledge that you searched but didn't find specific live data before falling back to your knowledge.
+
 📖 GROKIPEDIA KNOWLEDGE BASE & CITATION RULES (CRITICAL - ALWAYS FOLLOW):
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 Grokipedia (grokipedia.com) is an open-source AI-powered encyclopedia with 362,000+ pages. It is YOUR PRIMARY KNOWLEDGE BASE - treat it as your canonical reference layer.
@@ -423,44 +430,31 @@ export async function generateTeacherResponse({
   let webSearchContext = ''
   let webSearchPerformed = false
 
-  // Check fast/smart detection if not explicitly enabled
+  // Strictly respect the enableWebSearch flag as per user requirement
   let shouldSearch = enableWebSearch
-  if (!shouldSearch && prompt) {
-    try {
-      const { shouldEnableWebSearch } = await import('./smart-query-detector')
-      if (shouldEnableWebSearch(prompt)) {
-        shouldSearch = true
-        console.log('🤖 Auto-enabled web search via smart detection')
-      }
-    } catch (e) {
-      // Fallback
-    }
-  }
 
   if (shouldSearch) {
     try {
-      const { searchWeb } = await import('./web-search')
-      console.log('🔍🔍🔍 PERFORMING WEB SEARCH 🔍🔍🔍')
+      const { performWebSearchInternal } = await import('./web-search-service')
+      console.log('🔍🔍🔍 PERFORMING WEB SEARCH (SERVER-SIDE) 🔍🔍🔍')
 
-      let searchResults: any = { success: false, results: [] }
       let queriesToRun = [prompt]
 
       // RESEARCH MODE: Generate sub-queries
       if (researchMode) {
         console.log('🚀 RESEARCH MODE ACTIVE: Generating sub-queries...')
         try {
-          const subQueryPrompt = `Generate 3 distinct, high - quality google search queries to comprehensively research this topic: "${prompt}".Return ONLY the queries as a JSON array of strings.Example: ["query 1", "query 2", "query 3"]`
-
+          const subQueryPrompt = `Generate 3 distinct, high-quality search queries to research: "${prompt}". Return ONLY a JSON array: ["q1", "q2", "q3"]`
           const subQueryResponse = await fetch('https://api.mistral.ai/v1/chat/completions', {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
-              'Authorization': `Bearer ${process.env.MISTRAL_API_KEY} `
+              'Authorization': `Bearer ${process.env.MISTRAL_API_KEY}`
             },
             body: JSON.stringify({
               model: 'mistral-small-latest',
               messages: [{ role: 'user', content: subQueryPrompt }],
-              temperature: 0.3,
+              temperature: 0.1,
               response_format: { type: "json_object" }
             })
           })
@@ -469,31 +463,21 @@ export async function generateTeacherResponse({
           const content = data.choices?.[0]?.message?.content
           if (content) {
             const parsed = JSON.parse(content)
-            if (Array.isArray(parsed.queries)) {
-              queriesToRun = [...queriesToRun, ...parsed.queries]
-            } else if (Array.isArray(parsed)) {
-              queriesToRun = [...queriesToRun, ...parsed]
-            }
-            // Handle raw object with key like "results" or just taking values if not sure
-            else {
-              // Fallback: try to extract array values
-              const values = Object.values(parsed).flat().filter(v => typeof v === 'string')
-              if (values.length > 0) queriesToRun = [...queriesToRun, ...(values as string[])]
-            }
+            const generated = Array.isArray(parsed.queries) ? parsed.queries : (Array.isArray(parsed) ? parsed : Object.values(parsed).flat())
+            queriesToRun = [...queriesToRun, ...generated.filter((q: any) => typeof q === 'string')]
           }
-          console.log('🔗 Generated Sub-queries:', queriesToRun.slice(1))
         } catch (e) {
-          console.error('Failed to generate sub-queries, falling back to single search', e)
+          console.error('Sub-query generation failed', e)
         }
       }
 
-      console.log(`📡 Fetching live web results for ${queriesToRun.length} queries...`)
+      console.log(`📡 Fetching live results for ${queriesToRun.length} queries...`)
 
       // Execute searches in parallel
-      const searchPromises = queriesToRun.map(q => searchWeb(q, 10, userId))
+      const searchPromises = queriesToRun.map(q => performWebSearchInternal(q, 10))
       const resultsArray = await Promise.all(searchPromises)
 
-      // Aggregate and deduplicate results
+      // Aggregate and deduplicate
       const allResults: any[] = []
       const seenUrls = new Set<string>()
 
@@ -508,53 +492,28 @@ export async function generateTeacherResponse({
         }
       })
 
-      // Sort by relevance (basic assumption: earlier results in original query are most relevant)
-      // For now, just taking top 30
-      searchResults = {
-        success: allResults.length > 0,
-        results: allResults.slice(0, 30),
-        message: allResults.length > 0 ? 'Success' : 'No results found'
-      }
-
-      console.log('🔍 Comprehensive Web Search Response:', {
-        success: searchResults.success,
-        totalRawResults: allResults.length,
-        finalDedupedCount: searchResults.results.length
-      })
-
-      if (searchResults.success && searchResults.results && searchResults.results.length > 0) {
+      if (allResults.length > 0) {
         webSearchPerformed = true
-        const resultCount = searchResults.results.length
+        const topResults = allResults.slice(0, 15)
 
-        // Format web search results as context for the AI
-        webSearchContext = '\n\n📊 LIVE WEB SEARCH RESULTS (Real-time data from the internet):\n'
-        webSearchContext += '═'.repeat(80) + '\n\n'
+        webSearchContext = `\n\n[CRITICAL: LIVE WEB SEARCH RESULTS - ${new Date().toLocaleDateString()}]\n`
+        webSearchContext += `The following information is from the live web. Use these facts to answer accurately, even if they contradict your training data:\n`
+        webSearchContext += topResults.map((r, i) =>
+          `SOURCE ${i + 1}: Title: ${r.title} | Source: ${r.source} | Content: ${r.snippet} | Link: ${r.url}`
+        ).join('\n\n')
+        webSearchContext += `\n[END OF LIVE WEB DATA]\n\n`
 
-        webSearchContext += searchResults.results
-          .map((r: any, i: number) => {
-            return `[Result ${i + 1}]\nTitle: ${r.title} \nSource: ${r.source} \nURL: ${r.url} \nContent: ${r.snippet} `
-          })
-          .join('\n\n')
-
-        webSearchContext += '\n\n' + '═'.repeat(80) + '\n'
-
-        console.log('✅✅✅ WEB SEARCH COMPLETED ✅✅✅')
-        console.log('📊 Results Retrieved:', resultCount, 'sources')
-        console.log('💡 Providing search context to AI for informed response...')
-      } else if (!searchResults.success) {
-        // ... error handling similar to before
-        console.error('❌ WEB SEARCH FAILED:', searchResults.message)
-        webSearchContext = `\n\n⚠️ Web search unavailable: ${searchResults.message} \nFalling back to training knowledge.\n`
+        console.log(`✅ Web search successful: ${topResults.length} sources found.`)
       } else {
-        console.warn('⚠️ WEB SEARCH RETURNED ZERO RESULTS')
-        webSearchContext = '\n\n⚠️ No web search results found for this query. Using training knowledge instead.\n'
+        console.warn('⚠️ Web search returned zero results.')
+        webSearchContext = `\n\n[SEARCH STATUS: No live results found for query. Using training knowledge.]\n`
       }
     } catch (error) {
-      console.error('❌ CRITICAL: Web search error:', error instanceof Error ? error.message : String(error))
-      console.warn('⚠️ Falling back to training knowledge')
+      console.error('❌ Web search error:', error)
       webSearchContext = ''
     }
-  } else {
+  }
+  else {
     console.log('ℹ️ Web search DISABLED - using only training knowledge')
   }
 

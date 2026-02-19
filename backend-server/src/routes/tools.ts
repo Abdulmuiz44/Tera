@@ -133,4 +133,46 @@ router.post('/:toolId/process', authMiddleware, async (req: AuthRequest, res: ex
   }
 });
 
+// Web search route (SearXNG)
+router.post('/web-search', authMiddleware, async (req: AuthRequest, res: express.Response) => {
+  try {
+    const { query, numResults, lang } = req.body;
+
+    if (!query) {
+      return res.status(400).json({
+        success: false,
+        error: 'Search query is required',
+      });
+    }
+
+    const { searchWebWithSearxng } = await import('../lib/searxngClient.js');
+
+    const searchResponse = await searchWebWithSearxng({
+      query,
+      numResults: numResults ? parseInt(numResults) : 5,
+      lang: lang || 'en',
+    });
+
+    res.json({
+      success: true,
+      ...searchResponse,
+    });
+  } catch (error: any) {
+    console.error('Web search error:', error);
+
+    // Check for SearXNG specific errors (e.g. timeout)
+    if (error.message?.includes('timeout') || error.message?.includes('status 5')) {
+      return res.status(502).json({
+        success: false,
+        error: 'Web search backend (SearXNG) is currently unavailable or timed out.',
+      });
+    }
+
+    res.status(500).json({
+      success: false,
+      error: 'An unexpected error occurred during web search.',
+    });
+  }
+});
+
 export default router;

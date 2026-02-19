@@ -105,48 +105,16 @@ async function performWebSearch(
   limit: number,
   filters: SearchFilters = {}
 ): Promise<{ success: boolean; results: SearchResult[]; message?: string; provider?: string }> {
-  // Try search providers in order: Google CSE → Brave → DuckDuckGo → Mock
-
-  // 1. Try Google Custom Search API (primary)
   try {
-    const googleResults = await searchWithGoogleCSE(query, limit, filters)
-    if (googleResults.length > 0) {
-      console.log(`✅ Google CSE returned ${googleResults.length} results`)
-      return { success: true, results: googleResults, provider: 'google' }
-    }
+    const { performWebSearchInternal } = await import('@/lib/web-search-service');
+    return await performWebSearchInternal(query, limit, filters);
   } catch (error) {
-    console.warn('Google CSE failed:', error instanceof Error ? error.message : 'Unknown error')
-  }
-
-  // 2. Fallback to Brave Search API
-  try {
-    const braveResults = await searchWithBraveAPI(query, limit)
-    if (braveResults.length > 0) {
-      console.log(`✅ Brave API returned ${braveResults.length} results`)
-      return { success: true, results: braveResults, provider: 'brave' }
-    }
-  } catch (error) {
-    console.warn('Brave API failed:', error instanceof Error ? error.message : 'Unknown error')
-  }
-
-  // 3. Fallback to DuckDuckGo
-  try {
-    const ddgResults = await searchWithDuckDuckGo(query, limit)
-    if (ddgResults.length > 0) {
-      console.log(`✅ DuckDuckGo returned ${ddgResults.length} results`)
-      return { success: true, results: ddgResults, provider: 'duckduckgo' }
-    }
-  } catch (error) {
-    console.warn('DuckDuckGo failed:', error instanceof Error ? error.message : 'Unknown error')
-  }
-
-  // 4. Final fallback to mock results (for development)
-  console.warn('⚠️ All search providers failed, using mock results')
-  return {
-    success: true,
-    results: generateMockResults(query, limit),
-    provider: 'mock',
-    message: 'Using fallback results. Configure API keys for real search.'
+    console.error('Search internal service failed:', error);
+    return {
+      success: false,
+      results: [],
+      message: 'Internal search service encountered an error.'
+    };
   }
 }
 

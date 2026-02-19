@@ -36,78 +36,18 @@ router.post('/web', authMiddleware, async (req: AuthRequest, res: express.Respon
   }
 });
 
-// Helper function to perform web search
-// Replace with your preferred search API (Google Search, SerpAPI, etc.)
 async function performWebSearch(query: string, limit: number) {
   try {
-    // Example using a simple mock implementation
-    // In production, integrate with actual search API
-
-    // Option 1: Use SerpAPI
-    // const apiKey = process.env.SERPAPI_KEY;
-    // if (!apiKey) {
-    //   return mockSearchResults(query, limit);
-    // }
-    // const response = await axios.get('https://serpapi.com/search', {
-    //   params: {
-    //     q: query,
-    //     api_key: apiKey,
-    //     num: limit,
-    //   },
-    // });
-    // return response.data.organic_results.map((result: any) => ({
-    //   title: result.title,
-    //   url: result.link,
-    //   snippet: result.snippet,
-    // }));
-
-    // Option 2: Use Bing Search API
-    // const apiKey = process.env.BING_SEARCH_KEY;
-    // if (!apiKey) {
-    //   return mockSearchResults(query, limit);
-    // }
-    // const response = await axios.get('https://api.bing.microsoft.com/v7.0/search', {
-    //   headers: {
-    //     'Ocp-Apim-Subscription-Key': apiKey,
-    //   },
-    //   params: {
-    //     q: query,
-    //     count: limit,
-    //   },
-    // });
-    // return response.data.webPages.value.map((result: any) => ({
-    //   title: result.name,
-    //   url: result.url,
-    //   snippet: result.snippet,
-    // }));
-
-    // For now, return mock results
-    return mockSearchResults(query, limit);
+    const { searchWebWithSearxng } = await import('../lib/searxngClient.js');
+    const response = await searchWebWithSearxng({
+      query,
+      numResults: limit
+    });
+    return response.results;
   } catch (error) {
     console.error('Web search error:', error);
-    throw new Error('Failed to perform search');
+    throw new Error('Failed to perform search via SearXNG');
   }
-}
-
-// Mock search results for development
-function mockSearchResults(query: string, limit: number) {
-  return [
-    {
-      title: `Search results for "${query}" - Result 1`,
-      url: `https://example.com/result-1`,
-      snippet: `This is a mock search result for "${query}". In production, integrate with a real search API like SerpAPI, Bing, or Google Search API.`,
-    },
-    {
-      title: `Search results for "${query}" - Result 2`,
-      url: `https://example.com/result-2`,
-      snippet: `Another mock result for your query "${query}". Replace this with real search results.`,
-    },
-    {
-      title: `Search results for "${query}" - Result 3`,
-      url: `https://example.com/result-3`,
-      snippet: `Third mock result demonstrating the search API structure.`,
-    },
-  ].slice(0, limit);
 }
 
 export default router;

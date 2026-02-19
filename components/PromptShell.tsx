@@ -19,7 +19,6 @@ import VoiceControls from './VoiceControls'
 import WebSearchStatus from './WebSearchStatus'
 import LimitModal from './LimitModal'
 import SourcesPanel from './search/SourcesPanel'
-import { shouldEnableWebSearch } from '@/lib/smart-query-detector'
 import { saveSearchQuery, saveBookmark, isBookmarked, deleteBookmark } from '@/lib/search-history'
 
 type Message = {
@@ -465,25 +464,36 @@ export default function PromptShell({
                 // Only if not explicitly toggled by user (we rely on current toggle state if set)
                 let useWebSearch = webSearchEnabled
 
-                if (!webSearchEnabled && shouldEnableWebSearch(messageToSend)) {
-                    // Auto-enable for real-time queries
-                    useWebSearch = true
-                    console.log('🤖 Auto-enabled web search for:', messageToSend)
-                }
-
                 // Set dynamic thinking message
                 setThinkingMessage(getThinkingMessage(messageToSend, useWebSearch))
 
-                // Set up web search tracking
+                // Set up web search tracking with visual progress simulation
                 if (useWebSearch) {
                     setIsWebSearching(true)
                     setCurrentSearchQuery(messageToSend)
                     setWebSearchStatus('searching')
                     setWebSearchResultCount(0)
 
+                    // Cycle status to show "what's going on behind the scenes"
+                    const statusCycle = [
+                        { status: 'searching', delay: 0 },
+                        { status: 'processing', delay: 1500, check: researchMode },
+                        { status: 'searching', delay: 3500 },
+                    ]
+
+                    statusCycle.forEach(({ status, delay, check }) => {
+                        if (check === false) return
+                        setTimeout(() => {
+                            setWebSearchStatus(prev => {
+                                // Don't regress if already complete or errored
+                                if (prev === 'complete' || prev === 'idle') return prev
+                                return status as any
+                            })
+                        }, delay)
+                    })
+
                     // Track search in history
                     if (user?.id) {
-                        // Fire and forget save to history
                         saveSearchQuery(user.id, messageToSend, 0)
                             .catch(err => console.error('Failed to save search history', err))
                     }
