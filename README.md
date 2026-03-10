@@ -1,8 +1,8 @@
-# 🧠 Tera — Your AI Learning Companion for Anyone
+# 🧠 Tera — Your AI Learning Companion for Anything
 
 > **Learn anything. Master everything. Powered by AI.**
 
-Tera is a free, AI-powered learning companion designed for **anyone** — students, teachers, professionals, hobbyists, and curious minds. Built with conversational AI at its core, Tera makes learning simple, personal, and powerful.
+Tera is a free, AI-powered learning companion designed for **anything** you want to learn — school subjects, work skills, creative projects, and everyday curiosity. Built with conversational AI at its core, Tera makes learning simple, personal, and powerful.
 
 🌐 **Live:** [teraai.chat](https://teraai.chat)
 
