@@ -57,9 +57,6 @@ export default function PlusLayout({ children }: { children: React.ReactNode }) 
           </div>
           <div className="flex gap-4">
             <a href="/plus/analytics" className="text-tera-primary hover:text-tera-neon transition">Analytics</a>
-            <a href="/plus/team" className="text-tera-primary hover:text-tera-neon transition">Team</a>
-            <a href="/plus/api-keys" className="text-tera-primary hover:text-tera-neon transition">API Keys</a>
-            <a href="/plus/training" className="text-tera-primary hover:text-tera-neon transition">Training</a>
           </div>
         </div>
       </div>

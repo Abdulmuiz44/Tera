@@ -74,24 +74,21 @@ export const PLAN_CONFIGS: Record<PlanType, PlanConfig> = {
         displayName: 'Plus',
         price: 15,
         period: '/month',
-        description: 'Unlimited everything for power users.',
+        description: 'Highest limits plus advanced analytics.',
         limits: {
             messagesPerDay: 'unlimited',
             fileUploadsPerDay: 'unlimited',
             webSearchesPerMonth: 'unlimited',
             maxFileSize: 2000,
-            features: ['advanced-chat', 'all-tools', 'file-uploads', 'export', 'admin', 'analytics', 'sso', 'web-search', 'deep-research', 'priority-support', 'custom-ai']
+            features: ['advanced-chat', 'all-tools', 'file-uploads', 'export', 'admin', 'analytics', 'web-search', 'deep-research', 'priority-support']
         },
         features: [
             'Everything in Pro, plus:',
             'Unlimited file uploads (2GB each)',
             'Unlimited web searches',
             'Advanced analytics dashboard',
-            'Team collaboration features',
-            'API access',
             '24/7 priority support',
-            'Custom AI model training',
-            'Batch file processing'
+            'Highest usage limits across Tera'
         ]
     }
 }
