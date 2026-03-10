@@ -69,7 +69,7 @@ export default function SignInScreen() {
           <View style={styles.header}>
             <Text style={styles.logo}>Tera</Text>
             <Text style={styles.tagline}>
-              Your AI Learning Companion for Anyone
+              Your AI Learning Companion for Anything
             </Text>
           </View>
 

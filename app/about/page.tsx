@@ -15,10 +15,10 @@ export default function AboutPage() {
         <div className="mx-auto max-w-4xl px-6 py-12 md:py-20 text-tera-primary">
           <div className="mb-16 text-center">
             <h1 className="mb-6 text-5xl font-bold tracking-tight text-tera-primary md:text-6xl">
-              Your AI Learning Companion for Anyone
+              Your AI Learning Companion for Anything
             </h1>
             <p className="mx-auto max-w-2xl text-xl text-tera-secondary">
-              Tera is your AI Learning Companion for anyone — making learning simple, personal, and powerful. Whether you're a student, teacher, professional, or curious mind, Tera helps you master any concept and achieve your goals.
+              Tera is your AI Learning Companion for anything — making learning simple, personal, and powerful. Whether you're studying a subject, building a skill, solving a problem, or exploring an idea, Tera helps you make progress.
             </p>
           </div>
 
@@ -26,7 +26,7 @@ export default function AboutPage() {
             <div className="space-y-6">
               <h2 className="text-3xl font-bold text-tera-primary">Our Mission</h2>
               <p className="text-lg leading-relaxed text-tera-secondary">
-                Learning should feel like a conversation with a friend, not a lecture from a robot. Tera is built for anyone with curiosity — students tackling homework, teachers creating lessons, professionals upskilling, hobbyists exploring new passions, or anyone who simply wants to understand the world better.
+                Learning should feel like a conversation with a friend, not a lecture from a robot. Tera is built for anything you're trying to learn — from homework and lesson planning to career growth, side projects, and curiosity-driven exploration.
               </p>
             </div>
             <div className="rounded-3xl border border-tera-border bg-tera-muted p-8">
@@ -249,7 +249,7 @@ export default function AboutPage() {
           <div className="mb-16 text-center">
             <h2 className="mb-8 text-3xl font-bold text-tera-primary">Ready to Get Started?</h2>
             <p className="mb-8 text-lg text-tera-secondary">
-              Join thousands of people using Tera — your AI Learning Companion for anyone — to unlock their potential.
+              Join thousands of people using Tera — your AI Learning Companion for anything — to unlock their potential.
             </p>
             <Link
               href="/new"
