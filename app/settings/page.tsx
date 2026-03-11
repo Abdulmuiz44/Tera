@@ -27,18 +27,21 @@ function SettingToggle({
   onChange: () => void
 }) {
   return (
-    <div className="flex items-center justify-between gap-6 rounded-[22px] border border-tera-border bg-white/[0.03] px-5 py-4">
-      <div>
-        <p className="text-sm font-medium text-tera-primary">{label}</p>
-        <p className="mt-1 text-sm leading-6 text-tera-secondary">{description}</p>
+    <div className="rounded-[22px] border border-tera-border bg-white/[0.03] px-4 py-4 sm:px-5">
+      <div className="flex items-start justify-between gap-4">
+        <div className="min-w-0 pr-2">
+          <p className="text-sm font-medium text-tera-primary">{label}</p>
+          <p className="mt-1 text-sm leading-6 text-tera-secondary">{description}</p>
+        </div>
+        <button
+          type="button"
+          onClick={onChange}
+          className={`relative mt-1 h-7 w-12 shrink-0 rounded-full border transition ${checked ? 'border-tera-border bg-tera-highlight' : 'border-tera-border bg-white/[0.06]'}`}
+          aria-pressed={checked}
+        >
+          <span className={`absolute top-1 h-5 w-5 rounded-full bg-white transition ${checked ? 'left-6' : 'left-1'}`} />
+        </button>
       </div>
-      <button
-        type="button"
-        onClick={onChange}
-        className={`relative h-7 w-12 rounded-full border transition ${checked ? 'border-tera-neon/30 bg-tera-highlight' : 'border-white/10 bg-white/[0.06]'}`}
-      >
-        <span className={`absolute top-1 h-5 w-5 rounded-full bg-white transition ${checked ? 'left-6' : 'left-1'}`} />
-      </button>
     </div>
   )
 }
@@ -169,43 +172,48 @@ export default function SettingsPage() {
     }
   }
 
+  const tabs = [
+    { id: 'preferences', label: 'Preferences' },
+    { id: 'privacy', label: 'Privacy' },
+    { id: 'account', label: 'Account' },
+  ] as const
+
   return (
     <div className="tera-page">
-      <div className="tera-page-shell pt-24 md:pt-10">
-        <div className="tera-page-header">
+      <div className="tera-page-shell pt-6 md:pt-10">
+        <div className="tera-page-header gap-5">
           <div>
             <p className="tera-eyebrow">Workspace</p>
             <h1 className="tera-title mt-3">Settings</h1>
-            <p className="tera-subtitle mt-4">Control preferences, privacy defaults, account management, and the global theme.</p>
+            <p className="tera-subtitle mt-4">Control your workspace preferences, privacy defaults, billing, and theme without losing clarity on mobile.</p>
           </div>
-          <div className="flex items-center gap-3 text-sm text-tera-secondary">
-            <span className={`h-2.5 w-2.5 rounded-full ${autoSaving ? 'animate-pulse bg-tera-neon' : 'bg-white/20'}`} />
-            <span>{autoSaving ? 'Saving changes...' : 'Auto-save enabled'}</span>
+          <div className="tera-card flex items-center gap-3 px-4 py-3 sm:w-auto">
+            <span className={`h-2.5 w-2.5 rounded-full ${autoSaving ? 'animate-pulse bg-tera-accent' : 'bg-tera-secondary/40'}`} />
+            <span className="text-sm text-tera-secondary">{autoSaving ? 'Saving changes...' : 'Changes save automatically'}</span>
           </div>
         </div>
 
-        <div className="mt-8 grid gap-6 lg:grid-cols-[260px_1fr]">
-          <div className="tera-card h-fit p-3">
-            {[
-              { id: 'preferences', label: 'Preferences' },
-              { id: 'privacy', label: 'Privacy' },
-              { id: 'account', label: 'Account' },
-            ].map((item) => (
-              <button
-                key={item.id}
-                type="button"
-                onClick={() => setActiveTab(item.id as typeof activeTab)}
-                className={`flex w-full items-center justify-between rounded-[20px] px-4 py-3 text-left text-sm transition ${activeTab === item.id ? 'bg-white/[0.08] text-tera-primary' : 'text-tera-secondary hover:bg-white/[0.04] hover:text-tera-primary'}`}
-              >
-                <span>{item.label}</span>
-                {activeTab === item.id && <span className="h-2.5 w-2.5 rounded-full bg-tera-neon" />}
-              </button>
-            ))}
-          </div>
+        <div className="mt-8 grid gap-6 xl:grid-cols-[280px_minmax(0,1fr)]">
+          <aside className="tera-card h-fit p-3">
+            <p className="px-2 text-[0.68rem] uppercase tracking-[0.28em] text-tera-secondary">Sections</p>
+            <div className="mt-3 flex gap-2 overflow-x-auto pb-1 xl:flex-col xl:overflow-visible custom-scrollbar">
+              {tabs.map((item) => (
+                <button
+                  key={item.id}
+                  type="button"
+                  onClick={() => setActiveTab(item.id)}
+                  className={`min-w-fit rounded-full px-4 py-2.5 text-sm transition xl:flex xl:w-full xl:items-center xl:justify-between xl:rounded-[18px] xl:px-4 xl:py-3 xl:text-left ${activeTab === item.id ? 'bg-white/[0.08] text-tera-primary' : 'text-tera-secondary hover:bg-white/[0.04] hover:text-tera-primary'}`}
+                >
+                  <span>{item.label}</span>
+                  <span className={`hidden h-2.5 w-2.5 rounded-full xl:block ${activeTab === item.id ? 'bg-tera-accent' : 'bg-transparent'}`} />
+                </button>
+              ))}
+            </div>
+          </aside>
 
-          <div className="tera-surface p-6 md:p-8">
+          <section className="tera-surface p-5 sm:p-6 lg:p-8">
             {message && (
-              <div className={`mb-6 rounded-[20px] border px-4 py-3 text-sm ${messageType === 'success' ? 'border-tera-neon/20 bg-tera-highlight text-tera-primary' : 'border-red-500/30 bg-red-500/10 text-red-200'}`}>
+              <div className={`mb-6 rounded-[20px] border px-4 py-3 text-sm ${messageType === 'success' ? 'border-tera-border bg-tera-highlight text-tera-primary' : 'border-red-500/30 bg-red-500/10 text-red-200'}`}>
                 {message}
               </div>
             )}
@@ -216,79 +224,104 @@ export default function SettingsPage() {
               <div className="space-y-6">
                 {activeTab === 'preferences' && (
                   <>
-                    <div>
+                    <div className="space-y-3">
                       <p className="tera-eyebrow">Preferences</p>
-                      <h2 className="mt-3 text-2xl font-semibold text-tera-primary">Notifications and appearance</h2>
+                      <h2 className="text-2xl font-semibold tracking-[-0.03em] text-tera-primary">Notifications and appearance</h2>
+                      <p className="max-w-2xl text-sm leading-7 text-tera-secondary">Keep the essentials visible, simplify the signal, and switch the whole app between light and dark themes instantly.</p>
                     </div>
-                    <SettingToggle label="Push notifications" description="Receive updates about your activities and account events." checked={settings.notifications_enabled} onChange={() => toggleSetting('notifications_enabled')} />
-                    <SettingToggle label="Email notifications" description="Receive important product and account updates by email." checked={settings.email_notifications} onChange={() => toggleSetting('email_notifications')} />
-                    <SettingToggle label="Marketing emails" description="Allow occasional feature announcements and product tips." checked={settings.marketing_emails} onChange={() => toggleSetting('marketing_emails')} />
-                    <SettingToggle label="Dark mode" description="Use the redesigned dark interface across the app." checked={settings.dark_mode} onChange={() => toggleSetting('dark_mode')} />
+                    <div className="grid gap-4">
+                      <SettingToggle label="Push notifications" description="Receive updates about your activities and account events." checked={settings.notifications_enabled} onChange={() => toggleSetting('notifications_enabled')} />
+                      <SettingToggle label="Email notifications" description="Receive important product and account updates by email." checked={settings.email_notifications} onChange={() => toggleSetting('email_notifications')} />
+                      <SettingToggle label="Marketing emails" description="Allow occasional feature announcements and product tips." checked={settings.marketing_emails} onChange={() => toggleSetting('marketing_emails')} />
+                      <SettingToggle label="Dark mode" description="Use the calmer dark workspace across the entire app." checked={settings.dark_mode} onChange={() => toggleSetting('dark_mode')} />
+                    </div>
                   </>
                 )}
 
                 {activeTab === 'privacy' && (
                   <>
-                    <div>
+                    <div className="space-y-3">
                       <p className="tera-eyebrow">Privacy</p>
-                      <h2 className="mt-3 text-2xl font-semibold text-tera-primary">Retention and policy controls</h2>
+                      <h2 className="text-2xl font-semibold tracking-[-0.03em] text-tera-primary">Retention and policy controls</h2>
+                      <p className="max-w-2xl text-sm leading-7 text-tera-secondary">Choose the cleanup window for removed data and keep policy links easy to review from any device.</p>
                     </div>
-                    <div className="rounded-[22px] border border-tera-border bg-white/[0.03] px-5 py-4">
-                      <p className="text-sm font-medium text-tera-primary">Data retention</p>
-                      <p className="mt-1 text-sm leading-6 text-tera-secondary">Choose how long deleted data remains in our systems before cleanup.</p>
-                      <select
-                        value={settings.data_retention_days}
-                        onChange={(event) => updateSetting('data_retention_days', Number(event.target.value))}
-                        className="tera-input mt-4 w-full max-w-xs"
-                      >
-                        <option value={7}>7 days</option>
-                        <option value={30}>30 days</option>
-                        <option value={90}>90 days</option>
-                        <option value={180}>6 months</option>
-                        <option value={365}>1 year</option>
-                      </select>
-                    </div>
-                    <div className="rounded-[22px] border border-tera-border bg-white/[0.03] px-5 py-4">
-                      <p className="text-sm font-medium text-tera-primary">Privacy policy</p>
-                      <p className="mt-1 text-sm leading-6 text-tera-secondary">Read how Tera handles account data, uploads, and third-party providers.</p>
-                      <Link href="/privacy" className="tera-button-secondary mt-4">Open privacy policy</Link>
+
+                    <div className="grid gap-4 lg:grid-cols-2">
+                      <div className="rounded-[22px] border border-tera-border bg-white/[0.03] px-4 py-4 sm:px-5">
+                        <p className="text-sm font-medium text-tera-primary">Data retention</p>
+                        <p className="mt-1 text-sm leading-6 text-tera-secondary">Choose how long deleted data remains in our systems before cleanup.</p>
+                        <select
+                          value={settings.data_retention_days}
+                          onChange={(event) => updateSetting('data_retention_days', Number(event.target.value))}
+                          className="tera-input mt-4 w-full"
+                        >
+                          <option value={7}>7 days</option>
+                          <option value={30}>30 days</option>
+                          <option value={90}>90 days</option>
+                          <option value={180}>6 months</option>
+                          <option value={365}>1 year</option>
+                        </select>
+                      </div>
+
+                      <div className="rounded-[22px] border border-tera-border bg-white/[0.03] px-4 py-4 sm:px-5">
+                        <p className="text-sm font-medium text-tera-primary">Privacy policy</p>
+                        <p className="mt-1 text-sm leading-6 text-tera-secondary">Review how Tera handles account data, uploads, and third-party providers.</p>
+                        <Link href="/privacy" className="tera-button-secondary mt-4 w-full justify-center sm:w-auto">
+                          Open privacy policy
+                        </Link>
+                      </div>
                     </div>
                   </>
                 )}
 
                 {activeTab === 'account' && (
                   <>
-                    <div>
+                    <div className="space-y-3">
                       <p className="tera-eyebrow">Account</p>
-                      <h2 className="mt-3 text-2xl font-semibold text-tera-primary">Profile and subscription</h2>
+                      <h2 className="text-2xl font-semibold tracking-[-0.03em] text-tera-primary">Profile and subscription</h2>
+                      <p className="max-w-2xl text-sm leading-7 text-tera-secondary">See your current plan, open billing actions, and manage the active session without extra clutter.</p>
                     </div>
-                    <div className="rounded-[22px] border border-tera-border bg-white/[0.03] px-5 py-4">
-                      <p className="text-[0.68rem] uppercase tracking-[0.22em] text-tera-secondary">Email</p>
-                      <p className="mt-2 text-sm font-medium text-tera-primary">{user?.email || 'Unavailable'}</p>
+
+                    <div className="grid gap-4 lg:grid-cols-2">
+                      <div className="rounded-[22px] border border-tera-border bg-white/[0.03] px-4 py-4 sm:px-5">
+                        <p className="text-[0.68rem] uppercase tracking-[0.22em] text-tera-secondary">Email</p>
+                        <p className="mt-2 break-all text-sm font-medium text-tera-primary">{user?.email || 'Unavailable'}</p>
+                      </div>
+
+                      <div className="rounded-[22px] border border-tera-border bg-white/[0.03] px-4 py-4 sm:px-5">
+                        <p className="text-[0.68rem] uppercase tracking-[0.22em] text-tera-secondary">Plan</p>
+                        <p className="mt-2 text-sm font-medium text-tera-primary">
+                          {userProfile?.subscriptionPlan === 'free' ? 'Free plan' : userProfile?.subscriptionPlan ?? 'Unknown'}
+                        </p>
+                        <p className="mt-1 text-sm leading-6 text-tera-secondary">
+                          {userProfile?.subscriptionPlan === 'free' ? 'You are currently on the free plan.' : 'Billing and subscription controls are available below.'}
+                        </p>
+                      </div>
                     </div>
-                    <div className="rounded-[22px] border border-tera-border bg-white/[0.03] px-5 py-4">
-                      <p className="text-sm font-medium text-tera-primary">Subscription</p>
-                      <p className="mt-1 text-sm leading-6 text-tera-secondary">
-                        {userProfile?.subscriptionPlan === 'free' ? 'You are currently on the free plan.' : `Current plan: ${userProfile?.subscriptionPlan ?? 'unknown'}`}
-                      </p>
-                      <div className="mt-4 flex flex-wrap gap-3">
+
+                    <div className="rounded-[22px] border border-tera-border bg-white/[0.03] px-4 py-4 sm:px-5">
+                      <p className="text-sm font-medium text-tera-primary">Billing and access</p>
+                      <p className="mt-1 text-sm leading-6 text-tera-secondary">Open upgrade or billing management without leaving the settings flow.</p>
+                      <div className="mt-4 flex flex-col gap-3 sm:flex-row">
                         {userProfile?.subscriptionPlan === 'free' ? (
-                          <Link href="/pricing" className="tera-button-primary">Upgrade</Link>
+                          <Link href="/pricing" className="tera-button-primary w-full justify-center sm:w-auto">
+                            Upgrade plan
+                          </Link>
                         ) : (
-                          <button type="button" onClick={handleManageSubscription} disabled={portalLoading} className="tera-button-secondary disabled:opacity-60">
+                          <button type="button" onClick={handleManageSubscription} disabled={portalLoading} className="tera-button-secondary w-full justify-center disabled:opacity-60 sm:w-auto">
                             {portalLoading ? 'Loading...' : 'Manage subscription'}
                           </button>
                         )}
+                        <button type="button" onClick={signOut} className="tera-button-secondary w-full justify-center sm:w-auto">
+                          Sign out
+                        </button>
                       </div>
-                    </div>
-                    <div className="flex flex-wrap gap-3">
-                      <button type="button" onClick={signOut} className="tera-button-secondary">Sign out</button>
                     </div>
                   </>
                 )}
               </div>
             )}
-          </div>
+          </section>
         </div>
       </div>
     </div>
