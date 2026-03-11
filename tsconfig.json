@@ -1,4 +1,4 @@
-{
+﻿{
   "compilerOptions": {
     "target": "ES2022",
     "module": "ESNext",
@@ -44,9 +44,5 @@
     ".next/types/**/*.ts",
     ".next/dev/types/**/*.ts"
   ],
-  "exclude": [
-    "node_modules",
-    "backend-server",
-    "mobile"
-  ]
+  "exclude": [`r`n    "node_modules",`r`n    "backend-server",`r`n    "mobile",`r`n    "remotion",`r`n    "scripts"`r`n  ]
 }
