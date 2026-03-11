@@ -9,7 +9,7 @@
     "build": "next build --webpack",
     "start": "next start",
     "lint": "next lint",
-    "type-check": "tsc --noEmit",
+    "type-check": "tsc --noEmit -p tsconfig.typecheck.json",
     "remotion:preview": "remotion preview remotion/composition.ts",
     "remotion:render": "remotion render remotion/composition.ts TeraDemoVideo output.mp4"
   },
@@ -49,4 +49,5 @@
     "typescript": "^5.9.3"
   }
 }
+
 

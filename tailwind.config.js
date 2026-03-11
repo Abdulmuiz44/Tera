@@ -22,12 +22,12 @@ export default {
         'tera-input': 'var(--bg-tera-input)'
       },
       fontFamily: {
-        sans: ['Aptos', 'Segoe UI Variable Display', 'Inter', 'ui-sans-serif', 'system-ui']
+        sans: ['Manrope', 'Segoe UI Variable Display', 'Inter', 'ui-sans-serif', 'system-ui']
       },
       boxShadow: {
         'soft-lg': 'var(--shadow-tera-soft)',
         'panel': 'var(--shadow-tera-panel)',
-        'glow-md': '0 18px 44px rgba(183, 219, 255, 0.14)'
+        'glow-md': '0 18px 44px rgba(219, 188, 142, 0.16)'
       },
       animation: {
         'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite'

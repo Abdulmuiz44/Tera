@@ -23,38 +23,9 @@ interface UserMenuProps {
 }
 
 const menuItems = [
-  {
-    label: 'Pricing',
-    href: '/pricing',
-    icon: (
-      <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-        <rect x="3.5" y="5" width="17" height="14" rx="2.5" />
-        <path d="M3.5 10h17" />
-        <path d="M8 15h2.5" />
-      </svg>
-    ),
-  },
-  {
-    label: 'Settings',
-    href: '/settings',
-    icon: (
-      <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M12 3.75 14 5l2.4-.35 1.15 2.15 2.1 1.2-.35 2.4L20.25 12l-.95 1.6.35 2.4-2.1 1.2-1.15 2.15L14 19l-2 1.25L10 19l-2.4.35-1.15-2.15-2.1-1.2.35-2.4L3.75 12l.95-1.6-.35-2.4 2.1-1.2L7.6 4.65 10 5l2-1.25Z" />
-        <circle cx="12" cy="12" r="3.1" />
-      </svg>
-    ),
-  },
-  {
-    label: 'About',
-    href: '/about',
-    icon: (
-      <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-        <circle cx="12" cy="12" r="9" />
-        <path d="M12 10v5" />
-        <path d="M12 7.5h.01" />
-      </svg>
-    ),
-  },
+  { label: 'Pricing', href: '/pricing' },
+  { label: 'Settings', href: '/settings' },
+  { label: 'About', href: '/about' },
 ]
 
 export default function UserMenu({ user, expanded, onSignOut }: UserMenuProps) {
@@ -80,16 +51,16 @@ export default function UserMenu({ user, expanded, onSignOut }: UserMenuProps) {
   if (!user) {
     return expanded ? (
       <div className="grid grid-cols-2 gap-2">
-        <Link href="/auth/signin" className="tera-button-secondary justify-center rounded-2xl px-3 py-3 text-sm">
+        <Link href="/auth/signin" className="tera-button-secondary justify-center rounded-[20px] px-3 py-3 text-sm">
           Log in
         </Link>
-        <Link href="/auth/signup" className="tera-button-primary justify-center rounded-2xl px-3 py-3 text-sm">
+        <Link href="/auth/signup" className="tera-button-primary justify-center rounded-[20px] px-3 py-3 text-sm">
           Sign up
         </Link>
       </div>
     ) : (
       <div className="flex justify-center">
-        <Link href="/auth/signin" className="tera-icon-button h-12 w-12 rounded-2xl" title="Log in">
+        <Link href="/auth/signin" className="tera-icon-button h-12 w-12 rounded-[18px]" title="Log in">
           <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
             <path d="M14 7h3a2 2 0 0 1 2 2v6a2 2 0 0 1-2 2h-3" />
             <path d="M10 17 15 12 10 7" />
@@ -113,10 +84,10 @@ export default function UserMenu({ user, expanded, onSignOut }: UserMenuProps) {
   return (
     <div className="relative" ref={dropdownRef}>
       {dropdownOpen && (
-        <div className={`absolute bottom-full mb-3 w-[290px] overflow-hidden rounded-[26px] border border-tera-border bg-tera-elevated/95 shadow-panel backdrop-blur-2xl ${expanded ? 'left-0' : 'left-1/2 -translate-x-1/2'}`}>
+        <div className={`absolute bottom-full mb-3 w-[292px] overflow-hidden rounded-[26px] border border-tera-border bg-tera-elevated/96 shadow-panel backdrop-blur-xl ${expanded ? 'left-0' : 'left-1/2 -translate-x-1/2'}`}>
           <div className="border-b border-tera-border px-4 py-4">
             <div className="flex items-center gap-3">
-              <div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-white/10 bg-gradient-to-br from-tera-neon/20 to-white/[0.04] text-sm font-semibold text-tera-primary">
+              <div className="flex h-11 w-11 items-center justify-center rounded-[16px] border border-tera-border bg-tera-highlight text-sm font-semibold text-tera-primary">
                 {initials}
               </div>
               <div className="min-w-0 flex-1">
@@ -126,15 +97,15 @@ export default function UserMenu({ user, expanded, onSignOut }: UserMenuProps) {
             </div>
           </div>
 
-          <div className="border-b border-tera-border px-4 py-3">
-            <div className="flex items-center justify-between gap-3 rounded-[18px] border border-white/8 bg-white/[0.03] px-3 py-3">
-              <div>
-                <p className="text-[0.62rem] uppercase tracking-[0.3em] text-tera-secondary">Plan</p>
-                <p className="mt-1 text-sm font-medium text-tera-primary">{plan}</p>
+          <div className="border-b border-tera-border px-4 py-4">
+            <div className="rounded-[18px] border border-tera-border bg-white/[0.03] px-4 py-3">
+              <p className="text-[0.68rem] uppercase tracking-[0.22em] text-tera-secondary">Current plan</p>
+              <div className="mt-2 flex items-center justify-between gap-3">
+                <p className="text-sm font-medium text-tera-primary">{plan}</p>
+                <Link href="/pricing" className="tera-button-primary rounded-full px-3 py-2 text-xs">
+                  Upgrade
+                </Link>
               </div>
-              <Link href="/pricing" className="tera-button-primary rounded-2xl px-3 py-2 text-xs">
-                Upgrade
-              </Link>
             </div>
           </div>
 
@@ -146,10 +117,7 @@ export default function UserMenu({ user, expanded, onSignOut }: UserMenuProps) {
                 className="flex items-center justify-between rounded-[18px] px-3 py-3 text-sm text-tera-primary transition hover:bg-white/[0.05]"
                 onClick={() => setDropdownOpen(false)}
               >
-                <span className="flex items-center gap-3">
-                  <span className="text-tera-secondary">{item.icon}</span>
-                  <span>{item.label}</span>
-                </span>
+                <span>{item.label}</span>
                 <svg className="h-4 w-4 text-tera-secondary" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
                   <path d="m9 6 6 6-6 6" />
                 </svg>
@@ -180,9 +148,9 @@ export default function UserMenu({ user, expanded, onSignOut }: UserMenuProps) {
       <button
         type="button"
         onClick={() => setDropdownOpen((current) => !current)}
-        className={`flex w-full items-center gap-3 rounded-[22px] border border-tera-border bg-white/[0.04] px-3 py-3 text-left transition hover:border-white/16 hover:bg-white/[0.06] ${expanded ? '' : 'justify-center'}`}
+        className={`flex w-full items-center gap-3 rounded-[22px] border border-tera-border bg-white/[0.03] px-3 py-3 text-left transition hover:border-tera-border/90 hover:bg-white/[0.05] ${expanded ? '' : 'justify-center'}`}
       >
-        <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-white/10 bg-gradient-to-br from-tera-neon/20 to-white/[0.04] text-sm font-semibold text-tera-primary">
+        <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-[16px] border border-tera-border bg-tera-highlight text-sm font-semibold text-tera-primary">
           {initials}
         </div>
 

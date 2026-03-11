@@ -122,32 +122,18 @@ export default function Sidebar({ expanded, onToggle, onNewChat, user, onSignOut
   const isToolsRoute = pathname?.startsWith('/tools')
 
   return (
-    <aside
-      className={`fixed inset-y-0 left-0 z-50 p-3 transition-all duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] ${expanded ? 'w-[320px] translate-x-0' : '-translate-x-full md:w-[92px] md:translate-x-0'}`}
-    >
-      <div className="flex h-full flex-col rounded-[28px] border border-tera-border bg-tera-panel/85 backdrop-blur-2xl shadow-panel">
-        <div className="flex items-center justify-between gap-3 border-b border-tera-border/80 px-4 py-4">
-          <Link href="/new" className={`group flex min-w-0 items-center gap-3 overflow-hidden ${expanded ? '' : 'md:justify-center'}`}>
-            <div className="relative flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-white/10 bg-white/[0.04]">
-              <Image
-                src="/images/TERA_LOGO_ONLY1.png"
-                alt="Tera"
-                fill
-                className="object-contain p-2 block dark:hidden"
-                priority
-              />
-              <Image
-                src="/images/TERA_LOGO_ONLY.png"
-                alt="Tera"
-                fill
-                className="object-contain p-2 hidden dark:block"
-                priority
-              />
+    <aside className={`fixed inset-y-0 left-0 z-50 p-3 transition-all duration-300 ${expanded ? 'w-[312px] translate-x-0' : '-translate-x-full md:w-[104px] md:translate-x-0'}`}>
+      <div className="flex h-full flex-col rounded-[30px] border border-tera-border bg-tera-panel/90 p-3 backdrop-blur-xl shadow-panel">
+        <div className={`flex items-center gap-3 rounded-[24px] px-2 py-2 ${expanded ? 'justify-between' : 'justify-center md:flex-col md:gap-4'}`}>
+          <Link href="/new" className={`group flex min-w-0 items-center gap-3 ${expanded ? '' : 'md:flex-col'}`}>
+            <div className="relative flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-[18px] border border-tera-border bg-white/[0.03]">
+              <Image src="/images/TERA_LOGO_ONLY1.png" alt="Tera" fill className="block object-contain p-2 dark:hidden" priority />
+              <Image src="/images/TERA_LOGO_ONLY.png" alt="Tera" fill className="hidden object-contain p-2 dark:block" priority />
             </div>
             {expanded && (
               <div className="min-w-0">
-                <p className="text-[0.62rem] uppercase tracking-[0.36em] text-tera-secondary">Tera</p>
-                <p className="truncate text-sm font-medium text-tera-primary">Dark Workspace</p>
+                <p className="text-[0.68rem] uppercase tracking-[0.28em] text-tera-secondary">Tera</p>
+                <p className="mt-1 truncate text-sm font-medium text-tera-primary">Focused workspace</p>
               </div>
             )}
           </Link>
@@ -155,7 +141,7 @@ export default function Sidebar({ expanded, onToggle, onNewChat, user, onSignOut
           <button
             type="button"
             onClick={onToggle}
-            className="tera-icon-button h-10 w-10 shrink-0"
+            className="tera-icon-button h-11 w-11 shrink-0 rounded-2xl"
             aria-label={expanded ? 'Collapse sidebar' : 'Expand sidebar'}
           >
             <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
@@ -175,31 +161,29 @@ export default function Sidebar({ expanded, onToggle, onNewChat, user, onSignOut
           </button>
         </div>
 
-        <div className="px-3 pt-3">
+        <div className="mt-3">
           <button
             type="button"
             onClick={onNewChat}
-            className={expanded ? 'tera-button-primary w-full justify-start rounded-2xl px-4 py-3' : 'tera-icon-button h-12 w-12 rounded-2xl md:mx-auto'}
+            className={expanded ? 'tera-button-primary w-full justify-between rounded-[22px] px-4 py-3' : 'tera-icon-button mx-auto h-12 w-12 rounded-[18px]'}
             title="Start new chat"
           >
-            <svg className="h-5 w-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M12 5v14" />
-              <path d="M5 12h14" />
-            </svg>
-            {expanded && <span>New chat</span>}
+            <span className="flex items-center gap-2">
+              <svg className="h-5 w-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M12 5v14" />
+                <path d="M5 12h14" />
+              </svg>
+              {expanded && <span>New chat</span>}
+            </span>
+            {expanded && <span className="text-[0.65rem] uppercase tracking-[0.22em] opacity-70">N</span>}
           </button>
         </div>
 
-        <div className="px-3 py-5">
-          {expanded && <p className="px-2 text-[0.62rem] uppercase tracking-[0.36em] text-tera-secondary">Navigate</p>}
+        <div className="mt-5 flex-1 overflow-y-auto px-1 custom-scrollbar">
+          {expanded && <p className="px-3 text-[0.68rem] uppercase tracking-[0.28em] text-tera-secondary">Navigation</p>}
           <nav className="mt-3 flex flex-col gap-1.5">
             {navigation.map((item) => {
-              const isActive =
-                item.href === '/new'
-                  ? pathname?.startsWith('/new')
-                  : item.href === '/tools'
-                    ? isToolsRoute
-                    : pathname === item.href
+              const isActive = item.href === '/new' ? pathname?.startsWith('/new') : item.href === '/tools' ? isToolsRoute : pathname === item.href
 
               return (
                 <Link
@@ -211,19 +195,14 @@ export default function Sidebar({ expanded, onToggle, onNewChat, user, onSignOut
                       onNewChat()
                     }
                   }}
-                  className={`group relative flex min-h-12 items-center gap-3 overflow-hidden rounded-[18px] px-3 py-3 text-sm transition ${isActive ? 'border border-white/10 bg-white/[0.08] text-tera-primary shadow-[inset_0_1px_0_rgba(255,255,255,0.06)]' : 'border border-transparent text-tera-secondary hover:border-white/8 hover:bg-white/[0.05] hover:text-tera-primary'}`}
+                  className={`group relative flex min-h-12 items-center gap-3 rounded-[18px] px-3 py-3 text-sm transition ${isActive ? 'border border-tera-border bg-white/[0.07] text-tera-primary' : 'border border-transparent text-tera-secondary hover:border-tera-border hover:bg-white/[0.04] hover:text-tera-primary'}`}
                 >
-                  <div className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl ${isActive ? 'bg-tera-highlight text-tera-neon' : 'bg-white/[0.03]'}`}>
+                  <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-[16px] ${isActive ? 'bg-tera-highlight text-tera-accent' : 'bg-white/[0.03]'}`}>
                     {getIcon(item.icon)}
                   </div>
                   {expanded && <span className="flex-1 font-medium">{item.label}</span>}
-                  {expanded && (
-                    <svg className={`h-4 w-4 transition ${isActive ? 'text-tera-neon' : 'text-transparent group-hover:text-tera-secondary'}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="m9 6 6 6-6 6" />
-                    </svg>
-                  )}
                   {!expanded && (
-                    <span className="pointer-events-none absolute left-full ml-3 rounded-full border border-tera-border bg-tera-elevated px-3 py-1.5 text-xs uppercase tracking-[0.22em] text-tera-primary opacity-0 shadow-soft-lg transition group-hover:opacity-100 md:block">
+                    <span className="pointer-events-none absolute left-full ml-3 hidden rounded-full border border-tera-border bg-tera-elevated px-3 py-1.5 text-xs uppercase tracking-[0.18em] text-tera-primary opacity-0 shadow-soft-lg transition group-hover:opacity-100 md:block">
                       {item.label}
                     </span>
                   )}
@@ -233,13 +212,14 @@ export default function Sidebar({ expanded, onToggle, onNewChat, user, onSignOut
           </nav>
         </div>
 
-        <div className="mt-auto px-3 pb-3">
-          {expanded && (
-            <div className="mb-3 rounded-[22px] border border-white/8 bg-white/[0.04] px-4 py-4">
-              <p className="text-[0.62rem] uppercase tracking-[0.36em] text-tera-secondary">Tera UI</p>
-              <p className="mt-2 text-sm font-medium text-tera-primary">Search, write, organize, and build from one dark console.</p>
-            </div>
-          )}
+        {expanded && (
+          <div className="mt-4 rounded-[24px] border border-tera-border bg-white/[0.03] px-4 py-4">
+            <p className="text-[0.68rem] uppercase tracking-[0.28em] text-tera-secondary">System</p>
+            <p className="mt-2 text-sm leading-6 text-tera-primary">Search, write, and organize in one calm interface that stays usable on mobile.</p>
+          </div>
+        )}
+
+        <div className="mt-4">
           <UserMenu user={user || null} expanded={expanded} onSignOut={onSignOut || (() => {})} />
         </div>
       </div>
