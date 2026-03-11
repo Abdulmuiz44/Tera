@@ -141,22 +141,22 @@
   }
 
   .tera-surface {
-    @apply rounded-[30px] border border-tera-border bg-tera-panel/80 backdrop-blur-2xl;
+    @apply rounded-[30px] border border-tera-border bg-tera-panel backdrop-blur-2xl;
     box-shadow: var(--shadow-tera-panel);
   }
 
   .tera-surface-muted {
-    @apply rounded-[24px] border border-tera-border bg-tera-muted/80 backdrop-blur-xl;
+    @apply rounded-[24px] border border-tera-border bg-tera-muted backdrop-blur-xl;
     box-shadow: var(--shadow-tera-soft);
   }
 
   .tera-card {
-    @apply rounded-[24px] border border-tera-border bg-tera-panel/80 p-6 backdrop-blur-2xl;
+    @apply rounded-[24px] border border-tera-border bg-tera-panel p-6 backdrop-blur-2xl;
     box-shadow: var(--shadow-tera-soft);
   }
 
   .tera-card-subtle {
-    @apply rounded-[22px] border border-tera-border bg-tera-muted/65 backdrop-blur-xl;
+    @apply rounded-[22px] border border-tera-border bg-tera-muted backdrop-blur-xl;
   }
 
   .tera-button {
@@ -176,11 +176,13 @@
   }
 
   .tera-button-secondary {
-    @apply tera-button border border-tera-border bg-white/[0.04] text-tera-primary backdrop-blur-xl;
+    @apply tera-button border border-tera-border bg-transparent text-tera-primary backdrop-blur-xl;
+    background-color: rgba(255, 255, 255, 0.04);
   }
 
   .tera-button-secondary:hover {
-    @apply border-white/20 bg-white/[0.07];
+    @apply border-white text-tera-primary;
+    background-color: rgba(255, 255, 255, 0.07);
   }
 
   .tera-button-ghost {
@@ -192,24 +194,31 @@
   }
 
   .tera-icon-button {
-    @apply inline-flex h-10 w-10 items-center justify-center rounded-full border border-tera-border bg-white/[0.04] text-tera-secondary transition;
+    @apply inline-flex h-10 w-10 items-center justify-center rounded-full border border-tera-border bg-transparent text-tera-secondary transition;
+    background-color: rgba(255, 255, 255, 0.04);
   }
 
   .tera-icon-button:hover {
-    @apply border-white/20 bg-white/[0.07] text-tera-primary;
+    @apply border-white text-tera-primary;
+    background-color: rgba(255, 255, 255, 0.07);
   }
 
   .tera-input {
-    @apply rounded-2xl border border-tera-border bg-tera-input px-4 py-3 text-tera-primary placeholder:text-tera-secondary/70 focus:border-tera-neon focus:outline-none;
+    @apply rounded-2xl border border-tera-border bg-tera-input px-4 py-3 text-tera-primary focus:border-tera-neon focus:outline-none;
     box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03);
   }
 
+  .tera-input::placeholder {
+    color: rgba(214, 222, 236, 0.7);
+  }
+
   .tera-badge {
-    @apply inline-flex items-center gap-2 rounded-full border border-tera-border bg-white/[0.04] px-3 py-1 text-[0.68rem] uppercase tracking-[0.24em] text-tera-secondary;
+    @apply inline-flex items-center gap-2 rounded-full border border-tera-border bg-transparent px-3 py-1 text-[0.68rem] uppercase tracking-[0.24em] text-tera-secondary;
+    background-color: rgba(255, 255, 255, 0.04);
   }
 
   .tera-segmented {
-    @apply inline-flex items-center gap-1 rounded-full border border-tera-border bg-tera-panel/70 p-1 backdrop-blur-xl;
+    @apply inline-flex items-center gap-1 rounded-full border border-tera-border bg-tera-panel p-1 backdrop-blur-xl;
   }
 
   .tera-segmented-item {
@@ -217,12 +226,13 @@
   }
 
   .tera-segmented-item[data-active="true"] {
-    @apply bg-white/[0.07] text-tera-primary;
+    @apply text-tera-primary;
+    background-color: rgba(255, 255, 255, 0.07);
     box-shadow: 0 10px 28px rgba(2, 6, 14, 0.28);
   }
 
   .tera-prose {
-    @apply prose prose-invert max-w-none break-words text-tera-primary;
+    @apply max-w-none break-words text-tera-primary;
   }
 }
 
@@ -251,3 +261,4 @@
   border: 1px solid var(--border-tera);
   box-shadow: var(--shadow-tera-soft);
 }
+
