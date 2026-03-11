@@ -1,20 +1,20 @@
-import '@/styles/globals.css'
+﻿import '@/styles/globals.css'
 import type { ReactNode } from 'react'
 import { AuthProvider } from '@/components/AuthProvider'
 import AppLayout from '@/components/AppLayout'
-import { Analytics } from "@vercel/analytics/react"
+import { Analytics } from '@vercel/analytics/react'
 import { ThemeProvider } from '@/components/ThemeProvider'
 
 export const viewport = {
   width: 'device-width',
   initialScale: 1,
   maximumScale: 1,
-  themeColor: '#000000',
+  themeColor: '#06080d',
 }
 
 export const metadata = {
   title: 'Tera - Your AI Learning Companion for Anything',
-  description: 'Tera is your AI Learning Companion for anything — from school and work to skills, projects, and curiosity. Unlimited free conversations, homework help, skill building, and concept mastery.',
+  description: 'Tera is your AI Learning Companion for anything - from school and work to skills, projects, and curiosity. Unlimited free conversations, homework help, skill building, and concept mastery.',
   icons: {
     icon: [
       { url: '/favicon.ico', sizes: 'any' },
@@ -34,7 +34,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
       <head>
         {/* Favicon is handled by metadata */}
       </head>
-      <body className="bg-tera-bg text-tera-primary min-h-screen font-sans">
+      <body className="min-h-screen bg-tera-bg font-sans text-tera-primary antialiased">
         <AuthProvider>
           <ThemeProvider>
             <AppLayout>

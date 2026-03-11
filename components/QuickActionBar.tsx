@@ -1,8 +1,8 @@
-const quickActions = [
-  { label: 'Lesson Plan Generator', icon: '🗂️' },
-  { label: 'Worksheet & Quiz', icon: '📝' },
-  { label: 'Concept Explainer', icon: '🧠' },
-  { label: 'Rubric Builder', icon: '📊' }
+﻿const quickActions = [
+  { label: 'Lesson Plan Generator', note: 'Structure objectives, pacing, and checkpoints.' },
+  { label: 'Worksheet and Quiz', note: 'Build assessments with keys and variations.' },
+  { label: 'Concept Explainer', note: 'Turn difficult topics into stepwise explanations.' },
+  { label: 'Rubric Builder', note: 'Create consistent evaluation criteria quickly.' },
 ]
 
 export default function QuickActionBar() {
@@ -11,13 +11,17 @@ export default function QuickActionBar() {
       {quickActions.map((action) => (
         <button
           key={action.label}
-          className="flex items-center justify-between rounded-[26px] border border-white/5 bg-tera-panel px-5 py-4 text-left transition hover:border-tera-neon"
+          type="button"
+          className="group flex items-start justify-between rounded-[24px] border border-tera-border bg-tera-panel/75 px-5 py-5 text-left transition hover:border-white/16 hover:bg-tera-elevated/80"
         >
           <div>
-            <p className="text-sm uppercase tracking-[0.4em] text-white/50">Tool</p>
-            <p className="text-base font-semibold text-white">{action.label}</p>
+            <p className="text-[0.62rem] uppercase tracking-[0.32em] text-tera-secondary">Quick action</p>
+            <p className="mt-2 text-base font-semibold text-tera-primary">{action.label}</p>
+            <p className="mt-2 max-w-xs text-sm leading-6 text-tera-secondary">{action.note}</p>
           </div>
-          <span className="text-2xl">{action.icon}</span>
+          <svg className="mt-1 h-5 w-5 text-tera-secondary transition group-hover:text-tera-neon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+            <path d="m9 6 6 6-6 6" />
+          </svg>
         </button>
       ))}
     </div>
