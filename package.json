@@ -9,7 +9,9 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "type-check": "tsc --noEmit"
+    "type-check": "tsc --noEmit",
+    "remotion:preview": "remotion preview remotion/composition.ts",
+    "remotion:render": "remotion render remotion/composition.ts TeraDemoVideo output.mp4"
   },
   "keywords": [],
   "author": "",
@@ -34,9 +36,11 @@
     "rehype-katex": "^7.0.1",
     "remark-gfm": "^4.0.1",
     "remark-math": "^6.0.0",
+    "remotion": "^4.0.429",
     "zod": "^4.3.6"
   },
   "devDependencies": {
+    "@remotion/cli": "^4.0.429",
     "@types/react": "^19.2.7",
     "@types/react-dom": "^19.2.3",
     "autoprefixer": "^10.4.22",
