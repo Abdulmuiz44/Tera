@@ -14,7 +14,7 @@ export default function SignInPage() {
     setLoading(true)
 
     try {
-      await signIn('google', { callbackUrl: '/new', redirect: true })
+      const callbackUrl = `${window.location.origin}/new`; await signIn('google', { callbackUrl, redirect: true })
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Sign in failed')
       setLoading(false)
@@ -81,3 +81,5 @@ export default function SignInPage() {
     </div>
   )
 }
+
+
