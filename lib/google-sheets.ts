@@ -1,5 +1,6 @@
-import { google } from 'googleapis'
+﻿import { google } from 'googleapis'
 import { supabaseServer } from './supabase-server'
+import { resolveAppOrigin } from './url'
 
 const sheets = google.sheets('v4')
 const drive = google.drive('v3')
@@ -9,13 +10,13 @@ function getOAuth2Client(userId?: string) {
   const client = new google.auth.OAuth2(
     process.env.GOOGLE_CLIENT_ID,
     process.env.GOOGLE_CLIENT_SECRET,
-    `${process.env.NEXTAUTH_URL || 'http://localhost:3000'}/api/auth/google/callback`
+    `${resolveAppOrigin()}/api/auth/google/callback`
   )
 
   // If userId is provided, listen for token updates and save them
   if (userId) {
     (client as any).on('tokens', async (tokens: any) => {
-      console.log('🔄 Google tokens refreshed automatically')
+      console.log('ðŸ”„ Google tokens refreshed automatically')
       if (tokens.access_token) {
         // We need the existing refresh token if the new one is missing
         let refreshToken = tokens.refresh_token
@@ -27,7 +28,7 @@ function getOAuth2Client(userId?: string) {
 
         if (refreshToken) {
           await saveGoogleTokens(userId, tokens.access_token, refreshToken)
-          console.log('✅ Refreshed Google tokens saved to DB')
+          console.log('âœ… Refreshed Google tokens saved to DB')
         }
       }
     })
@@ -314,3 +315,4 @@ export async function deleteSpreadsheetReference(userId: string, spreadsheetId: 
 
   if (error) throw error
 }
+

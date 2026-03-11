@@ -41,8 +41,13 @@
     "**/*.ts",
     "**/*.tsx",
     "**/*.js",
-    ".next/types/**/*.ts",
-    ".next/dev/types/**/*.ts"
+    ".next/types/**/*.ts"
   ],
-  "exclude": [`r`n    "node_modules",`r`n    "backend-server",`r`n    "mobile",`r`n    "remotion",`r`n    "scripts"`r`n  ]
+  "exclude": [
+    "node_modules",
+    "backend-server",
+    "mobile",
+    "remotion",
+    "scripts"
+  ]
 }

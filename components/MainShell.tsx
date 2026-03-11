@@ -1,4 +1,4 @@
-"use client"
+﻿"use client"
 
 import { useState, useEffect, Suspense } from 'react'
 import { useRouter } from 'next/navigation'
@@ -64,7 +64,7 @@ function MainShellContent() {
   const handleGoogleSignIn = async () => {
     setAuthLoading(true)
     try {
-      await signIn('google', { callbackUrl: '/new' })
+      const callbackUrl = `${window.location.origin}/new`; await signIn('google', { callbackUrl })
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Unable to sign in with Google'
       setAuthMessage(message)
@@ -141,7 +141,7 @@ function MainShellContent() {
               <div className="flex items-center justify-between text-xs uppercase tracking-[0.4em] text-tera-secondary">
                 <span>{authDialog === 'signIn' ? 'Log In' : 'Sign Up'}</span>
                 <button className="text-tera-secondary hover:text-tera-primary" onClick={() => setAuthDialog(null)}>
-                  ✕
+                  âœ•
                 </button>
               </div>
               <p className="mt-4 text-sm text-tera-primary/80">
@@ -198,3 +198,5 @@ export default function MainShell() {
     </Suspense>
   )
 }
+
+
