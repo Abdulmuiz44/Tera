@@ -1,198 +1,203 @@
-'use client'
+﻿'use client'
 
 import { useState, useRef, useEffect } from 'react'
 import Link from 'next/link'
-import Image from 'next/image'
-// Replaced Supabase User with compatible NextAuth interface
+
 type User = {
-    id: string
-    email?: string | null
-    user_metadata?: {
-        full_name?: string
-        plan?: string
-        subscription_plan?: string
-        [key: string]: any
-    } | null
-    name?: string | null
-    image?: string | null
+  id: string
+  email?: string | null
+  user_metadata?: {
+    full_name?: string
+    plan?: string
+    subscription_plan?: string
+    [key: string]: any
+  } | null
+  name?: string | null
+  image?: string | null
 }
 
 interface UserMenuProps {
-    user: User | null
-    expanded: boolean
-    onSignOut: () => void
+  user: User | null
+  expanded: boolean
+  onSignOut: () => void
 }
 
+const menuItems = [
+  {
+    label: 'Pricing',
+    href: '/pricing',
+    icon: (
+      <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+        <rect x="3.5" y="5" width="17" height="14" rx="2.5" />
+        <path d="M3.5 10h17" />
+        <path d="M8 15h2.5" />
+      </svg>
+    ),
+  },
+  {
+    label: 'Settings',
+    href: '/settings',
+    icon: (
+      <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M12 3.75 14 5l2.4-.35 1.15 2.15 2.1 1.2-.35 2.4L20.25 12l-.95 1.6.35 2.4-2.1 1.2-1.15 2.15L14 19l-2 1.25L10 19l-2.4.35-1.15-2.15-2.1-1.2.35-2.4L3.75 12l.95-1.6-.35-2.4 2.1-1.2L7.6 4.65 10 5l2-1.25Z" />
+        <circle cx="12" cy="12" r="3.1" />
+      </svg>
+    ),
+  },
+  {
+    label: 'About',
+    href: '/about',
+    icon: (
+      <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+        <circle cx="12" cy="12" r="9" />
+        <path d="M12 10v5" />
+        <path d="M12 7.5h.01" />
+      </svg>
+    ),
+  },
+]
+
 export default function UserMenu({ user, expanded, onSignOut }: UserMenuProps) {
-    const [dropdownOpen, setDropdownOpen] = useState(false)
-    const dropdownRef = useRef<HTMLDivElement>(null)
+  const [dropdownOpen, setDropdownOpen] = useState(false)
+  const dropdownRef = useRef<HTMLDivElement>(null)
 
-    // Close dropdown when clicking outside
-    useEffect(() => {
-        const handleClickOutside = (event: MouseEvent) => {
-            if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
-                setDropdownOpen(false)
-            }
-        }
-
-        if (dropdownOpen) {
-            document.addEventListener('mousedown', handleClickOutside)
-        }
-
-        return () => {
-            document.removeEventListener('mousedown', handleClickOutside)
-        }
-    }, [dropdownOpen])
-
-    if (!user) {
-        return (
-            <div className={`flex items-center gap-2 w-full ${!expanded ? 'flex-col justify-center' : ''}`}>
-                <Link
-                    href="/auth/signin"
-                    className={`flex-1 text-center px-3 py-2 rounded-lg bg-tera-neon/10 text-tera-neon font-medium text-sm transition-colors hover:bg-tera-neon/20 border border-tera-neon/30 ${!expanded ? 'flex-none' : ''}`}
-                >
-                    {expanded ? 'Login' : 'In'}
-                </Link>
-                <Link
-                    href="/auth/signup"
-                    className={`flex-1 text-center px-3 py-2 rounded-lg bg-tera-neon/10 text-tera-neon font-medium text-sm transition-colors hover:bg-tera-neon/20 border border-tera-neon/30 ${!expanded ? 'flex-none' : ''}`}
-                >
-                    {expanded ? 'Sign Up' : 'Up'}
-                </Link>
-            </div>
-        )
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setDropdownOpen(false)
+      }
     }
 
-    // Get user's first and last name initials from email
-    const email = user.email || ''
-    const name = user.user_metadata?.full_name || (email ? email.split('@')[0] : '') || 'User'
-    const initials = (name || 'User')
-        .split(' ')
-        .map((n: string) => n[0])
-        .join('')
-        .toUpperCase()
-        .slice(0, 2)
+    if (dropdownOpen) {
+      document.addEventListener('mousedown', handleClickOutside)
+    }
 
-    const menuItems = [
-        {
-            label: 'Upgrade plan',
-            icon: (
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
-                </svg>
-            ),
-            href: '/pricing'
-        },
-        {
-            label: 'Settings',
-            icon: (
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <circle cx="12" cy="12" r="3" />
-                    <path d="M12 1v6m0 6v6M4.22 4.22l4.24 4.24m2.12 2.12l4.24 4.24M1 12h6m6 0h6m-17.78 7.78l4.24-4.24m2.12-2.12l4.24-4.24" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" />
-                </svg>
-            ),
-            href: '/settings'
-        },
-        {
-            label: 'About',
-            icon: (
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <circle cx="12" cy="12" r="10" />
-                    <path d="M12 16v-4M12 8h.01" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" />
-                </svg>
-            ),
-            href: '/about',
-            hasChevron: false
-        },
-    ]
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside)
+    }
+  }, [dropdownOpen])
 
-    return (
-        <div className="relative" ref={dropdownRef}>
-            {/* Dropdown Menu */}
-            {dropdownOpen && (
-                <div className="absolute bottom-full left-0 mb-2 w-[280px] rounded-2xl border border-tera-border bg-tera-panel shadow-2xl backdrop-blur-xl overflow-hidden">
-                    {/* User Info Section */}
-                    <div className="flex items-center gap-3 px-4 py-4 border-b border-tera-border">
-                        <div className="flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br from-tera-neon/40 to-blue-500/40 text-tera-primary font-semibold">
-                            {initials}
-                        </div>
-                        <div className="flex-1 min-w-0">
-                            <div className="text-sm font-medium text-tera-primary truncate">{name}</div>
-                            <div className="text-xs text-tera-secondary truncate">@{email.split('@')[0]}</div>
-                        </div>
-                    </div>
-
-                    {/* Menu Items */}
-                    <div className="py-2">
-                        {menuItems.map((item) => (
-                            <Link
-                                key={item.label}
-                                href={item.href}
-                                className="flex items-center justify-between px-4 py-3 text-tera-primary hover:bg-tera-muted transition-colors"
-                                onClick={() => setDropdownOpen(false)}
-                            >
-                                <div className="flex items-center gap-3">
-                                    <div className="flex items-center justify-center w-4 h-4 text-tera-secondary">
-                                        {item.icon}
-                                    </div>
-                                    <span className="text-sm font-medium">{item.label}</span>
-                                </div>
-                                {item.hasChevron && <span className="text-tera-secondary/40">›</span>}
-                            </Link>
-                        ))}
-
-                        {/* Separator */}
-                        <div className="h-px bg-tera-border my-2" />
-
-                        {/* Logout */}
-                        <button
-                            onClick={() => {
-                                onSignOut()
-                                setDropdownOpen(false)
-                            }}
-                            className="flex items-center gap-3 px-4 py-3 text-tera-primary hover:bg-red-500/10 hover:text-red-400 transition-colors w-full text-left"
-                        >
-                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-                            </svg>
-                            <span className="text-sm font-medium">Log out</span>
-                        </button>
-                    </div>
-                </div>
-            )}
-
-            {/* User Profile Button */}
-            <button
-                onClick={() => setDropdownOpen(!dropdownOpen)}
-                className={`flex items-center gap-3 w-full rounded-xl border border-tera-border bg-tera-panel px-3 py-3 hover:bg-tera-muted transition-all text-tera-primary ${expanded ? '' : 'justify-center'
-                    }`}
-            >
-                {/* Avatar */}
-                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-tera-neon/40 to-blue-500/40 text-tera-primary font-semibold text-sm">
-                    {initials}
-                </div>
-
-                {/* User Info - Only visible when expanded */}
-                {expanded && (
-                    <>
-                        <div className="flex-1 min-w-0 text-left">
-                            <div className="text-sm font-medium text-tera-primary truncate max-w-[120px]">{name}</div>
-                            <div className="text-xs text-tera-secondary">
-                                {user.user_metadata?.plan || user.user_metadata?.subscription_plan || 'Free'}
-                            </div>
-                        </div>
-
-                        {/* Upgrade Button */}
-                        <Link
-                            href="/pricing"
-                            className="px-3 py-1.5 rounded-lg bg-black/5 hover:bg-black/10 dark:bg-white/10 dark:hover:bg-white/20 text-xs font-medium text-tera-primary transition-colors"
-                            onClick={(e) => e.stopPropagation()}
-                        >
-                            Upgrade
-                        </Link>
-                    </>
-                )}
-            </button>
-        </div>
+  if (!user) {
+    return expanded ? (
+      <div className="grid grid-cols-2 gap-2">
+        <Link href="/auth/signin" className="tera-button-secondary justify-center rounded-2xl px-3 py-3 text-sm">
+          Log in
+        </Link>
+        <Link href="/auth/signup" className="tera-button-primary justify-center rounded-2xl px-3 py-3 text-sm">
+          Sign up
+        </Link>
+      </div>
+    ) : (
+      <div className="flex justify-center">
+        <Link href="/auth/signin" className="tera-icon-button h-12 w-12 rounded-2xl" title="Log in">
+          <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M14 7h3a2 2 0 0 1 2 2v6a2 2 0 0 1-2 2h-3" />
+            <path d="M10 17 15 12 10 7" />
+            <path d="M15 12H4" />
+          </svg>
+        </Link>
+      </div>
     )
+  }
+
+  const email = user.email || ''
+  const name = user.user_metadata?.full_name || (email ? email.split('@')[0] : '') || user.name || 'User'
+  const initials = name
+    .split(' ')
+    .map((part) => part[0])
+    .join('')
+    .toUpperCase()
+    .slice(0, 2)
+  const plan = user.user_metadata?.plan || user.user_metadata?.subscription_plan || 'Free'
+
+  return (
+    <div className="relative" ref={dropdownRef}>
+      {dropdownOpen && (
+        <div className={`absolute bottom-full mb-3 w-[290px] overflow-hidden rounded-[26px] border border-tera-border bg-tera-elevated/95 shadow-panel backdrop-blur-2xl ${expanded ? 'left-0' : 'left-1/2 -translate-x-1/2'}`}>
+          <div className="border-b border-tera-border px-4 py-4">
+            <div className="flex items-center gap-3">
+              <div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-white/10 bg-gradient-to-br from-tera-neon/20 to-white/[0.04] text-sm font-semibold text-tera-primary">
+                {initials}
+              </div>
+              <div className="min-w-0 flex-1">
+                <p className="truncate text-sm font-medium text-tera-primary">{name}</p>
+                <p className="truncate text-xs text-tera-secondary">{email}</p>
+              </div>
+            </div>
+          </div>
+
+          <div className="border-b border-tera-border px-4 py-3">
+            <div className="flex items-center justify-between gap-3 rounded-[18px] border border-white/8 bg-white/[0.03] px-3 py-3">
+              <div>
+                <p className="text-[0.62rem] uppercase tracking-[0.3em] text-tera-secondary">Plan</p>
+                <p className="mt-1 text-sm font-medium text-tera-primary">{plan}</p>
+              </div>
+              <Link href="/pricing" className="tera-button-primary rounded-2xl px-3 py-2 text-xs">
+                Upgrade
+              </Link>
+            </div>
+          </div>
+
+          <div className="px-2 py-2">
+            {menuItems.map((item) => (
+              <Link
+                key={item.label}
+                href={item.href}
+                className="flex items-center justify-between rounded-[18px] px-3 py-3 text-sm text-tera-primary transition hover:bg-white/[0.05]"
+                onClick={() => setDropdownOpen(false)}
+              >
+                <span className="flex items-center gap-3">
+                  <span className="text-tera-secondary">{item.icon}</span>
+                  <span>{item.label}</span>
+                </span>
+                <svg className="h-4 w-4 text-tera-secondary" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="m9 6 6 6-6 6" />
+                </svg>
+              </Link>
+            ))}
+          </div>
+
+          <div className="border-t border-tera-border px-2 py-2">
+            <button
+              type="button"
+              onClick={() => {
+                onSignOut()
+                setDropdownOpen(false)
+              }}
+              className="flex w-full items-center gap-3 rounded-[18px] px-3 py-3 text-left text-sm text-red-300 transition hover:bg-red-500/10"
+            >
+              <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M14 7h3a2 2 0 0 1 2 2v6a2 2 0 0 1-2 2h-3" />
+                <path d="M10 17 15 12 10 7" />
+                <path d="M15 12H4" />
+              </svg>
+              <span>Sign out</span>
+            </button>
+          </div>
+        </div>
+      )}
+
+      <button
+        type="button"
+        onClick={() => setDropdownOpen((current) => !current)}
+        className={`flex w-full items-center gap-3 rounded-[22px] border border-tera-border bg-white/[0.04] px-3 py-3 text-left transition hover:border-white/16 hover:bg-white/[0.06] ${expanded ? '' : 'justify-center'}`}
+      >
+        <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-white/10 bg-gradient-to-br from-tera-neon/20 to-white/[0.04] text-sm font-semibold text-tera-primary">
+          {initials}
+        </div>
+
+        {expanded && (
+          <>
+            <div className="min-w-0 flex-1">
+              <p className="truncate text-sm font-medium text-tera-primary">{name}</p>
+              <p className="truncate text-xs text-tera-secondary">{plan} plan</p>
+            </div>
+            <svg className={`h-4 w-4 shrink-0 text-tera-secondary transition ${dropdownOpen ? 'rotate-180' : ''}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+              <path d="m6 9 6 6 6-6" />
+            </svg>
+          </>
+        )}
+      </button>
+    </div>
+  )
 }

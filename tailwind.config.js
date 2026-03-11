@@ -1,4 +1,4 @@
-/** @type {import('tailwindcss').Config} */
+﻿/** @type {import('tailwindcss').Config} */
 export default {
   darkMode: 'class',
   content: [
@@ -11,7 +11,9 @@ export default {
       colors: {
         'tera-bg': 'var(--bg-tera-bg)',
         'tera-panel': 'var(--bg-tera-panel)',
+        'tera-elevated': 'var(--bg-tera-panel-strong)',
         'tera-muted': 'var(--bg-tera-muted)',
+        'tera-highlight': 'var(--bg-tera-highlight)',
         'tera-border': 'var(--border-tera)',
         'tera-neon': 'var(--text-tera-accent)',
         'tera-primary': 'var(--text-tera-primary)',
@@ -20,11 +22,12 @@ export default {
         'tera-input': 'var(--bg-tera-input)'
       },
       fontFamily: {
-        sans: ['Inter', 'ui-sans-serif', 'system-ui']
+        sans: ['Aptos', 'Segoe UI Variable Display', 'Inter', 'ui-sans-serif', 'system-ui']
       },
       boxShadow: {
-        'soft-lg': '0 30px 70px rgba(0, 0, 0, 0.1)',
-        'glow-md': '0 0 20px rgba(0, 255, 170, 0.2)'
+        'soft-lg': 'var(--shadow-tera-soft)',
+        'panel': 'var(--shadow-tera-panel)',
+        'glow-md': '0 18px 44px rgba(183, 219, 255, 0.14)'
       },
       animation: {
         'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite'
@@ -36,4 +39,3 @@ export default {
   },
   plugins: []
 }
-

@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useEffect } from 'react'
 import { useAuth } from '@/components/AuthProvider'
@@ -14,7 +14,7 @@ export default function NotesPage() {
 
   useEffect(() => {
     if (user) {
-      loadNotes()
+      void loadNotes()
     }
   }, [user])
 
@@ -30,7 +30,6 @@ export default function NotesPage() {
     if (!newNote.trim() || !user) return
 
     const createdNote = await addNote(user.id, newNote)
-
     if (createdNote) {
       setNotes([createdNote, ...notes])
       setNewNote('')
@@ -42,9 +41,8 @@ export default function NotesPage() {
     if (!editingNote || !editingNote.content.trim() || !user) return
 
     const success = await updateNote(user.id, editingNote.id, editingNote.content)
-
     if (success) {
-      setNotes(notes.map((n) => (n.id === editingNote.id ? editingNote : n)))
+      setNotes(notes.map((note) => (note.id === editingNote.id ? editingNote : note)))
       setEditingNote(null)
     }
   }
@@ -52,117 +50,100 @@ export default function NotesPage() {
   const handleDeleteNote = async (id: string) => {
     if (!user) return
     const success = await deleteNote(user.id, id)
-
     if (success) {
-      setNotes(notes.filter((n) => n.id !== id))
+      setNotes(notes.filter((note) => note.id !== id))
     }
   }
 
   return (
-    <div className="flex min-h-screen w-full bg-tera-bg text-tera-primary relative overflow-hidden">
-
-      <main className="flex-1 flex flex-col h-screen overflow-hidden relative z-10">
-
-        {/* Top Bar */}
-        <div className="h-16 border-b border-tera-border flex items-center justify-between px-6 bg-tera-bg/80 backdrop-blur-md">
+    <div className="tera-page">
+      <div className="tera-page-shell pt-24 md:pt-10">
+        <div className="tera-page-header">
           <div>
-            <p className="text-xs uppercase tracking-[0.5em] text-tera-secondary">TERA</p>
-            <h1 className="text-3xl font-semibold leading-tight text-tera-primary">Notes</h1>
+            <p className="tera-eyebrow">Workspace</p>
+            <h1 className="tera-title mt-3">Notes</h1>
+            <p className="tera-subtitle mt-4">Capture quick ideas, snippets, and working thoughts without leaving the main Tera workspace.</p>
           </div>
-          <div className="flex items-center gap-4">
-            <button
-              onClick={() => setIsAdding(!isAdding)}
-              className="rounded-full border border-tera-border px-4 py-2 text-sm text-tera-primary transition hover:border-tera-neon"
-            >
-              {isAdding ? 'Cancel' : 'Add note'}
-            </button>
-          </div>
+          <button type="button" onClick={() => setIsAdding((current) => !current)} className={isAdding ? 'tera-button-secondary' : 'tera-button-primary'}>
+            {isAdding ? 'Cancel' : 'Add note'}
+          </button>
         </div>
 
-        <div className="flex-1 p-6 overflow-hidden">
-          <div className="h-full rounded-[28px] bg-tera-panel border border-tera-border p-6 shadow-glow-md overflow-y-auto">
-            <h2 className="text-xl font-semibold text-tera-primary mb-4">Save quick thoughts or reference snippets</h2>
+        <div className="tera-surface mt-8 p-6 md:p-8">
+          <div className="flex items-center justify-between gap-4 border-b border-tera-border pb-5">
+            <div>
+              <p className="text-[0.62rem] uppercase tracking-[0.3em] text-tera-secondary">Notebook</p>
+              <h2 className="mt-2 text-xl font-semibold text-tera-primary">Thoughts and references</h2>
+            </div>
+            <p className="text-sm text-tera-secondary">{notes.length} saved</p>
+          </div>
 
-            {isAdding && (
-              <div className="mb-6 rounded-lg bg-tera-muted p-4 border border-tera-neon/50">
-                <textarea
-                  value={newNote}
-                  onChange={(e) => setNewNote(e.target.value)}
-                  placeholder="Write your note here..."
-                  className="w-full bg-transparent text-tera-primary placeholder-tera-secondary focus:outline-none resize-none h-24"
-                />
-                <div className="mt-2 flex justify-end">
-                  <button
-                    onClick={handleAddNote}
-                    className="rounded-full bg-tera-panel border border-tera-border px-4 py-1 text-xs text-tera-primary hover:bg-tera-muted"
-                  >
-                    Save
-                  </button>
-                </div>
+          {isAdding && (
+            <div className="mt-6 rounded-[24px] border border-tera-neon/20 bg-tera-highlight p-5">
+              <textarea
+                value={newNote}
+                onChange={(event) => setNewNote(event.target.value)}
+                placeholder="Write your note here..."
+                className="min-h-28 w-full resize-none bg-transparent text-sm leading-7 text-tera-primary placeholder:text-tera-secondary focus:outline-none"
+              />
+              <div className="mt-4 flex justify-end">
+                <button type="button" onClick={handleAddNote} className="tera-button-primary">
+                  Save note
+                </button>
               </div>
-            )}
+            </div>
+          )}
 
-            <div className="space-y-4">
-              {loading ? (
-                <p className="text-tera-secondary">Loading notes...</p>
-              ) : notes.length === 0 && !isAdding ? (
-                <div className="rounded-lg bg-tera-muted p-4">
-                  <p className="text-tera-secondary">No notes yet. Capture your first idea.</p>
-                </div>
-              ) : (
-                notes.map((note) => (
-                  <div key={note.id} className="group relative rounded-lg bg-tera-muted p-4 border border-tera-border hover:border-tera-accent transition">
-                    {editingNote?.id === note.id ? (
-                      <div>
-                        <textarea
-                          value={editingNote.content}
-                          onChange={(e) => setEditingNote({ ...editingNote, content: e.target.value })}
-                          className="w-full bg-transparent text-tera-primary focus:outline-none resize-none h-24"
-                        />
-                        <div className="mt-2 flex justify-end gap-2">
-                          <button
-                            onClick={() => setEditingNote(null)}
-                            className="text-xs text-tera-secondary hover:text-tera-primary"
-                          >
-                            Cancel
-                          </button>
-                          <button
-                            onClick={handleUpdateNote}
-                            className="rounded-full bg-tera-panel border border-tera-border px-3 py-1 text-xs text-tera-primary hover:bg-tera-muted"
-                          >
-                            Update
-                          </button>
-                        </div>
+          <div className="mt-6 space-y-4">
+            {loading ? (
+              <p className="text-sm text-tera-secondary">Loading notes...</p>
+            ) : notes.length === 0 && !isAdding ? (
+              <div className="rounded-[24px] border border-tera-border bg-white/[0.03] px-5 py-6 text-sm text-tera-secondary">
+                No notes yet. Capture your first idea.
+              </div>
+            ) : (
+              notes.map((note) => (
+                <div key={note.id} className="group rounded-[24px] border border-tera-border bg-white/[0.04] p-5 transition hover:border-white/16 hover:bg-white/[0.06]">
+                  {editingNote?.id === note.id ? (
+                    <div>
+                      <textarea
+                        value={editingNote.content}
+                        onChange={(event) => setEditingNote({ ...editingNote, content: event.target.value })}
+                        className="min-h-28 w-full resize-none bg-transparent text-sm leading-7 text-tera-primary focus:outline-none"
+                      />
+                      <div className="mt-4 flex justify-end gap-2">
+                        <button type="button" onClick={() => setEditingNote(null)} className="tera-button-secondary">
+                          Cancel
+                        </button>
+                        <button type="button" onClick={handleUpdateNote} className="tera-button-primary">
+                          Update
+                        </button>
                       </div>
-                    ) : (
-                      <div>
-                        <p className="text-tera-primary whitespace-pre-wrap">{note.content}</p>
-                        <p className="mt-2 text-[0.6rem] uppercase tracking-wider text-tera-secondary">
-                          {new Date(note.updated_at).toLocaleString()}
-                        </p>
-                        <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition flex gap-2">
-                          <button
-                            onClick={() => setEditingNote(note)}
-                            className="text-xs text-tera-secondary hover:text-tera-primary"
-                          >
+                    </div>
+                  ) : (
+                    <div>
+                      <div className="flex items-start justify-between gap-4">
+                        <p className="whitespace-pre-wrap text-sm leading-7 text-tera-primary/95">{note.content}</p>
+                        <div className="flex gap-2 opacity-0 transition group-hover:opacity-100">
+                          <button type="button" onClick={() => setEditingNote(note)} className="tera-button-ghost text-xs">
                             Edit
                           </button>
-                          <button
-                            onClick={() => handleDeleteNote(note.id)}
-                            className="text-xs text-red-400 hover:text-red-300"
-                          >
+                          <button type="button" onClick={() => handleDeleteNote(note.id)} className="tera-button-ghost px-2 text-xs text-red-300 hover:text-red-200">
                             Delete
                           </button>
                         </div>
                       </div>
-                    )}
-                  </div>
-                ))
-              )}
-            </div>
+                      <p className="mt-4 text-[0.62rem] uppercase tracking-[0.24em] text-tera-secondary">
+                        {new Date(note.updated_at).toLocaleString()}
+                      </p>
+                    </div>
+                  )}
+                </div>
+              ))
+            )}
           </div>
         </div>
-      </main>
+      </div>
     </div>
   )
 }

@@ -1,77 +1,63 @@
-'use client'
+﻿'use client'
 
 import { useState } from 'react'
 import Link from 'next/link'
-import { useAuth } from '@/components/AuthProvider'
-import Sidebar from '@/components/Sidebar'
+import ToolCard from '@/components/ToolCard'
 import { teacherTools, studentTools, learnerTools, slugify } from '@/lib/tools-data'
 
 export default function ToolsPage() {
-  const { user } = useAuth()
-  const [sidebarExpanded, setSidebarExpanded] = useState(false)
   const [activeTab, setActiveTab] = useState<'teachers' | 'students' | 'learners'>('teachers')
 
-  const allTools = [...teacherTools, ...studentTools, ...learnerTools]
-
   const activeTools =
-    activeTab === 'teachers' ? teacherTools :
-      activeTab === 'students' ? studentTools :
-        learnerTools
+    activeTab === 'teachers'
+      ? teacherTools
+      : activeTab === 'students'
+        ? studentTools
+        : learnerTools
 
   return (
-    <div className="flex h-screen w-full bg-tera-bg text-tera-primary">
-      <Sidebar expanded={sidebarExpanded} onToggle={() => setSidebarExpanded(!sidebarExpanded)} />
-      <main className="flex-1 overflow-y-auto px-6 py-8">
-        <div className="max-w-6xl mx-auto">
-          <h1 className="text-3xl font-bold text-black dark:text-white mb-8">Tools</h1>
-
-          <div className="flex gap-2 mb-8">
-            <button
-              onClick={() => setActiveTab('teachers')}
-              className={`px-4 py-2 rounded font-medium transition-all ${activeTab === 'teachers'
-                  ? 'bg-tera-primary text-tera-bg'
-                  : 'bg-tera-muted text-tera-secondary hover:bg-tera-border transition-colors'
-                }`}
-            >
-              For Teachers
-            </button>
-            <button
-              onClick={() => setActiveTab('students')}
-              className={`px-4 py-2 rounded font-medium transition-all ${activeTab === 'students'
-                  ? 'bg-tera-primary text-tera-bg'
-                  : 'bg-tera-muted text-tera-secondary hover:bg-tera-border transition-colors'
-                }`}
-            >
-              For Students
-            </button>
-            <button
-              onClick={() => setActiveTab('learners')}
-              className={`px-4 py-2 rounded font-medium transition-all ${activeTab === 'learners'
-                  ? 'bg-tera-primary text-tera-bg'
-                  : 'bg-tera-muted text-tera-secondary hover:bg-tera-border transition-colors'
-                }`}
-            >
-              For Everyone
-            </button>
+    <div className="tera-page">
+      <div className="tera-page-shell pt-24 md:pt-10">
+        <div className="tera-page-header">
+          <div>
+            <p className="tera-eyebrow">Workspace</p>
+            <h1 className="tera-title mt-3">Tools</h1>
+            <p className="tera-subtitle mt-4">
+              Launch Tera with a focused workflow. Each tool opens directly in chat with the right starting context.
+            </p>
           </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {activeTools.map((tool) => (
-              <Link
-                key={tool.name}
-                href={`/new?tool=${slugify(tool.name)}`}
-                className="p-6 bg-tera-panel border border-tera-border rounded-lg hover:border-tera-neon transition group"
-              >
-                <div className="flex items-start justify-between mb-3">
-                  <h3 className="font-semibold text-tera-primary group-hover:text-tera-neon transition-colors">{tool.name}</h3>
-                  <span className="text-2xl">{tool.icon}</span>
-                </div>
-                <p className="text-sm text-tera-secondary">{tool.description}</p>
-              </Link>
-            ))}
+          <div className="tera-card-subtle flex items-center gap-4 px-5 py-4">
+            <div>
+              <p className="text-[0.62rem] uppercase tracking-[0.3em] text-tera-secondary">Available</p>
+              <p className="mt-1 text-2xl font-semibold text-tera-primary">{teacherTools.length + studentTools.length + learnerTools.length}</p>
+            </div>
+            <div className="h-10 w-px bg-tera-border" />
+            <p className="max-w-[16rem] text-sm leading-6 text-tera-secondary">Teacher, student, and general-purpose flows share the same dark interface system.</p>
           </div>
         </div>
-      </main>
+
+        <div className="mt-8 flex flex-wrap gap-3">
+          <div className="tera-segmented">
+            <button type="button" className="tera-segmented-item" data-active={activeTab === 'teachers'} onClick={() => setActiveTab('teachers')}>
+              Teachers
+            </button>
+            <button type="button" className="tera-segmented-item" data-active={activeTab === 'students'} onClick={() => setActiveTab('students')}>
+              Students
+            </button>
+            <button type="button" className="tera-segmented-item" data-active={activeTab === 'learners'} onClick={() => setActiveTab('learners')}>
+              Everyone
+            </button>
+          </div>
+        </div>
+
+        <div className="mt-8 grid grid-cols-1 gap-5 lg:grid-cols-3">
+          {activeTools.map((tool) => (
+            <Link key={tool.name} href={`/new?tool=${slugify(tool.name)}`} className="block">
+              <ToolCard tool={tool} />
+            </Link>
+          ))}
+        </div>
+      </div>
     </div>
   )
 }

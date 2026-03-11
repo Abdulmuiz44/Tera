@@ -1,4 +1,4 @@
-"use client"
+﻿"use client"
 
 import React, { ChangeEvent, useCallback, useEffect, useRef, useState, useTransition } from 'react'
 import Image from 'next/image'
@@ -526,7 +526,7 @@ export default function PromptShell({
 
                 // Check if this request is still valid (hasn't been stopped or superseded)
                 if (currentRequestId !== requestIdRef.current) {
-                    console.log('🛑 Request cancelled/superseded, ignoring response')
+                    console.log('ðŸ›‘ Request cancelled/superseded, ignoring response')
                     return
                 }
 
@@ -661,7 +661,7 @@ export default function PromptShell({
                     prompt: messageToSend,
                     attachments: [...pendingAttachments]
                 }
-                console.log('🔴 SAVING to localStorage:', messageData)
+                console.log('ðŸ”´ SAVING to localStorage:', messageData)
                 localStorage.setItem('tera_queued_message', JSON.stringify(messageData))
             }
             setAttachmentMessage('Sign in to send your message. It will be posted automatically once you authenticate.')
@@ -673,7 +673,7 @@ export default function PromptShell({
                 prompt: messageToSend,
                 attachments: [...pendingAttachments]
             })
-            setAttachmentMessage('Hang tight—finalizing your account before sending.')
+            setAttachmentMessage('Hang tightâ€”finalizing your account before sending.')
             return
         }
 
@@ -687,37 +687,37 @@ export default function PromptShell({
 
     useEffect(() => {
         // Always check for persisted message on mount
-        console.log('🟢 MOUNT EFFECT: Checking localStorage...')
+        console.log('ðŸŸ¢ MOUNT EFFECT: Checking localStorage...')
         if (typeof window !== 'undefined' && !queuedMessage) {
             const savedMessage = localStorage.getItem('tera_queued_message')
-            console.log('🟢 localStorage value:', savedMessage)
+            console.log('ðŸŸ¢ localStorage value:', savedMessage)
             if (savedMessage) {
                 try {
-                    console.log('🟢 Found queued message, parsing...')
+                    console.log('ðŸŸ¢ Found queued message, parsing...')
                     const parsed = JSON.parse(savedMessage)
-                    console.log('🟢 Parsed message:', parsed)
+                    console.log('ðŸŸ¢ Parsed message:', parsed)
                     setQueuedMessage(parsed)
-                    console.log('🟢 Set queuedMessage state')
+                    console.log('ðŸŸ¢ Set queuedMessage state')
                 } catch (e) {
-                    console.error('🔴 Failed to parse queued message', e)
+                    console.error('ðŸ”´ Failed to parse queued message', e)
                     localStorage.removeItem('tera_queued_message')
                 }
             } else {
-                console.log('🟢 No saved message found in localStorage')
+                console.log('ðŸŸ¢ No saved message found in localStorage')
             }
         } else {
-            console.log('🟢 Skipping restore (window undefined or queuedMessage already set)')
+            console.log('ðŸŸ¢ Skipping restore (window undefined or queuedMessage already set)')
         }
     }, []) // Run once on mount
 
     useEffect(() => {
-        console.log('🔵 PROCESS EFFECT: userReady=', userReady, 'queuedMessage=', queuedMessage)
+        console.log('ðŸ”µ PROCESS EFFECT: userReady=', userReady, 'queuedMessage=', queuedMessage)
         if (userReady && queuedMessage) {
-            console.log('🔵 Processing queued message:', queuedMessage)
+            console.log('ðŸ”µ Processing queued message:', queuedMessage)
             processMessage(queuedMessage.prompt, queuedMessage.attachments)
 
             // Clean up
-            console.log('🔵 Cleaning up localStorage and queuedMessage state')
+            console.log('ðŸ”µ Cleaning up localStorage and queuedMessage state')
             localStorage.removeItem('tera_queued_message')
             setQueuedMessage(null)
         }
@@ -816,7 +816,7 @@ export default function PromptShell({
                     if (data.plan) {
                         setCurrentUserPlan(data.plan)
                     }
-                    console.log(`🔍 Web Search Status: ${data.remaining}/${data.total} (${data.plan?.toUpperCase()})`)
+                    console.log(`ðŸ” Web Search Status: ${data.remaining}/${data.total} (${data.plan?.toUpperCase()})`)
                 }
             } catch (err) {
                 console.warn('Failed to fetch web search status:', err)
@@ -884,13 +884,13 @@ export default function PromptShell({
     const showMicButton = !showSendButton && !showStopButton
 
     return (
-        <div className="flex h-full w-full flex-col overflow-hidden relative bg-tera-bg text-tera-primary">
-            <div className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden px-4 py-6 md:px-8 pb-6 relative" ref={conversationRef}>
-                <div className="mx-auto max-w-3xl space-y-8 min-h-full">
+        <div className="relative flex h-full w-full flex-col overflow-hidden bg-transparent text-tera-primary">
+            <div className="relative flex-1 min-h-0 overflow-y-auto overflow-x-hidden px-4 pb-8 pt-24 md:px-10 md:pb-10 md:pt-10" ref={conversationRef}>
+                <div className="mx-auto min-h-full max-w-4xl space-y-8">
                     {showInitialPrompt ? (
-                        <div className="absolute inset-x-0 top-0 bottom-0 flex items-center justify-center text-center pointer-events-none -mt-20">
-                            <div className="pointer-events-auto flex flex-col items-center">
-                                <div className="mb-8 rounded-full bg-gradient-to-br from-tera-neon/20 to-transparent p-6 mx-auto w-fit">
+                        <div className="absolute inset-x-0 top-0 bottom-0 flex items-center justify-center px-4 text-center pointer-events-none -mt-16">
+                            <div className="pointer-events-auto flex max-w-3xl flex-col items-center">
+                                <div className="mx-auto mb-8 w-fit rounded-[32px] border border-white/8 bg-white/[0.03] p-7 shadow-soft-lg">
                                     <span className="flex items-center justify-center w-32 h-32">
                                         <div className="relative w-[120px] h-[120px]">
                                             <Image
@@ -910,7 +910,8 @@ export default function PromptShell({
                                         </div>
                                     </span>
                                 </div>
-                                <h2 className="text-3xl font-semibold text-tera-primary">How can Tera help you today?</h2>
+                                <h2 className="text-4xl font-semibold tracking-[-0.03em] text-tera-primary md:text-5xl">How can Tera help you today?</h2>
+                                <p className="mt-4 max-w-2xl text-sm leading-7 text-tera-secondary md:text-base">Ask a question, run research, review notes, or jump into a tool from the same dark workspace.</p>
                             </div>
                         </div>
                     ) : (
@@ -933,13 +934,13 @@ export default function PromptShell({
                                             </button>
 
                                             <div className="flex flex-col items-end gap-1 w-full">
-                                                <div className="rounded-2xl bg-tera-muted border border-tera-border/50 px-6 py-4 text-tera-primary backdrop-blur-sm w-full">
+                                                <div className="w-full rounded-[26px] border border-white/10 bg-tera-elevated/90 px-5 py-4 text-tera-primary shadow-soft-lg backdrop-blur-xl">
                                                     <p className="whitespace-pre-wrap leading-relaxed">{entry.userMessage.content}</p>
                                                     {entry.userMessage.attachments && entry.userMessage.attachments.length > 0 && (
                                                         <div className="mt-3 flex flex-wrap gap-2">
                                                             {entry.userMessage.attachments.map((att, idx) => (
                                                                 <div key={idx} className="flex items-center gap-2 rounded-lg bg-black/5 px-3 py-2 text-xs">
-                                                                    <span>{att.type === 'image' ? '🖼️' : '📄'}</span>
+                                                                    <span>{att.type === 'image' ? 'ðŸ–¼ï¸' : 'ðŸ“„'}</span>
                                                                     <span className="truncate max-w-[150px]">{att.name}</span>
                                                                 </div>
                                                             ))}
@@ -949,7 +950,7 @@ export default function PromptShell({
                                                 {/* Timestamp and checkmarks */}
                                                 <div className="flex items-center gap-1.5 px-2 text-xs text-tera-secondary">
                                                     <span>{formatTimestamp(entry.userMessage.timestamp)}</span>
-                                                    <span className="text-tera-secondary/60">✓✓</span>
+                                                    <span className="text-tera-secondary/60">âœ“âœ“</span>
                                                 </div>
                                             </div>
                                         </div>
@@ -960,7 +961,7 @@ export default function PromptShell({
                                 {entry.assistantMessage && (
                                     <div className="flex justify-start w-full">
                                         <div className="w-full">
-                                            <div className="rounded-xl md:rounded-2xl bg-tera-panel border border-tera-border px-3 md:px-6 py-3 md:py-4 text-tera-primary shadow-lg overflow-x-auto overflow-y-hidden">
+                                            <div className="overflow-x-auto overflow-y-hidden rounded-[28px] border border-tera-border bg-tera-panel/82 px-4 py-4 text-tera-primary shadow-panel backdrop-blur-2xl md:px-6 md:py-5">
                                                 <div className="space-y-4 w-full break-words overflow-hidden">
                                                     {parseContent(entry.assistantMessage.content).map((block, idx) => {
                                                         if (block.type === 'tera-ui') {
@@ -1002,7 +1003,7 @@ export default function PromptShell({
                                                         }
                                                         if (block.type === 'code') {
                                                             return (
-                                                                <div key={idx} className="my-4 rounded-lg bg-black/5 dark:bg-black/30 border border-tera-border overflow-hidden w-full animate-in fade-in slide-in-from-bottom-2 duration-300">
+                                                                <div key={idx} className="my-4 w-full overflow-hidden rounded-[22px] border border-tera-border bg-[#08101a]/90 animate-in fade-in slide-in-from-bottom-2 duration-300">
                                                                     <div className="flex items-center justify-between px-3 md:px-4 py-2 border-b border-tera-border/50 bg-black/10 gap-2">
                                                                         <span className="text-xs font-semibold text-white/60 uppercase tracking-wider truncate">
                                                                             {block.language || 'code'}
@@ -1057,7 +1058,7 @@ export default function PromptShell({
                     {status === 'loading' && (
                         <div className="flex justify-start">
                             <div className="max-w-[85%]">
-                                <div className="flex items-center gap-3 rounded-2xl bg-tera-panel border border-tera-border px-6 py-4 text-tera-primary/60 shadow-md">
+                                <div className="flex items-center gap-3 rounded-[24px] border border-tera-border bg-tera-panel/80 px-6 py-4 text-tera-primary/70 shadow-soft-lg backdrop-blur-xl">
                                     <div className="flex gap-1">
                                         <span className="w-2 h-2 bg-tera-neon/60 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></span>
                                         <span className="w-2 h-2 bg-tera-neon/60 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></span>
@@ -1078,16 +1079,16 @@ export default function PromptShell({
             </div>
 
             {/* Input Area */}
-            <div className="w-full z-50 shrink-0 sticky bottom-0 border-t border-tera-border bg-tera-bg px-2 py-3 backdrop-blur-xl md:py-4 md:px-8">
-                <div className="mx-auto max-w-3xl relative">
-                    <div className={`relative flex flex-col gap-2 rounded-xl md:rounded-[24px] border border-tera-border bg-tera-panel p-2 shadow-2xl ring-1 ring-tera-border/50 transition-all ${conversationActive ? 'focus-within:ring-tera-neon/30 focus-within:border-tera-neon/30' : 'focus-within:ring-tera-primary/10'}`}>
+            <div className="sticky bottom-0 z-50 w-full shrink-0 border-t border-tera-border/80 bg-tera-bg/70 px-2 py-3 backdrop-blur-2xl md:px-8 md:py-4">
+                <div className="relative mx-auto max-w-4xl">
+                    <div className={`relative flex flex-col gap-2 rounded-[28px] border border-tera-border bg-tera-panel/82 p-2 shadow-panel ring-1 ring-white/5 transition-all backdrop-blur-2xl ${conversationActive ? 'focus-within:border-tera-neon/30 focus-within:ring-tera-neon/20' : 'focus-within:border-white/16 focus-within:ring-white/8'}`}>
 
                         {/* Active Tools & Attachments Preview */}
                         <div className="flex flex-wrap items-center gap-2 px-2 pt-2">
                             {/* Web Search Toggle Badge */}
                             {webSearchEnabled && (
-                                <div className="flex items-center gap-2 rounded-lg bg-blue-500/10 text-blue-500 border border-blue-500/30 px-3 py-2 text-xs font-semibold shadow-sm">
-                                    <span>🔍</span>
+                                <div className="flex items-center gap-2 rounded-full border border-tera-neon/20 bg-tera-highlight px-3 py-2 text-xs font-semibold text-tera-neon shadow-soft-lg">
+                                    <span>ðŸ”</span>
                                     <span>Web Search ON ({webSearchRemaining})</span>
                                 </div>
                             )}
@@ -1098,7 +1099,7 @@ export default function PromptShell({
                                     {pendingAttachments.map((att, idx) => (
                                         <div
                                             key={idx}
-                                            className="group relative rounded-xl overflow-hidden border border-tera-border bg-tera-panel shadow-lg"
+                                            className="group relative overflow-hidden rounded-[20px] border border-tera-border bg-tera-elevated/90 shadow-soft-lg"
                                         >
                                             {att.type === 'image' ? (
                                                 // Image thumbnail preview
@@ -1116,17 +1117,17 @@ export default function PromptShell({
                                             ) : (
                                                 // File preview (non-image)
                                                 <div className="flex items-center gap-2 px-4 py-3 min-w-[120px]">
-                                                    <span className="text-2xl">📄</span>
+                                                    <span className="text-2xl">ðŸ“„</span>
                                                     <span className="text-xs text-tera-primary truncate max-w-[150px]">{att.name}</span>
                                                 </div>
                                             )}
                                             {/* Remove button */}
                                             <button
                                                 onClick={() => setPendingAttachments(prev => prev.filter((_, i) => i !== idx))}
-                                                className="absolute top-1 right-1 w-6 h-6 rounded-full bg-black/70 hover:bg-red-500 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all text-sm"
+                                                className="absolute right-2 top-2 flex h-7 w-7 items-center justify-center rounded-full border border-white/10 bg-black/70 text-white opacity-0 transition-all group-hover:opacity-100 hover:bg-red-500"
                                                 title="Remove"
                                             >
-                                                ✕
+                                                âœ•
                                             </button>
                                         </div>
                                     ))}
@@ -1140,7 +1141,7 @@ export default function PromptShell({
                                 <div className="relative">
                                     <button
                                         onClick={() => setAttachmentOpen(!attachmentOpen)}
-                                        className="rounded-full p-2 text-tera-secondary transition hover:bg-tera-muted hover:text-tera-primary"
+                                        className="tera-icon-button h-11 w-11 border-transparent bg-white/[0.04]"
                                         title="Add attachment"
                                     >
                                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
@@ -1149,25 +1150,25 @@ export default function PromptShell({
                                     </button>
 
                                     {attachmentOpen && (
-                                        <div className="absolute bottom-full left-0 mb-2 w-56 overflow-hidden rounded-xl border border-tera-border bg-tera-panel shadow-xl backdrop-blur-xl">
+                                        <div className="absolute bottom-full left-0 mb-3 w-64 overflow-hidden rounded-[24px] border border-tera-border bg-tera-elevated/95 shadow-panel backdrop-blur-2xl">
                                             {/* File & Media Section */}
                                             <button
                                                 onClick={() => handleFileSelect('camera')}
                                                 className="flex w-full items-center gap-3 px-4 py-3 text-left text-sm text-tera-primary hover:bg-tera-muted border-b border-tera-border"
                                             >
-                                                <span>📷</span> Open Camera
+                                                <span>ðŸ“·</span> Open Camera
                                             </button>
                                             <button
                                                 onClick={() => handleFileSelect('image')}
                                                 className="flex w-full items-center gap-3 px-4 py-3 text-left text-sm text-tera-primary hover:bg-tera-muted border-b border-tera-border"
                                             >
-                                                <span>🖼️</span> Upload image
+                                                <span>ðŸ–¼ï¸</span> Upload image
                                             </button>
                                             <button
                                                 onClick={() => handleFileSelect('file')}
                                                 className="flex w-full items-center gap-3 px-4 py-3 text-left text-sm text-tera-primary hover:bg-tera-muted border-b border-tera-border"
                                             >
-                                                <span>📄</span> Upload file
+                                                <span>ðŸ“„</span> Upload file
                                             </button>
 
                                             {/* Web Search Option */}
@@ -1190,7 +1191,7 @@ export default function PromptShell({
                                                     }`}
                                                 title={webSearchRemaining <= 0 ? 'Monthly web search limit reached - Upgrade to continue' : 'Search the web for current information'}
                                             >
-                                                <span>🔍</span>
+                                                <span>ðŸ”</span>
                                                 <div className="flex-1">
                                                     <div>Web Search {webSearchEnabled ? '(ON)' : ''}</div>
                                                     <div className={`text-xs ${webSearchRemaining <= 0 ? 'text-red-300/50' : 'text-tera-secondary'}`}>
@@ -1216,7 +1217,7 @@ export default function PromptShell({
                                                 className={`flex w-full items-center gap-3 px-4 py-3 text-left text-sm border-t border-tera-border transition ${researchMode ? 'text-tera-neon bg-tera-neon/5' : 'text-tera-primary hover:bg-tera-muted'
                                                     }`}
                                             >
-                                                <span>🔭</span>
+                                                <span>ðŸ”­</span>
                                                 <div className="flex-1 flex items-center justify-between">
                                                     <span>Deep Research</span>
                                                     {researchMode && <span className="text-[10px] font-bold bg-tera-neon/20 px-1.5 py-0.5 rounded text-tera-neon">ON</span>}
@@ -1240,8 +1241,8 @@ export default function PromptShell({
                                         handleSubmit(e)
                                     }
                                 }}
-                                placeholder={isListening ? "Listening... 🎤" : "Ask Tera Anything..."}
-                                className="max-h-[120px] min-h-[44px] w-full resize-none bg-transparent text-base text-tera-primary placeholder-tera-secondary/60 focus:outline-none m-0 p-3 font-normal leading-relaxed"
+                                placeholder={isListening ? "Listening... ðŸŽ¤" : "Ask Tera Anything..."}
+                                className="m-0 min-h-[52px] max-h-[140px] w-full resize-none bg-transparent px-3 py-3 text-[0.98rem] leading-relaxed text-tera-primary placeholder-tera-secondary/60 focus:outline-none"
                                 rows={1}
                                 style={{ height: 'auto' }}
                                 onInput={(e) => {
@@ -1256,7 +1257,7 @@ export default function PromptShell({
                                 {showStopButton && (
                                     <button
                                         onClick={handleStop}
-                                        className="flex h-9 w-9 items-center justify-center rounded-full bg-black text-white dark:bg-white dark:text-black border border-white/20 dark:border-black/20 transition hover:bg-black/80 dark:hover:bg-white/90"
+                                        className="flex h-10 w-10 items-center justify-center rounded-full border border-white/12 bg-white/[0.92] text-[#08101a] transition hover:brightness-95"
                                         title="Stop generating"
                                     >
                                         <div className="h-3 w-3 bg-current rounded-[2px]" />
@@ -1266,7 +1267,7 @@ export default function PromptShell({
                                 {showSendButton && (
                                     <button
                                         onClick={handleSubmit}
-                                        className="flex h-9 w-9 items-center justify-center rounded-full bg-tera-accent text-tera-bg transition hover:bg-tera-accent/90"
+                                        className="flex h-10 w-10 items-center justify-center rounded-full bg-tera-accent text-[#08101a] shadow-soft-lg transition hover:brightness-95"
                                         title="Send message"
                                     >
                                         <svg
@@ -1283,10 +1284,10 @@ export default function PromptShell({
                                 {showMicButton && (
                                     <button
                                         onClick={toggleListening}
-                                        className={`flex h-9 w-9 items-center justify-center rounded-full transition ${isListening ? 'bg-red-500/20 text-red-500 animate-pulse' : 'bg-tera-muted text-tera-primary hover:bg-tera-muted/80'}`}
+                                        className={`flex h-10 w-10 items-center justify-center rounded-full border transition ${isListening ? 'border-red-400/40 bg-red-500/18 text-red-300 animate-pulse' : 'border-white/10 bg-white/[0.05] text-tera-primary hover:bg-white/[0.08]'}`}
                                         title="Voice input"
                                     >
-                                        <span className="text-xl">🎤</span>
+                                        <span className="text-xl">ðŸŽ¤</span>
                                     </button>
                                 )}
                             </div>
@@ -1314,7 +1315,7 @@ export default function PromptShell({
                                 onClick={() => setSearchHistoryOpen(false)}
                                 className="absolute -top-10 right-0 text-white/80 hover:text-white"
                             >
-                                Close ✕
+                                Close âœ•
                             </button>
                             <SearchHistoryRenderer
                                 userId={user.id}
@@ -1370,3 +1371,6 @@ export default function PromptShell({
         </div>
     )
 }
+
+
+

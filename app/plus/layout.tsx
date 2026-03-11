@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useAuth } from '@/components/AuthProvider'
 import { useRouter } from 'next/navigation'
@@ -13,7 +13,7 @@ export default function PlusLayout({ children }: { children: React.ReactNode }) 
   useEffect(() => {
     const checkSubscription = async () => {
       if (!user) {
-        router.push('/login')
+        router.push('/auth/signin')
         return
       }
 
@@ -24,46 +24,38 @@ export default function PlusLayout({ children }: { children: React.ReactNode }) 
         .single()
 
       if (error || data?.subscription_plan !== 'plus') {
-        router.push('/upgrade?reason=plus-only')
+        router.push('/pricing')
       } else {
         setIsAuthorized(true)
       }
     }
 
-    if (userReady && user) {
+    if (userReady) {
       void checkSubscription()
     }
-  }, [user, userReady, router])
+  }, [router, user, userReady])
 
   if (!userReady || !isAuthorized) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-tera-bg">
-        <div className="text-center">
-          <div className="inline-block w-8 h-8 border-4 border-tera-neon/20 border-t-tera-neon rounded-full animate-spin mb-4"></div>
-          <p className="text-tera-secondary">Verifying access...</p>
-        </div>
+      <div className="tera-page flex items-center justify-center text-sm text-tera-secondary">
+        Verifying Plus access...
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-tera-bg">
-      {/* Plus Features Header */}
-      <div className="border-b border-tera-border bg-tera-panel/40 sticky top-0 z-40">
-        <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
-          <div>
-            <h1 className="text-xl font-bold text-tera-primary">Plus Plan Features</h1>
-            <p className="text-tera-secondary text-sm">Unlock advanced capabilities</p>
-          </div>
-          <div className="flex gap-4">
-            <a href="/plus/analytics" className="text-tera-primary hover:text-tera-neon transition">Analytics</a>
+    <div className="tera-page">
+      <div className="tera-page-shell pt-24 md:pt-10">
+        <div className="tera-surface overflow-hidden px-6 py-5 md:px-8">
+          <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+            <div>
+              <p className="tera-eyebrow">Plus</p>
+              <h1 className="mt-2 text-2xl font-semibold text-tera-primary">Advanced workspace</h1>
+            </div>
+            <a href="/plus/analytics" className="tera-button-secondary">Analytics</a>
           </div>
         </div>
-      </div>
-
-      {/* Main Content */}
-      <div className="max-w-7xl mx-auto px-4 py-8">
-        {children}
+        <div className="mt-8">{children}</div>
       </div>
     </div>
   )

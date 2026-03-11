@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState } from 'react'
 import Link from 'next/link'
@@ -6,292 +6,149 @@ import Link from 'next/link'
 const HELP_SECTIONS = [
   {
     id: 'billing',
-    title: 'Billing & Payments',
-    icon: '💳',
+    title: 'Billing and payments',
     articles: [
       {
         title: 'How do I upgrade my plan?',
-        content: `To upgrade your plan:
-1. Open the Pricing page
-2. Choose Pro or Plus
-3. Review your plan details
-4. Continue to the secure checkout powered by Lemon Squeezy
-5. Complete payment
-
-Your new limits and features become available as soon as the subscription is active.`,
+        content: `To upgrade your plan:\n1. Open the Pricing page\n2. Choose Pro or Plus\n3. Review your plan details\n4. Continue to secure checkout powered by Lemon Squeezy\n5. Complete payment\n\nYour new limits and features become available as soon as the subscription is active.`,
       },
       {
         title: 'What payment methods do you accept?',
-        content: `We accept major credit cards, PayPal, and other payment methods supported by Lemon Squeezy.
-
-Payments are processed securely through Lemon Squeezy. Tera does not store your payment details on its own servers.`,
+        content: `We accept major credit cards, PayPal, and other payment methods supported by Lemon Squeezy.\n\nPayments are processed securely through Lemon Squeezy. Tera does not store your payment details on its own servers.`,
       },
       {
         title: 'How do I manage my subscription?',
-        content: `You can manage billing from your profile:
-1. Open your Profile page
-2. Find the subscription section
-3. Open the billing portal
-
-From there you can review your plan, update payment details, or cancel.`,
+        content: `You can manage billing from your profile:\n1. Open your Profile page\n2. Find the subscription section\n3. Open the billing portal\n\nFrom there you can review your plan, update payment details, or cancel.`,
       },
       {
         title: 'Do you offer refunds?',
-        content: `Yes. Paid plans include a 7-day money-back guarantee.
-
-If you need help with a refund request, contact Teraaiguide@gmail.com with your account email and purchase details.`,
-      },
-      {
-        title: 'What happens when my subscription expires?',
-        content: `If a paid subscription ends, your account falls back to the Free plan.
-
-Your conversations and account data remain available, but your limits return to the Free tier until you resubscribe.`,
+        content: `Yes. Paid plans include a 7-day money-back guarantee.\n\nIf you need help with a refund request, contact Teraaiguide@gmail.com with your account email and purchase details.`,
       },
     ],
   },
   {
     id: 'plans',
-    title: 'Understanding Your Plans',
-    icon: '📊',
+    title: 'Plans',
     articles: [
       {
-        title: "What's included in the Free plan?",
-        content: `The Free plan includes:
-- Unlimited AI conversations
-- 3 file uploads per day (10MB each)
-- 5 web searches per month
-- Basic AI tools and features
-- Mobile and desktop access
-
-It is designed to let you use Tera without a credit card.`,
+        title: 'What is included in the Free plan?',
+        content: `The Free plan includes unlimited AI conversations, 3 file uploads per day, 5 web searches per month, and access to the core Tera tools.`,
       },
       {
-        title: "What's the difference between Pro and Plus?",
-        content: `Pro plan ($5/month):
-- Everything in Free
-- 25 file uploads per day (500MB each)
-- 100 web searches per month
-- Deep Research Mode
-- Export to PDF and Word
-- Priority support
-
-Plus plan ($15/month):
-- Everything in Pro
-- Unlimited file uploads (2GB each)
-- Unlimited web searches
-- Advanced analytics dashboard
-- 24/7 priority support
-- Highest usage limits across Tera`,
+        title: 'What is the difference between Pro and Plus?',
+        content: `Pro increases upload and search limits, adds Deep Research, and unlocks exports. Plus adds the highest usage limits, analytics, and priority support.`,
       },
       {
         title: 'Can I switch plans anytime?',
-        content: `Yes. You can upgrade or downgrade at any time.
-
-Upgrades take effect immediately. Downgrades typically apply at the next renewal period.`,
-      },
-      {
-        title: 'Do you offer annual billing?',
-        content: `Tera currently uses monthly billing.
-
-If you need higher-volume or organizational access, contact Teraaiguide@gmail.com.`,
+        content: `Yes. Upgrades take effect immediately. Downgrades usually apply at the next renewal period.`,
       },
     ],
   },
   {
     id: 'troubleshooting',
     title: 'Troubleshooting',
-    icon: '🔧',
     articles: [
       {
-        title: 'My payment was declined. What should I do?',
-        content: `Try the following:
-1. Re-check your card details
-2. Confirm you have sufficient funds
-3. Try another payment method
-4. Contact your bank if international payments are blocked
-
-If the problem continues, contact support with the error message and your account email.`,
+        title: 'My premium features are missing after upgrading',
+        content: `Refresh the page, sign out and back in, and give the billing sync a few minutes. If the issue continues, contact support with your account email and a screenshot.`,
       },
       {
-        title: "I'm not seeing my premium features after upgrading",
-        content: `If your paid features do not appear right away:
-1. Refresh the page
-2. Sign out and back in
-3. Wait a few minutes for billing sync
-4. Check your profile to confirm the active plan
-
-If the issue continues, contact support with a screenshot and your account email.`,
+        title: 'My payment was declined',
+        content: `Re-check your card details, confirm available funds, try another payment method, or contact your bank if international payments are blocked.`,
       },
       {
         title: 'How do I cancel my subscription?',
-        content: `Open your profile, launch the billing portal, and cancel from there.
-
-Your paid access remains active until the end of the current billing period.`,
-      },
-      {
-        title: 'I was charged twice. What should I do?',
-        content: `First, check whether one charge is only a temporary authorization hold.
-
-If you still see duplicate settled charges after 24-48 hours, email support with your account email and payment screenshots.`,
-      },
-    ],
-  },
-  {
-    id: 'general',
-    title: 'General Questions',
-    icon: '❓',
-    articles: [
-      {
-        title: 'Is there a contract?',
-        content: `No. Plans are month to month with no long-term contract.`,
-      },
-      {
-        title: 'How is my data protected?',
-        content: `Tera uses encrypted transport and storage, standard authentication controls, and role-based access patterns around user data.`,
-      },
-      {
-        title: 'Can I use Tera with a team?',
-        content: `The current product is optimized for individual use.
-
-If you need organizational access or higher-volume usage, contact Teraaiguide@gmail.com.`,
-      },
-      {
-        title: 'Where do I get more help?',
-        content: `For billing, account, or product questions, email Teraaiguide@gmail.com.`,
+        content: `Open your profile, launch the billing portal, and cancel from there. Your paid access remains active until the end of the current billing period.`,
       },
     ],
   },
 ]
 
 export default function HelpPage() {
-  const [expandedSections, setExpandedSections] = useState<string[]>([])
+  const [expandedSections, setExpandedSections] = useState<string[]>(['billing'])
   const [expandedArticles, setExpandedArticles] = useState<string[]>([])
 
   const toggleSection = (sectionId: string) => {
     setExpandedSections((current) =>
-      current.includes(sectionId)
-        ? current.filter((id) => id !== sectionId)
-        : [...current, sectionId]
+      current.includes(sectionId) ? current.filter((id) => id !== sectionId) : [...current, sectionId]
     )
   }
 
   const toggleArticle = (articleId: string) => {
     setExpandedArticles((current) =>
-      current.includes(articleId)
-        ? current.filter((id) => id !== articleId)
-        : [...current, articleId]
+      current.includes(articleId) ? current.filter((id) => id !== articleId) : [...current, articleId]
     )
   }
 
   return (
-    <div className="w-full bg-tera-bg text-tera-primary custom-scrollbar font-sans selection:bg-tera-neon/30">
-      <main className="overflow-y-auto min-h-screen">
-        <div className="fixed inset-0 pointer-events-none overflow-hidden">
-          <div className="absolute top-[-10%] right-[-5%] w-[500px] h-[500px] bg-tera-neon/5 rounded-full blur-[100px] animate-pulse-slow"></div>
-          <div className="absolute bottom-[-10%] left-[-5%] w-[500px] h-[500px] bg-blue-500/5 rounded-full blur-[100px] animate-pulse-slow delay-1000"></div>
+    <div className="tera-page">
+      <div className="tera-page-shell pt-24 md:pt-10">
+        <section className="tera-surface overflow-hidden px-6 py-10 md:px-10 md:py-12">
+          <p className="tera-eyebrow">Help center</p>
+          <h1 className="mt-4 text-4xl font-semibold tracking-[-0.04em] text-tera-primary md:text-5xl">Support for plans, billing, and product questions.</h1>
+          <p className="mt-5 max-w-3xl text-base leading-8 text-tera-secondary">
+            Browse the most common account and pricing questions, or contact support directly if you need help with a specific issue.
+          </p>
+          <div className="mt-8 flex flex-wrap gap-3">
+            <a href="mailto:Teraaiguide@gmail.com" className="tera-button-primary">Contact support</a>
+            <Link href="/pricing" className="tera-button-secondary">Back to pricing</Link>
+          </div>
+        </section>
+
+        <div className="mt-8 grid gap-6 md:grid-cols-3">
+          {HELP_SECTIONS.map((section) => (
+            <button
+              key={section.id}
+              type="button"
+              onClick={() => toggleSection(section.id)}
+              className="tera-card text-left transition hover:border-white/16 hover:bg-tera-elevated/80"
+            >
+              <p className="tera-eyebrow">Section</p>
+              <h2 className="mt-3 text-xl font-semibold text-tera-primary">{section.title}</h2>
+              <p className="mt-3 text-sm leading-7 text-tera-secondary">{section.articles.length} article{section.articles.length > 1 ? 's' : ''}</p>
+            </button>
+          ))}
         </div>
 
-        <div className="relative z-10 w-full max-w-4xl mx-auto px-4 md:px-8 py-12">
-          <div className="flex flex-col items-center text-center mb-12">
-            <p className="text-xs uppercase tracking-[0.5em] text-tera-neon mb-4">Help Center</p>
-            <h1 className="text-4xl font-bold leading-tight text-tera-primary mb-4">How Can We Help?</h1>
-            <p className="text-tera-secondary max-w-2xl">
-              Find answers to common questions about billing, plans, and using Tera.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-12">
-            {HELP_SECTIONS.map((section) => (
-              <button
-                key={section.id}
-                onClick={() => toggleSection(section.id)}
-                className="flex items-center gap-3 p-4 rounded-lg bg-tera-panel border border-tera-border hover:border-tera-neon/30 transition text-left"
-              >
-                <span className="text-2xl">{section.icon}</span>
-                <span className="font-semibold text-tera-primary">{section.title}</span>
+        <div className="mt-8 space-y-5">
+          {HELP_SECTIONS.map((section) => (
+            <div key={section.id} className="tera-surface overflow-hidden px-6 py-5">
+              <button type="button" onClick={() => toggleSection(section.id)} className="flex w-full items-center justify-between gap-4 text-left">
+                <div>
+                  <p className="tera-eyebrow">Category</p>
+                  <h2 className="mt-2 text-xl font-semibold text-tera-primary">{section.title}</h2>
+                </div>
+                <svg className={`h-5 w-5 text-tera-secondary transition ${expandedSections.includes(section.id) ? 'rotate-180' : ''}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="m6 9 6 6 6-6" />
+                </svg>
               </button>
-            ))}
-          </div>
 
-          <div className="space-y-6">
-            {HELP_SECTIONS.map((section) => (
-              <div
-                key={section.id}
-                className="rounded-lg bg-tera-panel border border-tera-border overflow-hidden"
-              >
-                <button
-                  onClick={() => toggleSection(section.id)}
-                  className="w-full flex items-center justify-between p-6 hover:bg-tera-muted/30 transition"
-                >
-                  <div className="flex items-center gap-3">
-                    <span className="text-2xl">{section.icon}</span>
-                    <h2 className="text-xl font-bold text-tera-primary">{section.title}</h2>
-                  </div>
-                  <span className={`text-tera-neon transition ${expandedSections.includes(section.id) ? 'rotate-180' : ''}`}>
-                    ▼
-                  </span>
-                </button>
+              {expandedSections.includes(section.id) && (
+                <div className="mt-5 space-y-4 border-t border-tera-border pt-5">
+                  {section.articles.map((article, index) => {
+                    const articleId = `${section.id}-${index}`
+                    const isExpanded = expandedArticles.includes(articleId)
 
-                {expandedSections.includes(section.id) && (
-                  <div className="px-6 pb-6 space-y-4 border-t border-tera-border pt-4">
-                    {section.articles.map((article, idx) => {
-                      const articleId = `${section.id}-${idx}`
-                      const isExpanded = expandedArticles.includes(articleId)
-
-                      return (
-                        <div
-                          key={articleId}
-                          className="rounded-lg bg-tera-muted/30 border border-tera-border overflow-hidden"
-                        >
-                          <button
-                            onClick={() => toggleArticle(articleId)}
-                            className="w-full flex items-center justify-between p-4 hover:bg-tera-muted/50 transition text-left"
-                          >
-                            <h3 className="font-semibold text-tera-primary">{article.title}</h3>
-                            <span className={`text-tera-neon transition ${isExpanded ? 'rotate-180' : ''}`}>
-                              ▼
-                            </span>
-                          </button>
-
-                          {isExpanded && (
-                            <div className="px-4 pb-4 border-t border-tera-border pt-4">
-                              <p className="text-tera-secondary whitespace-pre-wrap leading-relaxed text-sm">
-                                {article.content}
-                              </p>
-                            </div>
-                          )}
-                        </div>
-                      )
-                    })}
-                  </div>
-                )}
-              </div>
-            ))}
-          </div>
-
-          <div className="mt-12 p-8 bg-gradient-to-r from-tera-neon/10 to-blue-500/10 border border-tera-neon/30 rounded-lg text-center">
-            <h3 className="text-xl font-bold text-tera-primary mb-3">Still need help?</h3>
-            <p className="text-tera-secondary mb-4">
-              Our support team is here to help.
-            </p>
-            <a
-              href="mailto:Teraaiguide@gmail.com"
-              className="inline-block px-6 py-3 bg-tera-neon text-black font-semibold rounded-lg hover:opacity-90 transition"
-            >
-              Contact Support
-            </a>
-          </div>
-
-          <div className="mt-8 text-center">
-            <Link
-              href="/pricing"
-              className="text-tera-neon hover:underline font-semibold"
-            >
-              Back to Pricing
-            </Link>
-          </div>
+                    return (
+                      <div key={articleId} className="rounded-[22px] border border-tera-border bg-white/[0.04] px-5 py-4">
+                        <button type="button" onClick={() => toggleArticle(articleId)} className="flex w-full items-center justify-between gap-4 text-left">
+                          <h3 className="text-base font-medium text-tera-primary">{article.title}</h3>
+                          <svg className={`h-4 w-4 shrink-0 text-tera-secondary transition ${isExpanded ? 'rotate-180' : ''}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="m6 9 6 6 6-6" />
+                          </svg>
+                        </button>
+                        {isExpanded && (
+                          <p className="mt-4 whitespace-pre-wrap text-sm leading-7 text-tera-secondary">{article.content}</p>
+                        )}
+                      </div>
+                    )
+                  })}
+                </div>
+              )}
+            </div>
+          ))}
         </div>
-      </main>
+      </div>
     </div>
   )
 }
