@@ -38,11 +38,11 @@ export default function AppLayout({ children }: AppLayoutProps) {
       />
 
       <main className={`relative flex min-w-0 flex-1 flex-col transition-all duration-300 ${sidebarExpanded ? 'md:pl-[320px]' : 'md:pl-[104px]'}`}>
-        <div className="pointer-events-none sticky top-0 z-30 border-b border-tera-border/80 bg-tera-bg/78 backdrop-blur-xl md:hidden">
-          <div className="flex items-center justify-between gap-3 px-4 py-4">
+        <div className="pointer-events-none sticky top-0 z-30 border-b border-tera-border/60 bg-tera-bg/88 backdrop-blur-xl md:hidden">
+          <div className="flex items-center justify-between gap-3 px-4 py-3.5">
             <button
               type="button"
-              className="tera-icon-button pointer-events-auto h-11 w-11 rounded-2xl"
+              className="tera-icon-button pointer-events-auto h-11 w-11 rounded-2xl border-0 bg-transparent"
               onClick={() => setSidebarExpanded(true)}
               aria-label="Open navigation"
             >
@@ -52,18 +52,18 @@ export default function AppLayout({ children }: AppLayoutProps) {
                 <path d="M4 17h10" />
               </svg>
             </button>
-            <div className="pointer-events-none text-center">
-              <p className="text-[0.68rem] uppercase tracking-[0.28em] text-tera-secondary">Tera</p>
-              <p className="mt-1 text-sm font-medium text-tera-primary">Workspace</p>
-            </div>
+            <div className="pointer-events-none" />
             <button
               type="button"
-              className="tera-button-primary pointer-events-auto h-11 min-w-[44px] rounded-2xl px-4 py-0 text-xs"
+              className="tera-icon-button pointer-events-auto h-11 w-11 rounded-2xl border-0 bg-transparent text-tera-primary"
               onClick={handleNewChat}
               title="Start new chat"
               aria-label="Start new chat"
             >
-              New
+              <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M12 5v14" />
+                <path d="M5 12h14" />
+              </svg>
             </button>
           </div>
         </div>

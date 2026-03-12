@@ -219,15 +219,14 @@
   }
 
   .composer-action-button {
-    @apply inline-flex h-10 w-10 items-center justify-center rounded-xl border text-tera-secondary transition-all duration-150;
-    border-color: rgba(255, 255, 255, 0.12);
-    background-color: rgba(255, 255, 255, 0.04);
+    @apply inline-flex h-10 w-10 items-center justify-center rounded-xl text-tera-secondary transition-all duration-150;
+    border: 0;
+    background-color: rgba(255, 255, 255, 0.06);
   }
 
   .composer-action-button:hover {
     @apply text-tera-primary;
-    border-color: var(--border-tera-strong);
-    background-color: rgba(255, 255, 255, 0.08);
+    background-color: rgba(255, 255, 255, 0.12);
   }
 
   .composer-action-button:active {
@@ -245,11 +244,11 @@
   }
 
   .composer-menu-row {
-    @apply flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-sm text-tera-primary transition;
+    @apply flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-sm font-medium text-[#f5f7fa] transition;
   }
 
   .composer-menu-row:hover {
-    @apply bg-tera-muted;
+    background-color: rgba(255, 255, 255, 0.1);
   }
 
   .tera-input {

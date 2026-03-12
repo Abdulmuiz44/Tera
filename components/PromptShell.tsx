@@ -240,7 +240,8 @@ const parseContent = (content: string): ContentBlock[] => {
 
 const AttachmentIcon = ({ className = 'h-5 w-5' }: { className?: string }) => (
     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.8} stroke="currentColor" className={className}>
-        <path strokeLinecap="round" strokeLinejoin="round" d="M18.375 12.739V17.25a3.75 3.75 0 01-7.5 0V6.75a2.25 2.25 0 114.5 0v9.75a.75.75 0 01-1.5 0V8.25" />
+        <path strokeLinecap="round" strokeLinejoin="round" d="M12 5v14" />
+        <path strokeLinecap="round" strokeLinejoin="round" d="M5 12h14" />
     </svg>
 )
 
@@ -1123,9 +1124,9 @@ export default function PromptShell({
             </div>
 
             {/* Input Area */}
-            <div className="sticky bottom-0 z-50 w-full shrink-0 border-t border-tera-border/80 bg-tera-bg/70 px-2 py-3 backdrop-blur-2xl md:px-8 md:py-4">
+            <div className="sticky bottom-0 z-50 w-full shrink-0 bg-tera-bg/92 px-2 py-2.5 backdrop-blur-xl md:px-8 md:py-3">
                 <div className="relative mx-auto max-w-4xl">
-                    <div className={`relative flex flex-col gap-2 rounded-[28px] border border-tera-border bg-tera-panel/82 p-2 shadow-panel ring-1 ring-white/5 transition-all backdrop-blur-2xl ${conversationActive ? 'focus-within:border-tera-neon/30 focus-within:ring-tera-neon/20' : 'focus-within:border-white/16 focus-within:ring-white/8'}`}>
+                    <div className={`relative flex flex-col gap-2 rounded-[26px] bg-[#1b1c1f] p-2.5 shadow-soft-lg transition-colors ${conversationActive ? 'focus-within:bg-[#1f2024]' : 'focus-within:bg-[#202228]'}`}>
 
                         {/* Active Tools & Attachments Preview */}
                         <div className="flex flex-wrap items-center gap-2 px-2 pt-2">
@@ -1179,7 +1180,7 @@ export default function PromptShell({
                             )}
                         </div>
 
-                        <div className="flex items-end gap-2 rounded-[22px] border border-white/12 bg-tera-elevated/70 px-3 py-2 shadow-inner ring-1 ring-white/5 transition focus-within:border-tera-neon/40 focus-within:ring-tera-neon/20">
+                        <div className="flex items-end gap-2 rounded-[18px] bg-transparent px-2 py-1.5">
                             {/* Left Actions */}
                             <div className="flex items-center">
                                 <div className="relative">
@@ -1193,7 +1194,7 @@ export default function PromptShell({
                                     </button>
 
                                     {attachmentOpen && (
-                                        <div className="absolute bottom-full left-0 mb-3 w-64 overflow-hidden rounded-2xl border border-tera-border bg-tera-panel/95 p-1.5 shadow-panel backdrop-blur-2xl">
+                                        <div className="absolute bottom-full left-0 mb-3 w-64 overflow-hidden rounded-2xl border border-white/15 bg-[#18191d] p-2 text-[#eef0f4] shadow-2xl">
                                             {/* File & Media Section */}
                                             <button
                                                 onClick={() => handleFileSelect('camera')}
@@ -1290,7 +1291,7 @@ export default function PromptShell({
                                     }
                                 }}
                                 placeholder={isListening ? 'Listening...' : 'Ask Tera Anything...'}
-                                className="m-0 min-h-[50px] max-h-[140px] w-full resize-none bg-transparent px-1 py-2 text-[0.98rem] leading-relaxed text-tera-primary placeholder-tera-secondary/60 focus:outline-none"
+                                className="m-0 min-h-[50px] max-h-[140px] w-full resize-none border-0 bg-transparent px-1 py-2 text-[0.98rem] leading-relaxed text-tera-primary placeholder:text-tera-secondary/60 focus:outline-none focus:ring-0"
                                 rows={1}
                                 style={{ height: 'auto' }}
                                 onInput={(e) => {
@@ -1415,5 +1416,4 @@ export default function PromptShell({
         </div>
     )
 }
-
 
