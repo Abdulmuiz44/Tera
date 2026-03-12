@@ -2,6 +2,7 @@ import Link from 'next/link'
 import { redirect } from 'next/navigation'
 import { auth } from '@/lib/auth'
 import { supabaseServer } from '@/lib/supabase-server'
+import ImageGallery from '@/components/ImageGallery'
 
 type Attachment = {
   url?: string
@@ -70,19 +71,7 @@ export default async function ImagesPage() {
           You have not uploaded any images yet.
         </div>
       ) : (
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {images.map((image, index) => (
-            <div key={`${image.url}-${index}`} className="overflow-hidden rounded-2xl border border-tera-border bg-tera-elevated">
-              <img src={image.url} alt={image.name} className="h-44 w-full object-cover" />
-              <div className="space-y-1 px-4 py-3">
-                <p className="truncate text-sm font-medium text-tera-primary">{image.name}</p>
-                <p className="text-xs text-tera-secondary">
-                  Uploaded {new Date(image.uploadedAt).toLocaleString()}
-                </p>
-              </div>
-            </div>
-          ))}
-        </div>
+        <ImageGallery images={images} />
       )}
     </div>
   )
