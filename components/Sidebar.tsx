@@ -167,6 +167,7 @@ export default function Sidebar({ expanded, onToggle, onNewChat, user, onSignOut
             onClick={onNewChat}
             className={expanded ? 'tera-button-primary w-full justify-between rounded-[22px] px-4 py-3' : 'tera-icon-button mx-auto h-12 w-12 rounded-[18px]'}
             title="Start new chat"
+            aria-label="Start new chat"
           >
             <span className="flex items-center gap-2">
               <svg className="h-5 w-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">

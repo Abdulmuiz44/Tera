@@ -60,7 +60,7 @@ export default function UserMenu({ user, expanded, onSignOut }: UserMenuProps) {
       </div>
     ) : (
       <div className="flex justify-center">
-        <Link href="/auth/signin" className="tera-icon-button h-12 w-12 rounded-[18px]" title="Log in">
+        <Link href="/auth/signin" className="tera-icon-button h-12 w-12 rounded-[18px]" title="Log in" aria-label="Log in">
           <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
             <path d="M14 7h3a2 2 0 0 1 2 2v6a2 2 0 0 1-2 2h-3" />
             <path d="M10 17 15 12 10 7" />
@@ -148,6 +148,9 @@ export default function UserMenu({ user, expanded, onSignOut }: UserMenuProps) {
       <button
         type="button"
         onClick={() => setDropdownOpen((current) => !current)}
+        aria-haspopup="menu"
+        aria-expanded={dropdownOpen}
+        aria-label={expanded ? 'Open user menu' : `Open user menu for ${name}`}
         className={`flex w-full items-center gap-3 rounded-[22px] border border-tera-border bg-white/[0.03] px-3 py-3 text-left transition hover:border-tera-border/90 hover:bg-white/[0.05] ${expanded ? '' : 'justify-center'}`}
       >
         <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-[16px] border border-tera-border bg-tera-highlight text-sm font-semibold text-tera-primary">

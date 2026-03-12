@@ -923,7 +923,9 @@ export default function PromptShell({
                                         <div className="flex items-end gap-2 max-w-[80%]">
                                             {/* Edit Button - visible on hover */}
                                             <button
+                                                type="button"
                                                 onClick={() => handleEditMessage(entry.id, entry.userMessage!)}
+                                                aria-label="Edit message"
                                                 className="opacity-0 group-hover:opacity-100 p-2 text-tera-primary/50 hover:text-tera-primary transition"
                                                 title="Edit message"
                                             >
@@ -1009,9 +1011,11 @@ export default function PromptShell({
                                                                             {block.language || 'code'}
                                                                         </span>
                                                                         <button
+                                                                            type="button"
                                                                             onClick={() => {
                                                                                 navigator.clipboard.writeText(block.code)
                                                                             }}
+                                                                            aria-label="Copy code"
                                                                             className="p-1.5 text-white/40 hover:text-tera-neon transition-colors flex-shrink-0"
                                                                             title="Copy code"
                                                                         >
@@ -1123,7 +1127,9 @@ export default function PromptShell({
                                             )}
                                             {/* Remove button */}
                                             <button
+                                                type="button"
                                                 onClick={() => setPendingAttachments(prev => prev.filter((_, i) => i !== idx))}
+                                                aria-label={`Remove ${att.name}`}
                                                 className="absolute right-2 top-2 flex h-7 w-7 items-center justify-center rounded-full border border-white/10 bg-black/70 text-white opacity-0 transition-all group-hover:opacity-100 hover:bg-red-500"
                                                 title="Remove"
                                             >
@@ -1140,7 +1146,11 @@ export default function PromptShell({
                             <div className="flex items-center gap-1 pb-1.5 pl-2">
                                 <div className="relative">
                                     <button
+                                        type="button"
                                         onClick={() => setAttachmentOpen(!attachmentOpen)}
+                                        aria-label="Add attachment"
+                                        aria-haspopup="menu"
+                                        aria-expanded={attachmentOpen}
                                         className="tera-icon-button h-11 w-11 border-transparent bg-white/[0.04]"
                                         title="Add attachment"
                                     >
@@ -1153,18 +1163,21 @@ export default function PromptShell({
                                         <div className="absolute bottom-full left-0 mb-3 w-64 overflow-hidden rounded-[24px] border border-tera-border bg-tera-elevated/95 shadow-panel backdrop-blur-2xl">
                                             {/* File & Media Section */}
                                             <button
+                                                type="button"
                                                 onClick={() => handleFileSelect('camera')}
                                                 className="flex w-full items-center gap-3 px-4 py-3 text-left text-sm text-tera-primary hover:bg-tera-muted border-b border-tera-border"
                                             >
                                                 <span>ðŸ“·</span> Open Camera
                                             </button>
                                             <button
+                                                type="button"
                                                 onClick={() => handleFileSelect('image')}
                                                 className="flex w-full items-center gap-3 px-4 py-3 text-left text-sm text-tera-primary hover:bg-tera-muted border-b border-tera-border"
                                             >
                                                 <span>ðŸ–¼ï¸</span> Upload image
                                             </button>
                                             <button
+                                                type="button"
                                                 onClick={() => handleFileSelect('file')}
                                                 className="flex w-full items-center gap-3 px-4 py-3 text-left text-sm text-tera-primary hover:bg-tera-muted border-b border-tera-border"
                                             >
@@ -1173,6 +1186,7 @@ export default function PromptShell({
 
                                             {/* Web Search Option */}
                                             <button
+                                                type="button"
                                                 onClick={() => {
                                                     if (webSearchRemaining > 0) {
                                                         setWebSearchEnabled(!webSearchEnabled)
@@ -1204,6 +1218,7 @@ export default function PromptShell({
 
                                             {/* Research Mode Toggle - Moved from main UI */}
                                             <button
+                                                type="button"
                                                 onClick={() => {
                                                     const isPro = currentUserPlan === 'pro' || currentUserPlan === 'plus' || currentUserPlan === 'lifetime'
                                                     if (!isPro) {
@@ -1256,8 +1271,10 @@ export default function PromptShell({
                             <div className="mb-1.5 mr-1.5">
                                 {showStopButton && (
                                     <button
+                                        type="button"
                                         onClick={handleStop}
-                                        className="flex h-10 w-10 items-center justify-center rounded-full border border-white/12 bg-white/[0.92] text-[#08101a] transition hover:brightness-95"
+                                        aria-label="Stop generating"
+                                        className="tera-icon-button flex h-10 w-10 items-center justify-center rounded-full border-white/12 bg-white/[0.92] text-[#08101a] hover:brightness-95"
                                         title="Stop generating"
                                     >
                                         <div className="h-3 w-3 bg-current rounded-[2px]" />
@@ -1266,8 +1283,10 @@ export default function PromptShell({
 
                                 {showSendButton && (
                                     <button
+                                        type="button"
                                         onClick={handleSubmit}
-                                        className="flex h-10 w-10 items-center justify-center rounded-full bg-tera-accent text-[#08101a] shadow-soft-lg transition hover:brightness-95"
+                                        aria-label="Send message"
+                                        className="tera-icon-button flex h-10 w-10 items-center justify-center border-transparent bg-tera-accent text-[#08101a] shadow-soft-lg hover:brightness-95"
                                         title="Send message"
                                     >
                                         <svg
@@ -1283,8 +1302,11 @@ export default function PromptShell({
 
                                 {showMicButton && (
                                     <button
+                                        type="button"
                                         onClick={toggleListening}
-                                        className={`flex h-10 w-10 items-center justify-center rounded-full border transition ${isListening ? 'border-red-400/40 bg-red-500/18 text-red-300 animate-pulse' : 'border-white/10 bg-white/[0.05] text-tera-primary hover:bg-white/[0.08]'}`}
+                                        aria-label={isListening ? 'Stop voice input' : 'Start voice input'}
+                                        aria-pressed={isListening}
+                                        className={`tera-icon-button flex h-10 w-10 items-center justify-center ${isListening ? 'border-red-400/40 bg-red-500/18 text-red-300 animate-pulse' : 'border-white/10 bg-white/[0.05] text-tera-primary hover:bg-white/[0.08]'}`}
                                         title="Voice input"
                                     >
                                         <span className="text-xl">ðŸŽ¤</span>
@@ -1312,6 +1334,7 @@ export default function PromptShell({
                     <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 animate-in fade-in duration-200">
                         <div className="relative w-full max-w-md">
                             <button
+                                type="button"
                                 onClick={() => setSearchHistoryOpen(false)}
                                 className="absolute -top-10 right-0 text-white/80 hover:text-white"
                             >
@@ -1371,6 +1394,5 @@ export default function PromptShell({
         </div>
     )
 }
-
 
 

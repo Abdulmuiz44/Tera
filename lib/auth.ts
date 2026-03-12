@@ -128,6 +128,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth((req) => {
     session: {
       strategy: 'jwt',
     },
+    secret: process.env.NEXTAUTH_SECRET ?? process.env.AUTH_SECRET ?? (process.env.NODE_ENV === 'production' ? undefined : 'tera-dev-auth-secret'),
     trustHost: true,
   }
 })
