@@ -158,3 +158,42 @@ export async function fetchHistoryPageData(userId: string, page: number = 1, pag
     }
 }
 
+
+
+export async function fetchUploadedImages(userId: string, limit: number = 200) {
+    try {
+        const session = await auth()
+        if (!session?.user?.id || session.user.id !== userId) return []
+
+        const { data, error } = await supabaseServer
+            .from('chat_sessions')
+            .select('attachments, created_at')
+            .eq('user_id', userId)
+            .not('attachments', 'is', null)
+            .order('created_at', { ascending: false })
+            .limit(limit)
+
+        if (error) throw error
+
+        const images: Array<{ name: string; url: string; uploadedAt: string }> = []
+
+        for (const row of data || []) {
+            const attachments = Array.isArray((row as any).attachments) ? (row as any).attachments : []
+            for (const att of attachments) {
+                if (att?.type === 'image' && att?.url) {
+                    images.push({
+                        name: att.name || 'Image',
+                        url: att.url,
+                        uploadedAt: (row as any).created_at
+                    })
+                }
+            }
+        }
+
+        const uniqueByUrl = Array.from(new Map(images.map((img) => [img.url, img])).values())
+        return uniqueByUrl
+    } catch (error) {
+        console.error('Error fetching uploaded images:', error)
+        return []
+    }
+}

@@ -13,14 +13,20 @@ export default function ChatPage() {
   const searchParams = useSearchParams()
   const router = useRouter()
   const sessionId = searchParams.get('sessionId')
+  const mode = searchParams.get('mode')
+  const prefill = searchParams.get('prefill')
 
   // Redirection logic for path-based sessions
   useEffect(() => {
     if (!sessionId) {
       const newId = crypto.randomUUID()
-      router.replace(`/new/${newId}`)
+      const params = new URLSearchParams()
+      if (mode) params.set('mode', mode)
+      if (prefill) params.set('prefill', prefill)
+      const query = params.toString()
+      router.replace(`/new/${newId}${query ? `?${query}` : ''}`)
     }
-  }, [sessionId, router])
+  }, [sessionId, mode, prefill, router])
 
   const handleRequireSignIn = () => {
     router.push('/auth/signin')

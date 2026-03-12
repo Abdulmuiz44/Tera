@@ -23,6 +23,7 @@ interface UserMenuProps {
 }
 
 const menuItems = [
+  { label: 'Profile', href: '/profile' },
   { label: 'Pricing', href: '/pricing' },
   { label: 'Settings', href: '/settings' },
   { label: 'About', href: '/about' },
