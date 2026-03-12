@@ -7,8 +7,6 @@ import PromptShell from '@/components/PromptShell'
 import type { TeacherTool } from '@/components/ToolCard'
 import { UniversalTool } from '@/lib/tools-data'
 
-// ... imports ...
-
 export default function ChatSessionPage() {
     const params = useParams()
     const router = useRouter()
