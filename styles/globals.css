@@ -180,7 +180,7 @@
   .tera-button-primary {
     @apply tera-button;
     background: linear-gradient(180deg, var(--text-tera-accent-strong), var(--text-tera-accent));
-    color: #16120d;
+    color: #ffffff;
     box-shadow: 0 14px 28px rgba(219, 188, 142, 0.18);
   }
 
@@ -244,11 +244,11 @@
   }
 
   .composer-menu-row {
-    @apply flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-sm font-medium text-[#f5f7fa] transition;
+    @apply flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-sm font-medium text-tera-primary transition;
   }
 
   .composer-menu-row:hover {
-    background-color: rgba(255, 255, 255, 0.1);
+    background-color: var(--bg-tera-highlight);
   }
 
   .tera-input {
