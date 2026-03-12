@@ -1,4 +1,4 @@
-﻿"use client"
+"use client"
 
 import React, { ChangeEvent, useCallback, useEffect, useRef, useState, useTransition } from 'react'
 import Image from 'next/image'
@@ -40,6 +40,31 @@ type QueuedMessage = {
     prompt: string
     attachments: AttachmentReference[]
 }
+
+const UI_STATUS = {
+    webSearch: {
+        idle: 'idle',
+        searching: 'searching',
+        processing: 'processing',
+        complete: 'complete'
+    },
+    labels: {
+        on: 'ON',
+        limitReached: 'Limit reached'
+    },
+    thinking: {
+        default: 'Tera is Thinking...',
+        searchingWeb: 'Tera is Searching the Web...',
+        creatingVisuals: 'Tera is Creating Visuals...',
+        coding: 'Tera is Coding...',
+        analyzingData: 'Tera is Analyzing Data...',
+        solving: 'Tera is Solving...',
+        writing: 'Tera is Writing...',
+        preparingLesson: 'Tera is Preparing Lesson...'
+    }
+} as const
+
+type WebSearchStatus = typeof UI_STATUS.webSearch[keyof typeof UI_STATUS.webSearch]
 
 const createId = () => (crypto.randomUUID ? crypto.randomUUID() : String(Date.now()))
 
@@ -284,28 +309,28 @@ export default function PromptShell({
     const [webSearchRemaining, setWebSearchRemaining] = useState(100)
     const [isWebSearching, setIsWebSearching] = useState(false)
     const [currentSearchQuery, setCurrentSearchQuery] = useState('')
-    const [webSearchStatus, setWebSearchStatus] = useState<'idle' | 'searching' | 'processing' | 'complete'>('idle')
+    const [webSearchStatus, setWebSearchStatus] = useState<WebSearchStatus>(UI_STATUS.webSearch.idle)
     const [webSearchResultCount, setWebSearchResultCount] = useState(0)
     const [searchHistoryOpen, setSearchHistoryOpen] = useState(false)
-    const [thinkingMessage, setThinkingMessage] = useState('Tera is Thinking...')
+    const [thinkingMessage, setThinkingMessage] = useState<string>(UI_STATUS.thinking.default)
     const requestIdRef = useRef(0)
 
     const getThinkingMessage = (prompt: string, isWebSearch: boolean) => {
         const p = prompt.toLowerCase()
-        if (isWebSearch) return 'Tera is Searching the Web...'
+        if (isWebSearch) return UI_STATUS.thinking.searchingWeb
         // Visuals / Creation
-        if (p.includes('draw') || p.includes('visual') || p.includes('chart') || p.includes('diagram') || p.includes('image')) return 'Tera is Creating Visuals...'
+        if (p.includes('draw') || p.includes('visual') || p.includes('chart') || p.includes('diagram') || p.includes('image')) return UI_STATUS.thinking.creatingVisuals
         // Coding
-        if (p.includes('code') || p.includes('function') || p.includes('script') || p.includes('debug') || p.includes('api')) return 'Tera is Coding...'
+        if (p.includes('code') || p.includes('function') || p.includes('script') || p.includes('debug') || p.includes('api')) return UI_STATUS.thinking.coding
         // Analysis / Math
-        if (p.includes('analyze') || p.includes('data') || p.includes('trend')) return 'Tera is Analyzing Data...'
-        if (p.includes('solve') || p.includes('calculate') || p.includes('math') || p.includes('equation')) return 'Tera is Solving...'
+        if (p.includes('analyze') || p.includes('data') || p.includes('trend')) return UI_STATUS.thinking.analyzingData
+        if (p.includes('solve') || p.includes('calculate') || p.includes('math') || p.includes('equation')) return UI_STATUS.thinking.solving
         // Writing / Creativity
-        if (p.includes('write') || p.includes('essay') || p.includes('story') || p.includes('poem') || p.includes('draft')) return 'Tera is Writing...'
+        if (p.includes('write') || p.includes('essay') || p.includes('story') || p.includes('poem') || p.includes('draft')) return UI_STATUS.thinking.writing
         // Learning / Explaining
-        if (p.includes('explain') || p.includes('teach') || p.includes('how to') || p.includes('learn')) return 'Tera is Preparing Lesson...'
+        if (p.includes('explain') || p.includes('teach') || p.includes('how to') || p.includes('learn')) return UI_STATUS.thinking.preparingLesson
 
-        return 'Tera is Thinking...'
+        return UI_STATUS.thinking.default
     }
 
 
@@ -471,14 +496,14 @@ export default function PromptShell({
                 if (useWebSearch) {
                     setIsWebSearching(true)
                     setCurrentSearchQuery(messageToSend)
-                    setWebSearchStatus('searching')
+                    setWebSearchStatus(UI_STATUS.webSearch.searching)
                     setWebSearchResultCount(0)
 
                     // Cycle status to show "what's going on behind the scenes"
                     const statusCycle = [
-                        { status: 'searching', delay: 0 },
-                        { status: 'processing', delay: 1500, check: researchMode },
-                        { status: 'searching', delay: 3500 },
+                        { status: UI_STATUS.webSearch.searching, delay: 0 },
+                        { status: UI_STATUS.webSearch.processing, delay: 1500, check: researchMode },
+                        { status: UI_STATUS.webSearch.searching, delay: 3500 },
                     ]
 
                     statusCycle.forEach(({ status, delay, check }) => {
@@ -486,8 +511,8 @@ export default function PromptShell({
                         setTimeout(() => {
                             setWebSearchStatus(prev => {
                                 // Don't regress if already complete or errored
-                                if (prev === 'complete' || prev === 'idle') return prev
-                                return status as any
+                                if (prev === UI_STATUS.webSearch.complete || prev === UI_STATUS.webSearch.idle) return prev
+                                return status
                             })
                         }, delay)
                     })
@@ -516,17 +541,17 @@ export default function PromptShell({
                 // Clear web search status
                 if (useWebSearch) {
                     setIsWebSearching(false)
-                    setWebSearchStatus('complete')
+                    setWebSearchStatus(UI_STATUS.webSearch.complete)
                     // Auto-reset after 2 seconds
                     setTimeout(() => {
-                        setWebSearchStatus('idle')
+                        setWebSearchStatus(UI_STATUS.webSearch.idle)
                         setCurrentSearchQuery('')
                     }, 2000)
                 }
 
                 // Check if this request is still valid (hasn't been stopped or superseded)
                 if (currentRequestId !== requestIdRef.current) {
-                    console.log('ðŸ›‘ Request cancelled/superseded, ignoring response')
+                    console.log('Request cancelled/superseded, ignoring response')
                     return
                 }
 
@@ -661,7 +686,6 @@ export default function PromptShell({
                     prompt: messageToSend,
                     attachments: [...pendingAttachments]
                 }
-                console.log('ðŸ”´ SAVING to localStorage:', messageData)
                 localStorage.setItem('tera_queued_message', JSON.stringify(messageData))
             }
             setAttachmentMessage('Sign in to send your message. It will be posted automatically once you authenticate.')
@@ -673,7 +697,7 @@ export default function PromptShell({
                 prompt: messageToSend,
                 attachments: [...pendingAttachments]
             })
-            setAttachmentMessage('Hang tightâ€”finalizing your account before sending.')
+            setAttachmentMessage('Hang tight—finalizing your account before sending.')
             return
         }
 
@@ -687,37 +711,25 @@ export default function PromptShell({
 
     useEffect(() => {
         // Always check for persisted message on mount
-        console.log('ðŸŸ¢ MOUNT EFFECT: Checking localStorage...')
         if (typeof window !== 'undefined' && !queuedMessage) {
             const savedMessage = localStorage.getItem('tera_queued_message')
-            console.log('ðŸŸ¢ localStorage value:', savedMessage)
             if (savedMessage) {
                 try {
-                    console.log('ðŸŸ¢ Found queued message, parsing...')
                     const parsed = JSON.parse(savedMessage)
-                    console.log('ðŸŸ¢ Parsed message:', parsed)
                     setQueuedMessage(parsed)
-                    console.log('ðŸŸ¢ Set queuedMessage state')
                 } catch (e) {
-                    console.error('ðŸ”´ Failed to parse queued message', e)
+                    console.error('Failed to parse queued message', e)
                     localStorage.removeItem('tera_queued_message')
                 }
-            } else {
-                console.log('ðŸŸ¢ No saved message found in localStorage')
             }
-        } else {
-            console.log('ðŸŸ¢ Skipping restore (window undefined or queuedMessage already set)')
         }
     }, []) // Run once on mount
 
     useEffect(() => {
-        console.log('ðŸ”µ PROCESS EFFECT: userReady=', userReady, 'queuedMessage=', queuedMessage)
         if (userReady && queuedMessage) {
-            console.log('ðŸ”µ Processing queued message:', queuedMessage)
             processMessage(queuedMessage.prompt, queuedMessage.attachments)
 
             // Clean up
-            console.log('ðŸ”µ Cleaning up localStorage and queuedMessage state')
             localStorage.removeItem('tera_queued_message')
             setQueuedMessage(null)
         }
@@ -816,7 +828,7 @@ export default function PromptShell({
                     if (data.plan) {
                         setCurrentUserPlan(data.plan)
                     }
-                    console.log(`ðŸ” Web Search Status: ${data.remaining}/${data.total} (${data.plan?.toUpperCase()})`)
+                    console.log(`Web Search Status: ${data.remaining}/${data.total} (${data.plan?.toUpperCase()})`)
                 }
             } catch (err) {
                 console.warn('Failed to fetch web search status:', err)
@@ -940,7 +952,7 @@ export default function PromptShell({
                                                         <div className="mt-3 flex flex-wrap gap-2">
                                                             {entry.userMessage.attachments.map((att, idx) => (
                                                                 <div key={idx} className="flex items-center gap-2 rounded-lg bg-black/5 px-3 py-2 text-xs">
-                                                                    <span>{att.type === 'image' ? 'ðŸ–¼ï¸' : 'ðŸ“„'}</span>
+                                                                    <span>{att.type === 'image' ? '🖼️' : '📄'}</span>
                                                                     <span className="truncate max-w-[150px]">{att.name}</span>
                                                                 </div>
                                                             ))}
@@ -950,7 +962,7 @@ export default function PromptShell({
                                                 {/* Timestamp and checkmarks */}
                                                 <div className="flex items-center gap-1.5 px-2 text-xs text-tera-secondary">
                                                     <span>{formatTimestamp(entry.userMessage.timestamp)}</span>
-                                                    <span className="text-tera-secondary/60">âœ“âœ“</span>
+                                                    <span className="text-tera-secondary/60">✓✓</span>
                                                 </div>
                                             </div>
                                         </div>
@@ -1045,7 +1057,7 @@ export default function PromptShell({
                         ))
                     )}
                     {/* Web Search Status */}
-                    {(isWebSearching || webSearchStatus !== 'idle') && (
+                    {(isWebSearching || webSearchStatus !== UI_STATUS.webSearch.idle) && (
                         <div className="flex items-center gap-4">
                             <WebSearchStatus
                                 isSearching={isWebSearching}
@@ -1088,8 +1100,8 @@ export default function PromptShell({
                             {/* Web Search Toggle Badge */}
                             {webSearchEnabled && (
                                 <div className="flex items-center gap-2 rounded-full border border-tera-neon/20 bg-tera-highlight px-3 py-2 text-xs font-semibold text-tera-neon shadow-soft-lg">
-                                    <span>ðŸ”</span>
-                                    <span>Web Search ON ({webSearchRemaining})</span>
+                                    <span>🔍</span>
+                                    <span>Web Search {UI_STATUS.labels.on} ({webSearchRemaining})</span>
                                 </div>
                             )}
 
@@ -1117,7 +1129,7 @@ export default function PromptShell({
                                             ) : (
                                                 // File preview (non-image)
                                                 <div className="flex items-center gap-2 px-4 py-3 min-w-[120px]">
-                                                    <span className="text-2xl">ðŸ“„</span>
+                                                    <span className="text-2xl">📄</span>
                                                     <span className="text-xs text-tera-primary truncate max-w-[150px]">{att.name}</span>
                                                 </div>
                                             )}
@@ -1127,7 +1139,7 @@ export default function PromptShell({
                                                 className="absolute right-2 top-2 flex h-7 w-7 items-center justify-center rounded-full border border-white/10 bg-black/70 text-white opacity-0 transition-all group-hover:opacity-100 hover:bg-red-500"
                                                 title="Remove"
                                             >
-                                                âœ•
+                                                ✕
                                             </button>
                                         </div>
                                     ))}
@@ -1156,19 +1168,19 @@ export default function PromptShell({
                                                 onClick={() => handleFileSelect('camera')}
                                                 className="flex w-full items-center gap-3 px-4 py-3 text-left text-sm text-tera-primary hover:bg-tera-muted border-b border-tera-border"
                                             >
-                                                <span>ðŸ“·</span> Open Camera
+                                                <span>📷</span> Open Camera
                                             </button>
                                             <button
                                                 onClick={() => handleFileSelect('image')}
                                                 className="flex w-full items-center gap-3 px-4 py-3 text-left text-sm text-tera-primary hover:bg-tera-muted border-b border-tera-border"
                                             >
-                                                <span>ðŸ–¼ï¸</span> Upload image
+                                                <span>🖼️</span> Upload image
                                             </button>
                                             <button
                                                 onClick={() => handleFileSelect('file')}
                                                 className="flex w-full items-center gap-3 px-4 py-3 text-left text-sm text-tera-primary hover:bg-tera-muted border-b border-tera-border"
                                             >
-                                                <span>ðŸ“„</span> Upload file
+                                                <span>📄</span> Upload file
                                             </button>
 
                                             {/* Web Search Option */}
@@ -1191,11 +1203,11 @@ export default function PromptShell({
                                                     }`}
                                                 title={webSearchRemaining <= 0 ? 'Monthly web search limit reached - Upgrade to continue' : 'Search the web for current information'}
                                             >
-                                                <span>ðŸ”</span>
+                                                <span>🔍</span>
                                                 <div className="flex-1">
-                                                    <div>Web Search {webSearchEnabled ? '(ON)' : ''}</div>
+                                                    <div>Web Search {webSearchEnabled ? `(${UI_STATUS.labels.on})` : ''}</div>
                                                     <div className={`text-xs ${webSearchRemaining <= 0 ? 'text-red-300/50' : 'text-tera-secondary'}`}>
-                                                        {webSearchRemaining <= 0 ? 'Limit reached' : `${webSearchRemaining} remaining`}
+                                                        {webSearchRemaining <= 0 ? UI_STATUS.labels.limitReached : `${webSearchRemaining} remaining`}
                                                     </div>
                                                 </div>
                                             </button>
@@ -1217,7 +1229,7 @@ export default function PromptShell({
                                                 className={`flex w-full items-center gap-3 px-4 py-3 text-left text-sm border-t border-tera-border transition ${researchMode ? 'text-tera-neon bg-tera-neon/5' : 'text-tera-primary hover:bg-tera-muted'
                                                     }`}
                                             >
-                                                <span>ðŸ”­</span>
+                                                <span>🔭</span>
                                                 <div className="flex-1 flex items-center justify-between">
                                                     <span>Deep Research</span>
                                                     {researchMode && <span className="text-[10px] font-bold bg-tera-neon/20 px-1.5 py-0.5 rounded text-tera-neon">ON</span>}
@@ -1241,7 +1253,7 @@ export default function PromptShell({
                                         handleSubmit(e)
                                     }
                                 }}
-                                placeholder={isListening ? "Listening... ðŸŽ¤" : "Ask Tera Anything..."}
+                                placeholder={isListening ? "Listening... 🎤" : "Ask Tera Anything..."}
                                 className="m-0 min-h-[52px] max-h-[140px] w-full resize-none bg-transparent px-3 py-3 text-[0.98rem] leading-relaxed text-tera-primary placeholder-tera-secondary/60 focus:outline-none"
                                 rows={1}
                                 style={{ height: 'auto' }}
@@ -1287,7 +1299,7 @@ export default function PromptShell({
                                         className={`flex h-10 w-10 items-center justify-center rounded-full border transition ${isListening ? 'border-red-400/40 bg-red-500/18 text-red-300 animate-pulse' : 'border-white/10 bg-white/[0.05] text-tera-primary hover:bg-white/[0.08]'}`}
                                         title="Voice input"
                                     >
-                                        <span className="text-xl">ðŸŽ¤</span>
+                                        <span className="text-xl">🎤</span>
                                     </button>
                                 )}
                             </div>
@@ -1315,7 +1327,7 @@ export default function PromptShell({
                                 onClick={() => setSearchHistoryOpen(false)}
                                 className="absolute -top-10 right-0 text-white/80 hover:text-white"
                             >
-                                Close âœ•
+                                Close ✕
                             </button>
                             <SearchHistoryRenderer
                                 userId={user.id}
@@ -1371,6 +1383,5 @@ export default function PromptShell({
         </div>
     )
 }
-
 
 
