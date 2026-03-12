@@ -22,9 +22,9 @@ type User = {
 export const navigation = [
   { label: 'New chat', icon: 'chat', href: '/new' },
   { label: 'Search chats', icon: 'search', href: '/history' },
-  { label: 'Images', icon: 'images', href: '/tools?tool=image-generator' },
-  { label: 'Apps', icon: 'apps', href: '/tools' },
-  { label: 'Deep research', icon: 'research', href: '/tools?tool=deep-research' },
+  { label: 'Images', icon: 'images', href: '/images' },
+  { label: 'Tools', icon: 'apps', href: '/tools' },
+  { label: 'Deep research', icon: 'research', href: '/deep-research' },
   { label: 'Notes', icon: 'notes', href: '/notes' },
   { label: 'Settings', icon: 'settings', href: '/settings' },
 ]

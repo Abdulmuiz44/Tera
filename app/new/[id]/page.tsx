@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { useParams, useRouter } from 'next/navigation'
+import { useParams, useRouter, useSearchParams } from 'next/navigation'
 import { useAuth } from '@/components/AuthProvider'
 import PromptShell from '@/components/PromptShell'
 import type { TeacherTool } from '@/components/ToolCard'
@@ -14,7 +14,9 @@ export default function ChatSessionPage() {
     const router = useRouter()
     const { user, userReady } = useAuth()
     const [selectedTool, setSelectedTool] = useState<TeacherTool>(UniversalTool)
+    const searchParams = useSearchParams()
     const sessionId = params.id as string
+    const initialPrompt = searchParams.get('prompt') || undefined
 
     const handleRequireSignIn = () => {
         router.push('/auth/signin')
@@ -29,6 +31,7 @@ export default function ChatSessionPage() {
                 user={user}
                 userReady={userReady}
                 onRequireSignIn={handleRequireSignIn}
+                initialPrompt={initialPrompt}
             />
         </div>
     )

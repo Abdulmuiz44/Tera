@@ -13,6 +13,7 @@ export default function ChatPage() {
   const searchParams = useSearchParams()
   const router = useRouter()
   const sessionId = searchParams.get('sessionId')
+  const initialPrompt = searchParams.get('prompt') || undefined
 
   // Redirection logic for path-based sessions
   useEffect(() => {
@@ -38,6 +39,7 @@ export default function ChatPage() {
         user={user}
         userReady={userReady}
         onRequireSignIn={handleRequireSignIn}
+        initialPrompt={initialPrompt}
       />
     </div>
   )
