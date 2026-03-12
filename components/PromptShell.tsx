@@ -1125,7 +1125,7 @@ export default function PromptShell({
             {/* Input Area */}
             <div className="sticky bottom-0 z-50 w-full shrink-0 bg-tera-bg/92 px-2 py-2.5 backdrop-blur-xl md:px-8 md:py-3">
                 <div className="relative mx-auto max-w-4xl">
-                    <div className={`relative flex flex-col gap-2 rounded-[26px] bg-[#1b1c1f] p-2.5 shadow-soft-lg transition-colors ${conversationActive ? 'focus-within:bg-[#1f2024]' : 'focus-within:bg-[#202228]'}`}>
+                    <div className={`relative flex flex-col gap-2 rounded-[26px] border border-tera-border bg-tera-panel p-2.5 shadow-soft-lg transition-colors ${conversationActive ? 'focus-within:bg-tera-panel' : 'focus-within:bg-tera-panel-strong'}`}>
 
                         {/* Active Tools & Attachments Preview */}
                         <div className="flex flex-wrap items-center gap-2 px-2 pt-2">
@@ -1193,7 +1193,7 @@ export default function PromptShell({
                                     </button>
 
                                     {attachmentOpen && (
-                                        <div className="absolute bottom-full left-0 mb-3 w-64 overflow-hidden rounded-2xl border border-white/15 bg-[#18191d] p-2 text-[#eef0f4] shadow-2xl">
+                                        <div className="absolute bottom-full left-0 mb-3 w-64 overflow-hidden rounded-2xl border border-tera-border bg-tera-panel p-2 text-tera-primary shadow-2xl">
                                             {/* File & Media Section */}
                                             <button
                                                 onClick={() => handleFileSelect('camera')}
