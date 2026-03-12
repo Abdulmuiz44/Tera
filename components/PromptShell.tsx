@@ -935,7 +935,7 @@ export default function PromptShell({
                     {showInitialPrompt ? (
                         <div className="absolute inset-x-0 top-0 bottom-0 flex items-center justify-center px-4 text-center pointer-events-none -mt-16">
                             <div className="pointer-events-auto flex max-w-3xl flex-col items-center">
-                                <div className="mx-auto mb-8 w-fit rounded-[32px] border border-white/8 bg-white/[0.03] p-7 shadow-soft-lg">
+                                <div className="mx-auto mb-8 w-fit p-7">
                                     <span className="flex items-center justify-center w-32 h-32">
                                         <div className="relative w-[120px] h-[120px]">
                                             <Image
@@ -956,7 +956,6 @@ export default function PromptShell({
                                     </span>
                                 </div>
                                 <h2 className="text-4xl font-semibold tracking-[-0.03em] text-tera-primary md:text-5xl">How can Tera help you today?</h2>
-                                <p className="mt-4 max-w-2xl text-sm leading-7 text-tera-secondary md:text-base">Ask a question, run research, review notes, or jump into a tool from the same dark workspace.</p>
                             </div>
                         </div>
                     ) : (
@@ -1416,4 +1415,3 @@ export default function PromptShell({
         </div>
     )
 }
-
