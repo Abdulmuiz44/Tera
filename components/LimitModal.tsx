@@ -88,7 +88,7 @@ export default function LimitModal({ isOpen, limitType, currentPlan, onClose, un
                 }`}
         >
             <div
-                className={`dark:bg-black dark:border-tera-neon bg-white border-tera-neon border rounded-2xl p-6 md:p-8 max-w-md w-full my-auto transition-all duration-300 transform max-h-[90vh] overflow-y-auto ${isClosing ? 'scale-95 opacity-0' : 'scale-100 opacity-100'
+                className={`bg-tera-panel-strong border border-tera-border rounded-2xl p-6 md:p-8 max-w-md w-full my-auto transition-all duration-300 transform max-h-[90vh] overflow-y-auto text-tera-primary ${isClosing ? 'scale-95 opacity-0' : 'scale-100 opacity-100'
                     }`}
                 onClick={(e) => e.stopPropagation()}
             >
@@ -108,14 +108,14 @@ export default function LimitModal({ isOpen, limitType, currentPlan, onClose, un
 
                 {/* Icon */}
                 <div className="flex justify-center mb-4 md:mb-6">
-                    <div className="w-14 h-14 md:w-16 md:h-16 rounded-full dark:bg-tera-neon/20 dark:border-tera-neon dark:border bg-tera-neon/20 border border-tera-neon flex items-center justify-center">
+                    <div className="w-14 h-14 md:w-16 md:h-16 rounded-full tera-accent-surface flex items-center justify-center">
                         <svg
                             xmlns="http://www.w3.org/2000/svg"
                             fill="none"
                             viewBox="0 0 24 24"
                             strokeWidth={1.5}
                             stroke="currentColor"
-                            className="w-7 h-7 md:w-8 md:h-8 text-tera-neon"
+                            className="w-7 h-7 md:w-8 md:h-8 tera-accent-text"
                         >
                             <path
                                 strokeLinecap="round"
@@ -127,26 +127,26 @@ export default function LimitModal({ isOpen, limitType, currentPlan, onClose, un
                 </div>
 
                 {/* Title */}
-                <h2 className="text-xl md:text-2xl font-bold dark:text-white text-black text-center mb-2 md:mb-3">{info.title}</h2>
+                <h2 className="text-xl md:text-2xl font-bold text-tera-primary text-center mb-2 md:mb-3">{info.title}</h2>
 
                 {/* Message */}
-                <p className="dark:text-white/80 text-black/70 text-center mb-2 text-sm md:text-base">{info.message}</p>
+                <p className="text-tera-secondary text-center mb-2 text-sm md:text-base">{info.message}</p>
 
                 {/* Unlock Time Info */}
                 {timeRemaining && (
-                    <div className="dark:bg-orange-500/20 dark:border-orange-500/50 bg-orange-50 border border-orange-200 rounded-lg p-3 mb-4">
-                        <p className="dark:text-orange-200 text-orange-800 text-center text-xs md:text-sm">
+                    <div className="tera-accent-surface rounded-lg p-3 mb-4">
+                        <p className="text-tera-secondary text-center text-xs md:text-sm">
                             <span className="font-semibold">Access Unlocks In:</span>
-                            <span className="block mt-1 text-tera-neon font-medium text-sm">{timeRemaining}</span>
+                            <span className="block mt-1 tera-accent-text font-medium text-sm">{timeRemaining}</span>
                         </p>
                     </div>
                 )}
 
                 {/* Limit Info */}
-                <div className="dark:bg-white/10 dark:border-white/20 bg-black/5 border border-black/10 rounded-lg p-3 mb-4">
+                <div className="tera-surface-subtle rounded-lg p-3 mb-4">
                     <div className="flex items-center justify-between">
-                        <span className="dark:text-white/60 text-black/60 text-xs md:text-sm">Your Free Plan:</span>
-                        <span className="text-tera-neon font-semibold text-xs md:text-sm">
+                        <span className="text-tera-secondary text-xs md:text-sm">Your Free Plan:</span>
+                        <span className="tera-accent-text font-semibold text-xs md:text-sm">
                             {limitType === 'chats' && 'Unlimited conversations'}
                             {limitType === 'file-uploads' && `${info.current} uploads/day`}
                             {limitType === 'web-search' && `${info.current} searches/month`}
@@ -156,10 +156,10 @@ export default function LimitModal({ isOpen, limitType, currentPlan, onClose, un
                 </div>
 
                 {/* Upgrade Info */}
-                <div className="dark:bg-tera-neon/10 dark:border-tera-neon/30 bg-tera-neon/10 border border-tera-neon/30 rounded-lg p-3 mb-4">
-                    <p className="dark:text-white text-black text-xs md:text-sm">
+                <div className="tera-accent-surface rounded-lg p-3 mb-4">
+                    <p className="text-tera-primary text-xs md:text-sm">
                         <span className="font-semibold">Upgrade to {info.upgrade}</span>
-                        <span className="dark:text-white/70 text-black/70 ml-2">for higher limits and more features</span>
+                        <span className="text-tera-secondary ml-2">for higher limits and more features</span>
                     </p>
                 </div>
 
@@ -167,57 +167,57 @@ export default function LimitModal({ isOpen, limitType, currentPlan, onClose, un
                 <div className="space-y-1.5 mb-4 text-xs md:text-sm">
                     {limitType === 'chats' && (
                         <>
-                            <div className="flex justify-between dark:text-white/80 text-black/70">
+                            <div className="flex justify-between text-tera-secondary">
                                 <span>All Plans:</span>
-                                <span className="font-medium text-tera-neon">Unlimited conversations</span>
+                                <span className="font-medium tera-accent-text">Unlimited conversations</span>
                             </div>
                         </>
                     )}
                     {limitType === 'file-uploads' && (
                         <>
-                            <div className="flex justify-between dark:text-white/80 text-black/70">
+                            <div className="flex justify-between text-tera-secondary">
                                 <span>Free:</span>
                                 <span className="font-medium">3 uploads/day (10MB)</span>
                             </div>
-                            <div className="flex justify-between dark:text-white/80 text-black/70">
+                            <div className="flex justify-between text-tera-secondary">
                                 <span>Pro:</span>
-                                <span className="font-medium text-tera-neon">25 uploads/day (500MB)</span>
+                                <span className="font-medium tera-accent-text">25 uploads/day (500MB)</span>
                             </div>
-                            <div className="flex justify-between dark:text-white/80 text-black/70">
+                            <div className="flex justify-between text-tera-secondary">
                                 <span>Plus:</span>
-                                <span className="font-medium text-tera-neon">Unlimited (2GB)</span>
+                                <span className="font-medium tera-accent-text">Unlimited (2GB)</span>
                             </div>
                         </>
                     )}
                     {limitType === 'web-search' && (
                         <>
-                            <div className="flex justify-between dark:text-white/80 text-black/70">
+                            <div className="flex justify-between text-tera-secondary">
                                 <span>Free:</span>
                                 <span className="font-medium">5 searches/month</span>
                             </div>
-                            <div className="flex justify-between dark:text-white/80 text-black/70">
+                            <div className="flex justify-between text-tera-secondary">
                                 <span>Pro:</span>
-                                <span className="font-medium text-tera-neon">100 searches/month</span>
+                                <span className="font-medium tera-accent-text">100 searches/month</span>
                             </div>
-                            <div className="flex justify-between dark:text-white/80 text-black/70">
+                            <div className="flex justify-between text-tera-secondary">
                                 <span>Plus:</span>
-                                <span className="font-medium text-tera-neon">Unlimited searches</span>
+                                <span className="font-medium tera-accent-text">Unlimited searches</span>
                             </div>
                         </>
                     )}
                     {limitType === 'research-mode' && (
                         <>
-                            <div className="flex justify-between dark:text-white/80 text-black/70">
+                            <div className="flex justify-between text-tera-secondary">
                                 <span>Free:</span>
                                 <span className="font-medium">Not available</span>
                             </div>
-                            <div className="flex justify-between dark:text-white/80 text-black/70">
+                            <div className="flex justify-between text-tera-secondary">
                                 <span>Pro:</span>
-                                <span className="font-medium text-tera-neon">✓ Deep Research Mode</span>
+                                <span className="font-medium tera-accent-text">✓ Deep Research Mode</span>
                             </div>
-                            <div className="flex justify-between dark:text-white/80 text-black/70">
+                            <div className="flex justify-between text-tera-secondary">
                                 <span>Plus:</span>
-                                <span className="font-medium text-tera-neon">✓ Deep Research Mode</span>
+                                <span className="font-medium tera-accent-text">✓ Deep Research Mode</span>
                             </div>
                         </>
                     )}
@@ -227,7 +227,7 @@ export default function LimitModal({ isOpen, limitType, currentPlan, onClose, un
                 <div className="flex gap-3 mt-4">
                     <button
                         onClick={handleUpgrade}
-                        className="w-full px-4 py-2 md:py-2.5 rounded-lg bg-tera-neon text-tera-bg dark:text-black font-semibold hover:bg-tera-neon/90 transition-colors text-sm md:text-base"
+                        className="tera-button-primary w-full px-4 py-2 md:py-2.5 rounded-lg font-semibold transition-colors text-sm md:text-base"
                     >
                         Upgrade to Pro/Plus
                     </button>

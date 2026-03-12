@@ -126,7 +126,7 @@ export default function Sidebar({ expanded, onToggle, onNewChat, user, onSignOut
       <div className="flex h-full flex-col rounded-[30px] border border-tera-border bg-tera-panel/90 p-3 backdrop-blur-xl shadow-panel">
         <div className={`flex items-center gap-3 rounded-[24px] px-2 py-2 ${expanded ? 'justify-between' : 'justify-center md:flex-col md:gap-4'}`}>
           <Link href="/new" className={`group flex min-w-0 items-center gap-3 ${expanded ? '' : 'md:flex-col'}`}>
-            <div className="relative flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-[18px] border border-tera-border bg-white/[0.03]">
+            <div className="relative flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-[18px] border border-tera-border bg-[var(--surface-subtle)]">
               <Image src="/images/TERA_LOGO_ONLY1.png" alt="Tera" fill className="block object-contain p-2 dark:hidden" priority />
               <Image src="/images/TERA_LOGO_ONLY.png" alt="Tera" fill className="hidden object-contain p-2 dark:block" priority />
             </div>
@@ -195,9 +195,9 @@ export default function Sidebar({ expanded, onToggle, onNewChat, user, onSignOut
                       onNewChat()
                     }
                   }}
-                  className={`group relative flex min-h-12 items-center gap-3 rounded-[18px] px-3 py-3 text-sm transition ${isActive ? 'border border-tera-border bg-white/[0.07] text-tera-primary' : 'border border-transparent text-tera-secondary hover:border-tera-border hover:bg-white/[0.04] hover:text-tera-primary'}`}
+                  className={`group relative flex min-h-12 items-center gap-3 rounded-[18px] px-3 py-3 text-sm transition ${isActive ? 'border border-tera-border bg-[var(--surface-strong)] text-tera-primary' : 'border border-transparent text-tera-secondary hover:border-tera-border hover:bg-[var(--interactive-neutral)] hover:text-tera-primary'}`}
                 >
-                  <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-[16px] ${isActive ? 'bg-tera-highlight text-tera-accent' : 'bg-white/[0.03]'}`}>
+                  <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-[16px] ${isActive ? 'bg-tera-highlight text-tera-accent' : 'bg-[var(--surface-subtle)]'}`}>
                     {getIcon(item.icon)}
                   </div>
                   {expanded && <span className="flex-1 font-medium">{item.label}</span>}
@@ -213,7 +213,7 @@ export default function Sidebar({ expanded, onToggle, onNewChat, user, onSignOut
         </div>
 
         {expanded && (
-          <div className="mt-4 rounded-[24px] border border-tera-border bg-white/[0.03] px-4 py-4">
+          <div className="mt-4 rounded-[24px] border border-tera-border bg-[var(--surface-subtle)] px-4 py-4">
             <p className="text-[0.68rem] uppercase tracking-[0.28em] text-tera-secondary">System</p>
             <p className="mt-2 text-sm leading-6 text-tera-primary">Search, write, and organize in one calm interface that stays usable on mobile.</p>
           </div>

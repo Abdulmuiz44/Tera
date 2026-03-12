@@ -17,7 +17,7 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({ content }) => {
     .replace(/\\\]/g, '$$')
 
   return (
-    <div className="tera-prose prose-headings:tracking-[-0.02em] prose-strong:text-tera-primary prose-p:text-tera-primary prose-li:text-tera-primary prose-code:text-tera-neon prose-a:text-tera-neon">
+    <div className="tera-prose prose-headings:tracking-[-0.02em] prose-strong:text-tera-primary prose-p:text-tera-primary prose-li:text-tera-primary">
       <ReactMarkdown
         remarkPlugins={[remarkGfm, remarkMath]}
         rehypePlugins={[rehypeKatex]}
@@ -28,7 +28,7 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({ content }) => {
               href={href}
               target="_blank"
               rel="noopener noreferrer"
-              className="break-all text-tera-neon underline decoration-tera-neon/30 underline-offset-4 transition hover:text-tera-primary"
+              className="break-all tera-link-accent transition"
             >
               {children}
             </a>
@@ -41,34 +41,34 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({ content }) => {
           h3: ({ children }) => <h3 className="mb-2 mt-5 text-lg font-semibold text-tera-primary">{children}</h3>,
           h4: ({ children }) => <h4 className="mb-2 mt-4 text-base font-semibold text-tera-primary">{children}</h4>,
           table: ({ children }) => (
-            <div className="my-6 w-full overflow-x-auto rounded-[20px] border border-tera-border bg-white/[0.03]">
+            <div className="my-6 w-full overflow-x-auto rounded-[20px] tera-surface-subtle">
               <table className="w-full text-left text-sm">{children}</table>
             </div>
           ),
           thead: ({ children }) => (
-            <thead className="border-b border-tera-border bg-white/[0.04] text-[0.68rem] uppercase tracking-[0.22em] text-tera-secondary">
+            <thead className="border-b border-tera-border bg-[var(--surface-strong)] text-[0.68rem] uppercase tracking-[0.22em] text-tera-secondary">
               {children}
             </thead>
           ),
           tbody: ({ children }) => <tbody className="divide-y divide-tera-border/70">{children}</tbody>,
-          tr: ({ children }) => <tr className="hover:bg-white/[0.03]">{children}</tr>,
+          tr: ({ children }) => <tr className="hover:bg-[var(--interactive-neutral)]">{children}</tr>,
           th: ({ children }) => <th className="px-4 py-3 font-medium">{children}</th>,
           td: ({ children }) => <td className="px-4 py-3 align-top text-tera-primary/95">{children}</td>,
           hr: () => <hr className="my-6 border-tera-border opacity-70" />,
           blockquote: ({ children }) => (
-            <blockquote className="my-5 rounded-r-[18px] border-l-2 border-tera-neon bg-tera-highlight px-4 py-3 italic text-tera-secondary">
+            <blockquote className="my-5 rounded-r-[18px] border-l-2 border-[var(--accent-primary-border)] bg-tera-highlight px-4 py-3 italic text-tera-secondary">
               {children}
             </blockquote>
           ),
           pre: ({ children }) => (
-            <pre className="my-5 w-full overflow-x-auto rounded-[20px] border border-tera-border bg-[#08101a] p-4 text-sm text-tera-primary">
+            <pre className="my-5 w-full overflow-x-auto rounded-[20px] border border-tera-border bg-tera-input p-4 text-sm text-tera-primary">
               {children}
             </pre>
           ),
           code({ inline, className, children, ...props }: any) {
             if (inline) {
               return (
-                <code className="rounded-md bg-white/[0.06] px-1.5 py-0.5 font-mono text-sm text-tera-neon" {...props}>
+                <code className="rounded-md bg-[var(--surface-strong)] px-1.5 py-0.5 font-mono text-sm tera-accent-text" {...props}>
                   {children}
                 </code>
               )

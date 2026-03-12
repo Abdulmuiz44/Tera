@@ -25,7 +25,7 @@ export default function SignInPage() {
     <div className="tera-page flex items-center justify-center px-4 py-10">
       <div className="w-full max-w-md rounded-[32px] border border-tera-border bg-tera-panel/82 p-8 shadow-panel backdrop-blur-2xl md:p-10">
         <div className="flex justify-center">
-          <div className="relative h-16 w-16 rounded-[24px] border border-white/10 bg-white/[0.04] p-3">
+          <div className="relative h-16 w-16 rounded-[24px] tera-surface-subtle p-3">
             <Image src="/images/TERA_LOGO_ONLY.png" alt="Tera" fill className="hidden object-contain p-3 dark:block" />
             <Image src="/images/TERA_LOGO_ONLY1.png" alt="Tera" fill className="object-contain p-3 dark:hidden" />
           </div>
@@ -40,7 +40,7 @@ export default function SignInPage() {
         </div>
 
         {error && (
-          <div className="mt-6 rounded-[20px] border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-200">
+          <div className="mt-6 rounded-[20px] tera-status-error px-4 py-3 text-sm">
             {error}
           </div>
         )}
@@ -49,7 +49,7 @@ export default function SignInPage() {
           type="button"
           onClick={handleGoogleSignIn}
           disabled={loading}
-          className="mt-8 flex w-full items-center justify-center gap-3 rounded-[20px] border border-white/10 bg-white px-4 py-3 font-medium text-[#111827] transition hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-60"
+          className="mt-8 flex w-full items-center justify-center gap-3 rounded-[20px] border border-tera-border bg-tera-panel-strong px-4 py-3 font-medium text-tera-primary transition hover:bg-[var(--interactive-neutral-hover)] disabled:cursor-not-allowed disabled:opacity-60"
         >
           <svg className="h-5 w-5" viewBox="0 0 24 24">
             <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
@@ -60,20 +60,20 @@ export default function SignInPage() {
           {loading ? 'Signing in...' : 'Continue with Google'}
         </button>
 
-        <div className="mt-8 space-y-3 rounded-[24px] border border-tera-border bg-white/[0.03] p-5">
+        <div className="mt-8 space-y-3 rounded-[24px] tera-surface-subtle p-5">
           <div className="flex items-start gap-3 text-sm leading-7 text-tera-secondary">
-            <span className="mt-2 h-2.5 w-2.5 rounded-full bg-tera-neon" />
+            <span className="mt-2 h-2.5 w-2.5 rounded-full tera-accent-dot" />
             <span>Unlimited AI conversations on the free plan.</span>
           </div>
           <div className="flex items-start gap-3 text-sm leading-7 text-tera-secondary">
-            <span className="mt-2 h-2.5 w-2.5 rounded-full bg-tera-neon" />
+            <span className="mt-2 h-2.5 w-2.5 rounded-full tera-accent-dot" />
             <span>One account for chat, tools, notes, and history.</span>
           </div>
         </div>
 
         <p className="mt-8 text-center text-sm text-tera-secondary">
           Do not have an account?{' '}
-          <Link href="/auth/signup" className="text-tera-neon underline decoration-tera-neon/30 underline-offset-4">
+          <Link href="/auth/signup" className="tera-link-accent">
             Create one
           </Link>
         </p>

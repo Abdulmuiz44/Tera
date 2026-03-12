@@ -98,7 +98,7 @@ export default function UserMenu({ user, expanded, onSignOut }: UserMenuProps) {
           </div>
 
           <div className="border-b border-tera-border px-4 py-4">
-            <div className="rounded-[18px] border border-tera-border bg-white/[0.03] px-4 py-3">
+            <div className="rounded-[18px] border border-tera-border bg-[var(--surface-subtle)] px-4 py-3">
               <p className="text-[0.68rem] uppercase tracking-[0.22em] text-tera-secondary">Current plan</p>
               <div className="mt-2 flex items-center justify-between gap-3">
                 <p className="text-sm font-medium text-tera-primary">{plan}</p>
@@ -114,7 +114,7 @@ export default function UserMenu({ user, expanded, onSignOut }: UserMenuProps) {
               <Link
                 key={item.label}
                 href={item.href}
-                className="flex items-center justify-between rounded-[18px] px-3 py-3 text-sm text-tera-primary transition hover:bg-white/[0.05]"
+                className="flex items-center justify-between rounded-[18px] px-3 py-3 text-sm text-tera-primary transition hover:bg-[var(--interactive-neutral)]"
                 onClick={() => setDropdownOpen(false)}
               >
                 <span>{item.label}</span>
@@ -132,7 +132,7 @@ export default function UserMenu({ user, expanded, onSignOut }: UserMenuProps) {
                 onSignOut()
                 setDropdownOpen(false)
               }}
-              className="flex w-full items-center gap-3 rounded-[18px] px-3 py-3 text-left text-sm text-red-300 transition hover:bg-red-500/10"
+              className="flex w-full items-center gap-3 rounded-[18px] px-3 py-3 text-left text-sm tera-status-error transition"
             >
               <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M14 7h3a2 2 0 0 1 2 2v6a2 2 0 0 1-2 2h-3" />
@@ -148,7 +148,7 @@ export default function UserMenu({ user, expanded, onSignOut }: UserMenuProps) {
       <button
         type="button"
         onClick={() => setDropdownOpen((current) => !current)}
-        className={`flex w-full items-center gap-3 rounded-[22px] border border-tera-border bg-white/[0.03] px-3 py-3 text-left transition hover:border-tera-border/90 hover:bg-white/[0.05] ${expanded ? '' : 'justify-center'}`}
+        className={`flex w-full items-center gap-3 rounded-[22px] border border-tera-border bg-[var(--surface-subtle)] px-3 py-3 text-left transition hover:border-[var(--border-tera-strong)] hover:bg-[var(--interactive-neutral-hover)] ${expanded ? '' : 'justify-center'}`}
       >
         <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-[16px] border border-tera-border bg-tera-highlight text-sm font-semibold text-tera-primary">
           {initials}

@@ -18,6 +18,21 @@
   --text-tera-accent-strong: #f3e5cf;
   --shadow-tera-panel: 0 24px 70px rgba(0, 0, 0, 0.36);
   --shadow-tera-soft: 0 16px 42px rgba(0, 0, 0, 0.22);
+  --surface-subtle: rgba(255, 255, 255, 0.03);
+  --surface-subtle-hover: rgba(255, 255, 255, 0.06);
+  --surface-strong: rgba(255, 255, 255, 0.08);
+  --border-soft: rgba(255, 255, 255, 0.1);
+  --text-muted: rgba(222, 214, 201, 0.58);
+  --text-inverse: #16120d;
+  --accent-primary: #dbbc8e;
+  --accent-primary-strong: #f3e5cf;
+  --accent-primary-soft: rgba(219, 188, 142, 0.12);
+  --accent-primary-border: rgba(219, 188, 142, 0.34);
+  --interactive-neutral: rgba(255, 255, 255, 0.03);
+  --interactive-neutral-hover: rgba(255, 255, 255, 0.06);
+  --danger-surface: rgba(248, 113, 113, 0.12);
+  --danger-border: rgba(248, 113, 113, 0.35);
+  --danger-text: #fecaca;
 }
 
 .light {
@@ -36,6 +51,21 @@
   --text-tera-accent-strong: #714819;
   --shadow-tera-panel: 0 26px 64px rgba(78, 63, 46, 0.14);
   --shadow-tera-soft: 0 14px 34px rgba(78, 63, 46, 0.1);
+  --surface-subtle: rgba(53, 41, 30, 0.04);
+  --surface-subtle-hover: rgba(53, 41, 30, 0.09);
+  --surface-strong: rgba(53, 41, 30, 0.1);
+  --border-soft: rgba(53, 41, 30, 0.14);
+  --text-muted: rgba(73, 61, 49, 0.66);
+  --text-inverse: #fffdf8;
+  --accent-primary: #9b6a35;
+  --accent-primary-strong: #714819;
+  --accent-primary-soft: rgba(155, 106, 53, 0.12);
+  --accent-primary-border: rgba(155, 106, 53, 0.32);
+  --interactive-neutral: rgba(53, 41, 30, 0.05);
+  --interactive-neutral-hover: rgba(53, 41, 30, 0.1);
+  --danger-surface: rgba(185, 28, 28, 0.09);
+  --danger-border: rgba(185, 28, 28, 0.22);
+  --danger-text: #991b1b;
 }
 
 .dark {
@@ -170,12 +200,12 @@
 
   .tera-button-secondary {
     @apply tera-button border border-tera-border text-tera-primary backdrop-blur-xl;
-    background-color: rgba(255, 255, 255, 0.03);
+    background-color: var(--interactive-neutral);
   }
 
   .tera-button-secondary:hover {
     border-color: var(--border-tera-strong);
-    background-color: rgba(255, 255, 255, 0.06);
+    background-color: var(--interactive-neutral-hover);
   }
 
   .tera-button-ghost {
@@ -188,12 +218,12 @@
 
   .tera-icon-button {
     @apply inline-flex h-10 w-10 items-center justify-center rounded-full border border-tera-border text-tera-secondary transition;
-    background-color: rgba(255, 255, 255, 0.03);
+    background-color: var(--interactive-neutral);
   }
 
   .tera-icon-button:hover {
     border-color: var(--border-tera-strong);
-    background-color: rgba(255, 255, 255, 0.06);
+    background-color: var(--interactive-neutral-hover);
     color: var(--text-tera-primary);
   }
 
@@ -208,12 +238,12 @@
   }
 
   .tera-input::placeholder {
-    color: rgba(222, 214, 201, 0.58);
+    color: var(--text-muted);
   }
 
   .tera-badge {
     @apply inline-flex items-center gap-2 rounded-full border border-tera-border px-3 py-1 text-[0.68rem] uppercase tracking-[0.22em] text-tera-secondary;
-    background-color: rgba(255, 255, 255, 0.03);
+    background-color: var(--surface-subtle);
   }
 
   .tera-segmented {
@@ -226,12 +256,63 @@
 
   .tera-segmented-item[data-active="true"] {
     @apply text-tera-primary;
-    background-color: rgba(255, 255, 255, 0.06);
+    background-color: var(--interactive-neutral-hover);
     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.16);
   }
 
   .tera-prose {
     @apply max-w-none break-words text-tera-primary;
+  }
+
+  .tera-surface-subtle {
+    background-color: var(--surface-subtle);
+    border: 1px solid var(--border-tera);
+  }
+
+  .tera-surface-subtle-strong {
+    background-color: var(--surface-strong);
+    border: 1px solid var(--border-soft);
+  }
+
+  .tera-interactive-neutral {
+    background-color: var(--interactive-neutral);
+    border: 1px solid var(--border-tera);
+    transition: background-color 200ms ease, border-color 200ms ease, color 200ms ease;
+  }
+
+  .tera-interactive-neutral:hover {
+    background-color: var(--interactive-neutral-hover);
+    border-color: var(--border-tera-strong);
+  }
+
+  .tera-accent-text {
+    color: var(--accent-primary);
+  }
+
+  .tera-accent-dot {
+    background-color: var(--accent-primary);
+  }
+
+  .tera-accent-surface {
+    background-color: var(--accent-primary-soft);
+    border: 1px solid var(--accent-primary-border);
+  }
+
+  .tera-link-accent {
+    color: var(--accent-primary);
+    text-decoration: underline;
+    text-underline-offset: 4px;
+    text-decoration-color: var(--accent-primary-border);
+  }
+
+  .tera-link-accent:hover {
+    color: var(--text-tera-primary);
+  }
+
+  .tera-status-error {
+    background-color: var(--danger-surface);
+    border: 1px solid var(--danger-border);
+    color: var(--danger-text);
   }
 }
 
