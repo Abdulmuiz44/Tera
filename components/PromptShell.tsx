@@ -320,8 +320,8 @@ export default function PromptShell({
     const [isListening, setIsListening] = useState(false)
     const recognitionRef = useRef<any>(null)
     const [currentSessionId, setCurrentSessionId] = useState<string | null>(sessionId || null)
-    const [upgradePromptType, setUpgradePromptType] = useState<'chats' | 'file-uploads' | 'web-search' | 'research-mode' | null>(null)
-    const [limitModalType, setLimitModalType] = useState<'chats' | 'file-uploads' | 'web-search' | 'research-mode' | null>(null)
+    const [upgradePromptType, setUpgradePromptType] = useState<'chats' | 'file-uploads' | 'web-search' | 'research-mode' | 'credits' | null>(null)
+    const [limitModalType, setLimitModalType] = useState<'chats' | 'file-uploads' | 'web-search' | 'research-mode' | 'credits' | null>(null)
     const [limitUnlocksAt, setLimitUnlocksAt] = useState<Date | undefined>(undefined)
     const [currentUserPlan, setCurrentUserPlan] = useState<string>('free')
     const [webSearchEnabled, setWebSearchEnabled] = useState(false)
@@ -589,6 +589,9 @@ export default function PromptShell({
                     } else if (limitError.includes('web search')) {
                         setLimitModalType('web-search')
                         setLimitUnlocksAt(unlocksAt)
+                    } else if (limitError.toLowerCase().includes('credit cap')) {
+                        setLimitModalType('credits')
+                        setLimitUnlocksAt(undefined)
                     }
 
                     setConversations((prev) =>
@@ -659,6 +662,9 @@ export default function PromptShell({
                 } else if (message === 'limit web-search') {
                     setLimitModalType('web-search')
                     setLimitUnlocksAt(unlocksAt)
+                } else if (message.toLowerCase().includes('credit cap')) {
+                    setLimitModalType('credits')
+                    setLimitUnlocksAt(undefined)
                 }
 
                 setConversations((prev) =>
@@ -1305,6 +1311,7 @@ export default function PromptShell({
                                 {showStopButton && (
                                     <button
                                         onClick={handleStop}
+                                        className="flex h-10 w-10 items-center justify-center rounded-full border border-tera-border bg-tera-muted text-white transition hover:bg-tera-panel"
                                         className="composer-action-button bg-white/[0.92] text-[#08101a] hover:bg-white"
                                         title="Stop generating"
                                         aria-label="Stop generating"
@@ -1316,6 +1323,7 @@ export default function PromptShell({
                                 {showSendButton && (
                                     <button
                                         onClick={handleSubmit}
+                                        className="flex h-10 w-10 items-center justify-center rounded-full border border-white/15 bg-gradient-to-b from-[#2a313d] to-[#1a2029] text-white shadow-soft-lg transition hover:from-[#303949] hover:to-[#1f2732]"
                                         className="composer-action-button bg-tera-accent text-[#08101a] border-tera-accent hover:brightness-95"
                                         title="Send message"
                                         aria-label="Send message"
@@ -1415,3 +1423,4 @@ export default function PromptShell({
         </div>
     )
 }
+

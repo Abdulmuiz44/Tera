@@ -38,6 +38,7 @@ export const PLAN_CONFIGS: Record<PlanType, PlanConfig> = {
         },
         features: [
             'Unlimited AI conversations',
+            '150 credits per month',
             '3 file uploads per day (10MB each)',
             '5 web searches per month',
             'Basic AI tools & features',
@@ -60,6 +61,7 @@ export const PLAN_CONFIGS: Record<PlanType, PlanConfig> = {
         },
         features: [
             'Everything in Free, plus:',
+            '1,500 credits per month',
             '25 file uploads per day (500MB each)',
             '100 web searches per month',
             'Deep Research Mode',
@@ -84,6 +86,7 @@ export const PLAN_CONFIGS: Record<PlanType, PlanConfig> = {
         },
         features: [
             'Everything in Pro, plus:',
+            '5,000 credits per month',
             'Unlimited file uploads (2GB each)',
             'Unlimited web searches',
             'Advanced analytics dashboard',
