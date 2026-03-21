@@ -304,7 +304,7 @@ export default function SettingsPage() {
                       <p className="mt-1 text-sm leading-6 text-tera-secondary">Open upgrade or billing management without leaving the settings flow.</p>
                       <div className="mt-4 flex flex-col gap-3 sm:flex-row">
                         {userProfile?.subscriptionPlan === 'free' ? (
-                          <Link href="/pricing" className="tera-button-primary w-full justify-center sm:w-auto">
+                          <Link href="/pricing" className="tera-button-upgrade w-full justify-center sm:w-auto">
                             Upgrade plan
                           </Link>
                         ) : (

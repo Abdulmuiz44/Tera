@@ -189,6 +189,18 @@
     filter: brightness(1.02);
   }
 
+  .tera-button-upgrade {
+    @apply tera-button border border-white/15 text-white;
+    background: linear-gradient(180deg, #2a313d, #1a2029);
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.3);
+  }
+
+  .tera-button-upgrade:hover {
+    border-color: rgba(255, 255, 255, 0.26);
+    background: linear-gradient(180deg, #303949, #1f2732);
+    color: #ffffff;
+  }
+
   .tera-button-secondary {
     @apply tera-button border border-tera-border text-tera-primary backdrop-blur-xl;
     background-color: rgba(255, 255, 255, 0.03);
