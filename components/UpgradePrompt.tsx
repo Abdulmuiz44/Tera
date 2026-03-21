@@ -3,7 +3,7 @@
 import Link from 'next/link'
 
 interface UpgradePromptProps {
-    type: 'lesson-plans' | 'chats' | 'file-uploads' | 'web-search' | 'research-mode'
+    type: 'lesson-plans' | 'chats' | 'file-uploads' | 'web-search' | 'research-mode' | 'credits'
     onClose?: () => void
     inline?: boolean
 }
@@ -39,6 +39,12 @@ export default function UpgradePrompt({ type, onClose, inline = false }: Upgrade
             description: "Deep Research mode (comprehensive multi-source research) is only available on Pro and Plus plans.",
             benefit: 'Upgrade to access Deep Research and other advanced features.',
             icon: '🔭'
+        },
+        'credits': {
+            title: 'Free Credit Cap Reached',
+            description: "You've reached your monthly Free credit cap for advanced usage.",
+            benefit: 'Upgrade to Pro or Plus for higher usage limits, or wait for your monthly credit reset.',
+            icon: '⚡'
         }
     }
 

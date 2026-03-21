@@ -1,13 +1,12 @@
 import { supabaseServer } from '@/lib/supabase-server'
 import { NextRequest, NextResponse } from 'next/server'
+import { auth } from '@/lib/auth'
 
 export async function GET(request: NextRequest) {
   try {
-    const userId = request.nextUrl.searchParams.get('userId')
-
-    if (!userId) {
-      return NextResponse.json({ error: 'User ID required' }, { status: 400 })
-    }
+    const session = await auth()
+    const userId = session?.user?.id
+    if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
     // Verify user is Plus plan
     const { data: user, error: userError } = await supabaseServer
@@ -45,7 +44,10 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-    const { ownerUserId, inviteeEmail, role } = await request.json()
+    const session = await auth()
+    const ownerUserId = session?.user?.id
+    if (!ownerUserId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    const { inviteeEmail, role } = await request.json()
 
     if (!ownerUserId || !inviteeEmail) {
       return NextResponse.json(
@@ -111,6 +113,9 @@ export async function POST(request: NextRequest) {
 
 export async function DELETE(request: NextRequest) {
   try {
+    const session = await auth()
+    const ownerUserId = session?.user?.id
+    if (!ownerUserId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     const memberId = request.nextUrl.searchParams.get('memberId')
 
     if (!memberId) {
@@ -122,6 +127,7 @@ export async function DELETE(request: NextRequest) {
       .from('team_members')
       .delete()
       .eq('id', memberId)
+      .eq('owner_id', ownerUserId)
 
     if (error) throw error
 

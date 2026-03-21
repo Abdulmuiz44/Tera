@@ -103,6 +103,17 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
                     const limit = getPlanConfig(userProfile.subscriptionPlan).limits.fileUploadsPerDay
                     return NextResponse.json({ error: `Daily upload limit reached (${limit}). Upgrade for more.` }, { status: 403 })
                 }
+
+                if (userProfile) {
+                    const maxFileSizeMb = getPlanConfig(userProfile.subscriptionPlan).limits.maxFileSize
+                    const fileSizeMb = file.size / (1024 * 1024)
+                    if (fileSizeMb > maxFileSizeMb) {
+                        return NextResponse.json(
+                            { error: `File too large (${fileSizeMb.toFixed(1)}MB). Max allowed on ${userProfile.subscriptionPlan} plan is ${maxFileSizeMb}MB.` },
+                            { status: 413 }
+                        )
+                    }
+                }
             }
 
             const fileExt = file.name.split('.').pop()

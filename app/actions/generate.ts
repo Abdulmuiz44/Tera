@@ -7,8 +7,9 @@ import { generateTeacherResponse } from '@/lib/mistral'
 import type { AttachmentReference } from '@/lib/attachment'
 import { getUserProfileServer } from '@/lib/usage-tracking-server'
 import { incrementChatsServer, incrementFileUploadsServer } from '@/lib/usage-tracking-server'
-import { canStartChat, canUploadFile, canPerformWebSearch, getPlanConfig } from '@/lib/plan-config'
+import { canStartChat, canUploadFile, getPlanConfig } from '@/lib/plan-config'
 import { getWebSearchRemaining, incrementWebSearchCount } from '@/lib/web-search-usage'
+import { getUserCreditsRemaining, incrementUserCredits, getFreePlanCreditCap } from '@/lib/free-plan-credits'
 
 type GenerateProps = {
   prompt: string
@@ -46,11 +47,13 @@ export async function generateAnswer({ prompt, tool, authorId, authorEmail, atta
     }
   }
 
+  const estimatedCreditCost = Math.max(1, 1 + attachments.length + (enableWebSearch ? 2 : 0) + (researchMode ? 2 : 0))
+
   // Check file upload limits if attachments are present
   if (attachments.length > 0 && !canUploadFile(userProfile.subscriptionPlan, userProfile.dailyFileUploads)) {
     const planConfig = getPlanConfig(userProfile.subscriptionPlan)
     const limit = planConfig.limits.fileUploadsPerDay
-    const errorMessage = `You've reached your daily limit of ${limit} file uploads. Upgrade to Pro for unlimited access.`
+    const errorMessage = `You've reached your daily limit of ${limit} file uploads. Upgrade to Pro or Plus for higher limits.`
     console.error('File upload limit reached:', errorMessage)
     return {
       answer: errorMessage,
@@ -74,17 +77,46 @@ export async function generateAnswer({ prompt, tool, authorId, authorEmail, atta
     }
   }
 
-  // Check web search limits if enabled
-  if (enableWebSearch) {
-    const { remaining } = await getWebSearchRemaining(authorId)
-    if (remaining <= 0) {
-      const errorMessage = 'You have reached your web search limit. Upgrade to Pro for unlimited access.'
+  // Free-plan monthly credit cap (conversations remain unlimited, but advanced usage is metered)
+  if (userProfile.subscriptionPlan === 'free') {
+    const { remaining, resetDate } = await getUserCreditsRemaining(authorId)
+    if (remaining < estimatedCreditCost) {
+      const cap = getFreePlanCreditCap()
+      const resetLabel = resetDate
+        ? new Date(resetDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+        : 'in 30 days'
+      const errorMessage = `You've reached your monthly Free credit cap (${cap}). Upgrade to Pro or Plus now, or wait until your credits reset on ${resetLabel}.`
       return {
         answer: errorMessage,
         sessionId: sessionId,
         chatId: chatId,
         error: errorMessage
       }
+    }
+  }
+
+  // Check web search limits if enabled
+  if (enableWebSearch) {
+    const { remaining } = await getWebSearchRemaining(authorId)
+    if (remaining <= 0) {
+      const errorMessage = 'You have reached your web search limit. Upgrade to Pro or Plus for higher limits.'
+      return {
+        answer: errorMessage,
+        sessionId: sessionId,
+        chatId: chatId,
+        error: errorMessage
+      }
+    }
+  }
+
+  // Enforce Deep Research entitlement on the server (defense-in-depth)
+  if (researchMode && !(userProfile.subscriptionPlan === 'pro' || userProfile.subscriptionPlan === 'plus')) {
+    const errorMessage = 'Deep Research mode is available on Pro and Plus plans.'
+    return {
+      answer: errorMessage,
+      sessionId: sessionId,
+      chatId: chatId,
+      error: errorMessage
     }
   }
 
@@ -181,6 +213,8 @@ export async function generateAnswer({ prompt, tool, authorId, authorEmail, atta
   if (enableWebSearch) {
     await incrementWebSearchCount(authorId)
   }
+
+  await incrementUserCredits(authorId, estimatedCreditCost)
 
   revalidatePath('/')
   revalidatePath('/history')

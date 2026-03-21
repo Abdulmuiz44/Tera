@@ -52,7 +52,12 @@ export default function PlusLayout({ children }: { children: React.ReactNode }) 
               <p className="tera-eyebrow">Plus</p>
               <h1 className="mt-2 text-2xl font-semibold text-tera-primary">Advanced workspace</h1>
             </div>
-            <a href="/plus/analytics" className="tera-button-secondary">Analytics</a>
+            <div className="flex flex-wrap gap-2">
+              <a href="/plus/analytics" className="tera-button-secondary">Analytics</a>
+              <a href="/plus/team" className="tera-button-secondary">Team</a>
+              <a href="/plus/training" className="tera-button-secondary">Training</a>
+              <a href="/plus/api-keys" className="tera-button-secondary">API Keys</a>
+            </div>
           </div>
         </div>
         <div className="mt-8">{children}</div>

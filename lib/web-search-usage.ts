@@ -1,18 +1,16 @@
 /**
  * Web Search Usage Tracking
- * Tracks and limits web searches based on subscription plan:
- * - Free: 5/month
- * - Pro: 50/month  
- * - Plus: 80/month
+ * Tracks and limits web searches based on subscription plan.
+ * Limits are sourced from centralized plan config to avoid drift.
  */
 
 import { supabaseServer } from './supabase-server'
 import { getPlanConfig } from './plan-config'
 
 const MONTHLY_WEB_SEARCH_LIMITS = {
-  free: 5,
-  pro: 50,
-  plus: Infinity // Unlimited (was showing 80 in pricing but Plus should have unlimited)
+  free: getPlanConfig('free').limits.webSearchesPerMonth as number,
+  pro: getPlanConfig('pro').limits.webSearchesPerMonth as number,
+  plus: Infinity
 }
 
 const RESET_INTERVAL_DAYS = 30
