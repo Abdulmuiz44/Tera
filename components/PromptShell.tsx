@@ -238,6 +238,51 @@ const parseContent = (content: string): ContentBlock[] => {
     return blocks
 }
 
+const AttachmentIcon = ({ className = 'h-5 w-5' }: { className?: string }) => (
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.8} stroke="currentColor" className={className}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M12 5v14" />
+        <path strokeLinecap="round" strokeLinejoin="round" d="M5 12h14" />
+    </svg>
+)
+
+const MicIcon = ({ className = 'h-5 w-5' }: { className?: string }) => (
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.8} stroke="currentColor" className={className}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M12 18.75a6 6 0 006-6v-1.5m-12 0v1.5a6 6 0 006 6m0 0v3m-3-3h6M12 3.75a3 3 0 00-3 3v6a3 3 0 006 0v-6a3 3 0 00-3-3z" />
+    </svg>
+)
+
+const SendIcon = ({ className = 'h-5 w-5' }: { className?: string }) => (
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.8} stroke="currentColor" className={className}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M6 12 3.269 3.125A59.77 59.77 0 0121.485 12 59.769 59.769 0 013.27 20.875L6 12Zm0 0h7.5" />
+    </svg>
+)
+
+const StopIcon = ({ className = 'h-4 w-4' }: { className?: string }) => (
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className={className}>
+        <rect x="7" y="7" width="10" height="10" rx="2" />
+    </svg>
+)
+
+const CameraIcon = ({ className = 'h-[18px] w-[18px]' }: { className?: string }) => (
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.8} stroke="currentColor" className={className}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 9.75A2.25 2.25 0 016 7.5h1.628a1.5 1.5 0 001.06-.44l.879-.879a1.5 1.5 0 011.06-.44h2.746a1.5 1.5 0 011.06.44l.879.88a1.5 1.5 0 001.06.439H18a2.25 2.25 0 012.25 2.25v7.5A2.25 2.25 0 0118 19.5H6a2.25 2.25 0 01-2.25-2.25v-7.5z" />
+        <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 13.5a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0z" />
+    </svg>
+)
+
+const ImageIcon = ({ className = 'h-[18px] w-[18px]' }: { className?: string }) => (
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.8} stroke="currentColor" className={className}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="m2.25 15.75 5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5 1.409-1.409a2.25 2.25 0 013.182 0L21.75 15.75m-16.5 4.5h13.5A2.25 2.25 0 0021 18V6a2.25 2.25 0 00-2.25-2.25H5.25A2.25 2.25 0 003 6v12a2.25 2.25 0 002.25 2.25z" />
+    </svg>
+)
+
+const FileIcon = ({ className = 'h-[18px] w-[18px]' }: { className?: string }) => (
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.8} stroke="currentColor" className={className}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375H14.25V6.375A2.625 2.625 0 0011.625 3.75h-4.5A2.625 2.625 0 004.5 6.375v11.25a2.625 2.625 0 002.625 2.625h9.75A2.625 2.625 0 0019.5 17.625V14.25z" />
+        <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 12h7.5m-7.5 3h4.5" />
+    </svg>
+)
+
 export default function PromptShell({
     tool,
     onToolChange,
@@ -679,7 +724,7 @@ export default function PromptShell({
                 prompt: messageToSend,
                 attachments: [...pendingAttachments]
             })
-            setAttachmentMessage('Hang tightâ€”finalizing your account before sending.')
+            setAttachmentMessage('Hang tight—finalizing your account before sending.')
             return
         }
 
@@ -896,7 +941,7 @@ export default function PromptShell({
                     {showInitialPrompt ? (
                         <div className="absolute inset-x-0 top-0 bottom-0 flex items-center justify-center px-4 text-center pointer-events-none -mt-16">
                             <div className="pointer-events-auto flex max-w-3xl flex-col items-center">
-                                <div className="mx-auto mb-8 w-fit rounded-[32px] border border-white/8 bg-white/[0.03] p-7 shadow-soft-lg">
+                                <div className="mx-auto mb-8 w-fit p-7">
                                     <span className="flex items-center justify-center w-32 h-32">
                                         <div className="relative w-[120px] h-[120px]">
                                             <Image
@@ -917,7 +962,6 @@ export default function PromptShell({
                                     </span>
                                 </div>
                                 <h2 className="text-4xl font-semibold tracking-[-0.03em] text-tera-primary md:text-5xl">How can Tera help you today?</h2>
-                                <p className="mt-4 max-w-2xl text-sm leading-7 text-tera-secondary md:text-base">Ask a question, run research, review notes, or jump into a tool from the same dark workspace.</p>
                             </div>
                         </div>
                     ) : (
@@ -1085,16 +1129,16 @@ export default function PromptShell({
             </div>
 
             {/* Input Area */}
-            <div className="sticky bottom-0 z-50 w-full shrink-0 border-t border-tera-border/80 bg-tera-bg/70 px-2 py-3 backdrop-blur-2xl md:px-8 md:py-4">
+            <div className="sticky bottom-0 z-50 w-full shrink-0 bg-tera-bg/92 px-2 py-2.5 backdrop-blur-xl md:px-8 md:py-3">
                 <div className="relative mx-auto max-w-4xl">
-                    <div className={`relative flex flex-col gap-2 rounded-[28px] border border-tera-border bg-tera-panel/82 p-2 shadow-panel ring-1 ring-white/5 transition-all backdrop-blur-2xl ${conversationActive ? 'focus-within:border-tera-neon/30 focus-within:ring-tera-neon/20' : 'focus-within:border-white/16 focus-within:ring-white/8'}`}>
+                    <div className={`relative flex flex-col gap-2 rounded-[26px] border border-tera-border bg-tera-panel p-2.5 shadow-soft-lg transition-colors ${conversationActive ? 'focus-within:bg-tera-panel' : 'focus-within:bg-tera-panel-strong'}`}>
 
                         {/* Active Tools & Attachments Preview */}
                         <div className="flex flex-wrap items-center gap-2 px-2 pt-2">
                             {/* Web Search Toggle Badge */}
                             {webSearchEnabled && (
                                 <div className="flex items-center gap-2 rounded-full border border-tera-neon/20 bg-tera-highlight px-3 py-2 text-xs font-semibold text-tera-neon shadow-soft-lg">
-                                    <span>ðŸ”</span>
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.8} stroke="currentColor" className="h-3.5 w-3.5"><path strokeLinecap="round" strokeLinejoin="round" d="m21 21-4.35-4.35m0 0A7.5 7.5 0 1 0 6.75 6.75a7.5 7.5 0 0 0 9.9 9.9Z" /></svg>
                                     <span>Web Search ON ({webSearchRemaining})</span>
                                 </div>
                             )}
@@ -1123,7 +1167,7 @@ export default function PromptShell({
                                             ) : (
                                                 // File preview (non-image)
                                                 <div className="flex items-center gap-2 px-4 py-3 min-w-[120px]">
-                                                    <span className="text-2xl">ðŸ“„</span>
+                                                    <FileIcon className="h-6 w-6 text-tera-secondary" />
                                                     <span className="text-xs text-tera-primary truncate max-w-[150px]">{att.name}</span>
                                                 </div>
                                             )}
@@ -1133,7 +1177,7 @@ export default function PromptShell({
                                                 className="absolute right-2 top-2 flex h-7 w-7 items-center justify-center rounded-full border border-white/10 bg-black/70 text-white opacity-0 transition-all group-hover:opacity-100 hover:bg-red-500"
                                                 title="Remove"
                                             >
-                                                âœ•
+                                                ×
                                             </button>
                                         </div>
                                     ))}
@@ -1141,40 +1185,42 @@ export default function PromptShell({
                             )}
                         </div>
 
-                        <div className="flex items-end gap-2">
+                        <div className="flex items-end gap-2 rounded-[18px] bg-transparent px-2 py-1.5">
                             {/* Left Actions */}
-                            <div className="flex items-center gap-1 pb-1.5 pl-2">
+                            <div className="flex items-center">
                                 <div className="relative">
                                     <button
                                         onClick={() => setAttachmentOpen(!attachmentOpen)}
-                                        className="tera-icon-button h-11 w-11 border-transparent bg-white/[0.04]"
+                                        className="composer-action-button"
                                         title="Add attachment"
+                                        aria-label="Add attachment"
                                     >
-                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
-                                            <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-                                        </svg>
+                                        <AttachmentIcon />
                                     </button>
 
                                     {attachmentOpen && (
-                                        <div className="absolute bottom-full left-0 mb-3 w-64 overflow-hidden rounded-[24px] border border-tera-border bg-tera-elevated/95 shadow-panel backdrop-blur-2xl">
+                                        <div className="absolute bottom-full left-0 mb-3 w-64 overflow-hidden rounded-2xl border border-tera-border bg-tera-panel p-2 text-tera-primary shadow-2xl">
                                             {/* File & Media Section */}
                                             <button
                                                 onClick={() => handleFileSelect('camera')}
-                                                className="flex w-full items-center gap-3 px-4 py-3 text-left text-sm text-tera-primary hover:bg-tera-muted border-b border-tera-border"
+                                                className="composer-menu-row"
                                             >
-                                                <span>ðŸ“·</span> Open Camera
+                                                <CameraIcon className="h-[18px] w-[18px] text-tera-secondary" />
+                                                <span>Open Camera</span>
                                             </button>
                                             <button
                                                 onClick={() => handleFileSelect('image')}
-                                                className="flex w-full items-center gap-3 px-4 py-3 text-left text-sm text-tera-primary hover:bg-tera-muted border-b border-tera-border"
+                                                className="composer-menu-row"
                                             >
-                                                <span>ðŸ–¼ï¸</span> Upload image
+                                                <ImageIcon className="h-[18px] w-[18px] text-tera-secondary" />
+                                                <span>Upload image</span>
                                             </button>
                                             <button
                                                 onClick={() => handleFileSelect('file')}
-                                                className="flex w-full items-center gap-3 px-4 py-3 text-left text-sm text-tera-primary hover:bg-tera-muted border-b border-tera-border"
+                                                className="composer-menu-row border-b border-tera-border/70"
                                             >
-                                                <span>ðŸ“„</span> Upload file
+                                                <FileIcon className="h-[18px] w-[18px] text-tera-secondary" />
+                                                <span>Upload file</span>
                                             </button>
 
                                             {/* Web Search Option */}
@@ -1189,15 +1235,17 @@ export default function PromptShell({
                                                     }
                                                 }}
                                                 disabled={webSearchRemaining <= 0}
-                                                className={`flex w-full items-center gap-3 px-4 py-3 text-left text-sm transition ${webSearchRemaining <= 0
+                                                className={`composer-menu-row ${webSearchRemaining <= 0
                                                     ? 'text-red-300/50 cursor-not-allowed opacity-60 hover:bg-red-500/10'
                                                     : webSearchEnabled
                                                         ? 'text-blue-500 bg-blue-500/10 hover:bg-blue-500/20'
-                                                        : 'text-tera-primary hover:bg-tera-muted'
+                                                        : 'text-tera-primary'
                                                     }`}
                                                 title={webSearchRemaining <= 0 ? 'Monthly web search limit reached - Upgrade to continue' : 'Search the web for current information'}
                                             >
-                                                <span>ðŸ”</span>
+                                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.8} stroke="currentColor" className="h-[18px] w-[18px] shrink-0">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" d="m21 21-4.35-4.35m0 0A7.5 7.5 0 1 0 6.75 6.75a7.5 7.5 0 0 0 9.9 9.9Z" />
+                                                </svg>
                                                 <div className="flex-1">
                                                     <div>Web Search {webSearchEnabled ? '(ON)' : ''}</div>
                                                     <div className={`text-xs ${webSearchRemaining <= 0 ? 'text-red-300/50' : 'text-tera-secondary'}`}>
@@ -1205,8 +1253,6 @@ export default function PromptShell({
                                                     </div>
                                                 </div>
                                             </button>
-
-
 
                                             {/* Research Mode Toggle - Moved from main UI */}
                                             <button
@@ -1220,10 +1266,12 @@ export default function PromptShell({
                                                     setResearchMode(!researchMode)
                                                     setAttachmentOpen(false)
                                                 }}
-                                                className={`flex w-full items-center gap-3 px-4 py-3 text-left text-sm border-t border-tera-border transition ${researchMode ? 'text-tera-neon bg-tera-neon/5' : 'text-tera-primary hover:bg-tera-muted'
+                                                className={`composer-menu-row border-t border-tera-border/70 ${researchMode ? 'text-tera-neon bg-tera-neon/5' : 'text-tera-primary'
                                                     }`}
                                             >
-                                                <span>ðŸ”­</span>
+                                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.8} stroke="currentColor" className="h-[18px] w-[18px] shrink-0">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904 9 18.75l-1.313-3.938a4.5 4.5 0 1 1 5.862-5.862L18.75 9l-2.846.813a4.5 4.5 0 0 1-6.09 6.091Z" />
+                                                </svg>
                                                 <div className="flex-1 flex items-center justify-between">
                                                     <span>Deep Research</span>
                                                     {researchMode && <span className="text-[10px] font-bold bg-tera-neon/20 px-1.5 py-0.5 rounded text-tera-neon">ON</span>}
@@ -1247,8 +1295,8 @@ export default function PromptShell({
                                         handleSubmit(e)
                                     }
                                 }}
-                                placeholder={isListening ? "Listening... ðŸŽ¤" : "Ask Tera Anything..."}
-                                className="m-0 min-h-[52px] max-h-[140px] w-full resize-none bg-transparent px-3 py-3 text-[0.98rem] leading-relaxed text-tera-primary placeholder-tera-secondary/60 focus:outline-none"
+                                placeholder={isListening ? 'Listening...' : 'Ask Tera Anything...'}
+                                className="m-0 min-h-[50px] max-h-[140px] w-full resize-none border-0 bg-transparent px-1 py-2 text-[0.98rem] leading-relaxed text-tera-primary placeholder:text-tera-secondary/60 focus:outline-none focus:ring-0"
                                 rows={1}
                                 style={{ height: 'auto' }}
                                 onInput={(e) => {
@@ -1259,14 +1307,16 @@ export default function PromptShell({
                             />
 
                             {/* Dynamic Action Button */}
-                            <div className="mb-1.5 mr-1.5">
+                            <div className="flex items-end gap-1">
                                 {showStopButton && (
                                     <button
                                         onClick={handleStop}
                                         className="flex h-10 w-10 items-center justify-center rounded-full border border-tera-border bg-tera-muted text-white transition hover:bg-tera-panel"
+                                        className="composer-action-button bg-white/[0.92] text-[#08101a] hover:bg-white"
                                         title="Stop generating"
+                                        aria-label="Stop generating"
                                     >
-                                        <div className="h-3 w-3 bg-current rounded-[2px]" />
+                                        <StopIcon />
                                     </button>
                                 )}
 
@@ -1274,26 +1324,22 @@ export default function PromptShell({
                                     <button
                                         onClick={handleSubmit}
                                         className="flex h-10 w-10 items-center justify-center rounded-full border border-white/15 bg-gradient-to-b from-[#2a313d] to-[#1a2029] text-white shadow-soft-lg transition hover:from-[#303949] hover:to-[#1f2732]"
+                                        className="composer-action-button bg-tera-accent text-[#08101a] border-tera-accent hover:brightness-95"
                                         title="Send message"
+                                        aria-label="Send message"
                                     >
-                                        <svg
-                                            xmlns="http://www.w3.org/2000/svg"
-                                            viewBox="0 0 24 24"
-                                            fill="currentColor"
-                                            className="h-5 w-5"
-                                        >
-                                            <path d="M3.478 2.405a.75.75 0 00-.926.94l2.432 7.905H13.5a.75.75 0 010 1.5H4.984l-2.432 7.905a.75.75 0 00.926.94 60.519 60.519 0 0018.445-8.986.75.75 0 000-1.218A60.517 60.517 0 003.478 2.405z" />
-                                        </svg>
+                                        <SendIcon />
                                     </button>
                                 )}
 
                                 {showMicButton && (
                                     <button
                                         onClick={toggleListening}
-                                        className={`flex h-10 w-10 items-center justify-center rounded-full border transition ${isListening ? 'border-red-400/40 bg-red-500/18 text-red-300 animate-pulse' : 'border-white/10 bg-white/[0.05] text-tera-primary hover:bg-white/[0.08]'}`}
+                                        className={`composer-action-button ${isListening ? 'border-red-400/40 bg-red-500/18 text-red-300 animate-pulse' : ''}`}
                                         title="Voice input"
+                                        aria-label="Voice input"
                                     >
-                                        <span className="text-xl">ðŸŽ¤</span>
+                                        <MicIcon />
                                     </button>
                                 )}
                             </div>
@@ -1321,7 +1367,7 @@ export default function PromptShell({
                                 onClick={() => setSearchHistoryOpen(false)}
                                 className="absolute -top-10 right-0 text-white/80 hover:text-white"
                             >
-                                Close âœ•
+                                Close ×
                             </button>
                             <SearchHistoryRenderer
                                 userId={user.id}

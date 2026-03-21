@@ -225,4 +225,4 @@ Tera includes specialized tools for different use cases:
 
 ## 📄 License
 
-© 2024 Tera. All rights reserved. Built with care for curious minds everywhere.
+© 2025 Tera. All rights reserved. Built with care for curious minds everywhere.
