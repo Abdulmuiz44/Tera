@@ -89,6 +89,28 @@ export async function fetchCreditUsage(userId: string) {
     return await getUserCreditsRemaining(userId)
 }
 
+export async function fetchDailyTokenUsage(userId: string) {
+    const session = await auth()
+    if (!session?.user?.id || session.user.id !== userId) return null
+
+    const startOfDay = new Date()
+    startOfDay.setHours(0, 0, 0, 0)
+
+    const { data, error } = await supabaseServer
+        .from('chat_sessions')
+        .select('token_usage')
+        .eq('user_id', userId)
+        .gte('created_at', startOfDay.toISOString())
+
+    if (error) {
+        console.error('Error fetching daily token usage:', error)
+        return null
+    }
+
+    const usedToday = (data || []).reduce((sum: number, row: any) => sum + Number(row.token_usage || 0), 0)
+    return { usedToday }
+}
+
 export async function fetchChatHistory(userId: string, sessionId: string) {
     try {
         const session = await auth()

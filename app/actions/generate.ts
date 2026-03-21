@@ -187,6 +187,7 @@ export async function generateAnswer({ prompt, tool, authorId, authorEmail, atta
         prompt,
         response: answer,
         attachments,
+        token_usage: tokenCost,
         // We don't update created_at or session_id usually, but ensure they match just in case?
         // Usually just updating content is enough.
       })
@@ -204,6 +205,7 @@ export async function generateAnswer({ prompt, tool, authorId, authorEmail, atta
       prompt,
       response: answer,
       attachments,
+      token_usage: tokenCost,
       created_at: new Date().toISOString(),
       session_id: currentSessionId,
       title: title

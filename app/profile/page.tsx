@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { useAuth } from '@/components/AuthProvider'
-import { checkLimitReset, fetchCreditUsage, fetchUserProfile, fetchUserSessions, updateUserProfile } from '@/app/actions/user'
+import { checkLimitReset, fetchCreditUsage, fetchDailyTokenUsage, fetchUserProfile, fetchUserSessions, updateUserProfile } from '@/app/actions/user'
 import { type UserProfile } from '@/lib/usage-tracking'
 import { getPlanConfig, getRemainingChats, getRemainingFileUploads, getUsagePercentage, type PlanType } from '@/lib/plan-config'
 
@@ -18,12 +18,14 @@ export default function ProfilePage() {
   const [sessionsLoading, setSessionsLoading] = useState(true)
   const [portalLoading, setPortalLoading] = useState(false)
   const [creditUsage, setCreditUsage] = useState<{ used: number; remaining: number; total: number; resetDate: string | null } | null>(null)
+  const [dailyTokenUsage, setDailyTokenUsage] = useState(0)
 
   useEffect(() => {
     if (user) {
       void loadProfile()
       void loadRecentSessions()
       void loadCreditUsage()
+      void loadDailyTokenUsage()
     }
   }, [user])
 
@@ -40,6 +42,17 @@ export default function ProfilePage() {
       })
     } catch (error) {
       console.error('Error loading credit usage:', error)
+    }
+  }
+
+  const loadDailyTokenUsage = async () => {
+    if (!user) return
+    try {
+      const usage = await fetchDailyTokenUsage(user.id)
+      if (!usage) return
+      setDailyTokenUsage(usage.usedToday)
+    } catch (error) {
+      console.error('Error loading daily token usage:', error)
     }
   }
 
@@ -220,11 +233,11 @@ export default function ProfilePage() {
                 <div>
                   <div className="flex items-end justify-between gap-4">
                     <div>
-                      <p className="text-sm text-tera-secondary">Credits used this month</p>
-                      <p className="mt-2 text-3xl font-semibold text-tera-primary">{creditUsage?.used ?? 0}</p>
+                      <p className="text-sm text-tera-secondary">Tokens used today</p>
+                      <p className="mt-2 text-3xl font-semibold text-tera-primary">{dailyTokenUsage}</p>
                     </div>
                     <p className="text-sm text-tera-secondary">
-                      Remaining: {creditUsage ? `${creditUsage.remaining} / ${creditUsage.total}` : 'Loading...'}
+                      Monthly remaining: {creditUsage ? `${creditUsage.remaining} / ${creditUsage.total}` : 'Loading...'}
                     </p>
                   </div>
                   <div className="mt-4 h-2.5 overflow-hidden rounded-full bg-white/[0.06]">
@@ -236,10 +249,10 @@ export default function ProfilePage() {
                   <p className="mt-2 text-xs text-tera-secondary">
                     {creditPercentage >= 85
                       ? 'You are close to your monthly credit limit. Upgrade for higher limits.'
-                      : 'Credits increase as you use advanced features like web search, deep research, and attachments.'}
+                      : 'Credits are charged by tokens consumed as you chat with Tera.'}
                   </p>
                   <p className="mt-1 text-[11px] uppercase tracking-[0.16em] text-tera-secondary">
-                    Credits reset on {creditResetLabel}
+                    Today: {dailyTokenUsage} tokens used · Credits reset on {creditResetLabel}
                   </p>
                 </div>
                 <div>
