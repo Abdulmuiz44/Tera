@@ -663,17 +663,49 @@ INSTRUCTION:
       saveConversationToMemory(userId, prompt, finalText).catch(err => console.error('Background memory save failed:', err))
     }
 
-    return finalText || `TERA couldn't build a response for ${tool}.`
+    const promptTokens = Number(data?.usage?.prompt_tokens || 0)
+    const completionTokens = Number(data?.usage?.completion_tokens || 0)
+    const totalTokens = Number(data?.usage?.total_tokens || (promptTokens + completionTokens) || 0)
+
+    return {
+      text: finalText || `TERA couldn't build a response for ${tool}.`,
+      usage: {
+        promptTokens,
+        completionTokens,
+        totalTokens
+      }
+    }
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error)
     console.error('Core AI Generation Error:', message)
 
     if (/429|Service Unavailable|503|502/.test(message)) {
-      return `System: The AI service is currently experiencing high traffic (Error ${message}). I've tried to reconnect but failed. Please give me a moment and try again.`
+      return {
+        text: `System: The AI service is currently experiencing high traffic (Error ${message}). I've tried to reconnect but failed. Please give me a moment and try again.`,
+        usage: {
+          promptTokens: 0,
+          completionTokens: 0,
+          totalTokens: 0
+        }
+      }
     }
     if (/Connect Timeout|fetch failed|connect timed out|UND_ERR_CONNECT_TIMEOUT/i.test(message)) {
-      return 'System: Use a clearer internet connection. I cannot reach the AI service right now.'
+      return {
+        text: 'System: Use a clearer internet connection. I cannot reach the AI service right now.',
+        usage: {
+          promptTokens: 0,
+          completionTokens: 0,
+          totalTokens: 0
+        }
+      }
     }
-    return `System: An unexpected error occurred: ${message}`
+    return {
+      text: `System: An unexpected error occurred: ${message}`,
+      usage: {
+        promptTokens: 0,
+        completionTokens: 0,
+        totalTokens: 0
+      }
+    }
   }
 }
