@@ -5,7 +5,7 @@ import { useState, useEffect } from 'react'
 
 interface LimitModalProps {
     isOpen: boolean
-    limitType: 'chats' | 'file-uploads' | 'web-search' | 'research-mode' | null
+    limitType: 'chats' | 'file-uploads' | 'web-search' | 'research-mode' | 'credits' | null
     currentPlan: string
     onClose: () => void
     unlocksAt?: Date
@@ -68,6 +68,12 @@ export default function LimitModal({ isOpen, limitType, currentPlan, onClose, un
             title: 'Deep Research Mode',
             message: 'Deep Research is a Pro/Plus feature for comprehensive multi-source research.',
             current: 0,
+            upgrade: 'Pro or Plus',
+        },
+        'credits': {
+            title: 'Free Plan Credit Cap Reached',
+            message: 'You’ve used your monthly Free credits for advanced usage. Upgrade now or wait for monthly reset.',
+            current: 150,
             upgrade: 'Pro or Plus',
         },
     }
@@ -151,6 +157,7 @@ export default function LimitModal({ isOpen, limitType, currentPlan, onClose, un
                             {limitType === 'file-uploads' && `${info.current} uploads/day`}
                             {limitType === 'web-search' && `${info.current} searches/month`}
                             {limitType === 'research-mode' && 'Not available'}
+                            {limitType === 'credits' && `${info.current} credits/month`}
                         </span>
                     </div>
                 </div>
@@ -218,6 +225,22 @@ export default function LimitModal({ isOpen, limitType, currentPlan, onClose, un
                             <div className="flex justify-between dark:text-white/80 text-black/70">
                                 <span>Plus:</span>
                                 <span className="font-medium text-tera-neon">✓ Deep Research Mode</span>
+                            </div>
+                        </>
+                    )}
+                    {limitType === 'credits' && (
+                        <>
+                            <div className="flex justify-between dark:text-white/80 text-black/70">
+                                <span>Free:</span>
+                                <span className="font-medium">150 credits/month</span>
+                            </div>
+                            <div className="flex justify-between dark:text-white/80 text-black/70">
+                                <span>Pro:</span>
+                                <span className="font-medium text-tera-neon">Higher limits</span>
+                            </div>
+                            <div className="flex justify-between dark:text-white/80 text-black/70">
+                                <span>Plus:</span>
+                                <span className="font-medium text-tera-neon">Highest limits</span>
                             </div>
                         </>
                     )}
