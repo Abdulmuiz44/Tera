@@ -58,6 +58,7 @@ const CURRENCY_CODES: Record<string, CurrencyConfig> = {
 
 const comparisonRows = [
   { feature: 'AI Conversations', free: 'Unlimited', pro: 'Unlimited', plus: 'Unlimited' },
+  { feature: 'Monthly Credits', free: '150', pro: '1,500', plus: '5,000' },
   { feature: 'File Uploads per Day', free: '3', pro: '25', plus: 'Unlimited' },
   { feature: 'Max File Size', free: '10 MB', pro: '500 MB', plus: '2 GB' },
   { feature: 'Monthly Web Searches', free: '5', pro: '100', plus: 'Unlimited' },
@@ -192,7 +193,7 @@ export default function PricingPage() {
           <p className="tera-eyebrow">Pricing</p>
           <h1 className="mt-4 text-4xl font-semibold tracking-[-0.04em] text-tera-primary md:text-5xl">Choose the level of Tera that fits your work.</h1>
           <p className="mt-5 max-w-3xl text-base leading-8 text-tera-secondary">
-            Conversations stay free. Upgrade when you need larger file limits, more web search volume, deeper research, or analytics.
+            Conversations stay free. Upgrade when you need more monthly credits, larger file limits, more web search volume, deeper research, or analytics.
           </p>
         </section>
 
@@ -240,7 +241,7 @@ export default function PricingPage() {
                   }
                   void handleCheckout(plan.name as PaidPlan)
                 }}
-                className={`mt-8 w-full ${plan.current ? 'tera-button-secondary cursor-default justify-center opacity-70' : plan.highlighted ? 'tera-button-primary justify-center' : 'tera-button-secondary justify-center'}`}
+                className={`mt-8 w-full ${plan.current ? 'tera-button-secondary cursor-default justify-center opacity-70' : plan.cta.startsWith('Upgrade') ? 'tera-button-upgrade justify-center' : plan.highlighted ? 'tera-button-primary justify-center' : 'tera-button-secondary justify-center'}`}
               >
                 {plan.current ? 'Current plan' : loading && plan.name !== 'free' ? 'Processing...' : plan.cta}
               </button>
@@ -307,4 +308,3 @@ export default function PricingPage() {
     </div>
   )
 }
-

@@ -1,6 +1,7 @@
 import { supabaseServer } from '@/lib/supabase-server'
 import { NextRequest, NextResponse } from 'next/server'
 import crypto from 'crypto'
+import { auth } from '@/lib/auth'
 
 function generateApiKey(): { full: string; masked: string; suffix: string } {
   const key = `tera_${crypto.randomBytes(32).toString('hex')}`
@@ -15,11 +16,9 @@ function hashApiKey(key: string): string {
 
 export async function GET(request: NextRequest) {
   try {
-    const userId = request.nextUrl.searchParams.get('userId')
-
-    if (!userId) {
-      return NextResponse.json({ error: 'User ID required' }, { status: 400 })
-    }
+    const session = await auth()
+    const userId = session?.user?.id
+    if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
     // Verify user is Plus plan
     const { data: user, error: userError } = await supabaseServer
@@ -58,11 +57,9 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-    const { userId } = await request.json()
-
-    if (!userId) {
-      return NextResponse.json({ error: 'User ID required' }, { status: 400 })
-    }
+    const session = await auth()
+    const userId = session?.user?.id
+    if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
     // Verify user is Plus plan
     const { data: user, error: userError } = await supabaseServer
@@ -107,6 +104,9 @@ export async function POST(request: NextRequest) {
 
 export async function DELETE(request: NextRequest) {
   try {
+    const session = await auth()
+    const userId = session?.user?.id
+    if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     const keyId = request.nextUrl.searchParams.get('keyId')
 
     if (!keyId) {
@@ -118,6 +118,7 @@ export async function DELETE(request: NextRequest) {
       .from('api_keys')
       .delete()
       .eq('id', keyId)
+      .eq('user_id', userId)
 
     if (error) throw error
 

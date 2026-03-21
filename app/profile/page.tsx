@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { useAuth } from '@/components/AuthProvider'
-import { checkLimitReset, fetchUserProfile, fetchUserSessions, updateUserProfile } from '@/app/actions/user'
+import { checkLimitReset, fetchCreditUsage, fetchUserProfile, fetchUserSessions, updateUserProfile } from '@/app/actions/user'
 import { type UserProfile } from '@/lib/usage-tracking'
 import { getPlanConfig, getRemainingChats, getRemainingFileUploads, getUsagePercentage, type PlanType } from '@/lib/plan-config'
 
@@ -17,13 +17,31 @@ export default function ProfilePage() {
   const [recentSessions, setRecentSessions] = useState<any[]>([])
   const [sessionsLoading, setSessionsLoading] = useState(true)
   const [portalLoading, setPortalLoading] = useState(false)
+  const [creditUsage, setCreditUsage] = useState<{ used: number; remaining: number; total: number; resetDate: string | null } | null>(null)
 
   useEffect(() => {
     if (user) {
       void loadProfile()
       void loadRecentSessions()
+      void loadCreditUsage()
     }
   }, [user])
+
+  const loadCreditUsage = async () => {
+    if (!user) return
+    try {
+      const usage = await fetchCreditUsage(user.id)
+      if (!usage) return
+      setCreditUsage({
+        used: usage.used,
+        remaining: usage.remaining,
+        total: usage.total,
+        resetDate: usage.resetDate,
+      })
+    } catch (error) {
+      console.error('Error loading credit usage:', error)
+    }
+  }
 
   const loadRecentSessions = async () => {
     if (!user) return
@@ -101,6 +119,10 @@ export default function ProfilePage() {
   const remainingUploads = getRemainingFileUploads(profile.subscriptionPlan as PlanType, profile.dailyFileUploads)
   const uploadLimit = planConfig.limits.fileUploadsPerDay
   const uploadPercentage = uploadLimit === 'unlimited' ? 0 : getUsagePercentage(uploadLimit as number, profile.dailyFileUploads)
+  const creditPercentage = creditUsage ? Math.min(100, Math.round((creditUsage.used / Math.max(1, creditUsage.total)) * 100)) : 0
+  const creditResetLabel = creditUsage?.resetDate
+    ? new Date(creditUsage.resetDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+    : 'in 30 days'
 
   const email = user.email || ''
   const displayName = formData.fullName || profile.fullName || (email ? email.split('@')[0] : '') || 'User'
@@ -171,7 +193,7 @@ export default function ProfilePage() {
                 <p className="mt-3 text-xl font-semibold text-tera-primary">{planConfig.displayName}</p>
                 <div className="mt-4 flex flex-wrap gap-3">
                   {profile.subscriptionPlan === 'free' ? (
-                    <Link href="/pricing" className="tera-button-primary">Upgrade</Link>
+                    <Link href="/pricing" className="tera-button-upgrade">Upgrade</Link>
                   ) : (
                     <button type="button" onClick={handleManageSubscription} disabled={portalLoading} className="tera-button-secondary disabled:opacity-60">
                       {portalLoading ? 'Loading...' : 'Manage'}
@@ -194,6 +216,31 @@ export default function ProfilePage() {
                     </div>
                     <p className="text-sm text-tera-secondary">Remaining: {remainingChats === 'unlimited' ? 'Unlimited' : remainingChats}</p>
                   </div>
+                </div>
+                <div>
+                  <div className="flex items-end justify-between gap-4">
+                    <div>
+                      <p className="text-sm text-tera-secondary">Credits used this month</p>
+                      <p className="mt-2 text-3xl font-semibold text-tera-primary">{creditUsage?.used ?? 0}</p>
+                    </div>
+                    <p className="text-sm text-tera-secondary">
+                      Remaining: {creditUsage ? `${creditUsage.remaining} / ${creditUsage.total}` : 'Loading...'}
+                    </p>
+                  </div>
+                  <div className="mt-4 h-2.5 overflow-hidden rounded-full bg-white/[0.06]">
+                    <div
+                      className={`h-full rounded-full ${creditPercentage >= 85 ? 'bg-red-400' : creditPercentage >= 60 ? 'bg-amber-400' : 'bg-tera-neon'}`}
+                      style={{ width: `${creditPercentage}%` }}
+                    />
+                  </div>
+                  <p className="mt-2 text-xs text-tera-secondary">
+                    {creditPercentage >= 85
+                      ? 'You are close to your monthly credit limit. Upgrade for higher limits.'
+                      : 'Credits increase as you use advanced features like web search, deep research, and attachments.'}
+                  </p>
+                  <p className="mt-1 text-[11px] uppercase tracking-[0.16em] text-tera-secondary">
+                    Credits reset on {creditResetLabel}
+                  </p>
                 </div>
                 <div>
                   <div className="flex items-end justify-between gap-4">

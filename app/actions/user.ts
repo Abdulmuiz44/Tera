@@ -5,6 +5,7 @@ import { supabaseServer } from '@/lib/supabase-server'
 import { auth } from '@/lib/auth'
 import { revalidatePath } from 'next/cache'
 import dns from 'node:dns'
+import { getUserCreditsRemaining } from '@/lib/free-plan-credits'
 
 // Force IPv4 to avoid SSL/TLS handshake issues with Supabase on some networks
 try {
@@ -82,6 +83,12 @@ export async function fetchUserSessions(userId: string, limit: number = 20) {
     }
 }
 
+export async function fetchCreditUsage(userId: string) {
+    const session = await auth()
+    if (!session?.user?.id || session.user.id !== userId) return null
+    return await getUserCreditsRemaining(userId)
+}
+
 export async function fetchChatHistory(userId: string, sessionId: string) {
     try {
         const session = await auth()
@@ -157,4 +164,3 @@ export async function fetchHistoryPageData(userId: string, page: number = 1, pag
         return { sessions: [], hasMore: false }
     }
 }
-
