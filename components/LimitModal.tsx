@@ -227,7 +227,7 @@ export default function LimitModal({ isOpen, limitType, currentPlan, onClose, un
                 <div className="flex gap-3 mt-4">
                     <button
                         onClick={handleUpgrade}
-                        className="w-full px-4 py-2 md:py-2.5 rounded-lg bg-tera-neon text-tera-bg dark:text-black font-semibold hover:bg-tera-neon/90 transition-colors text-sm md:text-base"
+                        className="tera-button-upgrade w-full justify-center rounded-lg px-4 py-2 text-sm font-semibold md:py-2.5 md:text-base"
                     >
                         Upgrade to Pro/Plus
                     </button>

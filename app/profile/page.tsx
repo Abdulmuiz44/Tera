@@ -171,7 +171,7 @@ export default function ProfilePage() {
                 <p className="mt-3 text-xl font-semibold text-tera-primary">{planConfig.displayName}</p>
                 <div className="mt-4 flex flex-wrap gap-3">
                   {profile.subscriptionPlan === 'free' ? (
-                    <Link href="/pricing" className="tera-button-primary">Upgrade</Link>
+                    <Link href="/pricing" className="tera-button-upgrade">Upgrade</Link>
                   ) : (
                     <button type="button" onClick={handleManageSubscription} disabled={portalLoading} className="tera-button-secondary disabled:opacity-60">
                       {portalLoading ? 'Loading...' : 'Manage'}

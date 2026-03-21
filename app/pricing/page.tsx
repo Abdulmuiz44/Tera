@@ -240,7 +240,7 @@ export default function PricingPage() {
                   }
                   void handleCheckout(plan.name as PaidPlan)
                 }}
-                className={`mt-8 w-full ${plan.current ? 'tera-button-secondary cursor-default justify-center opacity-70' : plan.highlighted ? 'tera-button-primary justify-center' : 'tera-button-secondary justify-center'}`}
+                className={`mt-8 w-full ${plan.current ? 'tera-button-secondary cursor-default justify-center opacity-70' : plan.cta.startsWith('Upgrade') ? 'tera-button-upgrade justify-center' : plan.highlighted ? 'tera-button-primary justify-center' : 'tera-button-secondary justify-center'}`}
               >
                 {plan.current ? 'Current plan' : loading && plan.name !== 'free' ? 'Processing...' : plan.cta}
               </button>
@@ -307,4 +307,3 @@ export default function PricingPage() {
     </div>
   )
 }
-
