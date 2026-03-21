@@ -6,10 +6,10 @@ import { supabaseServer } from '@/lib/supabase-server'
 import { generateTeacherResponse } from '@/lib/mistral'
 import type { AttachmentReference } from '@/lib/attachment'
 import { getUserProfileServer } from '@/lib/usage-tracking-server'
-import { incrementChatsServer, incrementFileUploadsServer } from '@/lib/usage-tracking-server'
+import { incrementChatsServer } from '@/lib/usage-tracking-server'
 import { canStartChat, canUploadFile, getPlanConfig } from '@/lib/plan-config'
 import { getWebSearchRemaining, incrementWebSearchCount } from '@/lib/web-search-usage'
-import { getUserCreditsRemaining, incrementUserCredits, getFreePlanCreditCap } from '@/lib/free-plan-credits'
+import { getUserCreditsRemaining, incrementUserCredits, getPlanCreditCap } from '@/lib/free-plan-credits'
 
 type GenerateProps = {
   prompt: string
@@ -47,8 +47,6 @@ export async function generateAnswer({ prompt, tool, authorId, authorEmail, atta
     }
   }
 
-  const estimatedCreditCost = Math.max(1, 1 + attachments.length + (enableWebSearch ? 2 : 0) + (researchMode ? 2 : 0))
-
   // Check file upload limits if attachments are present
   if (attachments.length > 0 && !canUploadFile(userProfile.subscriptionPlan, userProfile.dailyFileUploads)) {
     const planConfig = getPlanConfig(userProfile.subscriptionPlan)
@@ -77,21 +75,19 @@ export async function generateAnswer({ prompt, tool, authorId, authorEmail, atta
     }
   }
 
-  // Free-plan monthly credit cap (conversations remain unlimited, but advanced usage is metered)
-  if (userProfile.subscriptionPlan === 'free') {
-    const { remaining, resetDate } = await getUserCreditsRemaining(authorId)
-    if (remaining < estimatedCreditCost) {
-      const cap = getFreePlanCreditCap()
-      const resetLabel = resetDate
-        ? new Date(resetDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
-        : 'in 30 days'
-      const errorMessage = `You've reached your monthly Free credit cap (${cap}). Upgrade to Pro or Plus now, or wait until your credits reset on ${resetLabel}.`
-      return {
-        answer: errorMessage,
-        sessionId: sessionId,
-        chatId: chatId,
-        error: errorMessage
-      }
+  // Token-based monthly credit cap gate
+  const { remaining: creditsRemaining, resetDate } = await getUserCreditsRemaining(authorId)
+  if (creditsRemaining <= 0) {
+    const cap = getPlanCreditCap(userProfile.subscriptionPlan)
+    const resetLabel = resetDate
+      ? new Date(resetDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+      : 'in 30 days'
+    const errorMessage = `You've reached your monthly credit cap (${cap}). Upgrade your plan now, or wait until your credits reset on ${resetLabel}.`
+    return {
+      answer: errorMessage,
+      sessionId: sessionId,
+      chatId: chatId,
+      error: errorMessage
     }
   }
 
@@ -144,7 +140,24 @@ export async function generateAnswer({ prompt, tool, authorId, authorEmail, atta
   }
 
   // Generate the AI response
-  const answer = await generateTeacherResponse({ prompt, tool, attachments, history, userId: authorId, enableWebSearch, researchMode })
+  const generationResult = await generateTeacherResponse({ prompt, tool, attachments, history, userId: authorId, enableWebSearch, researchMode })
+  const answer = generationResult.text
+  const tokenCost = Math.max(1, generationResult.usage.totalTokens || 0)
+
+  // Enforce token credit limit before returning content if request exceeded remaining balance
+  if (tokenCost > creditsRemaining) {
+    const cap = getPlanCreditCap(userProfile.subscriptionPlan)
+    const resetLabel = resetDate
+      ? new Date(resetDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+      : 'in 30 days'
+    const errorMessage = `You've reached your monthly credit cap (${cap}). Upgrade your plan now, or wait until your credits reset on ${resetLabel}.`
+    return {
+      answer: errorMessage,
+      sessionId: sessionId,
+      chatId: chatId,
+      error: errorMessage
+    }
+  }
 
   const currentSessionId = sessionId || crypto.randomUUID()
 
@@ -214,7 +227,7 @@ export async function generateAnswer({ prompt, tool, authorId, authorEmail, atta
     await incrementWebSearchCount(authorId)
   }
 
-  await incrementUserCredits(authorId, estimatedCreditCost)
+  await incrementUserCredits(authorId, tokenCost)
 
   revalidatePath('/')
   revalidatePath('/history')
