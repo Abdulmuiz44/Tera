@@ -229,11 +229,40 @@ export async function generateAnswer({ prompt, tool, authorId, authorEmail, atta
     await incrementWebSearchCount(authorId)
   }
 
-  await incrementUserCredits(authorId, tokenCost)
+  const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms))
+  const maxAccountingAttempts = 2
+  let usageAccountingSucceeded = false
+
+  for (let attempt = 1; attempt <= maxAccountingAttempts; attempt += 1) {
+    usageAccountingSucceeded = await incrementUserCredits(authorId, tokenCost)
+    if (usageAccountingSucceeded) {
+      break
+    }
+
+    if (attempt < maxAccountingAttempts) {
+      await delay(200)
+    }
+  }
+
+  let usageAccountingWarning: string | undefined
+  if (!usageAccountingSucceeded) {
+    usageAccountingWarning = 'Your response was generated, but usage accounting is delayed. We will retry shortly.'
+    console.error('[usage_accounting_delayed]', {
+      event: 'usage_accounting_delayed',
+      userId: authorId,
+      sessionId: currentSessionId,
+      chatId: savedChatId ?? null,
+      tokenCost,
+      maxAttempts: maxAccountingAttempts,
+      warning: usageAccountingWarning
+    })
+  }
 
   revalidatePath('/')
   revalidatePath('/history')
-  revalidatePath('/profile')
+  if (usageAccountingSucceeded) {
+    revalidatePath('/profile')
+  }
 
-  return { answer, sessionId: currentSessionId, chatId: savedChatId }
+  return { answer, sessionId: currentSessionId, chatId: savedChatId, warning: usageAccountingWarning }
 }
