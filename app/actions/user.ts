@@ -1,6 +1,8 @@
 'use server'
 
 import { getUserProfileServer, checkAndResetUsageServer } from '@/lib/usage-tracking-server'
+import { buildProfileUsageSummary } from '@/lib/profile-usage'
+import { getWebSearchUsageState } from '@/lib/web-search-usage'
 import { supabaseServer } from '@/lib/supabase-server'
 import { auth } from '@/lib/auth'
 import { revalidatePath } from 'next/cache'
@@ -24,6 +26,34 @@ export async function fetchUserProfile(userId: string) {
         return profile
     } catch (error) {
         console.error('Error fetching user profile:', error)
+        return null
+    }
+}
+
+export async function fetchUserUsageSummary(userId: string) {
+    try {
+        const session = await auth()
+        if (!session?.user?.id || session.user.id !== userId) return null
+
+        await checkAndResetUsageServer(userId)
+
+        const [profile, webSearch] = await Promise.all([
+            getUserProfileServer(userId),
+            getWebSearchUsageState(userId),
+        ])
+
+        if (!profile) return null
+
+        return buildProfileUsageSummary({
+            plan: profile.subscriptionPlan,
+            dailyChats: profile.dailyChats,
+            dailyFileUploads: profile.dailyFileUploads,
+            monthlyWebSearches: webSearch.used,
+            chatResetDate: profile.chatResetDate,
+            webSearchResetDate: webSearch.resetDate ? new Date(webSearch.resetDate) : null,
+        })
+    } catch (error) {
+        console.error('Error fetching user usage summary:', error)
         return null
     }
 }
@@ -73,7 +103,6 @@ export async function fetchUserSessions(userId: string, limit: number = 20) {
 
         if (error) throw error
 
-        // De-duplicate by session_id
         const uniqueSessions = Array.from(new Map(data.map((item: any) => [item.session_id, item])).values())
         return uniqueSessions
     } catch (error) {
@@ -103,7 +132,6 @@ export async function fetchChatHistory(userId: string, sessionId: string) {
     }
 }
 
-// Enhanced history fetching with search and pagination support
 export async function fetchHistoryPageData(userId: string, page: number = 1, pageSize: number = 20, searchQuery: string = '') {
     try {
         const session = await auth()
@@ -119,20 +147,16 @@ export async function fetchHistoryPageData(userId: string, page: number = 1, pag
             query = query.or(`title.ilike.%${searchQuery}%,prompt.ilike.%${searchQuery}%`)
         }
 
-        // Strategy: Fetch a large batch to ensure we get enough UNIQUE sessions after deduplication
-        // Message-based storage means many rows = 1 session.
-        const fetchSize = pageSize * 10 // Fetch 10x to handle conversation depth
+        const fetchSize = pageSize * 10
         const from = (page - 1) * fetchSize
         const to = from + fetchSize - 1
 
-        const { data, error, count } = await query.range(from, to)
+        const { data, error } = await query.range(from, to)
 
         if (error) throw error
 
-        // Deduplicate by session_id
         const uniqueMap = new Map()
         data?.forEach((item: any) => {
-            // Keep the LATEST entry for each session (already sorted desc)
             if (!uniqueMap.has(item.session_id)) {
                 uniqueMap.set(item.session_id, {
                     id: item.id,
@@ -140,7 +164,7 @@ export async function fetchHistoryPageData(userId: string, page: number = 1, pag
                     title: item.title,
                     last_message: item.prompt,
                     created_at: item.created_at,
-                    tool: item.tool
+                    tool: item.tool,
                 })
             }
         })
@@ -149,12 +173,10 @@ export async function fetchHistoryPageData(userId: string, page: number = 1, pag
 
         return {
             sessions: uniqueSessions.slice(0, pageSize),
-            hasMore: uniqueSessions.length > pageSize
+            hasMore: uniqueSessions.length > pageSize,
         }
-
     } catch (error) {
         console.error('Error fetching history:', error)
         return { sessions: [], hasMore: false }
     }
 }
-

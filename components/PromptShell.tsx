@@ -1,4 +1,4 @@
-﻿"use client"
+"use client"
 
 import React, { ChangeEvent, useCallback, useEffect, useRef, useState, useTransition } from 'react'
 import Image from 'next/image'
@@ -13,6 +13,7 @@ type User = {
 }
 import type { AttachmentReference, AttachmentType } from '@/lib/attachment'
 import { fetchChatHistory } from '@/app/actions/user'
+import { dispatchUsageRefresh } from '@/lib/usage-events'
 import { compressImage } from '@/lib/image-compression'
 import UpgradePrompt from './UpgradePrompt'
 import VoiceControls from './VoiceControls'
@@ -425,6 +426,7 @@ export default function PromptShell({
 
             const attachment = await uploadAttachment(fileToUpload, type)
             setPendingAttachments((prev) => [...prev, attachment])
+            dispatchUsageRefresh('uploads')
             setAttachmentMessage(null)
         } catch (error) {
             console.error('Upload failed', error)
@@ -571,7 +573,7 @@ export default function PromptShell({
 
                 // Check if this request is still valid (hasn't been stopped or superseded)
                 if (currentRequestId !== requestIdRef.current) {
-                    console.log('ðŸ›‘ Request cancelled/superseded, ignoring response')
+                    console.log('🛑 Request cancelled/superseded, ignoring response')
                     return
                 }
 
@@ -629,6 +631,12 @@ export default function PromptShell({
                         } : entry
                     )
                 )
+
+                dispatchUsageRefresh('messages')
+                if (useWebSearch) {
+                    dispatchUsageRefresh('web-search')
+                    void refreshWebSearchStatus()
+                }
 
                 // Update editingMessageId to the saved chat ID for future edits
                 if (editingMessageId && savedChatId) {
@@ -706,7 +714,7 @@ export default function PromptShell({
                     prompt: messageToSend,
                     attachments: [...pendingAttachments]
                 }
-                console.log('ðŸ”´ SAVING to localStorage:', messageData)
+                console.log('🔴 SAVING to localStorage:', messageData)
                 localStorage.setItem('tera_queued_message', JSON.stringify(messageData))
             }
             setAttachmentMessage('Sign in to send your message. It will be posted automatically once you authenticate.')
@@ -732,37 +740,37 @@ export default function PromptShell({
 
     useEffect(() => {
         // Always check for persisted message on mount
-        console.log('ðŸŸ¢ MOUNT EFFECT: Checking localStorage...')
+        console.log('🟢 MOUNT EFFECT: Checking localStorage...')
         if (typeof window !== 'undefined' && !queuedMessage) {
             const savedMessage = localStorage.getItem('tera_queued_message')
-            console.log('ðŸŸ¢ localStorage value:', savedMessage)
+            console.log('🟢 localStorage value:', savedMessage)
             if (savedMessage) {
                 try {
-                    console.log('ðŸŸ¢ Found queued message, parsing...')
+                    console.log('🟢 Found queued message, parsing...')
                     const parsed = JSON.parse(savedMessage)
-                    console.log('ðŸŸ¢ Parsed message:', parsed)
+                    console.log('🟢 Parsed message:', parsed)
                     setQueuedMessage(parsed)
-                    console.log('ðŸŸ¢ Set queuedMessage state')
+                    console.log('🟢 Set queuedMessage state')
                 } catch (e) {
-                    console.error('ðŸ”´ Failed to parse queued message', e)
+                    console.error('🔴 Failed to parse queued message', e)
                     localStorage.removeItem('tera_queued_message')
                 }
             } else {
-                console.log('ðŸŸ¢ No saved message found in localStorage')
+                console.log('🟢 No saved message found in localStorage')
             }
         } else {
-            console.log('ðŸŸ¢ Skipping restore (window undefined or queuedMessage already set)')
+            console.log('🟢 Skipping restore (window undefined or queuedMessage already set)')
         }
     }, []) // Run once on mount
 
     useEffect(() => {
-        console.log('ðŸ”µ PROCESS EFFECT: userReady=', userReady, 'queuedMessage=', queuedMessage)
+        console.log('🔵 PROCESS EFFECT: userReady=', userReady, 'queuedMessage=', queuedMessage)
         if (userReady && queuedMessage) {
-            console.log('ðŸ”µ Processing queued message:', queuedMessage)
+            console.log('🔵 Processing queued message:', queuedMessage)
             processMessage(queuedMessage.prompt, queuedMessage.attachments)
 
             // Clean up
-            console.log('ðŸ”µ Cleaning up localStorage and queuedMessage state')
+            console.log('🔵 Cleaning up localStorage and queuedMessage state')
             localStorage.removeItem('tera_queued_message')
             setQueuedMessage(null)
         }
@@ -838,43 +846,37 @@ export default function PromptShell({
         }
     }, [conversations, conversationActive, status])
 
-    // Load web search remaining count and update periodically
-    useEffect(() => {
+    const refreshWebSearchStatus = useCallback(async () => {
         if (!user?.id) return
 
-        const fetchWebSearchStatus = async () => {
-            try {
-                const response = await fetch('/api/user/web-search-status', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ userId: user.id })
-                })
+        try {
+            const response = await fetch('/api/user/web-search-status', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ userId: user.id })
+            })
 
-                if (!response.ok) {
-                    console.warn('Failed to fetch web search status:', response.status)
-                    return
-                }
-
-                const data = await response.json()
-                if (data.success && data.remaining !== undefined) {
-                    setWebSearchRemaining(data.remaining)
-                    if (data.plan) {
-                        setCurrentUserPlan(data.plan)
-                    }
-                    console.log(`ðŸ” Web Search Status: ${data.remaining}/${data.total} (${data.plan?.toUpperCase()})`)
-                }
-            } catch (err) {
-                console.warn('Failed to fetch web search status:', err)
+            if (!response.ok) {
+                console.warn('Failed to fetch web search status:', response.status)
+                return
             }
+
+            const data = await response.json()
+            if (data.success && data.remaining !== undefined) {
+                setWebSearchRemaining(data.remaining)
+                if (data.plan) {
+                    setCurrentUserPlan(data.plan)
+                }
+                console.log(`🔍 Web Search Status: ${data.remaining}/${data.total} (${data.plan?.toUpperCase()})`)
+            }
+        } catch (err) {
+            console.warn('Failed to fetch web search status:', err)
         }
-
-        // Fetch immediately
-        fetchWebSearchStatus()
-
-        // Refetch every 30 seconds to keep count updated
-        const interval = setInterval(fetchWebSearchStatus, 30000)
-        return () => clearInterval(interval)
     }, [user?.id])
+
+    useEffect(() => {
+        void refreshWebSearchStatus()
+    }, [refreshWebSearchStatus])
 
     useEffect(() => {
         if (typeof window !== 'undefined' && 'webkitSpeechRecognition' in window) {
@@ -985,7 +987,7 @@ export default function PromptShell({
                                                         <div className="mt-3 flex flex-wrap gap-2">
                                                             {entry.userMessage.attachments.map((att, idx) => (
                                                                 <div key={idx} className="flex items-center gap-2 rounded-lg bg-black/5 px-3 py-2 text-xs">
-                                                                    <span>{att.type === 'image' ? 'ðŸ–¼ï¸' : 'ðŸ“„'}</span>
+                                                                    <span>{att.type === 'image' ? '🖼️' : '📄'}</span>
                                                                     <span className="truncate max-w-[150px]">{att.name}</span>
                                                                 </div>
                                                             ))}
@@ -995,7 +997,7 @@ export default function PromptShell({
                                                 {/* Timestamp and checkmarks */}
                                                 <div className="flex items-center gap-1.5 px-2 text-xs text-tera-secondary">
                                                     <span>{formatTimestamp(entry.userMessage.timestamp)}</span>
-                                                    <span className="text-tera-secondary/60">âœ“âœ“</span>
+                                                    <span className="text-tera-secondary/60">✓✓</span>
                                                 </div>
                                             </div>
                                         </div>
@@ -1416,4 +1418,6 @@ export default function PromptShell({
         </div>
     )
 }
+
+
 

@@ -2,25 +2,30 @@
  * Web Search Usage Tracking
  * Tracks and limits web searches based on subscription plan:
  * - Free: 5/month
- * - Pro: 50/month  
- * - Plus: 80/month
+ * - Pro: 100/month  
+ * - Plus: unlimited
  */
 
 import { supabaseServer } from './supabase-server'
-import { getPlanConfig } from './plan-config'
+import type { PlanType } from './plan-config'
 
-const MONTHLY_WEB_SEARCH_LIMITS = {
+const MONTHLY_WEB_SEARCH_LIMITS: Record<PlanType, number | typeof Infinity> = {
   free: 5,
-  pro: 50,
-  plus: Infinity // Unlimited (was showing 80 in pricing but Plus should have unlimited)
+  pro: 100,
+  plus: Infinity,
 }
 
 const RESET_INTERVAL_DAYS = 30
 
-/**
- * Get user's remaining web searches for current month
- */
-export async function getWebSearchRemaining(userId: string): Promise<{ remaining: number; total: number; resetDate: string | null; plan: string }> {
+export interface WebSearchUsageState {
+  used: number
+  limit: number | 'unlimited'
+  remaining: number | 'unlimited'
+  resetDate: string | null
+  plan: PlanType
+}
+
+async function normalizeWebSearchUsage(userId: string): Promise<{ used: number; resetDate: Date | null; plan: PlanType } | null> {
   try {
     const { data, error } = await supabaseServer
       .from('users')
@@ -29,44 +34,118 @@ export async function getWebSearchRemaining(userId: string): Promise<{ remaining
       .single()
 
     if (error) {
-      // PGRST116: The result contains 0 rows
       if (error.code === 'PGRST116') {
-        // User not found in DB yet (likely inconsistent state or new user lag)
-        // Default to free plan settings
-        return { remaining: 5, total: 5, resetDate: null, plan: 'free' }
+        return {
+          used: 0,
+          resetDate: null,
+          plan: 'free',
+        }
       }
 
       console.warn('Network issue getting web search usage (using fallback):', error instanceof Error ? error.message : String(error))
-      // Fail open during network issues - allow 10 searches so user isn't blocked
-      return { remaining: 10, total: 10, resetDate: null, plan: 'free' }
+      return {
+        used: 0,
+        resetDate: null,
+        plan: 'free',
+      }
     }
 
-    if (!data) {
-      return { remaining: 3, total: 3, resetDate: null, plan: 'free' }
-    }
-
-    const plan = (data.subscription_plan || 'free') as 'free' | 'pro' | 'plus'
-    const limit = MONTHLY_WEB_SEARCH_LIMITS[plan]
-
-    // Check if reset date has passed (reset monthly)
+    const plan = (data.subscription_plan || 'free') as PlanType
     const now = new Date()
     const resetDate = data.web_search_reset_date ? new Date(data.web_search_reset_date) : null
 
     if (!resetDate || now > resetDate) {
-      // If reset date has passed, the user has the full limit available.
-      // The actual reset of the counter in the DB will be handled by the increment function.
-      return { remaining: limit === Infinity ? 999999 : limit, total: limit === Infinity ? 999999 : limit, resetDate: resetDate?.toISOString() || null, plan }
+      const nextReset = new Date(now)
+      nextReset.setDate(nextReset.getDate() + RESET_INTERVAL_DAYS)
+
+      const { error: updateError } = await supabaseServer
+        .from('users')
+        .update({
+          monthly_web_searches: 0,
+          web_search_reset_date: nextReset.toISOString(),
+        })
+        .eq('id', userId)
+
+      if (updateError) {
+        console.error('Failed to normalize web search usage:', updateError)
+        return {
+          used: 0,
+          resetDate: nextReset,
+          plan,
+        }
+      }
+
+      return {
+        used: 0,
+        resetDate: nextReset,
+        plan,
+      }
     }
 
-    if (limit === Infinity) {
-      return { remaining: 999999, total: 999999, resetDate: resetDate?.toISOString() || null, plan }
+    return {
+      used: data.monthly_web_searches || 0,
+      resetDate,
+      plan,
     }
-
-    const remaining = Math.max(0, limit - (data.monthly_web_searches || 0))
-    return { remaining, total: limit, resetDate: resetDate?.toISOString() || null, plan }
   } catch (error) {
-    console.warn('Error getting web search usage (using fallback):', error)
-    return { remaining: 10, total: 10, resetDate: null, plan: 'free' }
+    console.warn('Error normalizing web search usage (using fallback):', error)
+    return {
+      used: 0,
+      resetDate: null,
+      plan: 'free',
+    }
+  }
+}
+
+export async function getWebSearchUsageState(userId: string): Promise<WebSearchUsageState> {
+  const state = await normalizeWebSearchUsage(userId)
+
+  if (!state) {
+    return {
+      used: 0,
+      limit: 5,
+      remaining: 5,
+      resetDate: null,
+      plan: 'free',
+    }
+  }
+
+  const limit = MONTHLY_WEB_SEARCH_LIMITS[state.plan]
+
+  if (limit === Infinity) {
+    return {
+      used: state.used,
+      limit: 'unlimited',
+      remaining: 'unlimited',
+      resetDate: state.resetDate ? state.resetDate.toISOString() : null,
+      plan: state.plan,
+    }
+  }
+
+  return {
+    used: state.used,
+    limit,
+    remaining: Math.max(0, limit - state.used),
+    resetDate: state.resetDate ? state.resetDate.toISOString() : null,
+    plan: state.plan,
+  }
+}
+
+/**
+ * Get user's remaining web searches for current month
+ */
+export async function getWebSearchRemaining(userId: string): Promise<{ remaining: number; total: number; resetDate: string | null; plan: string }> {
+  const state = await getWebSearchUsageState(userId)
+
+  if (state.limit === 'unlimited') {
+    return { remaining: 999999, total: 999999, resetDate: state.resetDate, plan: state.plan }
+  }
+
+  return {
+    remaining: state.remaining as number,
+    total: state.limit,
+    resetDate: state.resetDate,
+    plan: state.plan,
   }
 }
 
@@ -83,55 +162,20 @@ export async function canPerformWebSearch(userId: string): Promise<boolean> {
  */
 export async function incrementWebSearchCount(userId: string): Promise<boolean> {
   try {
-    // Get user's status ONCE
-    const { data: user, error: fetchError } = await supabaseServer
-      .from('users')
-      .select('monthly_web_searches, web_search_reset_date, subscription_plan')
-      .eq('id', userId)
-      .single()
+    const state = await normalizeWebSearchUsage(userId)
 
-    if (fetchError || !user) {
-      // Handle "User not found" case
-      if (fetchError?.code === 'PGRST116') {
-        console.warn(`User ${userId} not found when incrementing search count. Usage not tracked.`)
-        // Allow search anyway if we can't track it? Or block?
-        // Blocking is safer for abuse, allowing is better for UX.
-        // Let's return TRUE (allow) but log it, assuming it's a transient sync issue.
-        return true
-      }
+    if (!state) return false
 
-      console.error('Failed to get user for web search increment:', fetchError)
-      return false
-    }
+    const limit = MONTHLY_WEB_SEARCH_LIMITS[state.plan]
 
-    const plan = (user.subscription_plan || 'free') as 'free' | 'pro' | 'plus'
-    const limit = MONTHLY_WEB_SEARCH_LIMITS[plan]
-    const now = new Date()
-    const resetDate = user.web_search_reset_date ? new Date(user.web_search_reset_date) : null
-
-    let currentSearches = user.monthly_web_searches || 0
-    const updatePayload: { monthly_web_searches: number; web_search_reset_date?: string } = { monthly_web_searches: 0 }
-
-    // Check if we need to reset the count
-    if (!resetDate || now > resetDate) {
-      currentSearches = 0
-      const nextReset = new Date()
-      nextReset.setDate(nextReset.getDate() + 30)
-      updatePayload.web_search_reset_date = nextReset.toISOString()
-    }
-
-    // Check if user has remaining searches (skip for unlimited)
-    if (limit !== Infinity && currentSearches >= limit) {
+    if (limit !== Infinity && state.used >= limit) {
       console.warn(`User ${userId} has no remaining web searches.`)
       return false
     }
 
-    // Increment and update
-    updatePayload.monthly_web_searches = currentSearches + 1
-
     const { error: updateError } = await supabaseServer
       .from('users')
-      .update(updatePayload)
+      .update({ monthly_web_searches: state.used + 1 })
       .eq('id', userId)
 
     if (updateError) {
@@ -150,21 +194,21 @@ export async function incrementWebSearchCount(userId: string): Promise<boolean> 
  * Get formatted message for web search limit
  */
 export function getWebSearchLimitMessage(remaining: number, total: number): string {
-  if (total === Infinity || total > 9999) {
-    return '🔍 Web Search (Unlimited)'
+  if (total > 9999) {
+    return 'Web Search (Unlimited)'
   }
 
   if (remaining <= 0) {
-    return `🔍 Web Search Limit Reached (${total}/${total} searches used)`
+    return `Web Search Limit Reached (${total}/${total} searches used)`
   }
 
-  const percentage = Math.round((remaining / total) * 100)
   if (remaining <= 10) {
-    return `🔍 Web Search (${remaining}/${total} remaining) - Low`
+    return `Web Search (${remaining}/${total} remaining) - Low`
   }
 
-  return `🔍 Web Search (${remaining}/${total})`
+  return `Web Search (${remaining}/${total})`
 }
 
 export const WEB_SEARCH_LIMITS = MONTHLY_WEB_SEARCH_LIMITS
-export const getDefaultLimit = (plan: 'free' | 'pro' | 'plus' = 'free') => MONTHLY_WEB_SEARCH_LIMITS[plan]
+export const getDefaultLimit = (plan: PlanType = 'free') => MONTHLY_WEB_SEARCH_LIMITS[plan]
+
