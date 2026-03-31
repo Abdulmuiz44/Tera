@@ -22,9 +22,9 @@ type User = {
 export const navigation = [
   { label: 'New chat', icon: 'chat', href: '/new' },
   { label: 'Search chats', icon: 'search', href: '/history' },
-  { label: 'Images', icon: 'images', href: '/tools?tool=image-generator' },
-  { label: 'Apps', icon: 'apps', href: '/tools' },
-  { label: 'Deep research', icon: 'research', href: '/tools?tool=deep-research' },
+  { label: 'Images', icon: 'images', href: '/images' },
+  { label: 'Tools', icon: 'apps', href: '/tools' },
+  { label: 'Deep research', icon: 'research', href: '/deep-research' },
   { label: 'Notes', icon: 'notes', href: '/notes' },
   { label: 'Settings', icon: 'settings', href: '/settings' },
 ]
@@ -108,11 +108,12 @@ export default function Sidebar({ expanded, onToggle, onNewChat, user, onSignOut
 
   return (
     <aside className={`fixed inset-y-0 left-0 z-50 transition-all duration-300 ${expanded ? 'w-[310px] translate-x-0' : '-translate-x-full md:w-[90px] md:translate-x-0'}`}>
-      <div className="flex h-full flex-col border-r border-white/10 bg-[#0f1115] px-3 py-4 text-[#f1f1f2]">
+      <div className="flex h-full flex-col border-r border-tera-border bg-tera-panel px-3 py-4 text-tera-primary backdrop-blur-xl">
         <div className={`flex items-center ${expanded ? 'justify-between px-1' : 'justify-center'}`}>
           <Link href="/new" className={`flex items-center ${expanded ? 'gap-2' : ''}`} aria-label="Tera home">
             <div className="relative flex h-10 w-10 items-center justify-center overflow-hidden rounded-xl bg-white/[0.03]">
-              <Image src="/images/TERA_LOGO_ONLY.png" alt="Tera" fill className="object-contain p-2" priority />
+              <Image src="/images/TERA_LOGO_ONLY.png" alt="Tera" fill className="hidden object-contain p-2 dark:block" priority />
+              <Image src="/images/TERA_LOGO_ONLY1.png" alt="Tera" fill className="object-contain p-2 dark:hidden" priority />
             </div>
           </Link>
 
@@ -120,7 +121,7 @@ export default function Sidebar({ expanded, onToggle, onNewChat, user, onSignOut
             <button
               type="button"
               onClick={onToggle}
-              className="inline-flex h-10 w-10 items-center justify-center rounded-xl text-[#b9bcc3] transition hover:bg-white/[0.06] hover:text-white"
+              className="inline-flex h-10 w-10 items-center justify-center rounded-xl text-tera-secondary transition hover:bg-tera-highlight hover:text-tera-primary"
               aria-label="Collapse sidebar"
             >
               <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
@@ -134,7 +135,7 @@ export default function Sidebar({ expanded, onToggle, onNewChat, user, onSignOut
             <button
               type="button"
               onClick={onToggle}
-              className="hidden md:inline-flex md:h-10 md:w-10 md:items-center md:justify-center md:rounded-xl md:text-[#b9bcc3] md:transition md:hover:bg-white/[0.06] md:hover:text-white"
+              className="hidden md:inline-flex md:h-10 md:w-10 md:items-center md:justify-center md:rounded-xl md:text-tera-secondary md:transition md:hover:bg-tera-highlight md:hover:text-tera-primary"
               aria-label="Expand sidebar"
             >
               <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
@@ -162,7 +163,7 @@ export default function Sidebar({ expanded, onToggle, onNewChat, user, onSignOut
                       onNewChat()
                     }
                   }}
-                  className={`group flex items-center gap-3 rounded-xl px-3 py-3 text-sm transition ${isActive ? 'bg-white/[0.10] text-white' : 'text-[#d2d5dc] hover:bg-white/[0.06] hover:text-white'} ${expanded ? '' : 'justify-center md:px-2'}`}
+                  className={`group flex items-center gap-3 rounded-xl px-3 py-3 text-sm transition ${isActive ? 'bg-tera-highlight text-tera-primary' : 'text-tera-secondary hover:bg-tera-highlight hover:text-tera-primary'} ${expanded ? '' : 'justify-center md:px-2'}`}
                 >
                   <span className="flex h-5 w-5 shrink-0 items-center justify-center">{getIcon(item.icon)}</span>
                   {expanded && <span className="font-medium">{item.label}</span>}
@@ -172,7 +173,7 @@ export default function Sidebar({ expanded, onToggle, onNewChat, user, onSignOut
           </nav>
         </div>
 
-        <div className="mt-3 border-t border-white/10 pt-3">
+        <div className="mt-3 border-t border-tera-border pt-3">
           <UserMenu user={user || null} expanded={expanded} onSignOut={onSignOut || (() => {})} />
         </div>
       </div>

@@ -23,6 +23,7 @@ interface UserMenuProps {
 }
 
 const menuItems = [
+  { label: 'Profile', href: '/profile' },
   { label: 'Pricing', href: '/pricing' },
   { label: 'Settings', href: '/settings' },
   { label: 'About', href: '/about' },
@@ -102,7 +103,7 @@ export default function UserMenu({ user, expanded, onSignOut }: UserMenuProps) {
               <p className="text-[0.68rem] uppercase tracking-[0.22em] text-tera-secondary">Current plan</p>
               <div className="mt-2 flex items-center justify-between gap-3">
                 <p className="text-sm font-medium text-tera-primary">{plan}</p>
-                <Link href="/pricing" className="tera-button-primary rounded-full px-3 py-2 text-xs">
+                <Link href="/pricing" className="tera-button-upgrade rounded-full px-3 py-2 text-xs">
                   Upgrade
                 </Link>
               </div>

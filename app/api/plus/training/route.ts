@@ -1,14 +1,13 @@
 import { supabaseServer } from '@/lib/supabase-server'
 import { NextRequest, NextResponse } from 'next/server'
 import { randomUUID } from 'crypto'
+import { auth } from '@/lib/auth'
 
 export async function GET(request: NextRequest) {
   try {
-    const userId = request.nextUrl.searchParams.get('userId')
-
-    if (!userId) {
-      return NextResponse.json({ error: 'User ID required' }, { status: 400 })
-    }
+    const session = await auth()
+    const userId = session?.user?.id
+    if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
     // Verify user is Plus plan
     const { data: user, error: userError } = await supabaseServer
@@ -48,11 +47,14 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-    const { userId, modelName, dataUrl, epochs, description } = await request.json()
+    const session = await auth()
+    const userId = session?.user?.id
+    if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    const { modelName, dataUrl, epochs, description } = await request.json()
 
-    if (!userId || !modelName || !dataUrl) {
+    if (!modelName || !dataUrl) {
       return NextResponse.json(
-        { error: 'User ID, model name, and data URL required' },
+        { error: 'Model name and data URL required' },
         { status: 400 }
       )
     }

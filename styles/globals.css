@@ -180,7 +180,7 @@
   .tera-button-primary {
     @apply tera-button;
     background: linear-gradient(180deg, var(--text-tera-accent-strong), var(--text-tera-accent));
-    color: #16120d;
+    color: #ffffff;
     box-shadow: 0 14px 28px rgba(219, 188, 142, 0.18);
   }
 
@@ -189,14 +189,26 @@
     filter: brightness(1.02);
   }
 
+  .tera-button-upgrade {
+    @apply tera-button border border-white/15 text-white;
+    background: linear-gradient(180deg, #2a313d, #1a2029);
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.3);
+  }
+
+  .tera-button-upgrade:hover {
+    border-color: rgba(255, 255, 255, 0.26);
+    background: linear-gradient(180deg, #303949, #1f2732);
+    color: #ffffff;
+  }
+
   .tera-button-secondary {
     @apply tera-button border border-tera-border text-tera-primary backdrop-blur-xl;
-    background-color: rgba(255, 255, 255, 0.03);
+    background-color: color-mix(in srgb, var(--surface-l2) 78%, transparent);
   }
 
   .tera-button-secondary:hover {
     border-color: var(--border-tera-strong);
-    background-color: rgba(255, 255, 255, 0.06);
+    background-color: color-mix(in srgb, var(--surface-l2) 90%, transparent);
   }
 
   .tera-button-ghost {
@@ -209,12 +221,12 @@
 
   .tera-icon-button {
     @apply inline-flex h-10 w-10 items-center justify-center rounded-full border border-tera-border text-tera-secondary transition;
-    background-color: rgba(255, 255, 255, 0.03);
+    background-color: color-mix(in srgb, var(--surface-l2) 80%, transparent);
   }
 
   .tera-icon-button:hover {
     border-color: var(--border-tera-strong);
-    background-color: rgba(255, 255, 255, 0.06);
+    background-color: color-mix(in srgb, var(--surface-l2) 90%, transparent);
     color: var(--text-tera-primary);
   }
 
@@ -244,11 +256,11 @@
   }
 
   .composer-menu-row {
-    @apply flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-sm font-medium text-[#f5f7fa] transition;
+    @apply flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-sm font-medium text-tera-primary transition;
   }
 
   .composer-menu-row:hover {
-    background-color: rgba(255, 255, 255, 0.1);
+    background-color: var(--bg-tera-highlight);
   }
 
   .tera-input {

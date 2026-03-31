@@ -3,7 +3,7 @@
 import Link from 'next/link'
 
 interface UpgradePromptProps {
-    type: 'lesson-plans' | 'chats' | 'file-uploads' | 'web-search' | 'research-mode'
+    type: 'lesson-plans' | 'chats' | 'file-uploads' | 'web-search' | 'research-mode' | 'credits'
     onClose?: () => void
     inline?: boolean
 }
@@ -39,6 +39,12 @@ export default function UpgradePrompt({ type, onClose, inline = false }: Upgrade
             description: "Deep Research mode (comprehensive multi-source research) is only available on Pro and Plus plans.",
             benefit: 'Upgrade to access Deep Research and other advanced features.',
             icon: '🔭'
+        },
+        'credits': {
+            title: 'Free Credit Cap Reached',
+            description: "You've reached your monthly Free credit cap for advanced usage.",
+            benefit: 'Upgrade to Pro or Plus for higher usage limits, or wait for your monthly credit reset.',
+            icon: '⚡'
         }
     }
 
@@ -55,7 +61,7 @@ export default function UpgradePrompt({ type, onClose, inline = false }: Upgrade
                         <p className="text-sm text-tera-neon font-medium mb-3">{message.benefit}</p>
                         <Link
                             href="/pricing"
-                            className="inline-block px-4 py-2 rounded-lg bg-tera-neon text-tera-bg dark:text-black text-sm font-medium hover:bg-tera-neon/90 transition"
+                            className="tera-button-upgrade inline-block rounded-lg px-4 py-2 text-sm font-medium"
                         >
                             View Plans
                         </Link>
@@ -104,7 +110,7 @@ export default function UpgradePrompt({ type, onClose, inline = false }: Upgrade
                         )}
                         <Link
                             href="/pricing"
-                            className="flex-1 px-4 py-3 rounded-lg bg-tera-neon text-tera-bg dark:text-black font-semibold hover:bg-tera-neon/90 transition text-center"
+                            className="tera-button-upgrade flex-1 rounded-lg px-4 py-3 text-center font-semibold"
                         >
                             View Plans
                         </Link>

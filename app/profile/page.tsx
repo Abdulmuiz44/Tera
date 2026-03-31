@@ -12,6 +12,9 @@ import { TERA_USAGE_REFRESH_EVENT } from '@/lib/usage-events'
 function formatMemberSince(createdAt: Date) {
   return createdAt.toLocaleDateString([], { month: 'long', day: 'numeric', year: 'numeric' })
 }
+import { checkLimitReset, fetchCreditUsage, fetchDailyTokenUsage, fetchUserProfile, fetchUserSessions, updateUserProfile } from '@/app/actions/user'
+import { type UserProfile } from '@/lib/usage-tracking'
+import { getPlanConfig, getRemainingChats, getRemainingFileUploads, getUsagePercentage, type PlanType } from '@/lib/plan-config'
 
 export default function ProfilePage() {
   const { user } = useAuth()
@@ -25,6 +28,8 @@ export default function ProfilePage() {
   const [recentSessions, setRecentSessions] = useState<any[]>([])
   const [sessionsLoading, setSessionsLoading] = useState(true)
   const [portalLoading, setPortalLoading] = useState(false)
+  const [creditUsage, setCreditUsage] = useState<{ used: number; remaining: number; total: number; resetDate: string | null } | null>(null)
+  const [dailyTokenUsage, setDailyTokenUsage] = useState(0)
 
   const loadUsageSummary = useCallback(async () => {
     if (!user) return
@@ -41,6 +46,43 @@ export default function ProfilePage() {
   }, [user])
 
   const loadRecentSessions = useCallback(async () => {
+  useEffect(() => {
+    if (user) {
+      void loadProfile()
+      void loadRecentSessions()
+      void loadCreditUsage()
+      void loadDailyTokenUsage()
+    }
+  }, [user])
+
+  const loadCreditUsage = async () => {
+    if (!user) return
+    try {
+      const usage = await fetchCreditUsage(user.id)
+      if (!usage) return
+      setCreditUsage({
+        used: usage.used,
+        remaining: usage.remaining,
+        total: usage.total,
+        resetDate: usage.resetDate,
+      })
+    } catch (error) {
+      console.error('Error loading credit usage:', error)
+    }
+  }
+
+  const loadDailyTokenUsage = async () => {
+    if (!user) return
+    try {
+      const usage = await fetchDailyTokenUsage(user.id)
+      if (!usage) return
+      setDailyTokenUsage(usage.usedToday)
+    } catch (error) {
+      console.error('Error loading daily token usage:', error)
+    }
+  }
+
+  const loadRecentSessions = async () => {
     if (!user) return
     setSessionsLoading(true)
     try {
@@ -132,6 +174,16 @@ export default function ProfilePage() {
     return <div className="tera-page flex items-center justify-center text-sm text-tera-secondary">Unable to load profile.</div>
   }
 
+  const planConfig = getPlanConfig(profile.subscriptionPlan as PlanType)
+  const remainingChats = getRemainingChats(profile.subscriptionPlan as PlanType, profile.dailyChats)
+  const remainingUploads = getRemainingFileUploads(profile.subscriptionPlan as PlanType, profile.dailyFileUploads)
+  const uploadLimit = planConfig.limits.fileUploadsPerDay
+  const uploadPercentage = uploadLimit === 'unlimited' ? 0 : getUsagePercentage(uploadLimit as number, profile.dailyFileUploads)
+  const creditPercentage = creditUsage ? Math.min(100, Math.round((creditUsage.used / Math.max(1, creditUsage.total)) * 100)) : 0
+  const creditResetLabel = creditUsage?.resetDate
+    ? new Date(creditUsage.resetDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+    : 'in 30 days'
+
   const email = user.email || ''
   const displayName = formData.fullName || profile.fullName || (email ? email.split('@')[0] : '') || 'User'
   const initials = displayName
@@ -200,6 +252,17 @@ export default function ProfilePage() {
                 <p className="tera-eyebrow">Member since</p>
                 <p className="mt-3 text-xl font-semibold text-tera-primary">{formatMemberSince(profile.createdAt)}</p>
                 <p className="mt-2 text-sm text-tera-secondary">Usage cards below refresh from the same tracked counters Tera uses while you work.</p>
+                <p className="tera-eyebrow">Plan</p>
+                <p className="mt-3 text-xl font-semibold text-tera-primary">{planConfig.displayName}</p>
+                <div className="mt-4 flex flex-wrap gap-3">
+                  {profile.subscriptionPlan === 'free' ? (
+                    <Link href="/pricing" className="tera-button-upgrade">Upgrade</Link>
+                  ) : (
+                    <button type="button" onClick={handleManageSubscription} disabled={portalLoading} className="tera-button-secondary disabled:opacity-60">
+                      {portalLoading ? 'Loading...' : 'Manage'}
+                    </button>
+                  )}
+                </div>
               </div>
             </div>
           </div>
@@ -261,6 +324,39 @@ export default function ProfilePage() {
                         </div>
                       </div>
                       <p className="text-sm text-tera-secondary">Usage updates immediately after successful activity in this tab.</p>
+                    <p className="text-sm text-tera-secondary">Remaining: {remainingChats === 'unlimited' ? 'Unlimited' : remainingChats}</p>
+                  </div>
+                </div>
+                <div>
+                  <div className="flex items-end justify-between gap-4">
+                    <div>
+                      <p className="text-sm text-tera-secondary">Tokens used today</p>
+                      <p className="mt-2 text-3xl font-semibold text-tera-primary">{dailyTokenUsage}</p>
+                    </div>
+                    <p className="text-sm text-tera-secondary">
+                      Monthly remaining: {creditUsage ? `${creditUsage.remaining} / ${creditUsage.total}` : 'Loading...'}
+                    </p>
+                  </div>
+                  <div className="mt-4 h-2.5 overflow-hidden rounded-full bg-white/[0.06]">
+                    <div
+                      className={`h-full rounded-full ${creditPercentage >= 85 ? 'bg-red-400' : creditPercentage >= 60 ? 'bg-amber-400' : 'bg-tera-neon'}`}
+                      style={{ width: `${creditPercentage}%` }}
+                    />
+                  </div>
+                  <p className="mt-2 text-xs text-tera-secondary">
+                    {creditPercentage >= 85
+                      ? 'You are close to your monthly credit limit. Upgrade for higher limits.'
+                      : 'Credits are charged by tokens consumed as you chat with Tera.'}
+                  </p>
+                  <p className="mt-1 text-[11px] uppercase tracking-[0.16em] text-tera-secondary">
+                    Today: {dailyTokenUsage} tokens used Â· Credits reset on {creditResetLabel}
+                  </p>
+                </div>
+                <div>
+                  <div className="flex items-end justify-between gap-4">
+                    <div>
+                      <p className="text-sm text-tera-secondary">File uploads today</p>
+                      <p className="mt-2 text-3xl font-semibold text-tera-primary">{profile.dailyFileUploads}</p>
                     </div>
                   </div>
                 </div>
@@ -282,7 +378,7 @@ export default function ProfilePage() {
               recentSessions.map((session) => (
                 <Link key={session.session_id} href={`/new/${session.session_id}`} className="block rounded-[20px] border border-tera-border bg-white/[0.03] px-4 py-4 transition hover:border-white/16 hover:bg-white/[0.05]">
                   <p className="truncate text-sm font-medium text-tera-primary">{session.title || 'Untitled session'}</p>
-                  <p className="mt-1 text-[0.68rem] uppercase tracking-[0.22em] text-tera-secondary">{session.tool || 'Universal'} · {new Date(session.created_at).toLocaleDateString()}</p>
+                  <p className="mt-1 text-[0.68rem] uppercase tracking-[0.22em] text-tera-secondary">{session.tool || 'Universal'} ï¿½ {new Date(session.created_at).toLocaleDateString()}</p>
                 </Link>
               ))
             ) : (

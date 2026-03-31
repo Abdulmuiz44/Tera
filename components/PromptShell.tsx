@@ -321,8 +321,8 @@ export default function PromptShell({
     const [isListening, setIsListening] = useState(false)
     const recognitionRef = useRef<any>(null)
     const [currentSessionId, setCurrentSessionId] = useState<string | null>(sessionId || null)
-    const [upgradePromptType, setUpgradePromptType] = useState<'chats' | 'file-uploads' | 'web-search' | 'research-mode' | null>(null)
-    const [limitModalType, setLimitModalType] = useState<'chats' | 'file-uploads' | 'web-search' | 'research-mode' | null>(null)
+    const [upgradePromptType, setUpgradePromptType] = useState<'chats' | 'file-uploads' | 'web-search' | 'research-mode' | 'credits' | null>(null)
+    const [limitModalType, setLimitModalType] = useState<'chats' | 'file-uploads' | 'web-search' | 'research-mode' | 'credits' | null>(null)
     const [limitUnlocksAt, setLimitUnlocksAt] = useState<Date | undefined>(undefined)
     const [currentUserPlan, setCurrentUserPlan] = useState<string>('free')
     const [webSearchEnabled, setWebSearchEnabled] = useState(false)
@@ -591,6 +591,9 @@ export default function PromptShell({
                     } else if (limitError.includes('web search')) {
                         setLimitModalType('web-search')
                         setLimitUnlocksAt(unlocksAt)
+                    } else if (limitError.toLowerCase().includes('credit cap')) {
+                        setLimitModalType('credits')
+                        setLimitUnlocksAt(undefined)
                     }
 
                     setConversations((prev) =>
@@ -667,6 +670,9 @@ export default function PromptShell({
                 } else if (message === 'limit web-search') {
                     setLimitModalType('web-search')
                     setLimitUnlocksAt(unlocksAt)
+                } else if (message.toLowerCase().includes('credit cap')) {
+                    setLimitModalType('credits')
+                    setLimitUnlocksAt(undefined)
                 }
 
                 setConversations((prev) =>
@@ -937,7 +943,7 @@ export default function PromptShell({
                     {showInitialPrompt ? (
                         <div className="absolute inset-x-0 top-0 bottom-0 flex items-center justify-center px-4 text-center pointer-events-none -mt-16">
                             <div className="pointer-events-auto flex max-w-3xl flex-col items-center">
-                                <div className="mx-auto mb-8 w-fit rounded-[32px] border border-white/8 bg-white/[0.03] p-7 shadow-soft-lg">
+                                <div className="mx-auto mb-8 w-fit p-7">
                                     <span className="flex items-center justify-center w-32 h-32">
                                         <div className="relative w-[120px] h-[120px]">
                                             <Image
@@ -958,7 +964,6 @@ export default function PromptShell({
                                     </span>
                                 </div>
                                 <h2 className="text-4xl font-semibold tracking-[-0.03em] text-tera-primary md:text-5xl">How can Tera help you today?</h2>
-                                <p className="mt-4 max-w-2xl text-sm leading-7 text-tera-secondary md:text-base">Ask a question, run research, review notes, or jump into a tool from the same dark workspace.</p>
                             </div>
                         </div>
                     ) : (
@@ -1128,7 +1133,7 @@ export default function PromptShell({
             {/* Input Area */}
             <div className="sticky bottom-0 z-50 w-full shrink-0 bg-tera-bg/92 px-2 py-2.5 backdrop-blur-xl md:px-8 md:py-3">
                 <div className="relative mx-auto max-w-4xl">
-                    <div className={`relative flex flex-col gap-2 rounded-[26px] bg-[#1b1c1f] p-2.5 shadow-soft-lg transition-colors ${conversationActive ? 'focus-within:bg-[#1f2024]' : 'focus-within:bg-[#202228]'}`}>
+                    <div className={`relative flex flex-col gap-2 rounded-[26px] border border-tera-border bg-tera-panel p-2.5 shadow-soft-lg transition-colors ${conversationActive ? 'focus-within:bg-tera-panel' : 'focus-within:bg-tera-panel-strong'}`}>
 
                         {/* Active Tools & Attachments Preview */}
                         <div className="flex flex-wrap items-center gap-2 px-2 pt-2">
@@ -1196,7 +1201,7 @@ export default function PromptShell({
                                     </button>
 
                                     {attachmentOpen && (
-                                        <div className="absolute bottom-full left-0 mb-3 w-64 overflow-hidden rounded-2xl border border-white/15 bg-[#18191d] p-2 text-[#eef0f4] shadow-2xl">
+                                        <div className="absolute bottom-full left-0 mb-3 w-64 overflow-hidden rounded-2xl border border-tera-border bg-tera-panel p-2 text-tera-primary shadow-2xl">
                                             {/* File & Media Section */}
                                             <button
                                                 onClick={() => handleFileSelect('camera')}
@@ -1308,7 +1313,7 @@ export default function PromptShell({
                                 {showStopButton && (
                                     <button
                                         onClick={handleStop}
-                                        className="composer-action-button bg-white/[0.92] text-[#08101a] hover:bg-white"
+                                        className="composer-action-button flex h-10 w-10 items-center justify-center rounded-full border border-tera-border bg-white/[0.92] text-[#08101a] transition hover:bg-white"
                                         title="Stop generating"
                                         aria-label="Stop generating"
                                     >
@@ -1319,7 +1324,7 @@ export default function PromptShell({
                                 {showSendButton && (
                                     <button
                                         onClick={handleSubmit}
-                                        className="composer-action-button bg-tera-accent text-[#08101a] border-tera-accent hover:brightness-95"
+                                        className="composer-action-button flex h-10 w-10 items-center justify-center rounded-full border border-tera-accent bg-tera-accent text-[#08101a] transition hover:brightness-95"
                                         title="Send message"
                                         aria-label="Send message"
                                     >

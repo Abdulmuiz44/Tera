@@ -6,9 +6,10 @@ import { supabaseServer } from '@/lib/supabase-server'
 import { generateTeacherResponse } from '@/lib/mistral'
 import type { AttachmentReference } from '@/lib/attachment'
 import { getUserProfileServer } from '@/lib/usage-tracking-server'
-import { incrementChatsServer, incrementFileUploadsServer } from '@/lib/usage-tracking-server'
-import { canStartChat, canUploadFile, canPerformWebSearch, getPlanConfig } from '@/lib/plan-config'
+import { incrementChatsServer } from '@/lib/usage-tracking-server'
+import { canStartChat, canUploadFile, getPlanConfig } from '@/lib/plan-config'
 import { getWebSearchRemaining, incrementWebSearchCount } from '@/lib/web-search-usage'
+import { getUserCreditsRemaining, incrementUserCredits, getPlanCreditCap } from '@/lib/free-plan-credits'
 
 type GenerateProps = {
   prompt: string
@@ -50,7 +51,7 @@ export async function generateAnswer({ prompt, tool, authorId, authorEmail, atta
   if (attachments.length > 0 && !canUploadFile(userProfile.subscriptionPlan, userProfile.dailyFileUploads)) {
     const planConfig = getPlanConfig(userProfile.subscriptionPlan)
     const limit = planConfig.limits.fileUploadsPerDay
-    const errorMessage = `You've reached your daily limit of ${limit} file uploads. Upgrade to Pro for unlimited access.`
+    const errorMessage = `You've reached your daily limit of ${limit} file uploads. Upgrade to Pro or Plus for higher limits.`
     console.error('File upload limit reached:', errorMessage)
     return {
       answer: errorMessage,
@@ -74,17 +75,44 @@ export async function generateAnswer({ prompt, tool, authorId, authorEmail, atta
     }
   }
 
+  // Token-based monthly credit cap gate
+  const { remaining: creditsRemaining, resetDate } = await getUserCreditsRemaining(authorId)
+  if (creditsRemaining <= 0) {
+    const cap = getPlanCreditCap(userProfile.subscriptionPlan)
+    const resetLabel = resetDate
+      ? new Date(resetDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+      : 'in 30 days'
+    const errorMessage = `You've reached your monthly credit cap (${cap}). Upgrade your plan now, or wait until your credits reset on ${resetLabel}.`
+    return {
+      answer: errorMessage,
+      sessionId: sessionId,
+      chatId: chatId,
+      error: errorMessage
+    }
+  }
+
   // Check web search limits if enabled
   if (enableWebSearch) {
     const { remaining } = await getWebSearchRemaining(authorId)
     if (remaining <= 0) {
-      const errorMessage = 'You have reached your web search limit. Upgrade to Pro for unlimited access.'
+      const errorMessage = 'You have reached your web search limit. Upgrade to Pro or Plus for higher limits.'
       return {
         answer: errorMessage,
         sessionId: sessionId,
         chatId: chatId,
         error: errorMessage
       }
+    }
+  }
+
+  // Enforce Deep Research entitlement on the server (defense-in-depth)
+  if (researchMode && !(userProfile.subscriptionPlan === 'pro' || userProfile.subscriptionPlan === 'plus')) {
+    const errorMessage = 'Deep Research mode is available on Pro and Plus plans.'
+    return {
+      answer: errorMessage,
+      sessionId: sessionId,
+      chatId: chatId,
+      error: errorMessage
     }
   }
 
@@ -112,7 +140,24 @@ export async function generateAnswer({ prompt, tool, authorId, authorEmail, atta
   }
 
   // Generate the AI response
-  const answer = await generateTeacherResponse({ prompt, tool, attachments, history, userId: authorId, enableWebSearch, researchMode })
+  const generationResult = await generateTeacherResponse({ prompt, tool, attachments, history, userId: authorId, enableWebSearch, researchMode })
+  const answer = generationResult.text
+  const tokenCost = Math.max(1, generationResult.usage.totalTokens || 0)
+
+  // Enforce token credit limit before returning content if request exceeded remaining balance
+  if (tokenCost > creditsRemaining) {
+    const cap = getPlanCreditCap(userProfile.subscriptionPlan)
+    const resetLabel = resetDate
+      ? new Date(resetDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+      : 'in 30 days'
+    const errorMessage = `You've reached your monthly credit cap (${cap}). Upgrade your plan now, or wait until your credits reset on ${resetLabel}.`
+    return {
+      answer: errorMessage,
+      sessionId: sessionId,
+      chatId: chatId,
+      error: errorMessage
+    }
+  }
 
   const currentSessionId = sessionId || crypto.randomUUID()
 
@@ -142,6 +187,7 @@ export async function generateAnswer({ prompt, tool, authorId, authorEmail, atta
         prompt,
         response: answer,
         attachments,
+        token_usage: tokenCost,
         // We don't update created_at or session_id usually, but ensure they match just in case?
         // Usually just updating content is enough.
       })
@@ -159,6 +205,7 @@ export async function generateAnswer({ prompt, tool, authorId, authorEmail, atta
       prompt,
       response: answer,
       attachments,
+      token_usage: tokenCost,
       created_at: new Date().toISOString(),
       session_id: currentSessionId,
       title: title
@@ -182,9 +229,40 @@ export async function generateAnswer({ prompt, tool, authorId, authorEmail, atta
     await incrementWebSearchCount(authorId)
   }
 
+  const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms))
+  const maxAccountingAttempts = 2
+  let usageAccountingSucceeded = false
+
+  for (let attempt = 1; attempt <= maxAccountingAttempts; attempt += 1) {
+    usageAccountingSucceeded = await incrementUserCredits(authorId, tokenCost)
+    if (usageAccountingSucceeded) {
+      break
+    }
+
+    if (attempt < maxAccountingAttempts) {
+      await delay(200)
+    }
+  }
+
+  let usageAccountingWarning: string | undefined
+  if (!usageAccountingSucceeded) {
+    usageAccountingWarning = 'Your response was generated, but usage accounting is delayed. We will retry shortly.'
+    console.error('[usage_accounting_delayed]', {
+      event: 'usage_accounting_delayed',
+      userId: authorId,
+      sessionId: currentSessionId,
+      chatId: savedChatId ?? null,
+      tokenCost,
+      maxAttempts: maxAccountingAttempts,
+      warning: usageAccountingWarning
+    })
+  }
+
   revalidatePath('/')
   revalidatePath('/history')
-  revalidatePath('/profile')
+  if (usageAccountingSucceeded) {
+    revalidatePath('/profile')
+  }
 
-  return { answer, sessionId: currentSessionId, chatId: savedChatId }
+  return { answer, sessionId: currentSessionId, chatId: savedChatId, warning: usageAccountingWarning }
 }
