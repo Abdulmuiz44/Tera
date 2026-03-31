@@ -1,4 +1,4 @@
-import { getPlanConfig, type PlanType } from './plan-config'
+﻿import { getPlanConfig, type PlanType } from './plan-config'
 
 export type UsageLimit = number | 'unlimited'
 
@@ -79,3 +79,4 @@ export function buildProfileUsageSummary(source: ProfileUsageSource): ProfileUsa
         ),
     }
 }
+
