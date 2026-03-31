@@ -1,8 +1,17 @@
-﻿'use client'
+'use client'
 
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import Link from 'next/link'
 import { useAuth } from '@/components/AuthProvider'
+import UsageMetricCard from '@/components/UsageMetricCard'
+import { fetchUserProfile, fetchUserSessions, fetchUserUsageSummary, updateUserProfile } from '@/app/actions/user'
+import type { UserProfile } from '@/lib/usage-tracking'
+import type { ProfileUsageSummary } from '@/lib/profile-usage'
+import { TERA_USAGE_REFRESH_EVENT } from '@/lib/usage-events'
+
+function formatMemberSince(createdAt: Date) {
+  return createdAt.toLocaleDateString([], { month: 'long', day: 'numeric', year: 'numeric' })
+}
 import { checkLimitReset, fetchCreditUsage, fetchDailyTokenUsage, fetchUserProfile, fetchUserSessions, updateUserProfile } from '@/app/actions/user'
 import { type UserProfile } from '@/lib/usage-tracking'
 import { getPlanConfig, getRemainingChats, getRemainingFileUploads, getUsagePercentage, type PlanType } from '@/lib/plan-config'
@@ -10,7 +19,9 @@ import { getPlanConfig, getRemainingChats, getRemainingFileUploads, getUsagePerc
 export default function ProfilePage() {
   const { user } = useAuth()
   const [profile, setProfile] = useState<UserProfile | null>(null)
+  const [usageSummary, setUsageSummary] = useState<ProfileUsageSummary | null>(null)
   const [loading, setLoading] = useState(true)
+  const [usageLoading, setUsageLoading] = useState(true)
   const [editing, setEditing] = useState(false)
   const [saving, setSaving] = useState(false)
   const [formData, setFormData] = useState({ fullName: '', school: '', gradeLevels: [] as string[] })
@@ -20,6 +31,21 @@ export default function ProfilePage() {
   const [creditUsage, setCreditUsage] = useState<{ used: number; remaining: number; total: number; resetDate: string | null } | null>(null)
   const [dailyTokenUsage, setDailyTokenUsage] = useState(0)
 
+  const loadUsageSummary = useCallback(async () => {
+    if (!user) return
+
+    setUsageLoading(true)
+    try {
+      const summary = await fetchUserUsageSummary(user.id)
+      setUsageSummary(summary)
+    } catch (error) {
+      console.error('Error loading usage summary:', error)
+    } finally {
+      setUsageLoading(false)
+    }
+  }, [user])
+
+  const loadRecentSessions = useCallback(async () => {
   useEffect(() => {
     if (user) {
       void loadProfile()
@@ -67,23 +93,44 @@ export default function ProfilePage() {
     } finally {
       setSessionsLoading(false)
     }
-  }
+  }, [user])
 
-  const loadProfile = async () => {
+  const loadProfile = useCallback(async () => {
     if (!user) return
     setLoading(true)
-    await checkLimitReset(user.id)
-    const data = await fetchUserProfile(user.id)
-    if (data) {
-      setProfile(data)
-      setFormData({
-        fullName: data.fullName || '',
-        school: data.school || '',
-        gradeLevels: data.gradeLevels || [],
-      })
+    try {
+      const data = await fetchUserProfile(user.id)
+      if (data) {
+        setProfile(data)
+        setFormData({
+          fullName: data.fullName || '',
+          school: data.school || '',
+          gradeLevels: data.gradeLevels || [],
+        })
+      }
+    } finally {
+      setLoading(false)
     }
-    setLoading(false)
-  }
+  }, [user])
+
+  useEffect(() => {
+    if (!user) return
+
+    void Promise.all([
+      loadProfile(),
+      loadUsageSummary(),
+      loadRecentSessions(),
+    ])
+  }, [loadProfile, loadRecentSessions, loadUsageSummary, user])
+
+  useEffect(() => {
+    const handleUsageRefresh = () => {
+      void loadUsageSummary()
+    }
+
+    window.addEventListener(TERA_USAGE_REFRESH_EVENT, handleUsageRefresh)
+    return () => window.removeEventListener(TERA_USAGE_REFRESH_EVENT, handleUsageRefresh)
+  }, [loadUsageSummary])
 
   const handleSave = async () => {
     if (!user || !profile) return
@@ -153,7 +200,7 @@ export default function ProfilePage() {
           <div>
             <p className="tera-eyebrow">Workspace</p>
             <h1 className="tera-title mt-3">Profile</h1>
-            <p className="tera-subtitle mt-4">Manage your identity, review usage, and keep subscription details close to the main workspace.</p>
+            <p className="tera-subtitle mt-4">Manage your identity, review live usage across Tera, and keep subscription details close to the main workspace.</p>
           </div>
           <div className="flex flex-wrap gap-3">
             {editing ? (
@@ -202,6 +249,9 @@ export default function ProfilePage() {
               </div>
 
               <div className="rounded-[22px] border border-tera-border bg-white/[0.03] px-5 py-4 text-left md:min-w-[220px]">
+                <p className="tera-eyebrow">Member since</p>
+                <p className="mt-3 text-xl font-semibold text-tera-primary">{formatMemberSince(profile.createdAt)}</p>
+                <p className="mt-2 text-sm text-tera-secondary">Usage cards below refresh from the same tracked counters Tera uses while you work.</p>
                 <p className="tera-eyebrow">Plan</p>
                 <p className="mt-3 text-xl font-semibold text-tera-primary">{planConfig.displayName}</p>
                 <div className="mt-4 flex flex-wrap gap-3">
@@ -217,16 +267,63 @@ export default function ProfilePage() {
             </div>
           </div>
 
-          <div className="space-y-6">
-            <div className="tera-card">
-              <p className="tera-eyebrow">Usage</p>
-              <div className="mt-4 space-y-5">
-                <div>
-                  <div className="flex items-end justify-between gap-4">
+          <div className="tera-surface p-6 md:p-8">
+            <p className="tera-eyebrow">Subscription</p>
+            <h2 className="mt-3 text-3xl font-semibold text-tera-primary">{usageSummary?.planDisplayName || 'Current plan'}</h2>
+            <p className="mt-3 text-sm leading-7 text-tera-secondary">Upgrade to expand uploads and web search limits, or manage billing details from the same place you review activity.</p>
+            <div className="mt-6 flex flex-wrap gap-3">
+              {profile.subscriptionPlan === 'free' ? (
+                <Link href="/pricing" className="tera-button-primary">Upgrade</Link>
+              ) : (
+                <button type="button" onClick={handleManageSubscription} disabled={portalLoading} className="tera-button-secondary disabled:opacity-60">
+                  {portalLoading ? 'Loading...' : 'Manage'}
+                </button>
+              )}
+              <button type="button" onClick={() => void loadUsageSummary()} disabled={usageLoading} className="tera-button-secondary disabled:opacity-60">
+                {usageLoading ? 'Refreshing...' : 'Refresh usage'}
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div className="mt-10">
+          <div className="flex items-end justify-between gap-4">
+            <div>
+              <p className="tera-eyebrow">Balance</p>
+              <h2 className="mt-3 text-3xl font-semibold text-tera-primary">Usage dashboard</h2>
+              <p className="mt-3 text-sm leading-7 text-tera-secondary">A live view of the counters Tera updates when you send messages, upload files, or run web search.</p>
+            </div>
+          </div>
+
+          <div className="mt-6 grid gap-6 lg:grid-cols-2">
+            {usageSummary ? (
+              <>
+                <UsageMetricCard title="Messages" metric={usageSummary.messages} />
+                <UsageMetricCard title="Web search" metric={usageSummary.webSearch} />
+                <UsageMetricCard title="File uploads" metric={usageSummary.uploads} />
+                <div className="tera-card h-full">
+                  <div className="flex h-full flex-col justify-between gap-6">
                     <div>
-                      <p className="text-sm text-tera-secondary">Messages today</p>
-                      <p className="mt-2 text-3xl font-semibold text-tera-primary">{profile.dailyChats}</p>
+                      <p className="text-sm font-medium text-tera-secondary">Account</p>
+                      <p className="mt-3 text-4xl font-semibold tracking-[-0.05em] text-tera-primary">{usageSummary.planDisplayName}</p>
+                      <p className="mt-3 text-sm text-tera-secondary">This card mirrors the plan limits that power the rest of the dashboard.</p>
                     </div>
+                    <div className="space-y-4">
+                      <div className="rounded-[20px] border border-tera-border bg-white/[0.03] px-4 py-4">
+                        <div className="flex items-center justify-between gap-4 text-sm">
+                          <span className="text-tera-secondary">Messages</span>
+                          <span className="text-tera-primary">{usageSummary.messages.isUnlimited ? 'Unlimited' : usageSummary.messages.limit}</span>
+                        </div>
+                        <div className="mt-3 flex items-center justify-between gap-4 text-sm">
+                          <span className="text-tera-secondary">Uploads / day</span>
+                          <span className="text-tera-primary">{usageSummary.uploads.isUnlimited ? 'Unlimited' : usageSummary.uploads.limit}</span>
+                        </div>
+                        <div className="mt-3 flex items-center justify-between gap-4 text-sm">
+                          <span className="text-tera-secondary">Web search / month</span>
+                          <span className="text-tera-primary">{usageSummary.webSearch.isUnlimited ? 'Unlimited' : usageSummary.webSearch.limit}</span>
+                        </div>
+                      </div>
+                      <p className="text-sm text-tera-secondary">Usage updates immediately after successful activity in this tab.</p>
                     <p className="text-sm text-tera-secondary">Remaining: {remainingChats === 'unlimited' ? 'Unlimited' : remainingChats}</p>
                   </div>
                 </div>
@@ -261,34 +358,32 @@ export default function ProfilePage() {
                       <p className="text-sm text-tera-secondary">File uploads today</p>
                       <p className="mt-2 text-3xl font-semibold text-tera-primary">{profile.dailyFileUploads}</p>
                     </div>
-                    <p className="text-sm text-tera-secondary">Remaining: {remainingUploads === 'unlimited' ? 'Unlimited' : remainingUploads}</p>
                   </div>
-                  {uploadLimit !== 'unlimited' && (
-                    <div className="mt-4 h-2.5 overflow-hidden rounded-full bg-white/[0.06]">
-                      <div className="h-full rounded-full bg-tera-neon" style={{ width: `${uploadPercentage}%` }} />
-                    </div>
-                  )}
                 </div>
+              </>
+            ) : (
+              <div className="tera-card lg:col-span-2">
+                <p className="text-sm text-tera-secondary">Unable to load usage summary right now. Profile details are still available.</p>
               </div>
-            </div>
+            )}
+          </div>
+        </div>
 
-            <div className="tera-card">
-              <p className="tera-eyebrow">Recent sessions</p>
-              <div className="mt-4 space-y-3">
-                {sessionsLoading ? (
-                  <p className="text-sm text-tera-secondary">Loading recent sessions...</p>
-                ) : recentSessions.length > 0 ? (
-                  recentSessions.map((session) => (
-                    <Link key={session.session_id} href={`/new/${session.session_id}`} className="block rounded-[20px] border border-tera-border bg-white/[0.03] px-4 py-4 transition hover:border-white/16 hover:bg-white/[0.05]">
-                      <p className="truncate text-sm font-medium text-tera-primary">{session.title || 'Untitled session'}</p>
-                      <p className="mt-1 text-[0.68rem] uppercase tracking-[0.22em] text-tera-secondary">{session.tool || 'Universal'} · {new Date(session.created_at).toLocaleDateString()}</p>
-                    </Link>
-                  ))
-                ) : (
-                  <p className="text-sm text-tera-secondary">No recent sessions yet.</p>
-                )}
-              </div>
-            </div>
+        <div className="mt-10 tera-card">
+          <p className="tera-eyebrow">Recent sessions</p>
+          <div className="mt-4 space-y-3">
+            {sessionsLoading ? (
+              <p className="text-sm text-tera-secondary">Loading recent sessions...</p>
+            ) : recentSessions.length > 0 ? (
+              recentSessions.map((session) => (
+                <Link key={session.session_id} href={`/new/${session.session_id}`} className="block rounded-[20px] border border-tera-border bg-white/[0.03] px-4 py-4 transition hover:border-white/16 hover:bg-white/[0.05]">
+                  <p className="truncate text-sm font-medium text-tera-primary">{session.title || 'Untitled session'}</p>
+                  <p className="mt-1 text-[0.68rem] uppercase tracking-[0.22em] text-tera-secondary">{session.tool || 'Universal'} � {new Date(session.created_at).toLocaleDateString()}</p>
+                </Link>
+              ))
+            ) : (
+              <p className="text-sm text-tera-secondary">No recent sessions yet.</p>
+            )}
           </div>
         </div>
       </div>
