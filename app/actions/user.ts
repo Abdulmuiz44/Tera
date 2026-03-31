@@ -1,4 +1,4 @@
-'use server'
+﻿'use server'
 
 import { getUserProfileServer, checkAndResetUsageServer } from '@/lib/usage-tracking-server'
 import { buildProfileUsageSummary } from '@/lib/profile-usage'
@@ -209,3 +209,4 @@ export async function fetchHistoryPageData(userId: string, page: number = 1, pag
         return { sessions: [], hasMore: false }
     }
 }
+

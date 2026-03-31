@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useCallback, useEffect, useState } from 'react'
 import Link from 'next/link'
@@ -378,7 +378,7 @@ export default function ProfilePage() {
               recentSessions.map((session) => (
                 <Link key={session.session_id} href={`/new/${session.session_id}`} className="block rounded-[20px] border border-tera-border bg-white/[0.03] px-4 py-4 transition hover:border-white/16 hover:bg-white/[0.05]">
                   <p className="truncate text-sm font-medium text-tera-primary">{session.title || 'Untitled session'}</p>
-                  <p className="mt-1 text-[0.68rem] uppercase tracking-[0.22em] text-tera-secondary">{session.tool || 'Universal'} � {new Date(session.created_at).toLocaleDateString()}</p>
+                  <p className="mt-1 text-[0.68rem] uppercase tracking-[0.22em] text-tera-secondary">{session.tool || 'Universal'} · {new Date(session.created_at).toLocaleDateString()}</p>
                 </Link>
               ))
             ) : (
@@ -390,3 +390,6 @@ export default function ProfilePage() {
     </div>
   )
 }
+
+
+

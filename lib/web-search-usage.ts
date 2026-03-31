@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Web Search Usage Tracking
  * Tracks and limits web searches based on subscription plan:
  * - Free: 5/month
@@ -217,4 +217,5 @@ export function getWebSearchLimitMessage(remaining: number, total: number): stri
 
 export const WEB_SEARCH_LIMITS = MONTHLY_WEB_SEARCH_LIMITS
 export const getDefaultLimit = (plan: PlanType = 'free') => MONTHLY_WEB_SEARCH_LIMITS[plan]
+
 

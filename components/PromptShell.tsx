@@ -1,4 +1,4 @@
-"use client"
+﻿"use client"
 
 import React, { ChangeEvent, useCallback, useEffect, useRef, useState, useTransition } from 'react'
 import Image from 'next/image'
@@ -573,7 +573,7 @@ export default function PromptShell({
 
                 // Check if this request is still valid (hasn't been stopped or superseded)
                 if (currentRequestId !== requestIdRef.current) {
-                    console.log('🛑 Request cancelled/superseded, ignoring response')
+                    console.log('ðŸ›‘ Request cancelled/superseded, ignoring response')
                     return
                 }
 
@@ -720,7 +720,7 @@ export default function PromptShell({
                     prompt: messageToSend,
                     attachments: [...pendingAttachments]
                 }
-                console.log('🔴 SAVING to localStorage:', messageData)
+                console.log('ðŸ”´ SAVING to localStorage:', messageData)
                 localStorage.setItem('tera_queued_message', JSON.stringify(messageData))
             }
             setAttachmentMessage('Sign in to send your message. It will be posted automatically once you authenticate.')
@@ -732,7 +732,7 @@ export default function PromptShell({
                 prompt: messageToSend,
                 attachments: [...pendingAttachments]
             })
-            setAttachmentMessage('Hang tight—finalizing your account before sending.')
+            setAttachmentMessage('Hang tightâ€”finalizing your account before sending.')
             return
         }
 
@@ -746,37 +746,37 @@ export default function PromptShell({
 
     useEffect(() => {
         // Always check for persisted message on mount
-        console.log('🟢 MOUNT EFFECT: Checking localStorage...')
+        console.log('ðŸŸ¢ MOUNT EFFECT: Checking localStorage...')
         if (typeof window !== 'undefined' && !queuedMessage) {
             const savedMessage = localStorage.getItem('tera_queued_message')
-            console.log('🟢 localStorage value:', savedMessage)
+            console.log('ðŸŸ¢ localStorage value:', savedMessage)
             if (savedMessage) {
                 try {
-                    console.log('🟢 Found queued message, parsing...')
+                    console.log('ðŸŸ¢ Found queued message, parsing...')
                     const parsed = JSON.parse(savedMessage)
-                    console.log('🟢 Parsed message:', parsed)
+                    console.log('ðŸŸ¢ Parsed message:', parsed)
                     setQueuedMessage(parsed)
-                    console.log('🟢 Set queuedMessage state')
+                    console.log('ðŸŸ¢ Set queuedMessage state')
                 } catch (e) {
-                    console.error('🔴 Failed to parse queued message', e)
+                    console.error('ðŸ”´ Failed to parse queued message', e)
                     localStorage.removeItem('tera_queued_message')
                 }
             } else {
-                console.log('🟢 No saved message found in localStorage')
+                console.log('ðŸŸ¢ No saved message found in localStorage')
             }
         } else {
-            console.log('🟢 Skipping restore (window undefined or queuedMessage already set)')
+            console.log('ðŸŸ¢ Skipping restore (window undefined or queuedMessage already set)')
         }
     }, []) // Run once on mount
 
     useEffect(() => {
-        console.log('🔵 PROCESS EFFECT: userReady=', userReady, 'queuedMessage=', queuedMessage)
+        console.log('ðŸ”µ PROCESS EFFECT: userReady=', userReady, 'queuedMessage=', queuedMessage)
         if (userReady && queuedMessage) {
-            console.log('🔵 Processing queued message:', queuedMessage)
+            console.log('ðŸ”µ Processing queued message:', queuedMessage)
             processMessage(queuedMessage.prompt, queuedMessage.attachments)
 
             // Clean up
-            console.log('🔵 Cleaning up localStorage and queuedMessage state')
+            console.log('ðŸ”µ Cleaning up localStorage and queuedMessage state')
             localStorage.removeItem('tera_queued_message')
             setQueuedMessage(null)
         }
@@ -873,7 +873,7 @@ export default function PromptShell({
                 if (data.plan) {
                     setCurrentUserPlan(data.plan)
                 }
-                console.log(`🔍 Web Search Status: ${data.remaining}/${data.total} (${data.plan?.toUpperCase()})`)
+                console.log(`ðŸ” Web Search Status: ${data.remaining}/${data.total} (${data.plan?.toUpperCase()})`)
             }
         } catch (err) {
             console.warn('Failed to fetch web search status:', err)
@@ -992,7 +992,7 @@ export default function PromptShell({
                                                         <div className="mt-3 flex flex-wrap gap-2">
                                                             {entry.userMessage.attachments.map((att, idx) => (
                                                                 <div key={idx} className="flex items-center gap-2 rounded-lg bg-black/5 px-3 py-2 text-xs">
-                                                                    <span>{att.type === 'image' ? '🖼️' : '📄'}</span>
+                                                                    <span>{att.type === 'image' ? 'ðŸ–¼ï¸' : 'ðŸ“„'}</span>
                                                                     <span className="truncate max-w-[150px]">{att.name}</span>
                                                                 </div>
                                                             ))}
@@ -1002,7 +1002,7 @@ export default function PromptShell({
                                                 {/* Timestamp and checkmarks */}
                                                 <div className="flex items-center gap-1.5 px-2 text-xs text-tera-secondary">
                                                     <span>{formatTimestamp(entry.userMessage.timestamp)}</span>
-                                                    <span className="text-tera-secondary/60">✓✓</span>
+                                                    <span className="text-tera-secondary/60">âœ“âœ“</span>
                                                 </div>
                                             </div>
                                         </div>
@@ -1179,7 +1179,7 @@ export default function PromptShell({
                                                 className="absolute right-2 top-2 flex h-7 w-7 items-center justify-center rounded-full border border-white/10 bg-black/70 text-white opacity-0 transition-all group-hover:opacity-100 hover:bg-red-500"
                                                 title="Remove"
                                             >
-                                                ×
+                                                Ã—
                                             </button>
                                         </div>
                                     ))}
@@ -1367,7 +1367,7 @@ export default function PromptShell({
                                 onClick={() => setSearchHistoryOpen(false)}
                                 className="absolute -top-10 right-0 text-white/80 hover:text-white"
                             >
-                                Close ×
+                                Close Ã—
                             </button>
                             <SearchHistoryRenderer
                                 userId={user.id}
@@ -1423,6 +1423,7 @@ export default function PromptShell({
         </div>
     )
 }
+
 
 
 

@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import type { UsageMetricSummary } from '@/lib/profile-usage'
 
@@ -67,3 +67,4 @@ export default function UsageMetricCard({
     </div>
   )
 }
+
