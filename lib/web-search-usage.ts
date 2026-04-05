@@ -4,8 +4,6 @@
  * - Free: 5/month
  * - Pro: 100/month  
  * - Plus: unlimited
- * Tracks and limits web searches based on subscription plan.
- * Limits are sourced from centralized plan config to avoid drift.
  */
 
 import { supabaseServer } from './supabase-server'
@@ -15,10 +13,6 @@ const MONTHLY_WEB_SEARCH_LIMITS: Record<PlanType, number | typeof Infinity> = {
   free: 5,
   pro: 100,
   plus: Infinity,
-const MONTHLY_WEB_SEARCH_LIMITS = {
-  free: getPlanConfig('free').limits.webSearchesPerMonth as number,
-  pro: getPlanConfig('pro').limits.webSearchesPerMonth as number,
-  plus: Infinity
 }
 
 const RESET_INTERVAL_DAYS = 30
@@ -217,5 +211,3 @@ export function getWebSearchLimitMessage(remaining: number, total: number): stri
 
 export const WEB_SEARCH_LIMITS = MONTHLY_WEB_SEARCH_LIMITS
 export const getDefaultLimit = (plan: PlanType = 'free') => MONTHLY_WEB_SEARCH_LIMITS[plan]
-
-
