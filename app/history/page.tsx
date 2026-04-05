@@ -14,6 +14,52 @@ interface ChatSession {
   tool?: string
 }
 
+function escapeHtml(value: string) {
+  return value
+    .replaceAll('&', '&amp;')
+    .replaceAll('<', '&lt;')
+    .replaceAll('>', '&gt;')
+    .replaceAll('"', '&quot;')
+    .replaceAll("'", '&#39;')
+}
+
+function buildExportRows(conversations: ChatSession[]) {
+  return conversations.map((conversation) => ({
+    sessionId: conversation.session_id,
+    title: conversation.title || 'Untitled chat',
+    message: conversation.last_message || '',
+    tool: conversation.tool || 'Chat',
+    date: new Date(conversation.created_at).toLocaleString(),
+  }))
+}
+
+function buildExportTable(rows: ReturnType<typeof buildExportRows>) {
+  return `
+    <table>
+      <thead>
+        <tr>
+          <th>Session</th>
+          <th>Title</th>
+          <th>Tool</th>
+          <th>Message</th>
+          <th>Date</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${rows.map((row) => `
+          <tr>
+            <td>${escapeHtml(row.sessionId)}</td>
+            <td>${escapeHtml(row.title)}</td>
+            <td>${escapeHtml(row.tool)}</td>
+            <td>${escapeHtml(row.message)}</td>
+            <td>${escapeHtml(row.date)}</td>
+          </tr>
+        `).join('')}
+      </tbody>
+    </table>
+  `
+}
+
 export default function HistoryPage() {
   const { user } = useAuth()
   const [conversations, setConversations] = useState<ChatSession[]>([])
@@ -48,14 +94,8 @@ export default function HistoryPage() {
     fetchHistory()
   }, [fetchHistory])
 
-  const handleExport = () => {
-    const data = conversations.map((conversation) => ({
-      sessionId: conversation.session_id,
-      title: conversation.title,
-      message: conversation.last_message,
-      tool: conversation.tool,
-      date: conversation.created_at,
-    }))
+  const handleExportJson = () => {
+    const data = buildExportRows(conversations)
 
     const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' })
     const url = URL.createObjectURL(blob)
@@ -68,6 +108,76 @@ export default function HistoryPage() {
     URL.revokeObjectURL(url)
   }
 
+  const handleExportWord = () => {
+    const rows = buildExportRows(conversations)
+    const html = `
+      <html>
+        <head>
+          <meta charset="utf-8" />
+          <title>Tera history export</title>
+          <style>
+            body { font-family: Arial, sans-serif; padding: 24px; color: #111; }
+            h1 { font-size: 24px; margin: 0 0 16px; }
+            table { width: 100%; border-collapse: collapse; font-size: 12px; }
+            th, td { border: 1px solid #ccc; padding: 8px; vertical-align: top; text-align: left; }
+            th { background: #f5f5f5; }
+          </style>
+        </head>
+        <body>
+          <h1>Tera chat history</h1>
+          ${buildExportTable(rows)}
+        </body>
+      </html>
+    `
+
+    const blob = new Blob([html], { type: 'application/msword' })
+    const url = URL.createObjectURL(blob)
+    const anchor = document.createElement('a')
+    anchor.href = url
+    anchor.download = `tera-history-${new Date().toISOString().split('T')[0]}.doc`
+    document.body.appendChild(anchor)
+    anchor.click()
+    document.body.removeChild(anchor)
+    URL.revokeObjectURL(url)
+  }
+
+  const handleExportPdf = () => {
+    const rows = buildExportRows(conversations)
+    const printWindow = window.open('', '_blank', 'noopener,noreferrer,width=1100,height=900')
+
+    if (!printWindow) {
+      alert('Popup blocked. Allow popups to export PDF.')
+      return
+    }
+
+    const html = `
+      <html>
+        <head>
+          <meta charset="utf-8" />
+          <title>Tera history export</title>
+          <style>
+            @page { margin: 18mm; }
+            body { font-family: Arial, sans-serif; padding: 0; color: #111; }
+            h1 { font-size: 24px; margin: 0 0 16px; }
+            table { width: 100%; border-collapse: collapse; font-size: 12px; }
+            th, td { border: 1px solid #ccc; padding: 8px; vertical-align: top; text-align: left; }
+            th { background: #f5f5f5; }
+          </style>
+        </head>
+        <body>
+          <h1>Tera chat history</h1>
+          ${buildExportTable(rows)}
+        </body>
+      </html>
+    `
+
+    printWindow.document.open()
+    printWindow.document.write(html)
+    printWindow.document.close()
+    printWindow.focus()
+    setTimeout(() => printWindow.print(), 300)
+  }
+
   return (
     <div className="tera-page">
       <div className="tera-page-shell pt-24 md:pt-10">
@@ -75,7 +185,7 @@ export default function HistoryPage() {
           <div>
             <p className="tera-eyebrow">Workspace</p>
             <h1 className="tera-title mt-3">Chat history</h1>
-            <p className="tera-subtitle mt-4">Search recent sessions, reopen previous conversations, or export a clean JSON archive.</p>
+            <p className="tera-subtitle mt-4">Search recent sessions, reopen previous conversations, or export JSON, Word, or PDF archives.</p>
           </div>
           <div className="flex flex-wrap items-center gap-3">
             <input
@@ -88,8 +198,14 @@ export default function HistoryPage() {
               }}
               className="tera-input min-w-[16rem]"
             />
-            <button type="button" onClick={handleExport} className="tera-button-secondary">
+            <button type="button" onClick={handleExportJson} className="tera-button-secondary">
               Export JSON
+            </button>
+            <button type="button" onClick={handleExportWord} className="tera-button-secondary">
+              Export Word
+            </button>
+            <button type="button" onClick={handleExportPdf} className="tera-button-secondary">
+              Export PDF
             </button>
           </div>
         </div>

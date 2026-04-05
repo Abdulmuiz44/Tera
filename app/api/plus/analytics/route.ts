@@ -1,4 +1,4 @@
-import { supabaseServer } from '@/lib/supabase-server'
+﻿import { supabaseServer } from '@/lib/supabase-server'
 import { NextRequest, NextResponse } from 'next/server'
 
 export async function GET(request: NextRequest) {
@@ -9,7 +9,6 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'User ID required' }, { status: 400 })
     }
 
-    // Verify user is Plus plan
     const { data: user, error: userError } = await supabaseServer
       .from('users')
       .select('subscription_plan')
@@ -20,23 +19,19 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized - Plus plan required' }, { status: 403 })
     }
 
-    // Get chat sessions for analytics
     const { data: chats } = await supabaseServer
       .from('chat_sessions')
-      .select('tool, created_at')
+      .select('tool, created_at, attachments')
       .eq('user_id', userId)
 
-    // Get file uploads
-    const { data: uploads } = await supabaseServer
-      .from('file_uploads')
-      .select('created_at')
-      .eq('user_id', userId)
-
-    // Calculate stats
     const totalChats = chats?.length || 0
-    const totalUploads = uploads?.length || 0
+    const totalUploads = chats?.reduce((sum: number, chat: any) => {
+      if (Array.isArray(chat.attachments)) {
+        return sum + chat.attachments.length
+      }
+      return sum
+    }, 0) || 0
 
-    // Group chats by tool
     const chatsByTool: { [key: string]: number } = {}
     chats?.forEach((chat: any) => {
       const tool = chat.tool || 'Universal'
@@ -45,24 +40,22 @@ export async function GET(request: NextRequest) {
 
     const mostUsedTool = Object.entries(chatsByTool).sort((a, b) => b[1] - a[1])[0]?.[0] || 'Universal'
 
-    // Calculate daily activity (last 7 days)
     const dailyActivity: { date: string; chats: number }[] = []
     for (let i = 6; i >= 0; i--) {
       const date = new Date()
       date.setDate(date.getDate() - i)
       const dateStr = date.toISOString().split('T')[0]
 
-      const count = chats?.filter((c: any) => 
+      const count = chats?.filter((c: any) =>
         c.created_at?.startsWith(dateStr)
       ).length || 0
 
       dailyActivity.push({
         date: dateStr,
-        chats: count
+        chats: count,
       })
     }
 
-    // Average response time (mock for now)
     const avgResponseTime = 2.5
 
     return NextResponse.json({
@@ -71,7 +64,7 @@ export async function GET(request: NextRequest) {
       mostUsedTool,
       avgResponseTime,
       chatsByTool,
-      dailyActivity
+      dailyActivity,
     })
   } catch (error) {
     console.error('Analytics error:', error)
