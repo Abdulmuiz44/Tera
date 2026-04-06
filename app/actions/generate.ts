@@ -144,21 +144,6 @@ export async function generateAnswer({ prompt, tool, authorId, authorEmail, atta
   const answer = generationResult.text
   const tokenCost = Math.max(1, generationResult.usage.totalTokens || 0)
 
-  // Enforce token credit limit before returning content if request exceeded remaining balance
-  if (tokenCost > creditsRemaining) {
-    const cap = getPlanCreditCap(userProfile.subscriptionPlan)
-    const resetLabel = resetDate
-      ? new Date(resetDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
-      : 'in 30 days'
-    const errorMessage = `You've reached your monthly credit cap (${cap}). Upgrade your plan now, or wait until your credits reset on ${resetLabel}.`
-    return {
-      answer: errorMessage,
-      sessionId: sessionId,
-      chatId: chatId,
-      error: errorMessage
-    }
-  }
-
   const currentSessionId = sessionId || crypto.randomUUID()
 
   // Try to find existing title if continuing a session to ensure persistence
