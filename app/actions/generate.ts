@@ -142,6 +142,11 @@ export async function generateAnswer({ prompt, tool, authorId, authorEmail, atta
   // Generate the AI response
   const generationResult = await generateTeacherResponse({ prompt, tool, attachments, history, userId: authorId, enableWebSearch, researchMode })
   const answer = generationResult.text
+  const rawTokenCost = Number(generationResult.usage.totalTokens ?? 0)
+  const tokenCost = Number.isFinite(rawTokenCost)
+    ? Math.max(1, Math.min(Math.round(rawTokenCost), 2_147_483_647))
+    : 1
+  const creditsToCharge = Math.max(1, Math.min(tokenCost, creditsRemaining))
   const tokenCost = Math.max(1, generationResult.usage.totalTokens || 0)
 
   const currentSessionId = sessionId || crypto.randomUUID()
@@ -180,7 +185,14 @@ export async function generateAnswer({ prompt, tool, authorId, authorEmail, atta
       .eq('user_id', authorId)
 
     if (error) {
-      throw error
+      console.error('[chat_update_failed]', { userId: authorId, chatId, error })
+      const errorMessage = 'Your response was generated, but we could not save this chat. Please try again.'
+      return {
+        answer: errorMessage,
+        sessionId: sessionId,
+        chatId: chatId,
+        error: errorMessage
+      }
     }
   } else {
     // Insert new row
@@ -199,7 +211,14 @@ export async function generateAnswer({ prompt, tool, authorId, authorEmail, atta
       .single()
 
     if (error) {
-      throw error
+      console.error('[chat_insert_failed]', { userId: authorId, sessionId: currentSessionId, error })
+      const errorMessage = 'Your response was generated, but we could not save this chat. Please try again.'
+      return {
+        answer: errorMessage,
+        sessionId: currentSessionId,
+        chatId: chatId,
+        error: errorMessage
+      }
     }
     if (data?.id) {
       savedChatId = data.id
@@ -219,7 +238,7 @@ export async function generateAnswer({ prompt, tool, authorId, authorEmail, atta
   let usageAccountingSucceeded = false
 
   for (let attempt = 1; attempt <= maxAccountingAttempts; attempt += 1) {
-    usageAccountingSucceeded = await incrementUserCredits(authorId, tokenCost)
+    usageAccountingSucceeded = await incrementUserCredits(authorId, creditsToCharge)
     if (usageAccountingSucceeded) {
       break
     }
