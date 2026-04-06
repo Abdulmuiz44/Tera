@@ -783,8 +783,7 @@ export default function PromptShell({
     }, [userReady, queuedMessage, processMessage])
 
     useEffect(() => {
-        if (!user) {
-            setConversations([])
+        if (!user?.id) {
             return
         }
 
@@ -794,7 +793,9 @@ export default function PromptShell({
         async function loadChatHistory() {
             // If no sessionId is provided (New Chat), don't load history
             if (!sessionId) {
-                setConversations([])
+                if (isMounted) {
+                    setHistoryLoading(false)
+                }
                 return
             }
 
@@ -820,8 +821,16 @@ export default function PromptShell({
                             timestamp: new Date(session.created_at).getTime() + 1000 // Slight offset
                         }
                     }))
-                    setConversations(loadedConversations)
-                    setConversationActive(loadedConversations.length > 0)
+                    setConversations((prev) => {
+                        // Never wipe in-memory replies with an empty history payload.
+                        // This protects optimistic/new-session replies from briefly disappearing
+                        // when backend history is not yet available.
+                        if (loadedConversations.length === 0 && prev.length > 0) {
+                            return prev
+                        }
+                        return loadedConversations
+                    })
+                    setConversationActive((prev) => prev || loadedConversations.length > 0)
                 }
             } catch (error) {
                 console.error('Failed to load chat history', error)
@@ -837,7 +846,7 @@ export default function PromptShell({
         return () => {
             isMounted = false
         }
-    }, [user, sessionId])
+    }, [user?.id, sessionId])
 
     const messagesEndRef = useRef<HTMLDivElement | null>(null)
 
@@ -1423,7 +1432,5 @@ export default function PromptShell({
         </div>
     )
 }
-
-
 
 
