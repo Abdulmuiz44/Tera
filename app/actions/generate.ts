@@ -167,6 +167,7 @@ export async function generateAnswer({ prompt, tool, authorId, authorEmail, atta
   const title = existingTitle || (prompt.slice(0, 50) + (prompt.length > 50 ? '...' : ''))
 
   let savedChatId = chatId
+  let chatPersisted = false
   let persistenceWarning: string | undefined
 
   if (chatId) {
@@ -187,6 +188,8 @@ export async function generateAnswer({ prompt, tool, authorId, authorEmail, atta
     if (error) {
       console.error('[chat_update_failed]', { userId: authorId, chatId, error })
       persistenceWarning = 'We generated your response, but could not save this chat message.'
+    } else {
+      chatPersisted = true
     }
   } else {
     // Insert new row
@@ -209,6 +212,7 @@ export async function generateAnswer({ prompt, tool, authorId, authorEmail, atta
       persistenceWarning = 'We generated your response, but could not save this chat message.'
     } else if (data?.id) {
       savedChatId = data.id
+      chatPersisted = true
     }
   }
 
@@ -257,5 +261,7 @@ export async function generateAnswer({ prompt, tool, authorId, authorEmail, atta
     revalidatePath('/profile')
   }
 
-  return { answer, sessionId: currentSessionId, chatId: savedChatId, warning }
+  const responseSessionId = chatPersisted ? currentSessionId : (sessionId ?? null)
+
+  return { answer, sessionId: responseSessionId, chatId: savedChatId, warning }
 }
