@@ -147,6 +147,7 @@ export async function generateAnswer({ prompt, tool, authorId, authorEmail, atta
     ? Math.max(1, Math.min(Math.round(rawTokenCost), 2_147_483_647))
     : 1
   const creditsToCharge = Math.max(1, Math.min(tokenCost, creditsRemaining))
+  const tokenCost = Math.max(1, generationResult.usage.totalTokens || 0)
 
   const currentSessionId = sessionId || crypto.randomUUID()
 
