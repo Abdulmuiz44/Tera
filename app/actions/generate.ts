@@ -167,6 +167,7 @@ export async function generateAnswer({ prompt, tool, authorId, authorEmail, atta
   const title = existingTitle || (prompt.slice(0, 50) + (prompt.length > 50 ? '...' : ''))
 
   let savedChatId = chatId
+  let persistenceWarning: string | undefined
 
   if (chatId) {
     // Update existing row
@@ -185,13 +186,7 @@ export async function generateAnswer({ prompt, tool, authorId, authorEmail, atta
 
     if (error) {
       console.error('[chat_update_failed]', { userId: authorId, chatId, error })
-      const errorMessage = 'Your response was generated, but we could not save this chat. Please try again.'
-      return {
-        answer: errorMessage,
-        sessionId: sessionId,
-        chatId: chatId,
-        error: errorMessage
-      }
+      persistenceWarning = 'We generated your response, but could not save this chat message.'
     }
   } else {
     // Insert new row
@@ -211,15 +206,8 @@ export async function generateAnswer({ prompt, tool, authorId, authorEmail, atta
 
     if (error) {
       console.error('[chat_insert_failed]', { userId: authorId, sessionId: currentSessionId, error })
-      const errorMessage = 'Your response was generated, but we could not save this chat. Please try again.'
-      return {
-        answer: errorMessage,
-        sessionId: currentSessionId,
-        chatId: chatId,
-        error: errorMessage
-      }
-    }
-    if (data?.id) {
+      persistenceWarning = 'We generated your response, but could not save this chat message.'
+    } else if (data?.id) {
       savedChatId = data.id
     }
   }
@@ -261,11 +249,13 @@ export async function generateAnswer({ prompt, tool, authorId, authorEmail, atta
     })
   }
 
+  const warning = [persistenceWarning, usageAccountingWarning].filter(Boolean).join(' ') || undefined
+
   revalidatePath('/')
   revalidatePath('/history')
   if (usageAccountingSucceeded) {
     revalidatePath('/profile')
   }
 
-  return { answer, sessionId: currentSessionId, chatId: savedChatId, warning: usageAccountingWarning }
+  return { answer, sessionId: currentSessionId, chatId: savedChatId, warning }
 }
