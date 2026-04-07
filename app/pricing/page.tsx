@@ -92,13 +92,14 @@ export default function PricingPage() {
   useEffect(() => {
     const loadUserAndCurrency = async () => {
       try {
-        const response = await fetch('https://ipapi.co/json/')
-        const data = await response.json()
-        const currencyCode = data.currency || 'USD'
-        setCurrency(CURRENCY_CODES[currencyCode] || CURRENCY_CODES.USD)
-        setCountryCode(data.country_code || '')
+        const response = await fetch('/api/location/currency', { cache: 'no-store' })
+        if (response.ok) {
+          const data = await response.json()
+          const currencyCode = data.currency || 'USD'
+          setCurrency(CURRENCY_CODES[currencyCode] || CURRENCY_CODES.USD)
+          setCountryCode(data.countryCode || '')
+        }
       } catch (error) {
-        console.error('Error fetching currency:', error)
         setCurrency(CURRENCY_CODES.USD)
       }
 

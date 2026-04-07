@@ -5,6 +5,11 @@ import AppLayout from '@/components/AppLayout'
 import { Analytics } from '@vercel/analytics/react'
 import { ThemeProvider } from '@/components/ThemeProvider'
 
+const shouldRenderAnalytics =
+  process.env.VERCEL === '1' ||
+  process.env.VERCEL === 'true' ||
+  Boolean(process.env.VERCEL_URL)
+
 export const viewport = {
   width: 'device-width',
   initialScale: 1,
@@ -39,7 +44,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
           <ThemeProvider>
             <AppLayout>
               {children}
-              <Analytics />
+              {shouldRenderAnalytics ? <Analytics /> : null}
             </AppLayout>
           </ThemeProvider>
         </AuthProvider>
