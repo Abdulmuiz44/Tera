@@ -95,11 +95,42 @@ export const { handlers, signIn, signOut, auth } = NextAuth((req) => {
           token.name = user.name
           token.picture = user.image
         }
+
+        if (!token.userId && token.email) {
+          try {
+            const { data } = await supabaseServer
+              .from('users')
+              .select('id')
+              .eq('email', token.email)
+              .maybeSingle()
+
+            if (data?.id) {
+              token.userId = data.id
+            }
+          } catch {
+          }
+        }
+
         return token
       },
 
       async session({ session, token }) {
         if (session.user && token) {
+          if (!token.userId && token.email) {
+            try {
+              const { data } = await supabaseServer
+                .from('users')
+                .select('id')
+                .eq('email', token.email)
+                .maybeSingle()
+
+              if (data?.id) {
+                token.userId = data.id
+              }
+            } catch {
+            }
+          }
+
           session.user.id = token.userId as string
           session.user.email = token.email as string
           session.user.name = token.name as string

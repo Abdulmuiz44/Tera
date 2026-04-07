@@ -20,7 +20,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined)
 function AuthContextProvider({ children }: { children: React.ReactNode }) {
   const { data: session, status } = useSession()
   const loading = status === 'loading'
-  const userReady = status === 'authenticated' && !!session?.user
+  const userReady = status === 'authenticated' && !!session?.user?.id
 
   const user = session?.user ? {
     id: session.user.id as string,
