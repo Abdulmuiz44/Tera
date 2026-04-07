@@ -23,6 +23,23 @@ type GenerateProps = {
   researchMode?: boolean
 }
 
+function isMissingColumnError(error: unknown, columnName: string) {
+  if (!error || typeof error !== 'object') {
+    return false
+  }
+
+  const details = [
+    'message' in error ? error.message : '',
+    'details' in error ? error.details : '',
+    'hint' in error ? error.hint : '',
+  ]
+    .filter((value): value is string => typeof value === 'string')
+    .join(' ')
+    .toLowerCase()
+
+  return details.includes(columnName.toLowerCase()) && details.includes('column')
+}
+
 export async function generateAnswer({ prompt, tool, authorId, authorEmail, attachments = [], sessionId, chatId, enableWebSearch = false, researchMode = false }: GenerateProps) {
   // Get user profile and check limits
   let userProfile = await getUserProfileServer(authorId)
@@ -172,18 +189,30 @@ export async function generateAnswer({ prompt, tool, authorId, authorEmail, atta
 
   if (chatId) {
     // Update existing row
-    const { error } = await supabaseServer
+    const baseUpdatePayload = {
+      prompt,
+      response: answer,
+      attachments,
+    }
+
+    let { error } = await supabaseServer
       .from('chat_sessions')
       .update({
-        prompt,
-        response: answer,
-        attachments,
+        ...baseUpdatePayload,
         token_usage: tokenCost,
-        // We don't update created_at or session_id usually, but ensure they match just in case?
-        // Usually just updating content is enough.
       })
       .eq('id', chatId)
       .eq('user_id', authorId)
+
+    if (error && isMissingColumnError(error, 'token_usage')) {
+      const retryResult = await supabaseServer
+        .from('chat_sessions')
+        .update(baseUpdatePayload)
+        .eq('id', chatId)
+        .eq('user_id', authorId)
+
+      error = retryResult.error
+    }
 
     if (error) {
       console.error('[chat_update_failed]', { userId: authorId, chatId, error })
@@ -193,19 +222,32 @@ export async function generateAnswer({ prompt, tool, authorId, authorEmail, atta
     }
   } else {
     // Insert new row
-    const { data, error } = await supabaseServer.from('chat_sessions').insert({
+    const baseInsertPayload = {
       user_id: authorId,
       tool,
       prompt,
       response: answer,
       attachments,
-      token_usage: tokenCost,
       created_at: new Date().toISOString(),
       session_id: currentSessionId,
       title: title
+    }
+
+    let { data, error } = await supabaseServer.from('chat_sessions').insert({
+      ...baseInsertPayload,
+      token_usage: tokenCost,
     })
       .select('id')
       .single()
+
+    if (error && isMissingColumnError(error, 'token_usage')) {
+      const retryResult = await supabaseServer.from('chat_sessions').insert(baseInsertPayload)
+        .select('id')
+        .single()
+
+      data = retryResult.data
+      error = retryResult.error
+    }
 
     if (error) {
       console.error('[chat_insert_failed]', { userId: authorId, sessionId: currentSessionId, error })

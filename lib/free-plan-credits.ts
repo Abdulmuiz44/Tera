@@ -23,6 +23,23 @@ type UserCreditRecord = {
   resetDate: Date | null
 }
 
+function isMissingColumnError(error: unknown, columnName: string) {
+  if (!error || typeof error !== 'object') {
+    return false
+  }
+
+  const details = [
+    'message' in error ? error.message : '',
+    'details' in error ? error.details : '',
+    'hint' in error ? error.hint : '',
+  ]
+    .filter((value): value is string => typeof value === 'string')
+    .join(' ')
+    .toLowerCase()
+
+  return details.includes(columnName.toLowerCase()) && details.includes('column')
+}
+
 export function getFreePlanCreditCap() {
   return PLAN_MONTHLY_CREDIT_CAPS.free
 }
@@ -51,6 +68,24 @@ async function getUserCreditRecord(userId: string): Promise<UserCreditRecord | n
     .select('subscription_plan, free_plan_credits_used, free_plan_credits_reset_date')
     .eq('id', userId)
     .maybeSingle()
+
+  if (error && (isMissingColumnError(error, 'free_plan_credits_used') || isMissingColumnError(error, 'free_plan_credits_reset_date'))) {
+    const { data: fallbackData, error: fallbackError } = await supabaseServer
+      .from('users')
+      .select('subscription_plan')
+      .eq('id', userId)
+      .maybeSingle()
+
+    if (fallbackError || !fallbackData) {
+      return null
+    }
+
+    return {
+      plan: normalizePlan(fallbackData.subscription_plan),
+      used: 0,
+      resetDate: null,
+    }
+  }
 
   if (error || !data) {
     return null
@@ -83,6 +118,20 @@ async function getSessionCreditUsage(userId: string, windowStart: Date): Promise
     .select('token_usage')
     .eq('user_id', userId)
     .gte('created_at', windowStart.toISOString())
+
+  if (error && isMissingColumnError(error, 'token_usage')) {
+    const { data: fallbackData, error: fallbackError } = await supabaseServer
+      .from('chat_sessions')
+      .select('id')
+      .eq('user_id', userId)
+      .gte('created_at', windowStart.toISOString())
+
+    if (fallbackError || !fallbackData) {
+      return 0
+    }
+
+    return fallbackData.length
+  }
 
   if (error || !data) {
     return 0
