@@ -163,7 +163,22 @@ export async function generateAnswer({ prompt, tool, authorId, authorEmail, atta
   const tokenCost = Number.isFinite(rawTokenCost)
     ? Math.max(1, Math.min(Math.round(rawTokenCost), 2_147_483_647))
     : 1
-  const creditsToCharge = Math.max(1, Math.min(tokenCost, creditsRemaining))
+
+  if (tokenCost > creditsRemaining) {
+    const cap = getPlanCreditCap(userProfile.subscriptionPlan)
+    const resetLabel = resetDate
+      ? new Date(resetDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+      : 'in 30 days'
+    const errorMessage = `You've reached your monthly credit cap (${cap}). Upgrade your plan now, or wait until your credits reset on ${resetLabel}.`
+    return {
+      answer: errorMessage,
+      sessionId: sessionId,
+      chatId: chatId,
+      error: errorMessage
+    }
+  }
+
+  const creditsToCharge = tokenCost
 
   const currentSessionId = sessionId || crypto.randomUUID()
 
