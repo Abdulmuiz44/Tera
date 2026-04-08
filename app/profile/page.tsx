@@ -177,6 +177,33 @@ export default function ProfilePage() {
 
   const usageCardsLoading = usageLoading || creditsLoading
 
+  const activeLimitNotice = (() => {
+    if (!usageSummary || !creditUsage) return null
+
+    if (creditUsage.remaining <= 0) {
+      return {
+        title: 'Monthly credits reached',
+        message: 'Tera blocks new prompts when monthly credits are exhausted. This is the main limit for AI usage.',
+      }
+    }
+
+    if (!usageSummary.webSearch.isUnlimited && usageSummary.webSearch.remaining === 0) {
+      return {
+        title: 'Web search limit reached',
+        message: 'Tera can still chat, but web-backed answers are blocked until your web search allowance resets or you upgrade.',
+      }
+    }
+
+    if (!usageSummary.uploads.isUnlimited && usageSummary.uploads.remaining === 0) {
+      return {
+        title: 'File upload limit reached',
+        message: 'Tera can still chat, but new file uploads are blocked until your upload allowance resets or you upgrade.',
+      }
+    }
+
+    return null
+  })()
+
   return (
     <div className="tera-page">
       <div className="tera-page-shell pt-24 md:pt-10">
@@ -264,9 +291,16 @@ export default function ProfilePage() {
             <div>
               <p className="tera-eyebrow">Balance</p>
               <h2 className="mt-3 text-3xl font-semibold text-tera-primary">Usage dashboard</h2>
-              <p className="mt-3 text-sm leading-7 text-tera-secondary">A live view of the counters Tera updates when you send messages, upload files, run web search, or spend monthly credits.</p>
+              <p className="mt-3 text-sm leading-7 text-tera-secondary">A live view of the counters Tera updates when you upload files, run web search, or spend monthly credits. AI conversations themselves are not capped by message count.</p>
             </div>
           </div>
+
+          {activeLimitNotice && (
+            <div className="mt-6 rounded-[22px] border border-amber-400/30 bg-amber-500/10 px-5 py-4">
+              <p className="text-sm font-semibold text-amber-100">{activeLimitNotice.title}</p>
+              <p className="mt-2 text-sm leading-7 text-amber-50/90">{activeLimitNotice.message}</p>
+            </div>
+          )}
 
           <div className="mt-6 grid gap-6 lg:grid-cols-2">
             {usageCardsLoading || !usageSummary || !creditMetric ? (
@@ -275,10 +309,31 @@ export default function ProfilePage() {
               </div>
             ) : (
               <>
-                <UsageMetricCard title="Messages" metric={usageSummary.messages} />
+                <div className="tera-card h-full">
+                  <div className="flex h-full flex-col justify-between gap-6">
+                    <div>
+                      <p className="text-sm font-medium text-tera-secondary">AI conversations</p>
+                      <p className="mt-3 text-4xl font-semibold tracking-[-0.05em] text-tera-primary">Unlimited</p>
+                      <p className="mt-3 text-sm text-tera-secondary">Tera does not block you based on a message-count quota. If prompts stop, the active blocker is usually monthly credits, web search, or file uploads.</p>
+                    </div>
+                    <div>
+                      <div className="h-4 overflow-hidden rounded-full bg-white/[0.08]">
+                        <div className="h-full w-full rounded-full bg-tera-neon" />
+                      </div>
+                      <div className="mt-4 flex items-center justify-between gap-4 text-sm text-tera-secondary">
+                        <span>Unlimited access</span>
+                        <span>Always available</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
                 <UsageMetricCard title="Web search" metric={usageSummary.webSearch} />
                 <UsageMetricCard title="File uploads" metric={usageSummary.uploads} />
-                <UsageMetricCard title="Monthly credits" metric={creditMetric} />
+                <UsageMetricCard
+                  title="Monthly credits"
+                  metric={creditMetric}
+                  description="This is the usage meter that blocks new AI prompts when it reaches zero."
+                />
               </>
             )}
           </div>
