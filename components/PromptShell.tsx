@@ -558,7 +558,7 @@ export default function PromptShell({
                     researchMode: researchMode && useWebSearch // Only send researchMode if web search is enabled/active
                 })
 
-                const { answer, sessionId: newSessionId, chatId: savedChatId, error: limitError } = result
+                const { answer, sessionId: newSessionId, chatId: savedChatId, error: limitError, warning } = result
 
                 // Clear web search status
                 if (useWebSearch) {
@@ -634,6 +634,12 @@ export default function PromptShell({
                         } : entry
                     )
                 )
+
+                if (warning) {
+                    setAttachmentMessage(warning)
+                } else {
+                    setAttachmentMessage(null)
+                }
 
                 dispatchUsageRefresh('messages')
                 if (useWebSearch) {
