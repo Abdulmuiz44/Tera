@@ -173,32 +173,7 @@ export async function canUserStartChat(userId: string): Promise<{ allowed: boole
     const stats = await getUsageStats(userId)
     if (!stats) return { allowed: false, remaining: 0, reason: 'Could not fetch usage stats' }
 
-    const allowed = canStartChat(profile.subscriptionPlan, stats.dailyChats)
-    const remaining = getRemainingChats(profile.subscriptionPlan, stats.dailyChats)
-
-    if (!allowed) {
-        const limit = PLAN_CONFIGS[profile.subscriptionPlan].limits.messagesPerDay
-
-        // Calculate unlock time (24 hours from when limit was first hit)
-        let unlocksAt: Date | undefined
-        if (profile.limitHitChatAt) {
-            unlocksAt = new Date(profile.limitHitChatAt.getTime() + 24 * 60 * 60 * 1000)
-        } else {
-            // If not yet recorded, record it now
-            const now = new Date()
-            await recordChatLimitHit(userId)
-            unlocksAt = new Date(now.getTime() + 24 * 60 * 60 * 1000)
-        }
-
-        return {
-            allowed: false,
-            remaining: 0,
-            reason: `You've reached your daily limit of ${limit} messages. Access unlocks in 24 hours.`,
-            unlocksAt
-        }
-    }
-
-    return { allowed: true, remaining }
+    return { allowed: true, remaining: 'unlimited' }
 }
 
 /**

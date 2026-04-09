@@ -582,10 +582,7 @@ export default function PromptShell({
                     const now = new Date()
                     const unlocksAt = new Date(now.getTime() + 24 * 60 * 60 * 1000)
 
-                    if (limitError.includes('messages')) {
-                        setLimitModalType('chats')
-                        setLimitUnlocksAt(unlocksAt)
-                    } else if (limitError.includes('file uploads')) {
+                    if (limitError.includes('file uploads')) {
                         setLimitModalType('file-uploads')
                         setLimitUnlocksAt(unlocksAt)
                     } else if (limitError.includes('web search')) {
@@ -664,10 +661,7 @@ export default function PromptShell({
                 const now = new Date()
                 const unlocksAt = new Date(now.getTime() + 24 * 60 * 60 * 1000)
 
-                if (message.includes('limit') && (message.includes('chats') || message.includes('messages'))) {
-                    setLimitModalType('chats')
-                    setLimitUnlocksAt(unlocksAt)
-                } else if (message.includes('limit') && message.includes('file uploads')) {
+                if (message.includes('limit') && message.includes('file uploads')) {
                     setLimitModalType('file-uploads')
                     setLimitUnlocksAt(unlocksAt)
                 } else if (message.includes('limit') && message.includes('web-search')) {
