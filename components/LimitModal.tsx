@@ -1,7 +1,7 @@
 'use client'
 
 import { useRouter } from 'next/navigation'
-import { useState, useEffect } from 'react'
+import { useEffect, useState } from 'react'
 
 interface LimitModalProps {
     isOpen: boolean
@@ -11,248 +11,127 @@ interface LimitModalProps {
     unlocksAt?: Date
 }
 
-export default function LimitModal({ isOpen, limitType, currentPlan, onClose, unlocksAt }: LimitModalProps) {
+const LIMIT_INFO = {
+    chats: {
+        title: 'Something Went Wrong',
+        message: 'There was an issue processing your message. Chats themselves are unlimited on every plan.',
+        upgrade: 'Try again, or contact support if this keeps happening.',
+    },
+    'file-uploads': {
+        title: 'File Upload Limit Reached',
+        message: 'You have reached your daily file upload limit.',
+        upgrade: 'Upgrade to Pro for 25 uploads or Plus for unlimited uploads.',
+    },
+    'web-search': {
+        title: 'Monthly Web Search Limit Reached',
+        message: 'You have reached your monthly web search limit.',
+        upgrade: 'Upgrade to Pro for 100 searches or Plus for unlimited searches.',
+    },
+    'research-mode': {
+        title: 'Deep Research Mode',
+        message: 'Deep Research is available on Pro and Plus plans.',
+        upgrade: 'Upgrade to unlock deeper multi-source research.',
+    },
+    credits: {
+        title: 'Monthly Credit Cap Reached',
+        message: 'Chats are free and unlimited, but monthly credits power AI responses. You have used your current monthly credit allowance.',
+        upgrade: 'Upgrade for more monthly credits, or wait for your reset date.',
+    },
+} as const
+
+export default function LimitModal({ isOpen, limitType, currentPlan: _currentPlan, onClose, unlocksAt }: LimitModalProps) {
     const router = useRouter()
     const [isClosing, setIsClosing] = useState(false)
-    const [timeRemaining, setTimeRemaining] = useState<string>('')
+    const [timeRemaining, setTimeRemaining] = useState('')
 
     useEffect(() => {
-        if (!unlocksAt) return
+        if (!unlocksAt) {
+            setTimeRemaining('')
+            return
+        }
 
         const updateTime = () => {
-            const now = new Date()
-            const diff = unlocksAt.getTime() - now.getTime()
+            const diff = unlocksAt.getTime() - Date.now()
 
             if (diff <= 0) {
                 setTimeRemaining('Available now')
-            } else {
-                const hours = Math.floor(diff / (60 * 60 * 1000))
-                const minutes = Math.floor((diff % (60 * 60 * 1000)) / (60 * 1000))
-
-                if (hours > 0) {
-                    setTimeRemaining(`${hours}h ${minutes}m remaining`)
-                } else {
-                    setTimeRemaining(`${minutes}m remaining`)
-                }
+                return
             }
+
+            const hours = Math.floor(diff / (60 * 60 * 1000))
+            const minutes = Math.floor((diff % (60 * 60 * 1000)) / (60 * 1000))
+            setTimeRemaining(hours > 0 ? `${hours}h ${minutes}m remaining` : `${minutes}m remaining`)
         }
 
         updateTime()
-        const interval = setInterval(updateTime, 60000) // Update every minute
-
+        const interval = setInterval(updateTime, 60000)
         return () => clearInterval(interval)
     }, [unlocksAt])
 
     if (!isOpen || !limitType) return null
 
-    const limitInfo: Record<string, { title: string; message: string; current: number; upgrade: string }> = {
-        'chats': {
-            title: 'Something Went Wrong',
-            message: 'There was an issue processing your message. Please try again.',
-            current: 0,
-            upgrade: 'Contact support if this persists',
-        },
-        'file-uploads': {
-            title: 'File Upload Limit Reached',
-            message: 'You\'ve reached your daily file upload limit.',
-            current: 3,
-            upgrade: 'Pro for 25 uploads, Plus for unlimited',
-        },
-        'web-search': {
-            title: 'Monthly Web Search Limit Reached',
-            message: 'You\'ve reached your monthly web search limit.',
-            current: 5,
-            upgrade: 'Pro for 100 searches, Plus for unlimited',
-        },
-        'research-mode': {
-            title: 'Deep Research Mode',
-            message: 'Deep Research is a Pro/Plus feature for comprehensive multi-source research.',
-            current: 0,
-            upgrade: 'Pro or Plus',
-        },
-        'credits': {
-            title: 'Free Plan Credit Cap Reached',
-            message: 'You’ve used your monthly Free credits for advanced usage. Upgrade now or wait for monthly reset.',
-            current: 150,
-            upgrade: 'Pro or Plus',
-        },
-    }
+    const info = LIMIT_INFO[limitType]
 
-    const info = limitInfo[limitType]
+    const closeModal = () => {
+        setIsClosing(true)
+        setTimeout(() => {
+            setIsClosing(false)
+            onClose()
+        }, 200)
+    }
 
     const handleUpgrade = () => {
         setIsClosing(true)
         setTimeout(() => {
             router.push('/pricing')
+            setIsClosing(false)
             onClose()
-        }, 300)
+        }, 200)
     }
 
     return (
         <div
-            className={`fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 transition-opacity duration-300 overflow-auto p-4 ${isClosing ? 'opacity-0' : 'opacity-100'
-                }`}
+            className={`fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm transition-opacity duration-200 ${isClosing ? 'opacity-0' : 'opacity-100'}`}
+            onClick={closeModal}
         >
             <div
-                className={`dark:bg-black dark:border-tera-neon bg-white border-tera-neon border rounded-2xl p-6 md:p-8 max-w-md w-full my-auto transition-all duration-300 transform max-h-[90vh] overflow-y-auto ${isClosing ? 'scale-95 opacity-0' : 'scale-100 opacity-100'
-                    }`}
-                onClick={(e) => e.stopPropagation()}
+                className={`relative w-full max-w-md rounded-2xl border border-tera-border bg-tera-panel p-6 shadow-2xl transition-all duration-200 ${isClosing ? 'scale-95 opacity-0' : 'scale-100 opacity-100'}`}
+                onClick={(event) => event.stopPropagation()}
             >
-                {/* Close Button */}
                 <button
-                    onClick={() => {
-                        setIsClosing(true)
-                        setTimeout(onClose, 300)
-                    }}
-                    className="absolute top-4 right-4 text-tera-secondary hover:text-tera-primary transition-colors"
+                    type="button"
+                    onClick={closeModal}
+                    className="absolute right-4 top-4 text-tera-secondary transition hover:text-tera-primary"
                     aria-label="Close modal"
                 >
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-                    </svg>
+                    ×
                 </button>
 
-                {/* Icon */}
-                <div className="flex justify-center mb-4 md:mb-6">
-                    <div className="w-14 h-14 md:w-16 md:h-16 rounded-full dark:bg-tera-neon/20 dark:border-tera-neon dark:border bg-tera-neon/20 border border-tera-neon flex items-center justify-center">
-                        <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                            strokeWidth={1.5}
-                            stroke="currentColor"
-                            className="w-7 h-7 md:w-8 md:h-8 text-tera-neon"
-                        >
-                            <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                d="M12 9v3.75m-9.303 3.376c.866-1.5 2.845-2.751 5.169-2.751s4.303 1.253 5.169 2.75M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-9a.75.75 0 100-1.5.75.75 0 000 1.5z"
-                            />
-                        </svg>
-                    </div>
-                </div>
+                <p className="tera-eyebrow">Usage limit</p>
+                <h2 className="mt-3 text-2xl font-semibold text-tera-primary">{info.title}</h2>
+                <p className="mt-4 text-sm leading-7 text-tera-secondary">{info.message}</p>
+                <p className="mt-3 text-sm leading-7 text-tera-primary/90">{info.upgrade}</p>
 
-                {/* Title */}
-                <h2 className="text-xl md:text-2xl font-bold dark:text-white text-black text-center mb-2 md:mb-3">{info.title}</h2>
-
-                {/* Message */}
-                <p className="dark:text-white/80 text-black/70 text-center mb-2 text-sm md:text-base">{info.message}</p>
-
-                {/* Unlock Time Info */}
                 {timeRemaining && (
-                    <div className="dark:bg-orange-500/20 dark:border-orange-500/50 bg-orange-50 border border-orange-200 rounded-lg p-3 mb-4">
-                        <p className="dark:text-orange-200 text-orange-800 text-center text-xs md:text-sm">
-                            <span className="font-semibold">Access Unlocks In:</span>
-                            <span className="block mt-1 text-tera-neon font-medium text-sm">{timeRemaining}</span>
-                        </p>
+                    <div className="mt-5 rounded-xl border border-amber-400/20 bg-amber-500/10 px-4 py-3 text-sm text-amber-100">
+                        {timeRemaining}
                     </div>
                 )}
 
-                {/* Limit Info */}
-                <div className="dark:bg-white/10 dark:border-white/20 bg-black/5 border border-black/10 rounded-lg p-3 mb-4">
-                    <div className="flex items-center justify-between">
-                        <span className="dark:text-white/60 text-black/60 text-xs md:text-sm">Your Free Plan:</span>
-                        <span className="text-tera-neon font-semibold text-xs md:text-sm">
-                            {limitType === 'chats' && 'Unlimited conversations'}
-                            {limitType === 'file-uploads' && `${info.current} uploads/day`}
-                            {limitType === 'web-search' && `${info.current} searches/month`}
-                            {limitType === 'research-mode' && 'Not available'}
-                            {limitType === 'credits' && `${info.current} credits/month`}
-                        </span>
-                    </div>
-                </div>
-
-                {/* Upgrade Info */}
-                <div className="dark:bg-tera-neon/10 dark:border-tera-neon/30 bg-tera-neon/10 border border-tera-neon/30 rounded-lg p-3 mb-4">
-                    <p className="dark:text-white text-black text-xs md:text-sm">
-                        <span className="font-semibold">Upgrade to {info.upgrade}</span>
-                        <span className="dark:text-white/70 text-black/70 ml-2">for higher limits and more features</span>
-                    </p>
-                </div>
-
-                {/* Plan Comparison */}
-                <div className="space-y-1.5 mb-4 text-xs md:text-sm">
-                    {limitType === 'chats' && (
-                        <>
-                            <div className="flex justify-between dark:text-white/80 text-black/70">
-                                <span>All Plans:</span>
-                                <span className="font-medium text-tera-neon">Unlimited conversations</span>
-                            </div>
-                        </>
-                    )}
-                    {limitType === 'file-uploads' && (
-                        <>
-                            <div className="flex justify-between dark:text-white/80 text-black/70">
-                                <span>Free:</span>
-                                <span className="font-medium">3 uploads/day (10MB)</span>
-                            </div>
-                            <div className="flex justify-between dark:text-white/80 text-black/70">
-                                <span>Pro:</span>
-                                <span className="font-medium text-tera-neon">25 uploads/day (500MB)</span>
-                            </div>
-                            <div className="flex justify-between dark:text-white/80 text-black/70">
-                                <span>Plus:</span>
-                                <span className="font-medium text-tera-neon">Unlimited (2GB)</span>
-                            </div>
-                        </>
-                    )}
-                    {limitType === 'web-search' && (
-                        <>
-                            <div className="flex justify-between dark:text-white/80 text-black/70">
-                                <span>Free:</span>
-                                <span className="font-medium">5 searches/month</span>
-                            </div>
-                            <div className="flex justify-between dark:text-white/80 text-black/70">
-                                <span>Pro:</span>
-                                <span className="font-medium text-tera-neon">100 searches/month</span>
-                            </div>
-                            <div className="flex justify-between dark:text-white/80 text-black/70">
-                                <span>Plus:</span>
-                                <span className="font-medium text-tera-neon">Unlimited searches</span>
-                            </div>
-                        </>
-                    )}
-                    {limitType === 'research-mode' && (
-                        <>
-                            <div className="flex justify-between dark:text-white/80 text-black/70">
-                                <span>Free:</span>
-                                <span className="font-medium">Not available</span>
-                            </div>
-                            <div className="flex justify-between dark:text-white/80 text-black/70">
-                                <span>Pro:</span>
-                                <span className="font-medium text-tera-neon">✓ Deep Research Mode</span>
-                            </div>
-                            <div className="flex justify-between dark:text-white/80 text-black/70">
-                                <span>Plus:</span>
-                                <span className="font-medium text-tera-neon">✓ Deep Research Mode</span>
-                            </div>
-                        </>
-                    )}
-                    {limitType === 'credits' && (
-                        <>
-                            <div className="flex justify-between dark:text-white/80 text-black/70">
-                                <span>Free:</span>
-                                <span className="font-medium">150 credits/month</span>
-                            </div>
-                            <div className="flex justify-between dark:text-white/80 text-black/70">
-                                <span>Pro:</span>
-                                <span className="font-medium text-tera-neon">Higher limits</span>
-                            </div>
-                            <div className="flex justify-between dark:text-white/80 text-black/70">
-                                <span>Plus:</span>
-                                <span className="font-medium text-tera-neon">Highest limits</span>
-                            </div>
-                        </>
-                    )}
-                </div>
-
-                {/* Buttons - Only Upgrade button (forced) */}
-                <div className="flex gap-3 mt-4">
+                <div className="mt-6 flex gap-3">
                     <button
-                        onClick={handleUpgrade}
-                        className="tera-button-upgrade w-full justify-center rounded-lg px-4 py-2 text-sm font-semibold md:py-2.5 md:text-base"
+                        type="button"
+                        onClick={closeModal}
+                        className="tera-button-secondary flex-1 justify-center"
                     >
-                        Upgrade to Pro/Plus
+                        Close
+                    </button>
+                    <button
+                        type="button"
+                        onClick={handleUpgrade}
+                        className="tera-button-primary flex-1 justify-center"
+                    >
+                        View plans
                     </button>
                 </div>
             </div>

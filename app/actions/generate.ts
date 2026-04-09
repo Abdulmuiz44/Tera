@@ -7,7 +7,7 @@ import { generateTeacherResponse } from '@/lib/mistral'
 import type { AttachmentReference } from '@/lib/attachment'
 import { getUserProfileServer } from '@/lib/usage-tracking-server'
 import { incrementChatsServer } from '@/lib/usage-tracking-server'
-import { canStartChat, canUploadFile, getPlanConfig } from '@/lib/plan-config'
+import { canUploadFile, getPlanConfig } from '@/lib/plan-config'
 import { getWebSearchRemaining, incrementWebSearchCount } from '@/lib/web-search-usage'
 import { getUserCreditsRemaining, incrementUserCredits, getPlanCreditCap } from '@/lib/free-plan-credits'
 
@@ -70,20 +70,6 @@ export async function generateAnswer({ prompt, tool, authorId, authorEmail, atta
     const limit = planConfig.limits.fileUploadsPerDay
     const errorMessage = `You've reached your daily limit of ${limit} file uploads. Upgrade to Pro or Plus for higher limits.`
     console.error('File upload limit reached:', errorMessage)
-    return {
-      answer: errorMessage,
-      sessionId: sessionId,
-      chatId: chatId,
-      error: errorMessage
-    }
-  }
-
-  // Check if user has reached their chat limit
-  if (!canStartChat(userProfile.subscriptionPlan, userProfile.dailyChats)) {
-    const planConfig = getPlanConfig(userProfile.subscriptionPlan)
-    const limit = planConfig.limits.messagesPerDay
-    const errorMessage = `You've reached your daily limit of ${limit} messages. Upgrade to Pro for unlimited access.`
-    console.error('Chat limit reached:', errorMessage)
     return {
       answer: errorMessage,
       sessionId: sessionId,

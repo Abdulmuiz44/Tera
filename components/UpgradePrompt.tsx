@@ -8,71 +8,66 @@ interface UpgradePromptProps {
     inline?: boolean
 }
 
-export default function UpgradePrompt({ type, onClose, inline = false }: UpgradePromptProps) {
-    const messages = {
-        'lesson-plans': {
-            title: 'Lesson Plan Limit Reached',
-            description: "You've reached your monthly limit of 5 lesson plans on the Free plan.",
-            benefit: 'Upgrade to Pro for unlimited lesson plans and advanced features.',
-            icon: '📚'
-        },
-        'chats': {
-            title: 'Something Went Wrong',
-            description: "There was an issue processing your message. All plans include unlimited conversations.",
-            benefit: 'Please try again or contact support if this persists.',
-            icon: '💬'
-        },
-        'file-uploads': {
-            title: 'File Upload Limit Reached',
-            description: "You've reached your daily limit of 3 file uploads on the Free plan.",
-            benefit: 'Upgrade to Pro for 25 uploads/day or Plus for unlimited.',
-            icon: '📎'
-        },
-        'web-search': {
-            title: 'Web Search Limit Reached',
-            description: "You've reached your monthly limit of 5 web searches on the Free plan.",
-            benefit: 'Upgrade to Pro (100/month) or Plus (unlimited) to unlock more searches.',
-            icon: '🔍'
-        },
-        'research-mode': {
-            title: 'Deep Research Mode',
-            description: "Deep Research mode (comprehensive multi-source research) is only available on Pro and Plus plans.",
-            benefit: 'Upgrade to access Deep Research and other advanced features.',
-            icon: '🔭'
-        },
-        'credits': {
-            title: 'Free Credit Cap Reached',
-            description: "You've reached your monthly Free credit cap for advanced usage.",
-            benefit: 'Upgrade to Pro or Plus for higher usage limits, or wait for your monthly credit reset.',
-            icon: '⚡'
-        }
-    }
+const PROMPTS = {
+    'lesson-plans': {
+        title: 'Lesson Plan Limit Reached',
+        description: 'You have reached your monthly lesson plan limit.',
+        benefit: 'Upgrade to Pro for more lesson plans and advanced features.',
+        icon: 'LP',
+    },
+    chats: {
+        title: 'Something Went Wrong',
+        description: 'There was an issue processing your message. Chats themselves are unlimited on every plan.',
+        benefit: 'Please try again or contact support if this persists.',
+        icon: 'AI',
+    },
+    'file-uploads': {
+        title: 'File Upload Limit Reached',
+        description: 'You have reached your daily file upload limit.',
+        benefit: 'Upgrade to Pro for more uploads or Plus for unlimited uploads.',
+        icon: 'UP',
+    },
+    'web-search': {
+        title: 'Web Search Limit Reached',
+        description: 'You have reached your monthly web search limit.',
+        benefit: 'Upgrade to Pro or Plus to unlock more searches.',
+        icon: 'WS',
+    },
+    'research-mode': {
+        title: 'Deep Research Mode',
+        description: 'Deep Research mode is available on Pro and Plus plans.',
+        benefit: 'Upgrade to unlock deeper multi-source research.',
+        icon: 'DR',
+    },
+    credits: {
+        title: 'Monthly Credit Cap Reached',
+        description: 'Chats are free and unlimited, but monthly credits power AI responses.',
+        benefit: 'Upgrade to Pro or Plus for more monthly credits, or wait for your reset date.',
+        icon: 'CR',
+    },
+} as const
 
-    const message = messages[type]
+export default function UpgradePrompt({ type, onClose, inline = false }: UpgradePromptProps) {
+    const message = PROMPTS[type]
 
     if (inline) {
         return (
-            <div className="rounded-xl bg-tera-neon/10 border border-tera-neon/30 p-4">
+            <div className="rounded-xl border border-tera-neon/30 bg-tera-neon/10 p-4">
                 <div className="flex items-start gap-3">
-                    <span className="text-2xl">{message.icon}</span>
+                    <span className="flex h-10 w-10 items-center justify-center rounded-full border border-tera-neon/30 text-xs font-semibold text-tera-primary">
+                        {message.icon}
+                    </span>
                     <div className="flex-1">
-                        <h3 className="font-semibold text-tera-primary mb-1">{message.title}</h3>
-                        <p className="text-sm text-tera-primary/70 mb-3">{message.description}</p>
-                        <p className="text-sm text-tera-neon font-medium mb-3">{message.benefit}</p>
-                        <Link
-                            href="/pricing"
-                            className="tera-button-upgrade inline-block rounded-lg px-4 py-2 text-sm font-medium"
-                        >
+                        <h3 className="mb-1 font-semibold text-tera-primary">{message.title}</h3>
+                        <p className="mb-3 text-sm text-tera-primary/70">{message.description}</p>
+                        <p className="mb-3 text-sm font-medium text-tera-neon">{message.benefit}</p>
+                        <Link href="/pricing" className="tera-button-upgrade inline-block rounded-lg px-4 py-2 text-sm font-medium">
                             View Plans
                         </Link>
                     </div>
                     {onClose && (
-                        <button
-                            onClick={onClose}
-                            className="text-tera-secondary hover:text-tera-primary transition"
-                            aria-label="Close"
-                        >
-                            ✕
+                        <button type="button" onClick={onClose} className="text-tera-secondary transition hover:text-tera-primary" aria-label="Close">
+                            ×
                         </button>
                     )}
                 </div>
@@ -82,36 +77,28 @@ export default function UpgradePrompt({ type, onClose, inline = false }: Upgrade
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
-            <div className="relative max-w-md w-full mx-4 rounded-2xl bg-tera-panel border border-tera-border shadow-2xl p-6">
+            <div className="relative mx-4 w-full max-w-md rounded-2xl border border-tera-border bg-tera-panel p-6 shadow-2xl">
                 {onClose && (
-                    <button
-                        onClick={onClose}
-                        className="absolute top-4 right-4 text-tera-secondary hover:text-tera-primary transition"
-                        aria-label="Close"
-                    >
-                        ✕
+                    <button type="button" onClick={onClose} className="absolute right-4 top-4 text-tera-secondary transition hover:text-tera-primary" aria-label="Close">
+                        ×
                     </button>
                 )}
 
                 <div className="text-center">
-                    <div className="text-5xl mb-4">{message.icon}</div>
-                    <h2 className="text-2xl font-bold text-tera-primary mb-2">{message.title}</h2>
-                    <p className="text-tera-primary/70 mb-4">{message.description}</p>
-                    <p className="text-tera-neon mb-6 font-medium">{message.benefit}</p>
+                    <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full border border-tera-border text-sm font-semibold text-tera-primary">
+                        {message.icon}
+                    </div>
+                    <h2 className="mb-2 text-2xl font-bold text-tera-primary">{message.title}</h2>
+                    <p className="mb-4 text-tera-primary/70">{message.description}</p>
+                    <p className="mb-6 font-medium text-tera-neon">{message.benefit}</p>
 
                     <div className="flex gap-3">
                         {onClose && (
-                            <button
-                                onClick={onClose}
-                                className="flex-1 px-4 py-3 rounded-lg border border-tera-border text-tera-primary hover:bg-tera-muted transition"
-                            >
+                            <button type="button" onClick={onClose} className="flex-1 rounded-lg border border-tera-border px-4 py-3 text-tera-primary transition hover:bg-tera-muted">
                                 Maybe Later
                             </button>
                         )}
-                        <Link
-                            href="/pricing"
-                            className="tera-button-upgrade flex-1 rounded-lg px-4 py-3 text-center font-semibold"
-                        >
+                        <Link href="/pricing" className="tera-button-upgrade flex-1 rounded-lg px-4 py-3 text-center font-semibold">
                             View Plans
                         </Link>
                     </div>
