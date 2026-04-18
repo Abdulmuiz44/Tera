@@ -36,7 +36,9 @@
       "bundler": "metro"
     },
     "plugins": [
-      "expo-router"
+      "expo-router",
+      "expo-font",
+      "expo-secure-store"
     ],
     "scheme": "tera"
   }
