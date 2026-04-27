@@ -4,10 +4,11 @@ import { useCallback, useEffect, useState } from 'react'
 import Link from 'next/link'
 import { useAuth } from '@/components/AuthProvider'
 import UsageMetricCard from '@/components/UsageMetricCard'
-import { fetchCreditUsage, fetchUserProfile, fetchUserSessions, fetchUserUsageSummary, updateUserProfile } from '@/app/actions/user'
+import { fetchCreditUsage, fetchUserProfile, fetchUserSessions, fetchUserUsageSummary, updateUserProfile, fetchWeeklyUsageHistory } from '@/app/actions/user'
 import { buildUsageMetricSummary, type ProfileUsageSummary } from '@/lib/profile-usage'
 import { TERA_USAGE_REFRESH_EVENT } from '@/lib/usage-events'
 import type { UserProfile } from '@/lib/usage-tracking'
+import UsageHistoryChart from '@/components/UsageHistoryChart'
 
 type CreditUsageState = {
   used: number
@@ -15,6 +16,11 @@ type CreditUsageState = {
   total: number
   resetDate: string | null
 } | null
+
+type UsageHistoryData = {
+  date: string
+  used: number
+}
 
 function formatMemberSince(createdAt: Date) {
   return createdAt.toLocaleDateString([], { month: 'long', day: 'numeric', year: 'numeric' })
@@ -25,9 +31,11 @@ export default function ProfilePage() {
   const [profile, setProfile] = useState<UserProfile | null>(null)
   const [usageSummary, setUsageSummary] = useState<ProfileUsageSummary | null>(null)
   const [creditUsage, setCreditUsage] = useState<CreditUsageState>(null)
+  const [usageHistory, setUsageHistory] = useState<UsageHistoryData[]>([])
   const [loading, setLoading] = useState(true)
   const [usageLoading, setUsageLoading] = useState(true)
   const [creditsLoading, setCreditsLoading] = useState(true)
+  const [historyLoading, setHistoryLoading] = useState(true)
   const [editing, setEditing] = useState(false)
   const [saving, setSaving] = useState(false)
   const [formData, setFormData] = useState({ fullName: '', school: '', gradeLevels: [] as string[] })
@@ -62,6 +70,19 @@ export default function ProfilePage() {
       setCreditUsage(null)
     } finally {
       setCreditsLoading(false)
+    }
+  }, [user])
+
+  const loadUsageHistory = useCallback(async () => {
+    if (!user) return
+    setHistoryLoading(true)
+    try {
+      const history = await fetchWeeklyUsageHistory(user.id)
+      setUsageHistory(history)
+    } catch (error) {
+      console.error('Error loading usage history:', error)
+    } finally {
+      setHistoryLoading(false)
     }
   }, [user])
 
@@ -103,18 +124,19 @@ export default function ProfilePage() {
       loadProfile(),
       loadUsageSummary(),
       loadCreditUsage(),
+      loadUsageHistory(),
       loadRecentSessions(),
     ])
-  }, [loadCreditUsage, loadProfile, loadRecentSessions, loadUsageSummary, user])
+  }, [loadCreditUsage, loadProfile, loadRecentSessions, loadUsageSummary, loadUsageHistory, user])
 
   useEffect(() => {
     const handleUsageRefresh = () => {
-      void Promise.all([loadUsageSummary(), loadCreditUsage()])
+      void Promise.all([loadUsageSummary(), loadCreditUsage(), loadUsageHistory()])
     }
 
     window.addEventListener(TERA_USAGE_REFRESH_EVENT, handleUsageRefresh)
     return () => window.removeEventListener(TERA_USAGE_REFRESH_EVENT, handleUsageRefresh)
-  }, [loadCreditUsage, loadUsageSummary])
+  }, [loadCreditUsage, loadUsageSummary, loadUsageHistory])
 
   const handleSave = async () => {
     if (!user || !profile) return
@@ -182,15 +204,8 @@ export default function ProfilePage() {
 
     if (creditUsage.remaining <= 0) {
       return {
-        title: 'Monthly credits reached',
-        message: 'Tera blocks new prompts when monthly credits are exhausted. This is the main limit for AI usage.',
-      }
-    }
-
-    if (!usageSummary.webSearch.isUnlimited && usageSummary.webSearch.remaining === 0) {
-      return {
-        title: 'Web search limit reached',
-        message: 'Tera can still chat, but web-backed answers are blocked until your web search allowance resets or you upgrade.',
+        title: 'Computational credits reached',
+        message: 'Tera blocks new prompts when AI computational credits are exhausted. This is the primary meter for AI usage.',
       }
     }
 
@@ -270,7 +285,7 @@ export default function ProfilePage() {
           <div className="tera-surface p-6 md:p-8">
             <p className="tera-eyebrow">Subscription</p>
             <h2 className="mt-3 text-3xl font-semibold text-tera-primary">{usageSummary?.planDisplayName || 'Current plan'}</h2>
-            <p className="mt-3 text-sm leading-7 text-tera-secondary">Manage billing details, review your monthly credits, and keep subscription details close to the rest of the workspace.</p>
+            <p className="mt-3 text-sm leading-7 text-tera-secondary">Manage billing details, review your computational credits, and keep subscription details close to the rest of the workspace.</p>
             <div className="mt-6 flex flex-wrap gap-3">
               {profile.subscriptionPlan === 'free' ? (
                 <Link href="/pricing" className="tera-button-primary">Upgrade</Link>
@@ -287,12 +302,17 @@ export default function ProfilePage() {
         </div>
 
         <div className="mt-10">
-          <div className="flex items-end justify-between gap-4">
+          <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
             <div>
               <p className="tera-eyebrow">Balance</p>
               <h2 className="mt-3 text-3xl font-semibold text-tera-primary">Usage dashboard</h2>
-              <p className="mt-3 text-sm leading-7 text-tera-secondary">A live view of the counters Tera updates when you upload files, run web search, or spend monthly credits. AI conversations themselves are not capped by message count.</p>
+              <p className="mt-3 text-sm leading-7 text-tera-secondary">A live view of the counters Tera updates when you upload files, run web search, or spend computational credits. AI conversations themselves are not capped by message count.</p>
             </div>
+            {lastUpdated && (
+              <p className="pb-1 text-[10px] uppercase tracking-widest text-tera-secondary">
+                Last updated: {lastUpdated.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+              </p>
+            )}
           </div>
 
           {activeLimitNotice && (
@@ -314,7 +334,7 @@ export default function ProfilePage() {
                     <div>
                       <p className="text-sm font-medium text-tera-secondary">AI conversations</p>
                       <p className="mt-3 text-4xl font-semibold tracking-[-0.05em] text-tera-primary">Unlimited</p>
-                      <p className="mt-3 text-sm text-tera-secondary">Tera does not block you based on a message-count quota. If prompts stop, the active blocker is usually monthly credits, web search, or file uploads.</p>
+                      <p className="mt-3 text-sm text-tera-secondary">Tera does not block you based on a message-count quota. If prompts stop, the active blocker is usually computational credits.</p>
                     </div>
                     <div>
                       <div className="h-4 overflow-hidden rounded-full bg-white/[0.08]">
@@ -327,21 +347,54 @@ export default function ProfilePage() {
                     </div>
                   </div>
                 </div>
-                <UsageMetricCard title="Web search" metric={usageSummary.webSearch} />
-                <UsageMetricCard title="File uploads" metric={usageSummary.uploads} />
                 <UsageMetricCard
-                  title="Monthly credits"
+                  title="AI Computational Credits"
                   metric={creditMetric}
-                  description="This is the usage meter that blocks new AI prompts when it reaches zero."
+                  description="Computational units required for AI reasoning and generation. High-complexity tasks consume more units."
                 />
+                <UsageMetricCard title="File uploads" metric={usageSummary.uploads} />
               </>
             )}
           </div>
         </div>
 
-        <div className="mt-10 tera-card">
-          <p className="tera-eyebrow">Recent sessions</p>
-          <div className="mt-4 space-y-3">
+        <div className="mt-10 grid gap-6 lg:grid-cols-[1fr_1.5fr]">
+          <div className="tera-card">
+            <p className="tera-eyebrow">Weekly Trend</p>
+            <h2 className="mt-3 text-2xl font-semibold text-tera-primary">Usage history</h2>
+            <p className="mt-3 text-sm leading-7 text-tera-secondary">Track your credit consumption over the last 7 days to understand your peak activity periods.</p>
+            <div className="mt-8">
+              {historyLoading ? (
+                <div className="flex h-[200px] items-center justify-center text-sm text-tera-secondary">Loading history...</div>
+              ) : usageHistory.length > 0 ? (
+                <div className="space-y-6">
+                  <UsageHistoryChart data={usageHistory} />
+                  <div className="grid grid-cols-2 gap-4 border-t border-white/5 pt-6">
+                    <div>
+                      <p className="text-[10px] uppercase tracking-widest text-tera-secondary">Avg. Intensity</p>
+                      <p className="mt-1 text-xl font-semibold text-tera-primary">
+                        {Math.round(usageHistory.reduce((sum, d) => sum + d.used, 0) / (recentSessions.length || 1))} 
+                        <span className="ml-1 text-xs font-normal text-tera-secondary">pts/session</span>
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-[10px] uppercase tracking-widest text-tera-secondary">7D Total</p>
+                      <p className="mt-1 text-xl font-semibold text-tera-primary">
+                        {usageHistory.reduce((sum, d) => sum + d.used, 0).toLocaleString()}
+                        <span className="ml-1 text-xs font-normal text-tera-secondary">credits</span>
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <div className="flex h-[200px] items-center justify-center text-sm text-tera-secondary">No history data yet.</div>
+              )}
+            </div>
+          </div>
+
+          <div className="tera-card">
+            <p className="tera-eyebrow">Recent sessions</p>
+            <div className="mt-6 space-y-3">
             {sessionsLoading ? (
               <p className="text-sm text-tera-secondary">Loading recent sessions...</p>
             ) : recentSessions.length > 0 ? (
@@ -355,6 +408,12 @@ export default function ProfilePage() {
               <p className="text-sm text-tera-secondary">No recent sessions yet.</p>
             )}
           </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+</div>
         </div>
       </div>
     </div>
