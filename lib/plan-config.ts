@@ -6,7 +6,6 @@ export type PlanType = 'free' | 'pro' | 'plus'
 export interface PlanLimits {
     messagesPerDay: number | 'unlimited'
     fileUploadsPerDay: number | 'unlimited'
-    webSearchesPerMonth: number | 'unlimited'
     maxFileSize: number // in MB
     features: string[]
 }
@@ -32,15 +31,13 @@ export const PLAN_CONFIGS: Record<PlanType, PlanConfig> = {
         limits: {
             messagesPerDay: 'unlimited',
             fileUploadsPerDay: 3,
-            webSearchesPerMonth: 5,
             maxFileSize: 10,
-            features: ['basic-chat', 'basic-tools']
+            features: ['basic-chat', 'basic-tools', 'file-uploads']
         },
         features: [
             'Unlimited AI conversations',
-            '150 credits per month',
+            '150 AI Computational Credits',
             '3 file uploads per day (10MB each)',
-            '5 web searches per month',
             'Basic AI tools & features',
             'Mobile & desktop access',
             'Community support'
@@ -55,15 +52,13 @@ export const PLAN_CONFIGS: Record<PlanType, PlanConfig> = {
         limits: {
             messagesPerDay: 'unlimited',
             fileUploadsPerDay: 25,
-            webSearchesPerMonth: 100,
             maxFileSize: 500,
-            features: ['advanced-chat', 'all-tools', 'file-uploads', 'export', 'web-search', 'deep-research', 'priority-support']
+            features: ['advanced-chat', 'all-tools', 'file-uploads', 'export', 'deep-research', 'priority-support']
         },
         features: [
             'Everything in Free, plus:',
-            '1,500 credits per month',
+            '1,500 AI Computational Credits',
             '25 file uploads per day (500MB each)',
-            '100 web searches per month',
             'Deep Research Mode',
             'Export to PDF & Word',
             'Priority email support',
@@ -80,15 +75,13 @@ export const PLAN_CONFIGS: Record<PlanType, PlanConfig> = {
         limits: {
             messagesPerDay: 'unlimited',
             fileUploadsPerDay: 'unlimited',
-            webSearchesPerMonth: 'unlimited',
             maxFileSize: 2000,
-            features: ['advanced-chat', 'all-tools', 'file-uploads', 'export', 'admin', 'analytics', 'web-search', 'deep-research', 'priority-support']
+            features: ['advanced-chat', 'all-tools', 'file-uploads', 'export', 'admin', 'analytics', 'deep-research', 'priority-support']
         },
         features: [
             'Everything in Pro, plus:',
-            '5,000 credits per month',
+            '5,000 AI Computational Credits',
             'Unlimited file uploads (2GB each)',
-            'Unlimited web searches',
             'Advanced analytics dashboard',
             '24/7 priority support',
             'Highest usage limits across Tera'
@@ -112,11 +105,6 @@ export function canStartChat(plan: PlanType, currentCount: number): boolean {
 
 export function canUploadFile(plan: PlanType, currentCount: number): boolean {
     const limit = PLAN_CONFIGS[plan].limits.fileUploadsPerDay
-    return limit === 'unlimited' || currentCount < limit
-}
-
-export function canPerformWebSearch(plan: PlanType, currentCount: number): boolean {
-    const limit = PLAN_CONFIGS[plan].limits.webSearchesPerMonth
     return limit === 'unlimited' || currentCount < limit
 }
 
