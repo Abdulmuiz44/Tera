@@ -40,6 +40,11 @@ function isMissingColumnError(error: unknown, columnName: string) {
   return details.includes(columnName.toLowerCase()) && details.includes('column')
 }
 
+function omitField<T extends Record<string, any>, K extends keyof T>(payload: T, key: K): Omit<T, K> {
+  const { [key]: _removed, ...rest } = payload
+  return rest
+}
+
 export async function generateAnswer({ prompt, tool, authorId, authorEmail, attachments = [], sessionId, chatId, enableWebSearch = false, researchMode = false }: GenerateProps) {
   // Get user profile and check limits
   let userProfile = await getUserProfileServer(authorId)
@@ -234,24 +239,50 @@ export async function generateAnswer({ prompt, tool, authorId, authorEmail, atta
       title: title
     }
 
-    let { data, error } = await supabaseServer.from('chat_sessions').insert({
+    let insertPayload: Record<string, any> = {
       ...baseInsertPayload,
       token_usage: tokenCost,
-    })
-      .select('id')
-      .single()
+    }
+    let data: { id: string } | null = null
+    let error: any = null
 
-    if (error && isMissingColumnError(error, 'token_usage')) {
-      const retryResult = await supabaseServer.from('chat_sessions').insert(baseInsertPayload)
+    for (let attempt = 0; attempt < 4; attempt += 1) {
+      const result = await supabaseServer
+        .from('chat_sessions')
+        .insert(insertPayload)
         .select('id')
         .single()
 
-      data = retryResult.data
-      error = retryResult.error
+      data = result.data
+      error = result.error
+
+      if (!error) break
+
+      if (isMissingColumnError(error, 'token_usage') && 'token_usage' in insertPayload) {
+        insertPayload = omitField(insertPayload, 'token_usage')
+        continue
+      }
+
+      if (isMissingColumnError(error, 'session_id') && 'session_id' in insertPayload) {
+        insertPayload = omitField(insertPayload, 'session_id')
+        continue
+      }
+
+      if (isMissingColumnError(error, 'title') && 'title' in insertPayload) {
+        insertPayload = omitField(insertPayload, 'title')
+        continue
+      }
+
+      break
     }
 
     if (error) {
-      console.error('[chat_insert_failed]', { userId: authorId, sessionId: currentSessionId, error })
+      console.error('[chat_insert_failed]', {
+        userId: authorId,
+        sessionId: currentSessionId,
+        error,
+        attemptedPayloadKeys: Object.keys(insertPayload)
+      })
       persistenceWarning = 'We generated your response, but could not save this chat message.'
     } else if (data?.id) {
       savedChatId = data.id
@@ -259,8 +290,10 @@ export async function generateAnswer({ prompt, tool, authorId, authorEmail, atta
     }
   }
 
-  // Increment chat counter after successful generation
-  await incrementChatsServer(authorId)
+  // Increment chat counter only after successful persistence to avoid analytics drift.
+  if (chatPersisted) {
+    await incrementChatsServer(authorId)
+  }
 
   // Increment web search counter if enabled
   if (enableWebSearch) {
