@@ -1,14 +1,12 @@
 "use server"
 
 import { revalidatePath } from 'next/cache'
-import { supabase } from '@/lib/supabase'
 import { supabaseServer } from '@/lib/supabase-server'
 import { generateTeacherResponse } from '@/lib/mistral'
 import type { AttachmentReference } from '@/lib/attachment'
 import { getUserProfileServer } from '@/lib/usage-tracking-server'
 import { incrementChatsServer } from '@/lib/usage-tracking-server'
 import { canUploadFile, getPlanConfig } from '@/lib/plan-config'
-import { getWebSearchRemaining, incrementWebSearchCount } from '@/lib/web-search-usage'
 import { getUserCreditsRemaining, incrementUserCredits, getPlanCreditCap } from '@/lib/free-plan-credits'
 
 type GenerateProps = {
@@ -19,7 +17,6 @@ type GenerateProps = {
   attachments?: AttachmentReference[]
   sessionId?: string | null
   chatId?: string
-  enableWebSearch?: boolean
   researchMode?: boolean
 }
 
@@ -45,7 +42,7 @@ function omitField<T extends Record<string, any>, K extends keyof T>(payload: T,
   return rest
 }
 
-export async function generateAnswer({ prompt, tool, authorId, authorEmail, attachments = [], sessionId, chatId, enableWebSearch = false, researchMode = false }: GenerateProps) {
+export async function generateAnswer({ prompt, tool, authorId, authorEmail, attachments = [], sessionId, chatId, researchMode = false }: GenerateProps) {
   // Get user profile and check limits
   let userProfile = await getUserProfileServer(authorId)
 
@@ -99,20 +96,6 @@ export async function generateAnswer({ prompt, tool, authorId, authorEmail, atta
     }
   }
 
-  // Check web search limits if enabled
-  if (enableWebSearch) {
-    const { remaining } = await getWebSearchRemaining(authorId)
-    if (remaining <= 0) {
-      const errorMessage = 'You have reached your web search limit. Upgrade to Pro or Plus for higher limits.'
-      return {
-        answer: errorMessage,
-        sessionId: sessionId,
-        chatId: chatId,
-        error: errorMessage
-      }
-    }
-  }
-
   // Enforce Deep Research entitlement on the server (defense-in-depth)
   if (researchMode && !(userProfile.subscriptionPlan === 'pro' || userProfile.subscriptionPlan === 'plus')) {
     const errorMessage = 'Deep Research mode is available on Pro and Plus plans.'
@@ -136,7 +119,7 @@ export async function generateAnswer({ prompt, tool, authorId, authorEmail, atta
       .limit(10)
 
     if (historyData) {
-      // Format history: Reverse first to get chronological order (Oldest -> Newest), then map
+      // Format history: Oldest -> Newest
       history = historyData
         .reverse()
         .map(msg => [
@@ -148,7 +131,7 @@ export async function generateAnswer({ prompt, tool, authorId, authorEmail, atta
   }
 
   // Generate the AI response
-  const generationResult = await generateTeacherResponse({ prompt, tool, attachments, history, userId: authorId, enableWebSearch, researchMode })
+  const generationResult = await generateTeacherResponse({ prompt, tool, attachments, history, userId: authorId, researchMode })
   const answer = generationResult.text
   const rawTokenCost = Number(generationResult.usage.totalTokens ?? 0)
   const tokenCost = Number.isFinite(rawTokenCost)
@@ -170,10 +153,9 @@ export async function generateAnswer({ prompt, tool, authorId, authorEmail, atta
   }
 
   const creditsToCharge = tokenCost
-
   const currentSessionId = sessionId || crypto.randomUUID()
 
-  // Try to find existing title if continuing a session to ensure persistence
+  // Find existing title if continuing a session
   let existingTitle: string | null = null
   if (sessionId) {
     const { data: titleData } = await supabaseServer
@@ -186,7 +168,6 @@ export async function generateAnswer({ prompt, tool, authorId, authorEmail, atta
     existingTitle = titleData?.title || null
   }
 
-  // Use existing title if found, otherwise generate from prompt (ensures even legacy chats get titled on new msg)
   const title = existingTitle || (prompt.slice(0, 50) + (prompt.length > 50 ? '...' : ''))
 
   let savedChatId = chatId
@@ -194,19 +175,11 @@ export async function generateAnswer({ prompt, tool, authorId, authorEmail, atta
   let persistenceWarning: string | undefined
 
   if (chatId) {
-    // Update existing row
-    const baseUpdatePayload = {
-      prompt,
-      response: answer,
-      attachments,
-    }
+    const baseUpdatePayload = { prompt, response: answer, attachments }
 
     let { error } = await supabaseServer
       .from('chat_sessions')
-      .update({
-        ...baseUpdatePayload,
-        token_usage: tokenCost,
-      })
+      .update({ ...baseUpdatePayload, token_usage: tokenCost })
       .eq('id', chatId)
       .eq('user_id', authorId)
 
@@ -216,7 +189,6 @@ export async function generateAnswer({ prompt, tool, authorId, authorEmail, atta
         .update(baseUpdatePayload)
         .eq('id', chatId)
         .eq('user_id', authorId)
-
       error = retryResult.error
     }
 
@@ -227,7 +199,6 @@ export async function generateAnswer({ prompt, tool, authorId, authorEmail, atta
       chatPersisted = true
     }
   } else {
-    // Insert new row
     const baseInsertPayload = {
       user_id: authorId,
       tool,
@@ -239,10 +210,7 @@ export async function generateAnswer({ prompt, tool, authorId, authorEmail, atta
       title: title
     }
 
-    let insertPayload: Record<string, any> = {
-      ...baseInsertPayload,
-      token_usage: tokenCost,
-    }
+    let insertPayload: Record<string, any> = { ...baseInsertPayload, token_usage: tokenCost }
     let data: { id: string } | null = null
     let error: any = null
 
@@ -262,27 +230,19 @@ export async function generateAnswer({ prompt, tool, authorId, authorEmail, atta
         insertPayload = omitField(insertPayload, 'token_usage')
         continue
       }
-
       if (isMissingColumnError(error, 'session_id') && 'session_id' in insertPayload) {
         insertPayload = omitField(insertPayload, 'session_id')
         continue
       }
-
       if (isMissingColumnError(error, 'title') && 'title' in insertPayload) {
         insertPayload = omitField(insertPayload, 'title')
         continue
       }
-
       break
     }
 
     if (error) {
-      console.error('[chat_insert_failed]', {
-        userId: authorId,
-        sessionId: currentSessionId,
-        error,
-        attemptedPayloadKeys: Object.keys(insertPayload)
-      })
+      console.error('[chat_insert_failed]', { userId: authorId, sessionId: currentSessionId, error })
       persistenceWarning = 'We generated your response, but could not save this chat message.'
     } else if (data?.id) {
       savedChatId = data.id
@@ -290,14 +250,8 @@ export async function generateAnswer({ prompt, tool, authorId, authorEmail, atta
     }
   }
 
-  // Increment chat counter only after successful persistence to avoid analytics drift.
   if (chatPersisted) {
     await incrementChatsServer(authorId)
-  }
-
-  // Increment web search counter if enabled
-  if (enableWebSearch) {
-    await incrementWebSearchCount(authorId)
   }
 
   const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms))
@@ -306,30 +260,15 @@ export async function generateAnswer({ prompt, tool, authorId, authorEmail, atta
 
   for (let attempt = 1; attempt <= maxAccountingAttempts; attempt += 1) {
     usageAccountingSucceeded = await incrementUserCredits(authorId, creditsToCharge)
-    if (usageAccountingSucceeded) {
-      break
-    }
-
-    if (attempt < maxAccountingAttempts) {
-      await delay(200)
-    }
+    if (usageAccountingSucceeded) break
+    if (attempt < maxAccountingAttempts) await delay(200)
   }
 
-  let usageAccountingWarning: string | undefined
   if (!usageAccountingSucceeded) {
-    usageAccountingWarning = 'Your response was generated, but usage accounting is delayed. We will retry shortly.'
-    console.error('[usage_accounting_delayed]', {
-      event: 'usage_accounting_delayed',
-      userId: authorId,
-      sessionId: currentSessionId,
-      chatId: savedChatId ?? null,
-      tokenCost,
-      maxAttempts: maxAccountingAttempts,
-      warning: usageAccountingWarning
-    })
+    console.error('[usage_accounting_delayed]', { userId: authorId, sessionId: currentSessionId, chatId: savedChatId ?? null, tokenCost })
   }
 
-  const warning = [persistenceWarning, usageAccountingWarning].filter(Boolean).join(' ') || undefined
+  const warning = [persistenceWarning, !usageAccountingSucceeded ? 'Your response was generated, but usage accounting is delayed.' : ''].filter(Boolean).join(' ') || undefined
 
   revalidatePath('/')
   revalidatePath('/history')
@@ -337,7 +276,5 @@ export async function generateAnswer({ prompt, tool, authorId, authorEmail, atta
     revalidatePath('/profile')
   }
 
-  const responseSessionId = chatPersisted ? currentSessionId : (sessionId ?? null)
-
-  return { answer, sessionId: responseSessionId, chatId: savedChatId, warning }
+  return { answer, sessionId: chatPersisted ? currentSessionId : (sessionId ?? null), chatId: savedChatId, warning }
 }

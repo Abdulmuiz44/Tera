@@ -184,7 +184,7 @@ export const studentTools: TeacherTool[] = [
     },
     {
         name: 'Research Agent',
-        description: 'I conduct deep web searches to build comprehensive reports with citations.',
+        description: 'I conduct deep Grokipedia research to build comprehensive reports with citations.',
         icon: '🕵️',
         tags: ['Research', 'Web', 'Deep Dive']
     },

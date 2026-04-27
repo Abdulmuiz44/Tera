@@ -2,7 +2,6 @@
 
 import { getUserProfileServer, checkAndResetUsageServer } from '@/lib/usage-tracking-server'
 import { buildProfileUsageSummary } from '@/lib/profile-usage'
-import { getWebSearchUsageState } from '@/lib/web-search-usage'
 import { supabaseServer } from '@/lib/supabase-server'
 import { auth } from '@/lib/auth'
 import { revalidatePath } from 'next/cache'
@@ -38,10 +37,7 @@ export async function fetchUserUsageSummary(userId: string) {
 
         await checkAndResetUsageServer(userId)
 
-        const [profile, webSearch] = await Promise.all([
-            getUserProfileServer(userId),
-            getWebSearchUsageState(userId),
-        ])
+        const profile = await getUserProfileServer(userId)
 
         if (!profile) return null
 
@@ -49,9 +45,7 @@ export async function fetchUserUsageSummary(userId: string) {
             plan: profile.subscriptionPlan,
             dailyChats: profile.dailyChats,
             dailyFileUploads: profile.dailyFileUploads,
-            monthlyWebSearches: webSearch.used,
             chatResetDate: profile.chatResetDate,
-            webSearchResetDate: webSearch.resetDate ? new Date(webSearch.resetDate) : null,
         })
     } catch (error) {
         console.error('Error fetching user usage summary:', error)
@@ -138,6 +132,49 @@ export async function fetchDailyTokenUsage(userId: string) {
 
     const usedToday = (data || []).reduce((sum: number, row: any) => sum + Number(row.token_usage || 0), 0)
     return { usedToday }
+}
+
+export async function fetchWeeklyUsageHistory(userId: string) {
+    try {
+        const session = await auth()
+        if (!session?.user?.id || session.user.id !== userId) return []
+
+        const sevenDaysAgo = new Date()
+        sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 6)
+        sevenDaysAgo.setHours(0, 0, 0, 0)
+
+        const { data, error } = await supabaseServer
+            .from('chat_sessions')
+            .select('created_at, token_usage')
+            .eq('user_id', userId)
+            .gte('created_at', sevenDaysAgo.toISOString())
+            .order('created_at', { ascending: true })
+
+        if (error) throw error
+
+        // Group by day
+        const history: Record<string, number> = {}
+        for (let i = 0; i < 7; i++) {
+            const date = new Date()
+            date.setDate(date.getDate() - i)
+            const dateStr = date.toISOString().split('T')[0]
+            history[dateStr] = 0
+        }
+
+        data?.forEach((row: any) => {
+            const dateStr = row.created_at.split('T')[0]
+            if (history[dateStr] !== undefined) {
+                history[dateStr] += Number(row.token_usage || 0)
+            }
+        })
+
+        return Object.entries(history)
+            .map(([date, used]) => ({ date, used }))
+            .sort((a, b) => a.date.localeCompare(b.date))
+    } catch (error) {
+        console.error('Error fetching weekly usage history:', error)
+        return []
+    }
 }
 
 export async function fetchChatHistory(userId: string, sessionId: string) {
