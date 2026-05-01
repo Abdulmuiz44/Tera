@@ -1,4 +1,4 @@
-import { getPlanCreditCap } from '@/lib/free-plan-credits'
+import { getPlanCreditCap, getTokensPerCredit } from '@/lib/free-plan-credits'
 import type { PlanType } from '@/lib/plan-config'
 import { PLAN_CONFIGS } from '@/lib/plan-config'
 import { sendResendEmail } from '@/lib/resend'
@@ -193,7 +193,7 @@ export function sendWelcomeEmail(input: { userId: string; email: string; name?: 
     subject: 'Welcome to TeraAI',
     heading: `Welcome to Tera, ${firstName}`,
     previewText: 'Your TeraAI account is ready with 150 free credits.',
-    message: `Your Tera account is ready. You have 150 free AI credits to learn concepts, research clearly, and build from what you understand.\n\nA credit is currently charged at roughly 1 credit per 100 AI tokens, with a minimum of 1 credit per prompt.`,
+    message: `Your Tera account is ready. You have 150 free AI credits to learn concepts, research clearly, and build from what you understand.\n\nA credit is currently charged at roughly 1 credit per ${getTokensPerCredit().toLocaleString()} AI tokens, with a minimum of 1 credit per prompt.`,
     ctaLabel: 'Start learning',
     ctaUrl: `${appUrl()}/new`,
     dedupeKey: `welcome:${input.userId}`,
