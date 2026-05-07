@@ -160,6 +160,7 @@ export async function generateTeacherResponse({
   history = [] as { role: 'user' | 'assistant'; content: string }[],
   userId,
   researchMode = false,
+  chatMode = 'ask'
   chatMode
 }: {
   prompt: string
@@ -230,6 +231,8 @@ ${modeSystemPrompt}
   } else {
     toolContext = `\nActive Mode: Universal Companion. Adapt your personality and style to match the user's need.`
   }
+
+  toolContext += `\nChat Mode: ${chatMode}.`
 
   let userContent: any
   if (imageAttachments.length > 0) {
