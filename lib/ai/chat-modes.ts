@@ -1,3 +1,4 @@
+export type ChatMode = 'ask' | 'deep-research'
 export type ChatMode = 'ask' | 'study' | 'quiz' | 'summarize' | 'image'
 
 export type ChatModeStatus = 'enabled' | 'coming_soon' | 'disabled'
