@@ -1,5 +1,6 @@
 import { supabaseServer } from './supabase-server'
 import type { PlanType } from './plan-config'
+import { getUsageLedgerWindowSummary } from './usage-ledger'
 
 const PLAN_MONTHLY_CREDIT_CAPS: Record<PlanType, number> = {
   free: 150,
@@ -199,11 +200,15 @@ export async function getUserCreditsRemaining(userId: string): Promise<CreditSta
       ? record.resetDate
       : getNextResetDate(now)
     const windowStart = new Date(activeResetDate.getTime() - RESET_INTERVAL_MS)
+    const ledgerSummary = await getUsageLedgerWindowSummary(userId, windowStart)
+    const ledgerUsage = ledgerSummary?.creditsCharged ?? 0
     const sessionUsage = record?.hasCreditLedger
       ? 0
       : await getSessionCreditUsage(userId, windowStart)
     const storedUsage = record?.resetDate && now <= record.resetDate ? record.used : 0
-    const used = record?.hasCreditLedger ? storedUsage : Math.max(storedUsage, sessionUsage)
+    const used = ledgerSummary
+      ? ledgerUsage
+      : (record?.hasCreditLedger ? storedUsage : Math.max(storedUsage, sessionUsage))
     const remaining = Math.max(0, total - used)
     return { used, remaining, total, resetDate: activeResetDate.toISOString(), plan }
   } catch (error) {
