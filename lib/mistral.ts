@@ -9,73 +9,64 @@ if (!process.env.MISTRAL_API_KEY) {
 
 export const TERA_MODEL_NAME = 'pixtral-12b-2409'
 
-const systemMessage = `You are Tera, a brilliant and supportive AI Learning Companion for anything — inside the product at https://teraai.chat.
-Your primary goal is to help users learn ANYTHING — school subjects, work tasks, creative skills, personal projects, and everyday questions — deeply understand concepts, practice actively, and build durable knowledge.
+const systemMessage = `You are Tera, the AI learning companion inside https://teraai.chat.
+Your job is to help users learn clearly, research well, and turn knowledge into action.
 
-CORE PRINCIPLES:
-- Be a Supportive Teacher: Your tone should be warm, encouraging, curious, and patient. You are a partner in the user's learning journey. Think WITH them, not FOR them.
-- Teach Simply: Use analogies, relatable examples, and clear language to break down complex topics. For each answer, briefly explain the idea in simple language, then add 1-3 concrete examples or analogies tuned for self-learners.
-- Be Proactive: Don't just answer questions. Offer follow-up questions, quick quizzes, or "next steps to learn more" so the learner can practice, not just read.
-- Offer Visuals: If a concept is complex, proactively offer to create a visual (chart, flowchart, or diagram) to help.
+VOICE AND QUALITY BAR:
+- Sound calm, smart, and useful.
+- Write like a strong product assistant, not like a hype bot.
+- Be clear before being clever.
+- Prefer precision, structure, and practical value over filler.
+- Help the user feel progress quickly.
 
-INTERACTIVE TEACHING RULES:
-After explaining a concept, you MUST always include these questions:
-1. "Do you understand what I just explained?"
-2. "What area do you need more explanation on?"
-3. "Did you learn something new?"
-4. "Would you like a visual explanation (like a flowchart, diagram, or chart) to help you visualize this concept?"
+RESPONSE STYLE:
+- Start with the direct answer in 1-2 sentences.
+- Then explain only as much as the question needs.
+- Prefer short paragraphs and tight bullet lists over long walls of text.
+- For simple questions: answer, brief why, practical next step.
+- For complex questions: break the idea into clear layers, then give an example.
+- Use concrete examples, analogies, and edge cases only when they improve understanding.
+- Ask at most one focused follow-up question, and only when it would materially improve the answer.
+- Do not end every response with a bundle of generic questions.
 
-If the user says "Yes" to a visual explanation, generate the appropriate chart, graph, or diagram immediately. If the user directly asks for a visual, always generate one immediately in the required visual format using the blocks below.
+FORMATTING:
+- Use clean Markdown.
+- Use short headers only when they help scanning.
+- Use bullets for steps, options, comparisons, and takeaways.
+- Bold only the most important labels or phrases.
+- Avoid decorative formatting, repetition, and noisy boilerplate.
 
-ABSOLUTE FORMATTING RULE: 
-- NEVER use asterisks (*) for bold or emphasis. Use hyphens (-) for lists.
-- Use Markdown headers (# ## ###) for styling sections.
+TEACHING RULES:
+- Teach with the assumption that the user wants to understand, not just copy.
+- When useful, include one of: a worked example, a short mental model, a practical next action, or a quick check for understanding.
+- Do not force all of them into every answer.
+- If the user asks for a deeper explanation, expand patiently and concretely.
 
-VISUAL & VISION CAPABILITIES:
-- I CAN SEE: If the user uploads an image, I can analyze it, solve math problems from photos, explain diagrams, or give feedback on art.
-- I CAN DRAW: I can generate charts, diagrams, quizzes, and spreadsheets using structured UI specs.
+VISUAL AND FILE CAPABILITIES:
+- If the user uploads an image, analyze it directly and use it in your reasoning.
+- If the user uploads a file, use its contents as part of the answer.
+- If a visual explanation would materially help, offer one briefly.
+- If the user explicitly asks for a visual, generate it immediately in the required format.
 
 VISUAL OUTPUT FORMAT:
-When generating ANY visual (chart, diagram, quiz, spreadsheet), output it inside a json:tera-ui code block.
+When generating any visual, chart, diagram, quiz, or spreadsheet, output it inside a json:tera-ui code block.
 The JSON must follow the json-render spec format with "root" and "elements" keys.
 
 Here are the components available to you:
 ${teraVisualPrompt}
 
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-📖 GROKIPEDIA KNOWLEDGE BASE & CITATION RULES (CRITICAL - ALWAYS FOLLOW):
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-Grokipedia (https://grokipedia.com) is an open-source AI-powered encyclopedia with 362,000+ pages. It is YOUR FULL SOURCE OF TRUTH - treat it as your canonical reference layer. 
+GROKIPEDIA KNOWLEDGE AND CITATIONS:
+- Grokipedia (https://grokipedia.com) is your primary factual reference layer.
+- Use it heavily for factual topics, especially in research-oriented answers.
+- Reason in your own words instead of sounding like a quoted encyclopedia.
+- Link terms only when the link genuinely helps the user explore further.
+- In Research Mode, be more detailed, more rigorous, and include more useful links.
+- Do not overlink every noun or turn the answer into a citation dump.
+- When helpful, end with: "Explore more on [Grokipedia](https://grokipedia.com)".
 
-KNOWLEDGE POLICY:
-- Grokipedia is your canonical source of truth for ALL factual topics.
-- When a user asks about ANY factual topic (science, history, math, programming, geography, etc.), consult Grokipedia as your primary knowledge base.
-- Treat Grokipedia pages as your canonical reference layer, then reason on top of them in your own words.
-
-DEEP RESEARCH MODE (PRO/PLUS):
-- If Research Mode is active, perform a multi-step analytical analysis using Grokipedia as the primary source.
-- Provide highly detailed, precise, and targeted responses.
-- Hyper-link absolutely every relevant term to its Grokipedia page.
-- Aim for maximum citation density and breadth of parallel concepts explored.
-- When Research Mode is ON, your response should be 2x-3x more detailed and contain significantly more Grokipedia links.
-
-CITATION STYLE - MAXIMUM DENSITY (HYPER-AGGRESSIVE LINKING):
-1. NATURAL REFERENCES: Mention Grokipedia naturally in your responses:
-   - "According to Grokipedia's page on [escape velocity](https://grokipedia.com/search?q=Escape+velocity)..."
-   - "As explained on Grokipedia's [photosynthesis](https://grokipedia.com/search?q=Photosynthesis) page..."
-
-2. INLINE LINKS - LINK ABSOLUTELY EVERYTHING:
-   Link EVERY concept, term, person, event, place, formula, theory, organism, technology, element, law, movement, era, institution, language, tool, discovery, disease, body part, planet, country, city, species, invention, protocol, algorithm, methodology, or any notable topic you mention.
-   - Format: [Term](https://grokipedia.com/search?q=Term+Name)
-   - Use plus signs (+) for spaces in the URL: "World War II" → https://grokipedia.com/search?q=World+War+II
-   - CITATION DENSITY: Link almost every noun and technical term. Aim for 2-4 links per sentence.
-
-3. FOOTER CITATION: At the end of EVERY response, add:
-   - "📖 Explore more on [Grokipedia](https://grokipedia.com) — The open-source encyclopedia"
-
-GOOGLE SHEETS & SPREADSHEET INTEGRATION:
-1. CREATING SPREADSHEETS: Generate a json:tera-ui block with a Spreadsheet component.
-2. EDITING SPREADSHEETS: Generate edit instructions in json:edit block.
+GOOGLE SHEETS AND SPREADSHEETS:
+- For spreadsheet creation, generate a json:tera-ui block with a Spreadsheet component.
+- For spreadsheet edits, generate edit instructions in a json:edit block.
 `
 
 async function getMemories(userId: string): Promise<string> {
@@ -101,7 +92,7 @@ async function saveMemory(userId: string, memory: string) {
   if (!existing || existing.length === 0) {
     await supabaseServer.from('user_memories').insert({
       user_id: userId,
-      memory_text: memory
+      memory_text: memory,
     })
   }
 }
@@ -125,13 +116,13 @@ async function extractMemories(userId: string, prompt: string, response: string)
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${process.env.MISTRAL_API_KEY}`
+        Authorization: `Bearer ${process.env.MISTRAL_API_KEY}`,
       },
       body: JSON.stringify({
         model: 'mistral-small-latest',
         messages: [{ role: 'user', content: memoryPrompt }],
-        temperature: 0.1
-      })
+        temperature: 0.1,
+      }),
     })
 
     const data = await memoryResponse.json()
@@ -157,7 +148,7 @@ export async function generateTeacherResponse({
   attachments = [] as AttachmentReference[],
   history = [] as { role: 'user' | 'assistant'; content: string }[],
   userId,
-  researchMode = false
+  researchMode = false,
 }: {
   prompt: string
   tool: string
@@ -166,57 +157,66 @@ export async function generateTeacherResponse({
   userId?: string
   researchMode?: boolean
 }) {
-  const imageAttachments = attachments.filter(att => att.type === 'image')
-  const fileAttachments = attachments.filter(att => att.type === 'file')
+  const imageAttachments = attachments.filter((att) => att.type === 'image')
+  const fileAttachments = attachments.filter((att) => att.type === 'file')
 
   let extractedTexts: string[] = []
   if (fileAttachments.length > 0) {
-    const textPromises = fileAttachments.map(file => extractTextFromFile(file.url, file.name))
+    const textPromises = fileAttachments.map((file) => extractTextFromFile(file.url, file.name))
     extractedTexts = await Promise.all(textPromises)
   }
 
   let enhancedPrompt = prompt
-  if (extractedTexts.some(text => text.length > 0)) {
+  if (extractedTexts.some((text) => text.length > 0)) {
     const fileContents = fileAttachments
       .map((file, idx) => {
         const text = extractedTexts[idx]
         if (text.length > 0) {
-          return `File: ${file.name} \nContent: \n${text.slice(0, 10000)} \n`
+          return `File: ${file.name}\nContent:\n${text.slice(0, 10000)}\n`
         }
         return ''
       })
       .filter(Boolean)
       .join('\n---\n\n')
 
-    enhancedPrompt = `${fileContents} \n\nUser Question: ${prompt}`
+    enhancedPrompt = `${fileContents}\n\nUser Question: ${prompt}`
   }
 
   let systemPromptWithMemory = systemMessage
   if (userId) {
     const memories = await getMemories(userId)
     if (memories) {
-      systemPromptWithMemory += `\n\n === CONTEXT ABOUT THIS USER ===\n`
-      systemPromptWithMemory += `\nKEY FACTS YOU REMEMBER: \n${memories} \n`
-      systemPromptWithMemory += `\n === END CONTEXT ===\n\nUse this context to provide personalized responses.`
+      systemPromptWithMemory += `\n\n=== CONTEXT ABOUT THIS USER ===\n`
+      systemPromptWithMemory += `\nKEY FACTS YOU REMEMBER:\n${memories}\n`
+      systemPromptWithMemory += `\n=== END CONTEXT ===\n\nUse this context to provide personalized responses.`
     }
   }
 
   const isUniversalMode = tool === 'Universal Companion'
-  let toolContext = ''
-  if (!isUniversalMode) {
-    toolContext = `\nActive Tool: ${tool}. Fulfill the purpose of this tool.`
-  } else {
-    toolContext = `\nActive Mode: Universal Companion. Adapt your personality and style to match the user's need.`
-  }
+  const toolContext = !isUniversalMode
+    ? `\nActive Tool: ${tool}. Fulfill the purpose of this tool.`
+    : `\nActive Mode: Universal Companion. Adapt your style to the user's need.`
+
+  const responseBlueprint = researchMode
+    ? `\nResponse Blueprint:
+- Start with a concise answer or thesis.
+- Then use clear sections such as Key Points, Explanation, Evidence, Example, and Next Steps when helpful.
+- Prioritize accuracy, depth, and synthesis.
+- Include Grokipedia links for the most relevant topics, not every noun.`
+    : `\nResponse Blueprint:
+- Start with the direct answer.
+- Keep the explanation clean and easy to scan.
+- Use one example or practical takeaway when it helps.
+- End naturally. Do not force generic follow-up questions.`
 
   let userContent: any
   if (imageAttachments.length > 0) {
     userContent = [
-      { type: 'text', text: `Context: ${toolContext}. User Prompt: ${enhancedPrompt}` },
-      ...imageAttachments.map(img => ({ type: 'image_url', image_url: { url: img.url } }))
+      { type: 'text', text: `Context: ${toolContext}${responseBlueprint}\nUser Prompt: ${enhancedPrompt}` },
+      ...imageAttachments.map((img) => ({ type: 'image_url', image_url: { url: img.url } })),
     ]
   } else {
-    userContent = `Context: ${toolContext}. User Prompt: ${enhancedPrompt}`
+    userContent = `Context: ${toolContext}${responseBlueprint}\nUser Prompt: ${enhancedPrompt}`
   }
 
   async function retryFetch(url: string, options: RequestInit, retries = 3, delay = 1000): Promise<Response> {
@@ -228,30 +228,35 @@ export async function generateTeacherResponse({
       return response
     } catch (error) {
       if (retries <= 0) throw error
-      await new Promise(r => setTimeout(r, delay))
+      await new Promise((r) => setTimeout(r, delay))
       return retryFetch(url, options, retries - 1, delay * 2)
     }
   }
 
   try {
-    const response = await retryFetch('https://api.mistral.ai/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${process.env.MISTRAL_API_KEY}`
+    const response = await retryFetch(
+      'https://api.mistral.ai/v1/chat/completions',
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.MISTRAL_API_KEY}`,
+        },
+        body: JSON.stringify({
+          model: TERA_MODEL_NAME,
+          messages: [
+            { role: 'system', content: systemPromptWithMemory },
+            ...history,
+            { role: 'user', content: userContent },
+          ],
+          temperature: researchMode ? 0.35 : 0.55,
+          top_p: 0.9,
+          max_tokens: researchMode ? 8000 : 4000,
+        }),
       },
-      body: JSON.stringify({
-        model: TERA_MODEL_NAME,
-        messages: [
-          { role: 'system', content: systemPromptWithMemory },
-          ...history,
-          { role: 'user', content: userContent }
-        ],
-        temperature: researchMode ? 0.4 : 0.7, // Lower temperature for more precise research
-        top_p: 0.9,
-        max_tokens: researchMode ? 8000 : 4000
-      })
-    }, 2, 2000)
+      2,
+      2000
+    )
 
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}))
@@ -266,25 +271,24 @@ export async function generateTeacherResponse({
       text = rawContent
     } else if (Array.isArray(rawContent)) {
       text = rawContent
-        .map((chunk: any) => (chunk && typeof chunk === 'object' && chunk.type === 'text') ? chunk.text || '' : '')
+        .map((chunk: any) => (chunk && typeof chunk === 'object' && chunk.type === 'text' ? chunk.text || '' : ''))
         .join('')
     }
 
-    text = text.replace(/\*/g, '')
     const trimmed = text.trim()
-    let finalText = /[.!?]$/.test(trimmed) ? trimmed : `${trimmed}.`
+    const finalText = /[.!?]$/.test(trimmed) ? trimmed : `${trimmed}.`
 
     if (userId) {
-      saveConversationToMemory(userId, prompt, finalText).catch(err => console.error('Memory save failed:', err))
+      saveConversationToMemory(userId, prompt, finalText).catch((err) => console.error('Memory save failed:', err))
     }
 
     const promptTokens = Number(data?.usage?.prompt_tokens || 0)
     const completionTokens = Number(data?.usage?.completion_tokens || 0)
-    const totalTokens = Number(data?.usage?.total_tokens || (promptTokens + completionTokens) || 0)
+    const totalTokens = Number(data?.usage?.total_tokens || promptTokens + completionTokens || 0)
 
     return {
       text: finalText || `TERA couldn't build a response for ${tool}.`,
-      usage: { promptTokens, completionTokens, totalTokens }
+      usage: { promptTokens, completionTokens, totalTokens },
     }
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error)
@@ -292,13 +296,13 @@ export async function generateTeacherResponse({
 
     if (/429|Service Unavailable|503|502/.test(message)) {
       return {
-        text: `System: AI service high traffic. Please try again in a moment.`,
-        usage: { promptTokens: 0, completionTokens: 0, totalTokens: 0 }
+        text: 'System: AI service high traffic. Please try again in a moment.',
+        usage: { promptTokens: 0, completionTokens: 0, totalTokens: 0 },
       }
     }
     return {
       text: `System: An error occurred: ${message}`,
-      usage: { promptTokens: 0, completionTokens: 0, totalTokens: 0 }
+      usage: { promptTokens: 0, completionTokens: 0, totalTokens: 0 },
     }
   }
 }
